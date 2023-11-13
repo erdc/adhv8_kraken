@@ -1,0 +1,3 @@
+CJT :: need to eventually merge read_interface_geo and read_geo 
+CJT :: need to bail out of fc and ielem FCS stuff
+CJT :: best to use FCS in when running copuling codes for now ... 

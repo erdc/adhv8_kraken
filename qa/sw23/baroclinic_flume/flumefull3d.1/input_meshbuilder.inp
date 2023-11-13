@@ -1,0 +1,58 @@
+############################################################### For allocating memory
+NSUPMOD  1                                                    # Number of supermodels
+NSUBMOD  1                                                    # Number of submodels in each supermodel
+############################################################### Supermodel 1, Submodel 1 details below
+SUPMOD  1  SUBMOD  1  NAME  flumefull3d.1                     #
+NROWS   5                                                     # Number of divisions between Eta=-1 and Eta=1
+NCOLS   65                                                    # Number of divisions between Ksi=-1 and Ksi=1
+NCORND  4                                                     # 
+
+   ND   1        0.0      0.0  -10.0                         # Mapped to (-1, -1)
+   ND   2     3200.0      0.0  -10.0                         # Mapped to ( 1, -1)
+   ND   3     3200.0    200.0  -10.0                         # Mapped to ( 1,  1)
+   ND   4        0.0    200.0  -10.0                         # Mapped to (-1,  1)
+
+   WSE  1      0.0                                            # Water surface elevations at t = TSTART
+   WSE  2      0.0                                            #
+   WSE  3      0.0                                            #
+   WSE  4      0.0                                            #
+
+   EGS  1  4  1  ! West                                       # Boundary edges
+   EGS  2  3  4  ! North                                      #
+   EGS  3  2  3  ! East                                       #
+   EGS  4  1  2  ! South                                      #
+
+BC  1  0.000E+00        ! No Flow                             # SERIES BC  <ID>  1
+BC  2  2.000E+00        ! 3d Inflow  VEL                      # SERIES BC  <ID>  2
+BC  3  6.400E+03        ! 3D Inflow  DIS                      # SERIES BC  <ID>  2
+BC  4  0.000E+00        ! Tail Water                          # SERIES BC  <ID>  3
+BC  5  1.000E+00        ! Inflow salinity                     # SERIES BC  <ID>  4
+BC  6  3.500E+01        ! Tailwater salinity                  # SERIES BC  <ID>  5
+
+VEL  1  2                                                     # NB VEL
+VEL  2  1                                                     # NB VEL
+OTW  3  4                                                     # NB VEL
+VEL  4  1                                                     # NB VEL
+
+############################################################### Common items between all submodels
+COMMON START
+
+TRN  1                                                        # Switch transport on/off
+#TEM  1                                                        # Optional, second order time stepping
+#TPG  0                                                        #
+
+NTL   1.000E-6                                               # IP NTL
+ITL   1.000E-6                                               # IP ITL
+NIT   15                                                      # IP NIT
+MIT   500                                                     # IP MIT
+
+MNG     0.000E+00                                             # Manning's friction
+
+TSTART  0.000E+00                                             # Simulation starting time
+TEND    1.440E+04                                             # Simulation ending time
+
+AWRITE  3.000E+02   ! Result writing interval                 # SERIES AWRITE  <ID>  1
+DT      6.000E+01   ! Time step                               # SERIES DT  <ID>  2
+
+COMMON END
+

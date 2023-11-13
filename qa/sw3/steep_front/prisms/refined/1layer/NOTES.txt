@@ -1,0 +1,2 @@
+boundaries are causing convergence to be hard here ... when front enters domain and leaves domain, the nonlinear iterations are many.  
+Could try quadrature ... something in prisms is FAR more sensitive than tets here

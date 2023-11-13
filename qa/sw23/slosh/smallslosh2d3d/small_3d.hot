@@ -1,0 +1,16 @@
+DATASET
+OBJTYPE "mesh3d"
+BEGSCL
+ND 8
+NC 6
+NAME ID
+TS 0 0
+    0.0
+    0.0
+   -0.5
+    0.0
+   -0.5
+    0.0
+    0.0
+    0.0
+ENDDS

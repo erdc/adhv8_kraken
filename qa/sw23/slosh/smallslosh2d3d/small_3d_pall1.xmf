@@ -1,0 +1,2230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd">
+<Xdmf Version="2.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <Domain>
+    <Grid CollectionType="Temporal" GridType="Collection" Name="Mesh">
+      <Grid GridType="Uniform">
+        <Time Value="0.000000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/0</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/0</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/0</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/0</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.050000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/1</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/1</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/1</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/1</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.100000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/2</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/2</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/2</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/2</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.150000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/3</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/3</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/3</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/3</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.200000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/4</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/4</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/4</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/4</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.250000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/5</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/5</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/5</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/5</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.300000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/6</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/6</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/6</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/6</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.350000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/7</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/7</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/7</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/7</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.400000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/8</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/8</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/8</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/8</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.450000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/9</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/9</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/9</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/9</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.500000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/10</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/10</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/10</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/10</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.550000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/11</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/11</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/11</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/11</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.600000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/12</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/12</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/12</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/12</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.650000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/13</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/13</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/13</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/13</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.700000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/14</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/14</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/14</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/14</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.750000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/15</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/15</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/15</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/15</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.800000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/16</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/16</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/16</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/16</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.850000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/17</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/17</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/17</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/17</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.900000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/18</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/18</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/18</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/18</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="0.950000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/19</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/19</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/19</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/19</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.000000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/20</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/20</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/20</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/20</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.051000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/21</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/21</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/21</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/21</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.101000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/22</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/22</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/22</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/22</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.151000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/23</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/23</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/23</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/23</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.201000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/24</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/24</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/24</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/24</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.251000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/25</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/25</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/25</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/25</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.301000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/26</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/26</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/26</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/26</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.351000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/27</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/27</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/27</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/27</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.401000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/28</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/28</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/28</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/28</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.451000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/29</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/29</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/29</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/29</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.501000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/30</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/30</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/30</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/30</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.551000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/31</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/31</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/31</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/31</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.601000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/32</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/32</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/32</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/32</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.651000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/33</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/33</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/33</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/33</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.701000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/34</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/34</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/34</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/34</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.751000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/35</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/35</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/35</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/35</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.801000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/36</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/36</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/36</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/36</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.851000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/37</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/37</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/37</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/37</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.901000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/38</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/38</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/38</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/38</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="1.951000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/39</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/39</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/39</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/39</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.001000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/40</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/40</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/40</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/40</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.051000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/41</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/41</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/41</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/41</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.101000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/42</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/42</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/42</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/42</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.151000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/43</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/43</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/43</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/43</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.201000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/44</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/44</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/44</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/44</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.251000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/45</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/45</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/45</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/45</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.301000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/46</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/46</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/46</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/46</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.351000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/47</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/47</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/47</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/47</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.401000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/48</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/48</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/48</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/48</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.451000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/49</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/49</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/49</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/49</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.501000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/50</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/50</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/50</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/50</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.551000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/51</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/51</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/51</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/51</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.601000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/52</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/52</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/52</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/52</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.651000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/53</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/53</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/53</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/53</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.701000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/54</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/54</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/54</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/54</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.751000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/55</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/55</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/55</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/55</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.801000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/56</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/56</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/56</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/56</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.851000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/57</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/57</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/57</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/57</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.901000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/58</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/58</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/58</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/58</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="2.951000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/59</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/59</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/59</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/59</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.001000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/60</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/60</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/60</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/60</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.051000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/61</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/61</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/61</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/61</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.101000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/62</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/62</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/62</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/62</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.151000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/63</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/63</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/63</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/63</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.201000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/64</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/64</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/64</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/64</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.251000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/65</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/65</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/65</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/65</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.301000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/66</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/66</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/66</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/66</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.351000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/67</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/67</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/67</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/67</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.401000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/68</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/68</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/68</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/68</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.451000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/69</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/69</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/69</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/69</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.501000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/70</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/70</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/70</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/70</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.551000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/71</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/71</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/71</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/71</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.601000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/72</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/72</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/72</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/72</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.651000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/73</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/73</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/73</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/73</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.701000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/74</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/74</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/74</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/74</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.751000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/75</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/75</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/75</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/75</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.801000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/76</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/76</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/76</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/76</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.851000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/77</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/77</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/77</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/77</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.901000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/78</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/78</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/78</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/78</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="3.951000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/79</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/79</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/79</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/79</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.001000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/80</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/80</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/80</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/80</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.051000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/81</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/81</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/81</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/81</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.101000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/82</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/82</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/82</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/82</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.151000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/83</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/83</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/83</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/83</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.201000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/84</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/84</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/84</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/84</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.251000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/85</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/85</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/85</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/85</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.301000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/86</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/86</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/86</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/86</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.351000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/87</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/87</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/87</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/87</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.401000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/88</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/88</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/88</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/88</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.451000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/89</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/89</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/89</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/89</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.501000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/90</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/90</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/90</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/90</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.551000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/91</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/91</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/91</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/91</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.601000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/92</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/92</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/92</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/92</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.651000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/93</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/93</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/93</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/93</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.701000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/94</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/94</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/94</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/94</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.751000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/95</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/95</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/95</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/95</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.801000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/96</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/96</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/96</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/96</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.851000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/97</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/97</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/97</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/97</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.901000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/98</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/98</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/98</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/98</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="4.951000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/99</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/99</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/99</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/99</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid GridType="Uniform">
+        <Time Value="5.000000"/>
+        <Topology NumberOfElements="6" Type="Tetrahedron">
+          <DataItem DataType="Int" Dimensions="6 4" Format="HDF">small_3d_p0.h5:/Geometry/elements/0</DataItem>
+        </Topology>
+        <Geometry Type="XYZ">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:/Geometry/nodes/0</DataItem>
+          <Information Name="my_nnode" Value="8"/>
+        </Geometry>
+        <Attribute AttributeType="Vector" Center="Node" Name="Velocity">
+          <DataItem DataType="Float" Dimensions="8 3" Format="HDF" Precision="8">small_3d_p0.h5:Data/Velocity/100</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Displacement">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Displacement/100</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Cell" Name="Error">
+          <DataItem DataType="Float" Dimensions="6" Format="HDF" Precision="8">small_3d_p0.h5:Data/Error/100</DataItem>
+        </Attribute>
+        <Attribute AttributeType="Scalar" Center="Node" Name="Hydro Error">
+          <DataItem DataType="Float" Dimensions="8" Format="HDF" Precision="8">small_3d_p0.h5:Data/Hydro Error/100</DataItem>
+        </Attribute>
+      </Grid>
+    </Grid>
+  </Domain>
+</Xdmf>

@@ -1,0 +1,26 @@
+################################################################# SUPERMODEL 1
+SMODEL  2
+    flume3d.1
+    flume2d.1
+
+    OP BLK  1
+    OP INC  40
+    OP PRE  1
+    IP NTL     1.00000000000000E-06
+    IP ITL     1.00000000000000E-06
+    IP NIT   15
+    IP MIT  500
+
+    #Overriding timing information:
+    TC T0        0.0
+    TC TF    14400.0
+    TC DT      300.0
+
+    CN 1
+
+    NUMIFC  1
+    INTFCE  1  2  5    !  Interface between submodel 1 and 2 contains 5 coupled node columns.
+
+
+
+################################################################# Superinterface data

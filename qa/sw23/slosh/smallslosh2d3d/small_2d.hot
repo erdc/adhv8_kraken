@@ -1,0 +1,12 @@
+DATASET
+OBJTYPE "mesh2d"
+BEGSCL
+ND 4
+NC 2
+NAME IOH
+TS 0 0
+    1.5
+    1.0
+    1.0
+    1.5
+ENDDS

@@ -1,0 +1,14 @@
+
+
+in all the loads, the matri init has
+
+    // /* reset the matrix if unrefinement has taken place */
+    // if(mod->flag.UNREFINE == YES) {
+    //     for(i = 0; i < grid->nnodes; i++) {
+    //         spv_reset(mod->matrix + i);
+    //         mod->matrix[i].size = 0;
+    //     }
+    //     mod->flag.UNREFINE = NO;
+    // }
+
+probably should include this

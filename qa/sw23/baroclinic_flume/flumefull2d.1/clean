@@ -1,0 +1,6 @@
+rm -f *h5*
+rm -f *xmf*
+rm -f *dat*
+rm -f *3dm-*
+rm -f station.out station3d.out
+rm -f *.txt *.out

@@ -1,0 +1,21 @@
+################################################################# SUPERMODEL 1
+SMODEL  2
+    tides2d
+    tides3d
+
+    TEST TIDE23
+
+    OP BLK  1
+    OP INC  40
+    OP PRE  1
+    IP NTL     1.00000000000000E-09
+    IP ITL     1.00000000000000E-09
+    IP NIT   10
+    IP MIT  200
+
+    NUMIFC  1
+    INTFCE  1  2  11    !  Interface between submodel 1 and 2 contains 11 coupled node columns.
+
+
+
+################################################################# Superinterface data

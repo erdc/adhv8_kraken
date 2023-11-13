@@ -1,0 +1,75 @@
+OP NS3
+
+#OP TPG 0
+
+#DEBUG RHSHV
+
+# screen output
+SOUT RESID
+
+# test case
+#TEST DIS
+
+IP MIT 500
+IP NIT 10
+IP NTL 1e-6
+IP ITL 1e-6
+
+MP MUC 1.0
+MP G   9.8
+MP MU  0.000000121
+MP RHO 1000
+
+MP ML 1 0
+MP SRT 1 1
+
+!MP EVS xx yy xy zz xz yz
+#MP EVS 1 5. 5. 5. 5. 5. 5. 
+MP EVS 1 0.0 0.0 0. 0.0 0.0 0.0
+
+! **********  NODE STRINGS **********
+
+! FCS 1 Inflow
+! FCS 2 Tailwater
+! FCS 3 Sidewalls
+! FCS 4 Top Surface
+! FCS 5 Bot SurfacE
+
+SERIES BC 1 2 0 0 0 0 ! NO FLOW
+0 0
+864000 0
+
+SERIES BC 2 2 0 0 0 0 ! IN FLOW
+0 1
+864000 1
+
+SERIES BC 3 2 0 0 0 0 ! TAILWATER
+0 0
+8640000 0
+
+SERIES AWRITE 4 1 0 0 0 0
+0 864000 3600 0 
+
+SERIES DT 5 2 0 0 0 0
+0 100
+8640000 100
+
+! No Flow
+#NB VEL 1 1
+#NB VEL 2 2 ! IN FLOW 2
+#NB VEL 3 1 
+#NB OF  4
+##NB VEL 4 1
+#NB VEL 5 1
+#NB VEL 6 1
+
+NB VEL 1 1
+NB VEL 2 2 
+NB VEL 3 1 
+NB VEL 4 1 
+NB VEL 5 1
+NB VEL 6 1
+
+TC T0 0 0
+TC TF 86400 0
+END

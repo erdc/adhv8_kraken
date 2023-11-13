@@ -1,0 +1,13 @@
+
+OBJ = test.o file_io.o
+OBJ2 = test2.o file_io.o
+
+CC = cc
+
+all: test test2
+
+test: $(OBJ)
+	$(CC) -64 -o $@ $(OBJ)
+
+test2: $(OBJ2)
+	$(CC) -64 -o $@ $(OBJ2)

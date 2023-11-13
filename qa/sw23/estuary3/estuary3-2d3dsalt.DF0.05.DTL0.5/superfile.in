@@ -1,0 +1,21 @@
+################################################################# SUPERMODEL 1
+SMODEL  2
+    estuary1mirrored_2d3d_3d
+    estuary1mirrored_2d3d_2d
+
+    OP BLK  1
+    OP INC  40
+    OP PRE  1
+    IP NTL  100.0
+    IP ITL  0.10
+    IP NIT   20
+    IP MIT  500
+
+    TC  T0       0.00
+    TC  TF  864000.00
+    TC  DT    1800.00
+
+    CN  1
+
+    NUMIFC  1
+    INTFCE  1  2  2331    !  Interface between submodel 1 and 2 contains 2150 coupled node columns.

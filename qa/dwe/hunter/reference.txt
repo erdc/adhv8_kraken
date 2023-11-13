@@ -1,0 +1,2 @@
+Hunter, N.M., Horitt, M.S., Bates, P.D., Wilson, M.D., Werner, M.G.F. (2005) "An adaptive time step solution for raster-based storage cell 
+modelling of floodlain inundation." Advances in Water Resources, Vol. 28, pp: 975-991

@@ -1,0 +1,54 @@
+OP SW3
+OP INC 10
+OP BLK 1
+OP TRN 0
+OP PRE 1
+
+IP NTL 0.0001
+IP NIT 4
+IP MIT 200
+
+MP RHO 1000
+MP MU  0.0000007
+MP MUC 1
+MP G   9.8
+MP DTL 0.000001
+MP ML 1 0
+MP SRT 1 1
+MP COR 1 45
+
+# EVS card :: {xx, yy, xy, zz, xz, yz} 
+MP EVS 1 0.0 0.0 0.0 0.0 0.0 0.0
+SERIES DT 1 2 0 0
+0 5000
+8640000 5000
+
+SERIES AWRITE 2 1 0 0
+0 8640000 864000 0
+
+SERIES BC 3 2 0 0
+0 0
+8640000 0
+
+NB VEL 2 3
+NB VEL 3 3
+
+TC T0 0
+TC TF 864000
+
+
+#***********************************************
+# NO-FLUX TIME-SERIES **************************
+
+# Zero Series (created by extrusion code)
+SERIES BC 2 2 0 0
+0.000000  0 
+864000.000000  0 
+
+#***********************************************
+# BOUNDARY CONDITIONS **************************
+
+NB FRS 1 2
+NB BED 2 2
+
+END

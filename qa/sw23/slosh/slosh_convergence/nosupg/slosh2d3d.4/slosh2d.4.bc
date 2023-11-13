@@ -1,0 +1,153 @@
+OP SW2
+OP TRN  0
+OP BLK  1
+OP INC  40
+OP PRE  1
+OP TEM  1
+OP TPG  0
+
+#Screen output
+SOUT ALL
+
+IP NTL     1.000E-12
+IP ITL     1.000E-12
+IP NIT     15
+IP MIT     500
+
+MTS        1  1
+MP ML      1  0
+MP SRT     1  100
+
+MP EVS     1  0.00  0.00  0.00  0.00  0.00  0.00
+MP MUC     1.0
+MP MU      0.0
+MP RHO     990
+MP G       9.81
+
+FR MNG     1   0.000000E+00
+
+#
+SERIES BC  1  2  0  0  0  0
+      0.000000E+00      0.000000E+00
+      1.080000E+06      0.000000E+00
+
+#Output
+SERIES AWRITE  2  1  0  0  0  0
+  0.000000E+00       1.080000E+06       3.000000E+01     0
+
+#Time step
+SERIES DT  3  2  0  0  0  0
+      0.000000E+00      1.000000E+00
+      1.080000E+06      1.000000E+00
+
+TC T0    2.000000E+00  0
+TC TF    1.080000E+04  0
+
+#Enable XDMF output
+#PC XDF
+
+#Shallow water boundary Conditions
+HY INT    2             ! Strongly coupled interface
+NB VEL    3    1        ! No Flow
+NB VEL    4    1        ! No Flow
+NB VEL    5    1        ! No Flow
+
+#Edge list below:
+EGS          1          2          2
+EGS          2          3          2
+EGS          3          4          2
+EGS          4          5          2
+EGS          5          6          2
+EGS          6          7          2
+EGS          7          8          2
+EGS          8          9          2
+EGS          9         10          2
+EGS         10         11          2
+EGS         11         12          2
+EGS         12         13          2
+EGS         13         14          2
+EGS         14         15          2
+EGS         15         16          2
+EGS         16         17          2
+EGS         17         34          3
+EGS         34         51          3
+EGS         51         68          3
+EGS         68         85          3
+EGS         85        102          3
+EGS        102        119          3
+EGS        119        136          3
+EGS        136        153          3
+EGS        153        170          3
+EGS        170        187          3
+EGS        187        204          3
+EGS        204        221          3
+EGS        221        238          3
+EGS        238        255          3
+EGS        255        272          3
+EGS        272        289          3
+EGS        289        306          3
+EGS        306        323          3
+EGS        323        340          3
+EGS        340        357          3
+EGS        357        374          3
+EGS        374        391          3
+EGS        391        408          3
+EGS        408        425          3
+EGS        425        442          3
+EGS        442        459          3
+EGS        459        476          3
+EGS        476        493          3
+EGS        493        510          3
+EGS        510        527          3
+EGS        527        544          3
+EGS        544        561          3
+EGS        561        560          4
+EGS        560        559          4
+EGS        559        558          4
+EGS        558        557          4
+EGS        557        556          4
+EGS        556        555          4
+EGS        555        554          4
+EGS        554        553          4
+EGS        553        552          4
+EGS        552        551          4
+EGS        551        550          4
+EGS        550        549          4
+EGS        549        548          4
+EGS        548        547          4
+EGS        547        546          4
+EGS        546        545          4
+EGS        545        528          5
+EGS        528        511          5
+EGS        511        494          5
+EGS        494        477          5
+EGS        477        460          5
+EGS        460        443          5
+EGS        443        426          5
+EGS        426        409          5
+EGS        409        392          5
+EGS        392        375          5
+EGS        375        358          5
+EGS        358        341          5
+EGS        341        324          5
+EGS        324        307          5
+EGS        307        290          5
+EGS        290        273          5
+EGS        273        256          5
+EGS        256        239          5
+EGS        239        222          5
+EGS        222        205          5
+EGS        205        188          5
+EGS        188        171          5
+EGS        171        154          5
+EGS        154        137          5
+EGS        137        120          5
+EGS        120        103          5
+EGS        103         86          5
+EGS         86         69          5
+EGS         69         52          5
+EGS         52         35          5
+EGS         35         18          5
+EGS         18          1          5
+
+END

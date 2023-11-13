@@ -1,0 +1,46 @@
+#include "global_header.h"
+
+// these case will stop the code
+
+void read_bc_STOP(SMODEL * mod, char *data)
+{
+
+    char line[MAXLINE];         /* the input line */
+    char *subdata = NULL;       /* the data after the second card is read */
+    char *subsubdata = NULL;
+
+    SIO info = *(mod->io);
+
+    switch (parse_card(data, &subdata)) {
+        case CARD_READBC:
+            stop.after_readBC = 1;
+            break;
+
+        case CARD_MAT:
+            stop.after_matrix = 1;
+            break;
+
+        case CARD_MATHV:
+            stop.after_matrix_hvel = 1;
+            break;
+
+        case CARD_MATWV:
+            stop.after_matrix_hvel = 1;
+            break;
+
+        case CARD_RES:
+            stop.after_residual = 1;
+            break;
+
+        case CARD_RESHV:
+            stop.after_residual_hvel = 1;
+            break;
+
+        case CARD_RESWV:
+            stop.after_residual_wvel = 1;
+            break;
+
+        default:
+            break;
+    }
+}

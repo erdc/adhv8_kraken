@@ -1,0 +1,4 @@
+mpirun -np 2 xterm -e lldb
+file /Users/rdchlmwf/Public/code/adh_surface/build/bin/adh
+b /Users/rdchlmwf/Public/code/adh_surface/messg/messg_buffer_free.c:14
+process launch /Users/rdchlmwf/Public/code/adh_surface/build/bin/adh heat2

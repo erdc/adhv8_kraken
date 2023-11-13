@@ -1,0 +1,22 @@
+################################################################# SUPERMODEL 1
+SMODEL  1
+    sloshfull3d.1
+
+    OP BLK  1
+    OP INC  40
+    OP PRE  1
+    IP NTL     1.00000000000000E-12
+    IP ITL     1.00000000000000E-12
+    IP NIT   15
+    IP MIT  500
+
+    #Overriding timing information:
+    TC T0        2.0
+    TC TF    10800.0
+    TC DT        1.0
+
+    TEST SLSH23 1
+
+
+
+################################################################# Superinterface data

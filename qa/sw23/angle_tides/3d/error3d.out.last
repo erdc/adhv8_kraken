@@ -1,0 +1,14 @@
+node 2033 max error @ last time-step :: displacment: 1.2665074e-02
+node 2033 max error @ last time-step :: x-velocity: 2.9397293e-03
+node 2033 max error @ last time-step :: y-velocity: 3.8840813e-02
+node 2033 max error @ last time-step :: w-velocity: 3.0636728e-06
+
+node 2033 max error over time:: displacment: 2.4139388e-02
+node 2033 max error over time :: x-velocity: 1.4600116e-02
+node 2033 max error over time :: y-velocity: 4.7523250e-02
+node 2033 max error over time :: w-velocity: 6.8916901e-06
+
+grid RMSE max error over time:: absolute displacment: 2.2502743e-02
+grid RMSE max error over time:: absolute u: 1.6423082e-01
+grid RMSE max error over time:: absolute v: 1.1807523e-01
+grid RMSE max error over time:: absolute w: 2.1432762e-04

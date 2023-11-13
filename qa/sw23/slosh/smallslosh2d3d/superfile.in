@@ -1,0 +1,59 @@
+### Description
+# Gajanan gkc 04.19.2018
+# 
+# This test case is one of the smallest 2D-3D coupling test cases we can have.
+# The 2D model is a unit square [-1,0] x [0,1] made up of 4 nodes, 2 triangles.
+# The 3D model is a unit cube [0,1] x [0,1] x [-1,0] made up of 8 nodes, 6 tetrahedra.
+# The bed is flat, with z_b = -1.0.
+# The equilibrium depth is 1.0, and the equilibrium water surface elevation is 0.0.
+# 
+# Top view of mesh:
+#                    y
+#                    |
+#                    |
+#       (-1,1)   ____|____  (1,1)
+#               |   /|   /|
+#               |  / |  / |
+#               | /  | /  |
+#               |/___|/___|________________x
+#       (-1,0)     (0,0)    (0,1)
+# 
+#               |<2D>|<3D>|
+# 
+# Side view of mesh:
+#                    z
+#                    |
+#                    |
+#            (0,0,0) |____ ________________x
+#                    |\   | (1,0,0)
+#                    | \  |
+#                    |  \ |
+#               _____|___\|
+#     (-1,0,-1)             (1,0,-1)
+#
+# Initial conditions:
+#     Depth = 1.5, 1.0, 0.5 @ x = -1, 0, 1, respectively.
+#     Velocity = 0.0
+#
+# Boundary conditions:
+#     No flow everywhere
+#
+################################################################## SUPERMODEL 1
+SMODEL 2		! Supermodel contains 2 submodels
+    small_2d   1
+    small_3d   1
+
+    OP BLK    1
+    OP INC   40
+    OP PRE    1
+    IP NTL    1e-10
+    IP ITL    1e-10
+    IP NIT   10
+    IP MIT  100
+
+    TC  T0    0.0	! Overrides all submodel initial times
+    TC  TF    5.0	! Overrides all submodel final times
+    TC  DT    0.001	! Overrides all submodel time steps
+
+    NUMIFC  1		! Supermodel contains 1 2D2D/2D3D/3D3D strong interface. 2D3D in this case.
+    INTFCE  1  2  2	! Interface between submodel 1 and 2 contains 2 coupled node columns

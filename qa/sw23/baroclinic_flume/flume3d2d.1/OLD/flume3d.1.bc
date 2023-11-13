@@ -1,0 +1,87 @@
+OP SW3
+OP TRN  1
+OP BLK  1
+OP INC  40
+OP PRE  1
+
+#OP TPG 0.
+
+#Screen output
+SOUT ALL
+
+IP NTL     1.000E-06
+IP ITL     1.000E-06
+IP NIT     15
+IP MIT     500
+
+MP ML      1  0
+MP SRT     1  100
+
+MP EVS     1  0.001  0.001  0.001  0.001  0.001  0.001
+#MP TUR     1  0     1     0.2   1
+MP MUC     1.0
+MP MU      0.0
+MP RHO     990
+MP G       9.81
+
+FR MNG     6   0.000000E+00
+
+#
+SERIES BC  1  2  0  0  0  0
+     -1.440000E+06      0.000000E+00
+      1.440000E+06      0.000000E+00
+#
+SERIES BC  2  2  0  0  0  0
+     -1.440000E+06      2.000000E+00
+      1.440000E+06      2.000000E+00
+#
+SERIES BC  3  2  0  0  0  0
+     -1.440000E+06      4.000000E+02
+      1.440000E+06      4.000000E+02
+#
+SERIES BC  4  2  0  0  0  0
+     -1.440000E+06      0.000000E+00
+      1.440000E+06      0.000000E+00
+#
+SERIES BC  5  2  0  0  0  0
+     -1.440000E+06      1.000000E+00
+      1.440000E+06      1.000000E+00
+#
+SERIES BC  6  2  0  0  0  0
+     -1.440000E+06      0.000000E+00
+      1.440000E+06      0.000000E+00
+
+#Output
+SERIES AWRITE  7  1  0  0  0  0
+ -1.440000E+06       1.440000E+06       3.000000E+02     0
+
+#Time step
+SERIES DT  8  2  0  0  0  0
+     -1.440000E+06      6.000000E+01
+      1.440000E+06      6.000000E+01
+
+TC T0    0.000000E+00  0
+TC TF    1.440000E+04  0
+
+#Enable XDMF output
+PC XDF
+
+#Shallow water boundary Conditions
+NB FLXNML
+HY INT    1             ! Strongly coupled interface
+NB VEL    2    1        ! No Flow
+NB DIS    3    3        ! Inflow
+NB VEL    4    1        ! No Flow
+
+NB FRS    5    1        ! Surface
+NB BED    6    1        ! Bed
+
+# Salinity transport
+CN SAL  1  1        
+MP DF   1  1    0.001
+MP TRT  1  1    5000
+# Transport BCs
+#NB TRN 1 1 6   
+NB TRN 3 1 5   
+                    
+END

@@ -1,0 +1,136 @@
+OP SW2
+OP TRN 1
+OP BLK 1
+OP PRE 1
+OP LVL 1
+OP INC 1000
+
+#OP WND
+##OP  GRBLIB  1  Tstart wind_DT  nlat nlon  latmin   lonmin    D_LAT   D_LON   YYYY MM DD HR MIN SEC  R_EARTH     BASELAT   BASELON  XTRANS YTRANS
+#OP   GRBLIB  1   0.0   21600.0   614 428   12.190   226.541   0.0108  0.0108  2017 08 23 0   0   0  6378206.40  29.36019  265.26437   0.0    0.0
+
+IP NTL 0.1
+IP ITL 0.01
+IP NIT 15
+IP MIT 300
+
+SOUT ALL
+
+MTS    1 1
+MP ML  1 0
+MP SRT 1 100
+
+#MP EVS  1  0.01  0.01  0.01 
+MP EEV  1  0.2  3 
+ 
+MP G    9.8
+MP RHO  1000.
+MP MU   0.000001
+MP MUC  1.0
+
+# Wetting and Drying # No wetting drying in this model
+MP DTL  0.5
+
+#Friction
+FR MNG  1  0.025
+
+# Inflow
+SERIES BC 1 2 0 0
+0        10.0
+7776000  10.0
+
+# Time steps
+SERIES DT 2 2 0 0
+0       1800.0
+7776000  1800.0
+
+# OUTPUT
+SERIES AWRITE 3 1 0 0
+0  7776000  10800.0  0
+
+TC T0 0
+#TC TF 777600
+TC TF 259200
+#TC TF 138600
+#TC TF 21600
+
+PC XDF
+
+HY INT 2     # 2D-3D Interface
+NB VEL 3  1  # Inflow
+
+# Salt transport
+CN SAL 1 1 0 0 0 0
+MP DF  1 1 0.05
+MP TRT 1 1 100.
+# Salt
+SERIES BC  4  2  0  0
+0        1.00
+7776000  1.00
+NB TRN  3  1  4  # Inflow freshwater
+
+# 2D-3D Interface
+EGS       7656       7657    2
+EGS       7657       7658    2
+EGS       7658       7659    2
+EGS       7659       7660    2
+EGS       7660       7661    2
+EGS       7661       7662    2
+EGS       7662       7663    2
+EGS       7663       7664    2
+EGS       7664       7665    2
+EGS       7665       7666    2
+EGS       7666       7667    2
+EGS       7667       7668    2
+EGS       7668       7669    2
+EGS       7669       7670    2
+EGS       7670         16    2
+EGS         16         15    2
+EGS         15         14    2
+EGS         14         13    2
+EGS         13         12    2
+EGS         12         11    2
+EGS         11         10    2
+EGS         10          9    2
+EGS          9          8    2
+EGS          8          7    2
+EGS          7          6    2
+EGS          6          5    2
+EGS          5          4    2
+EGS          4          3    2
+EGS          3          2    2
+EGS          2          1    2
+
+# Inflow
+EGS        435        434    3
+EGS        434        433    3
+EGS        433        432    3
+EGS        432        431    3
+EGS        431        430    3
+EGS        430        429    3
+EGS        429        428    3
+EGS        428        427    3
+EGS        427        426    3
+EGS        426        425    3
+EGS        425        424    3
+EGS        424        423    3
+EGS        423        422    3
+EGS        422        421    3
+EGS        421        420    3
+EGS        420       7671    3
+EGS       7671       7672    3
+EGS       7672       7673    3
+EGS       7673       7674    3
+EGS       7674       7675    3
+EGS       7675       7676    3
+EGS       7676       7677    3
+EGS       7677       7678    3
+EGS       7678       7679    3
+EGS       7679       7680    3
+EGS       7680       7681    3
+EGS       7681       7682    3
+EGS       7682       7683    3
+EGS       7683       7684    3
+EGS       7684       7685    3
+
+END

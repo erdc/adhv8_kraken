@@ -1,0 +1,3 @@
+#! /bin/sh
+
+(cd ~/src/AdaptiveHydraulics_6x/src/pt && make all)

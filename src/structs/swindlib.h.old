@@ -1,0 +1,67 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// FOLLOWING LINES ADDED BY GAJANAN [ gkc July 2015 ]. These are for ADCIRC wind library usage. //
+
+/* Note: Entire file added by Gajanan. */
+typedef struct {
+  int nws;                  /* nws type */
+  int ics;                  /* ics = 1 (Cartesian) for AdH necessarily as of July 2015. */
+  int NScreen;
+  int MyProc;
+  int ScreenUnit;
+
+  /* Timing information */
+  double statim;            /* wind start time */
+  double wtiminc;           /* wind time increment */
+  double wtime_prev;        /* previous wind time */
+  double wtime_curr;        /* current wind time */
+
+  /* nws dependent information */
+    /* grid info */
+    int nwlon;                /* number of longitudes (x) */
+    int nwlat;                /* number of latitudes (y) */
+    double wlonmin;           /* minimum longitude value (x_min) */
+    double wlatmax;           /* maximum latitude value (y_max) */
+    double wloninc;           /* longitude increment */
+    double wlatinc;           /* latitude increment */
+
+    /* time conversion */
+    int iwyr;
+    int irefyr;
+    int irefmo;
+    int irefday;
+    int irefhr;
+    int irefmin;
+    double refsec;
+    double iwtime;
+    double wreftim;
+    double wtimed;
+
+  /* ics dependent information; currently not in use since ICS = 1 */
+//  double slam0;               /* ADCIRC fort.15 input parameter */
+//  double sfea0;               /* ADCIRC fort.15 input parameter */
+
+  /* Actual wind variables in x and y direction. Windx, Windy, Pressure */
+  double *prevx;              /* 1d array of size model->nnodes */
+  double *prevy;              /* 1d array of size model->nnodes */
+  double *prevp;              /* 1d array of size model->nnodes */
+  double *currx;              /* 1d array of size model->nnodes */
+  double *curry;              /* 1d array of size model->nnodes */
+  double *currp;              /* 1d array of size model->nnodes */
+
+} SWINDLIB;
+
+/*********************************************************/
+/* struct methods -------------------------------------- */
+
+void swindlib_alloc(SWINDLIB **windlib);
+void swindlib_init(SWINDLIB *windlib, int nnodes);
+void swindlib_printScreen(SWINDLIB *windlib);
+void swindlib_free(SWINDLIB *windlib, int nnodes);
+
+/***********************************************************/
+/***********************************************************/
+/***********************************************************/
+
+// ABOVE LINES ADDED BY GAJANAN                                                                 //
+//////////////////////////////////////////////////////////////////////////////////////////////////
+

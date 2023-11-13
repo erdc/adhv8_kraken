@@ -1,0 +1,17 @@
+set(target_properties ${target_properties}\ -D_UMFPACK)
+
+if (UMFPACK_INT_SIZE EQUAL 32)
+  set(target_properties ${target_properties}\ -D_UMFPACK_INT_SIZE=32)
+elseif (UMFPACK_INT_SIZE EQUAL 64)
+  set(target_properties ${target_properties}\ -D_UMFPACK_INT_SIZE=64\ -D_UMFPACK_LONG)
+endif (UMFPACK_INT_SIZE EQUAL 32)
+
+if(UMFPACK_VERSION EQUAL 3)
+    set(target_properties ${target_properties}\ -D_UMFPACK_VERSION=3)
+endif(UMFPACK_VERSION EQUAL 3)
+if(UMFPACK_VERSION EQUAL 4)
+    set(target_properties ${target_properties}\ -D_UMFPACK_VERSION=4)
+endif(UMFPACK_VERSION EQUAL 4)
+if(UMFPACK_VERSION EQUAL 5)
+    set(target_properties ${target_properties}\ -D_UMFPACK_VERSION=5)
+endif(UMFPACK_VERSION EQUAL 5)

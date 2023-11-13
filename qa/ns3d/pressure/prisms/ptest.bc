@@ -1,0 +1,62 @@
+OP SW3
+OP TRN 0
+OP BLK 1
+OP INC 40
+OP PRE 1
+
+# test case
+TEST PTEST
+
+# screen output
+SOUT RESID
+
+OP TPG 0
+
+IP NTL 1e-6
+IP ITL 1e-6
+IP NIT 4
+IP MIT 100
+
+MP ML 1 0
+MP SRT 1 100
+
+!MP EVS xx yy xy zz xz yz
+MP EVS 1 0.0 0.0 0.0 0.0 0.00 0.00
+
+MP MUC 1.0
+MP MU 0.0000001
+MP RHO 1000
+MP G   9.8
+
+FR MNG 3 0.000000
+
+!TIME-SERIES **********************************
+SERIES DT  1  2  0  0  0  0
+0.0   50.0
+99999999999.0  50.0
+
+SERIES WRITE  2  6  0  0  0  0
+50.    0.0
+100.    0.0
+150.    0.0
+200.    0.0
+250.    0.0
+300.    0.0
+
+SERIES BC 3 2 0 0 0 0
+0 0.0
+300 0.0
+
+TC T0 0 0
+TC TF 300 0
+
+
+!***********************************************
+! BOUNDARY CONDITIONS **************************
+
+NB VEL 1 3
+NB FRS 2 3
+NB BED 3 3
+
+
+END

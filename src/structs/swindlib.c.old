@@ -1,0 +1,543 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// FOLLOWING LINES ADDED BY GAJANAN [ gkc July 2015 ]. These are for ADCIRC wind library usage. //
+
+#ifdef DWINDLIB
+
+/* Note: Entire file added by Gajanan. */
+#include "global_header.h"
+
+// ************************************************************//
+// ************************************************************//
+// local prototypes *******************************************//
+
+void AdH_direct_nwsget(double *wvnx, double *wvny, double *press, int nnodes, SIO *io);
+
+#ifdef WIND_GNU_NM
+void __wind_MOD_nws3get(double *x, double *y, double *slam, double *sfea, double *wvnx, double *wvny,
+                        double *iwtime, int *iwvyr, double *wtimed, int *nnodes,
+                        int *nwlon, int *nwlat, double *wlatmax, double *wlonmin,
+                        double * wlatinc, double *wloninc, int *ics, int *nscreen, int *screenunit);
+
+void __wind_MOD_nws4get(double *wvnx, double *wvny, double *press, int *nnodes, double *rho, double *g);
+
+void __wind_MOD_nws6get(double *x, double *y, double *slam, double *sfea, double *wvnx, double *wvny,
+                        double *press, int *nnodes, int *nwlon, int *nwlat, double *wlatmax,
+                        double *wlonmin, double * wlatinc, double *wloninc, int *ics,
+                        double *rho, double *g);
+
+void __wind_MOD_nws7get(double *x, double *y, double *slam, double *sfea, double *wvnx, double *wvny,
+                        double *press, int *nnodes, int *nwlon, int *nwlat, double *wlatmax,
+                        double *wlonmin, double * wlatinc, double *wloninc, int *ics,
+                        double *rho, double *g);
+#endif
+#ifdef WIND_INTEL_NM
+void wind_mp_nws3get_(double *x, double *y, double *slam, double *sfea, double *wvnx, double *wvny,
+                      double *iwtime, int *iwvyr, double *wtimed, int *nnodes,
+                      int *nwlon, int *nwlat, double *wlatmax, double *wlonmin,
+                      double * wlatinc, double *wloninc, int *ics, int *nscreen, int *screenunit);
+
+void wind_mp_nws4get_(double *wvnx, double *wvny, double *press, int *nnodes, double *rho, double *g);
+
+void wind_mp_nws6get_(double *x, double *y, double *slam, double *sfea, double *wvnx, double *wvny,
+                      double *press, int *nnodes, int *nwlon, int *nwlat, double *wlatmax,
+                      double *wlonmin, double * wlatinc, double *wloninc, int *ics,
+                      double *rho, double *g);
+
+void wind_mp_nws7get_(double *x, double *y, double *slam, double *sfea, double *wvnx, double *wvny,
+                      double *press, int *nnodes, int *nwlon, int *nwlat, double *wlatmax,
+                      double *wlonmin, double * wlatinc, double *wloninc, int *ics,
+                      double *rho, double *g);
+#endif
+#ifdef WIND_PGI_NM
+void wind_nws3get_(double *x, double *y, double *slam, double *sfea, double *wvnx, double *wvny,
+                      double *iwtime, int *iwvyr, double *wtimed, int *nnodes,
+                      int *nwlon, int *nwlat, double *wlatmax, double *wlonmin,
+                      double * wlatinc, double *wloninc, int *ics, int *nscreen, int *screenunit);
+
+void wind_nws4get_(double *wvnx, double *wvny, double *press, int *nnodes, double *rho, double *g);
+
+void wind_nws6get_(double *x, double *y, double *slam, double *sfea, double *wvnx, double *wvny,
+                      double *press, int *nnodes, int *nwlon, int *nwlat, double *wlatmax,
+                      double *wlonmin, double * wlatinc, double *wloninc, int *ics,
+                      double *rho, double *g);
+
+void wind_nws7get_(double *x, double *y, double *slam, double *sfea, double *wvnx, double *wvny,
+                      double *press, int *nnodes, int *nwlon, int *nwlat, double *wlatmax,
+                      double *wlonmin, double * wlatinc, double *wloninc, int *ics,
+                      double *rho, double *g);
+#endif
+
+/***********************************************************/
+/***********************************************************/
+/***********************************************************/
+
+void swindlib_alloc(SWINDLIB **windlib) {
+    (*windlib) = (SWINDLIB *) tl_alloc(sizeof(SWINDLIB), 1);
+}
+
+void swindlib_init(SWINDLIB *wl, int nnodes) {
+    int i;
+    wl->prevx = (double *) tl_alloc(sizeof(double), nnodes);
+    wl->prevy = (double *) tl_alloc(sizeof(double), nnodes);
+    wl->prevp = (double *) tl_alloc(sizeof(double), nnodes);
+    wl->currx = (double *) tl_alloc(sizeof(double), nnodes);
+    wl->curry = (double *) tl_alloc(sizeof(double), nnodes);
+    wl->currp = (double *) tl_alloc(sizeof(double), nnodes);
+    for(i = 0; i<nnodes; i++){
+       wl->prevx[i] = 0.0; wl->prevy[i] = 0.0; wl->prevp[i] = 0.0;
+       wl->currx[i] = 0.0; wl->curry[i] = 0.0; wl->currp[i] = 0.0;
+    }
+}
+
+/***********************************************************/
+/***********************************************************/
+/***********************************************************/
+
+void swindlib_free(SWINDLIB *windlib, int nnodes) {
+    windlib->prevx = (double *) tl_free(sizeof(double), nnodes, windlib->prevx);
+    windlib->prevy = (double *) tl_free(sizeof(double), nnodes, windlib->prevy);
+    windlib->prevp = (double *) tl_free(sizeof(double), nnodes, windlib->prevp);
+    windlib->currx = (double *) tl_free(sizeof(double), nnodes, windlib->currx);
+    windlib->curry = (double *) tl_free(sizeof(double), nnodes, windlib->curry);
+    windlib->currp = (double *) tl_free(sizeof(double), nnodes, windlib->currp);
+
+    windlib = (SWINDLIB *) tl_free(sizeof(SWINDLIB), 1, windlib);
+}
+
+/***********************************************************/
+/***********************************************************/
+/***********************************************************/
+
+void swindlib_printScreen(SWINDLIB *windlib) {
+    printf("\n-----------------\nWind library data\n-----------------\n");
+    printf("NWS:          %i\n", windlib->nws);
+    printf("ICS:          %i\n", windlib->ics);
+    if (windlib->nws !=1){
+        printf("STATIM:       %f\n", windlib->statim);
+        printf("WTIMINC:      %f\n\n", windlib->wtiminc);
+    }
+
+    if (windlib->nws == 3 || windlib->nws == 6 || windlib->nws == 7 ){
+      printf("\nAdditional parameters for NWS = %i -----------------\n", windlib->nws);
+      printf("NWLON:        %i\n", windlib->nwlon);
+      printf("NWLAT:        %i\n", windlib->nwlat);
+      printf("WLONMIN:      %f\n", windlib->wlonmin);
+      printf("WLATMAX:      %f\n", windlib->wlatmax);
+      printf("WLONINC:      %f\n", windlib->wloninc);
+      printf("WLATINC:      %f\n\n", windlib->wlatinc);
+    }
+    if (windlib->nws == 3){
+      printf("IREFYR:       %i\n", windlib->irefyr);
+      printf("IREFMO:       %i\n", windlib->irefmo);
+      printf("IREFDAY:      %i\n", windlib->irefday);
+      printf("IREFHR:       %i\n", windlib->irefhr);
+      printf("IREFMIN:      %i\n", windlib->irefmin);
+      printf("REFSEC:       %f\n", windlib->refsec);
+      printf("WREFTIM:      %f\n\n", windlib->wreftim);
+    }
+}
+
+/***********************************************************/
+/***********************************************************/
+/***********************************************************/
+
+void swindlib_update(SMODEL *mod, SWINDLIB *wl, double t_curr, int nnodes, double **values) {
+    int i,id3d;
+    double *x, *y, wtratio;
+    double slam = 0; double sfea = 0;
+    x = (double *) tl_alloc(sizeof(double), nnodes);
+    y = (double *) tl_alloc(sizeof(double), nnodes);
+    if (mod->grid->ndim == 2) {
+        for (i=0; i<nnodes; i++) {
+            x[i] = mod->grid->node[i].x;
+            y[i] = mod->grid->node[i].y;
+        }
+    } else if (mod->grid->ndim == 3) {
+        for (i=0; i<nnodes; i++) {
+            id3d = mod->grid->nodeID_2d_to_3d_sur[i];
+            x[i] = mod->grid->node[id3d].x;
+            y[i] = mod->grid->node[id3d].y;
+        }
+    }
+    switch (wl->nws){
+        case 1: // Wind STRESSES read in directly at all grid nodes. No spatial / temporal interpolaiton.
+            AdH_direct_nwsget(wl->currx, wl->curry, wl->currp, nnodes, mod->io);
+            for (i=0;i<nnodes;i++){
+                values[0][i] = wl->currx[i];
+                values[1][i] = wl->curry[i];
+                //			values[2][i] = wl->currp[i];
+            }
+            x = (double *) tl_free(sizeof(double), nnodes, x);
+            y = (double *) tl_free(sizeof(double), nnodes, y);
+            return;
+            break;
+        case 2: // Wind STRESSES read in directly at all grid nodes. Interpolated temporally.
+            if (t_curr > wl->wtime_curr){
+                wl->wtime_prev = wl->wtime_curr;
+                wl->wtime_curr += wl->wtiminc;
+                for (i=0;i<nnodes;i++){
+                    wl->prevx[i] = wl->currx[i];
+                    wl->prevy[i] = wl->curry[i];
+                    wl->prevp[i] = wl->currp[i];
+                }
+                AdH_direct_nwsget(wl->currx, wl->curry, wl->currp, nnodes, mod->io);
+            }
+            break;
+        case 3: // Wind VELOCITIES in US Navy Fleet format interpolated spaciotemporally.
+            if (t_curr > wl->wtime_curr){
+                wl->wtime_prev = wl->wtime_curr;
+                wl->wtime_curr += wl->wtiminc;
+                for (i=0;i<nnodes;i++){
+                    wl->prevx[i] = wl->currx[i];
+                    wl->prevy[i] = wl->curry[i];
+                }
+#ifdef WIND_GNU_NM
+                __wind_MOD_nws3get( x, y, &slam, &sfea, wl->currx, wl->curry, &(wl->iwtime),
+                                   &(wl->iwyr), &(wl->wtimed), &(nnodes), &(wl->nwlon),
+                                   &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                                   &(wl->wloninc), &(wl->ics), &(wl->NScreen), &(wl->ScreenUnit) );
+#endif
+#ifdef WIND_INTEL_NM
+                wind_mp_nws3get_( x, y, &slam, &sfea, wl->currx, wl->curry, &(wl->iwtime),
+                                 &(wl->iwyr), &(wl->wtimed), &(nnodes), &(wl->nwlon),
+                                 &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                                 &(wl->wloninc), &(wl->ics), &(wl->NScreen), &(wl->ScreenUnit) );
+#endif
+#ifdef WIND_PGI_NM
+                wind_nws3get_( x, y, &slam, &sfea, wl->currx, wl->curry, &(wl->iwtime),
+                              &(wl->iwyr), &(wl->wtimed), &(nnodes), &(wl->nwlon),
+                              &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                              &(wl->wloninc), &(wl->ics), &(wl->NScreen), &(wl->ScreenUnit) );
+#endif
+            }
+            break;
+        case 4: // Wind VELOCITIES read in PBL/JAG format directly at all grid nodes. Interpolated temporally.
+            if (t_curr > wl->wtime_curr){
+                wl->wtime_prev = wl->wtime_curr;
+                wl->wtime_curr += wl->wtiminc;
+                for (i=0;i<nnodes;i++){
+                    wl->prevx[i] = wl->currx[i];
+                    wl->prevy[i] = wl->curry[i];
+                    wl->prevp[i] = wl->currp[i];
+                }
+#ifdef WIND_GNU_NM
+                __wind_MOD_nws4get(wl->currx,wl->curry, wl->currp,
+                                   &(nnodes), &(mod->density), &(mod->gravity));
+#endif
+#ifdef WIND_INTEL_NM
+                wind_mp_nws4get_(wl->currx,wl->curry, wl->currp,
+                                 &(nnodes), &(mod->density), &(mod->gravity));
+#endif
+#ifdef WIND_PGI_NM
+                wind_nws4get_(wl->currx,wl->curry, wl->currp,
+                              &(nnodes), &(mod->density), &(mod->gravity));
+#endif
+            }
+            break;
+        case 5: // Wind VELOCITIES read in directly at all grid nodes. Interpolated temporally.
+            if (t_curr > wl->wtime_curr){
+                wl->wtime_prev = wl->wtime_curr;
+                wl->wtime_curr += wl->wtiminc;
+                for (i=0;i<nnodes;i++){
+                    wl->prevx[i] = wl->currx[i];
+                    wl->prevy[i] = wl->curry[i];
+                    wl->prevp[i] = wl->currp[i];
+                }
+                AdH_direct_nwsget(wl->currx, wl->curry, wl->currp, nnodes, mod->io);
+            }
+            break;
+        case 6: // Wind VELOCITIES read in from a rectangular grid, and interpolated spaciotemporally.
+            if (t_curr > wl->wtime_curr){
+                wl->wtime_prev = wl->wtime_curr;
+                wl->wtime_curr += wl->wtiminc;
+                for (i=0;i<nnodes;i++){
+                    wl->prevx[i] = wl->currx[i];
+                    wl->prevy[i] = wl->curry[i];
+                    wl->prevp[i] = wl->currp[i];
+                }
+#ifdef WIND_GNU_NM
+                __wind_MOD_nws6get( x, y, &slam, &sfea,
+                                   wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),
+                                   &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                                   &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+#ifdef WIND_INTEL_NM
+                wind_mp_nws6get_( x, y, &slam, &sfea,
+                                 wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),
+                                 &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                                 &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+#ifdef WIND_PGI_NM
+                wind_nws6get_( x, y, &slam, &sfea,
+                              wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),
+                              &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                              &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+            }
+            break;
+        case 7: // Wind STRESSES read in from a rectangular grid, and interpolated spaciotemporally.
+            if (t_curr > wl->wtime_curr){
+                wl->wtime_prev = wl->wtime_curr;
+                wl->wtime_curr += wl->wtiminc;
+                for (i=0;i<nnodes;i++){
+                    wl->prevx[i] = wl->currx[i];
+                    wl->prevy[i] = wl->curry[i];
+                    wl->prevp[i] = wl->currp[i];
+                }
+#ifdef WIND_GNU_NM
+                __wind_MOD_nws7get( x, y, &slam, &sfea,
+                                   wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),  
+                                   &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                                   &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+#ifdef WIND_INTEL_NM
+                wind_mp_nws7get_( x, y, &slam, &sfea,
+                                 wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),  
+                                 &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                                 &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+#ifdef WIND_PGI_NM
+                wind_nws7get_( x, y, &slam, &sfea,
+                              wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),  
+                              &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                              &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+            }
+            break;
+        default:
+            printf("\nNot sure how you got here, but NWS = %i is not allowed!\n",wl->nws);
+            printf("\nOnly NWS = {1, 2, 3, 4, 5, 6, 7} are allowed. Terminating program.\n");
+            printf("******************************************************************\n");
+            exit(0);
+            break;
+    }
+    wtratio = (t_curr - wl->wtime_prev)/wl->wtiminc;
+    for (i=0;i<nnodes;i++){
+        values[0][i] = wl->prevx[i] + wtratio * (wl->currx[i] - wl->prevx[i]);
+        values[1][i] = wl->prevy[i] + wtratio * (wl->curry[i] - wl->prevy[i]);
+        //		values[2][i] = wl->prevp[i] + wtratio * (wl->currp[i] - wl->prevp[i]);
+    }
+
+    x = (double *) tl_free(sizeof(double), nnodes, x);
+    y = (double *) tl_free(sizeof(double), nnodes, y);
+}
+
+/***********************************************************/
+/***********************************************************/
+/***********************************************************/
+
+void swindlib_firstread(SMODEL *mod, SWINDLIB *wl, int nnodes ) {
+    printf("\n*************************************************************\n");
+    printf("-- reading wind forcing file: %s\n",mod->io->windfile.filename);
+    int i,id3d;
+    double *x, *y;
+    double slam=0; double sfea=0;
+    double iwtimep;
+    x = (double *) tl_alloc(sizeof(double), nnodes);
+    y = (double *) tl_alloc(sizeof(double), nnodes);
+    if (mod->grid->ndim == 2) {
+        for (i=0; i<nnodes; i++) {
+            x[i] = mod->grid->node[i].x;
+            y[i] = mod->grid->node[i].y;
+        }
+    } else if (mod->grid->ndim == 3) {
+        for (i=0; i<nnodes; i++) {
+            id3d = mod->grid->nodeID_2d_to_3d_sur[i];
+            x[i] = mod->grid->node[id3d].x;
+            y[i] = mod->grid->node[id3d].y;
+        }
+    }
+    switch (wl->nws) {
+        case 1:
+            x = (double *) tl_free(sizeof(double), nnodes, x);
+            y = (double *) tl_free(sizeof(double), nnodes, y);
+            return;
+        case 2:
+            AdH_direct_nwsget(wl->prevx, wl->prevy, wl->prevp, nnodes, mod->io);
+            AdH_direct_nwsget(wl->currx, wl->curry, wl->currp, nnodes, mod->io);
+            break;
+        case 3:
+            do {
+#ifdef WIND_GNU_NM
+                __wind_MOD_nws3get( x, y, &slam, &sfea, wl->currx, wl->curry, &(wl->iwtime),
+                                   &(wl->iwyr), &(wl->wtimed), &(nnodes), &(wl->nwlon),
+                                   &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                                   &(wl->wloninc), &(wl->ics), &(wl->NScreen), &(wl->ScreenUnit));
+#endif
+#ifdef WIND_INTEL_NM
+                wind_mp_nws3get_( x, y, &slam, &sfea, wl->currx, wl->curry, &(wl->iwtime),
+                                 &(wl->iwyr), &(wl->wtimed), &(nnodes), &(wl->nwlon),
+                                 &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                                 &(wl->wloninc), &(wl->ics), &(wl->NScreen), &(wl->ScreenUnit));
+#endif
+#ifdef WIND_PGI_NM
+                wind_nws3get_( x, y, &slam, &sfea, wl->currx, wl->curry, &(wl->iwtime),
+                              &(wl->iwyr), &(wl->wtimed), &(nnodes), &(wl->nwlon),
+                              &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                              &(wl->wloninc), &(wl->ics), &(wl->NScreen), &(wl->ScreenUnit));
+#endif
+                if (wl->iwyr != wl->irefyr){
+                    iwtimep = wl->iwtime;
+                    for (i=0; i<nnodes;i++){
+                        wl->prevx[i] = wl->currx[i];
+                        wl->prevy[i] = wl->curry[i];
+                    }
+                    continue;
+                }
+                if (wl->wtimed <= wl->wreftim){
+                    iwtimep = wl->iwtime;
+                    for (i=0; i<nnodes;i++){
+                        wl->prevx[i] = wl->currx[i];
+                        wl->prevy[i] = wl->curry[i];
+                    }
+                }
+            }while (wl->iwyr != wl->irefyr || wl->wtimed <= wl->wreftim);
+            iwtimep = wl->iwtime;
+            for (i=0; i<nnodes;i++){
+                wl->prevx[i] = wl->currx[i];
+                wl->prevy[i] = wl->curry[i];
+            }
+            //            printf("\nFound wind data at time t1 = %f",iwtimep);
+            //            printf("\nFound wind data at time t2 = %f\n",wl->iwtime);
+            wl->wtime_curr = wl->wtimed - wl->wreftim;
+            wl->wtime_prev = wl->wtime_curr - wl->wtiminc;
+            x = (double *) tl_free(sizeof(double), nnodes, x);
+            y = (double *) tl_free(sizeof(double), nnodes, y);
+            printf("\nFound wind data at time t1 = %f",wl->wtime_prev);
+            printf("\nFound wind data at time t2 = %f\n",wl->wtime_curr);
+            return;
+        case 4:
+#ifdef WIND_GNU_NM
+            __wind_MOD_nws4get(wl->prevx, wl->prevy, wl->prevp,
+                               &(nnodes), &(mod->density), &(mod->gravity));
+            __wind_MOD_nws4get(wl->currx,wl->curry, wl->currp,
+                               &(nnodes), &(mod->density), &(mod->gravity));
+#endif
+#ifdef WIND_INTEL_NM
+            wind_mp_nws4get_(wl->prevx, wl->prevy, wl->prevp,
+                             &(nnodes), &(mod->density), &(mod->gravity));
+            wind_mp_nws4get_(wl->currx,wl->curry, wl->currp,
+                             &(nnodes), &(mod->density), &(mod->gravity));
+#endif
+#ifdef WIND_PGI_NM
+            wind_nws4get_(wl->prevx, wl->prevy, wl->prevp,
+                          &(nnodes), &(mod->density), &(mod->gravity));
+            wind_nws4get_(wl->currx,wl->curry, wl->currp,
+                          &(nnodes), &(mod->density), &(mod->gravity));
+#endif
+            
+            break;
+        case 5:
+            AdH_direct_nwsget(wl->prevx, wl->prevy, wl->prevp, nnodes, mod->io);
+            AdH_direct_nwsget(wl->currx, wl->curry, wl->currp, nnodes, mod->io);
+            break;
+        case 6:
+#ifdef WIND_GNU_NM
+            __wind_MOD_nws6get( x, y, &slam, &sfea,
+                               wl->prevx,  wl->prevy, wl->prevp, &(nnodes), &(wl->nwlon),
+                               &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                               &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+            __wind_MOD_nws6get( x, y, &slam, &sfea,
+                               wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),
+                               &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                               &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+#ifdef WIND_INTEL_NM
+            wind_mp_nws6get_( x, y, &slam, &sfea,
+                             wl->prevx,  wl->prevy, wl->prevp, &(nnodes), &(wl->nwlon),
+                             &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                             &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+            wind_mp_nws6get_( x, y, &slam, &sfea,
+                             wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),
+                             &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                             &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+#ifdef WIND_PGI_NM
+            wind_nws6get_( x, y, &slam, &sfea,
+                          wl->prevx,  wl->prevy, wl->prevp, &(nnodes), &(wl->nwlon),
+                          &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                          &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+            wind_nws6get_( x, y, &slam, &sfea,
+                          wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),
+                          &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                          &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+            break;
+        case 7:
+#ifdef WIND_GNU_NM
+            __wind_MOD_nws7get( x, y, &slam, &sfea,
+                               wl->prevx,  wl->prevy, wl->prevp, &(nnodes), &(wl->nwlon),
+                               &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                               &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+            __wind_MOD_nws7get( x, y, &slam, &sfea,
+                               wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),
+                               &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                               &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+#ifdef WIND_INTEL_NM
+            wind_mp_nws7get_( x, y, &slam, &sfea,
+                             wl->prevx,  wl->prevy, wl->prevp, &(nnodes), &(wl->nwlon),
+                             &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                             &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+            wind_mp_nws7get_( x, y, &slam, &sfea,
+                             wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),
+                             &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                             &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+#ifdef WIND_PGI_NM
+            wind_nws7get_( x, y, &slam, &sfea,
+                          wl->prevx,  wl->prevy, wl->prevp, &(nnodes), &(wl->nwlon),
+                          &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                          &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+            wind_nws7get_( x, y, &slam, &sfea,
+                          wl->currx, wl->curry, wl->currp, &(nnodes), &(wl->nwlon),
+                          &(wl->nwlat), &(wl->wlatmax), &(wl->wlonmin), &(wl->wlatinc),
+                          &(wl->wloninc), &(wl->ics), &(mod->density), &(mod->gravity) );
+#endif
+            break;
+        default:
+            printf("\nNot sure how you got here, but NWS = %i is not allowed!\n",wl->nws);
+            printf("\nOnly NWS = {1, 2, 3, 4, 5, 6, 7} are allowed. Terminating program.\n");
+            printf("*************************************************************\n\n");
+            exit(0);
+            break;
+    }
+
+    x = (double *) tl_free(sizeof(double), nnodes, x);
+    y = (double *) tl_free(sizeof(double), nnodes, y);
+
+    wl->wtime_prev = wl->statim;
+    wl->wtime_curr = wl->wtime_prev + wl->wtiminc;
+    printf("Wind forcing starter calls completed successfully for NWS = %i\n",wl->nws);
+    printf("*************************************************************\n\n");
+}
+
+void AdH_direct_nwsget(double *wvnx, double *wvny, double *press, int nnodes, SIO * io){
+    int i, nodenum;
+    char line[MAXLINE];
+    char *data;
+    for (i=0; i<nnodes; i++){
+        fgets(line, MAXLINE, io->windfile.fp);
+        data = line;
+        parse_card(line,&data);
+        nodenum          = read_int_field(*io, &data);
+        if (nodenum > nnodes) {
+            printf("\n\nProblem encountered in wind file fort.22");
+            printf("Line from fort.22:  %s",line);
+            printf("\nNode number encountered %i exceeds the number of surface nodes %i",nodenum,nnodes);
+            printf("Terminating AdH run...");
+            exit(0);
+        }
+        else{
+            nodenum--; /* Since arrays start at [0] in C */
+        }
+        wvnx[nodenum]    = read_dbl_field(*io, &data);
+        wvny[nodenum]    = read_dbl_field(*io, &data);
+        press[nodenum]   = read_dbl_field(*io, &data);
+    }
+}
+
+#endif
+
+// ABOVE LINES ADDED BY GAJANAN                                                                 //
+//////////////////////////////////////////////////////////////////////////////////////////////////

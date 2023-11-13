@@ -1,0 +1,113 @@
+OP GW 			! Run Fluid Flow Through Porous Media
+
+SOUT RESID
+#SOUT ALL
+#DEBUG NEWTON
+
+!OP TEM 1
+OP BLK 1 		! Blocks per processor for preconditioner
+OP PRE 1		! Preconditioner (0=point jacobi, 1=block jacobi, 2,3=domain decomp) 
+OP INC 40
+
+IP NTL 1e-7
+IP ITL 1e-4
+IP NIT 12
+IP MIT 100
+
+MP MUC 1.0
+MP MU  0.00001
+MP RHO 1000
+MP G 9.8
+
+MP ML 1 0
+MP SRT 1 100
+
+# EVS card :: {xx, yy, xy, zz, xz, yz} 
+#MP EVS 1 0.0 0.0 0.0 0.0 0.0 0.0
+! Mapping material IDs to Domain IDs
+MP MID 1 1
+
+
+! Material -- Celia-Boulatas 'clay' 
+! General
+MP POR 1 0.368 				! Porosity
+MP ML  1 0 				! Refinement levels
+MP FRT 1 1.0 				! Refinement Tolerance
+! Moisture
+MP K   1 9.22e-5 9.22e-5 9.22e-5 0. 0. 0. ! Hydraulic conductivity
+MP SS  1 1.0e-5	 			! Specific storage
+MP VGA 1 3.35 				! van Genuchten curve alpha (1/L)
+MP VGN 1 2.00 				! van Genuchten curve exponent
+MP VGP 1 200 				! van Genuchten curve max capillary pressure head
+MP VGX 1 400 				! number of van Genuchten curve entries
+MP RSD 1 0.102 				! Residual saturation by gravity drainage
+! Transport
+MP TOR 1 0.7 				! Tortuosity
+MP DPL 1 1.0 				! Longitudinal dispersivity
+
+
+! Time control
+TC T0      0.00000 0
+!TC TF    3600.00000 0
+TC TF  86400.00000 0
+
+! Output
+PC XDF 
+#***********************************************
+# SERIES ***************************************
+SERIES DT  1  3  0  0  0  0
+     0.00000 1800.
+  3600.00000 1800.
+100000.00000 1800.
+
+SERIES AWRITE  2  1  0  0  0  0
+   0.00000 86400.00000 1800. 0
+
+SERIES BC 3 2 0 0 0 0
+   000.00000 -10.
+100000.00000 -10.
+
+SERIES BC 4 2 0 0 0 0
+   000.00000 -0.75
+100000.00000 -0.75
+
+SERIES BC 5 2 0 0 0 0
+   000.00000 0.0
+100000.00000 0.0
+
+
+#***********************************************
+# SIDEWALL BOUNDARY CONDITIONS *****************
+NB VEL 1 5
+NB VEL 2 5
+NB VEL 3 5
+NB VEL 4 5
+#***********************************************
+# TOP AND BOTTOM BOUNDARY CONDITIONS **********
+DB PSI 7 4
+DB PSI 8 3
+
+#***********************************************
+# DIRICHLET BOUNDARY STRINGS
+# TOP
+NDS 1 7
+NDS 102 7
+NDS 203 7
+NDS 304 7
+NDS 405 7
+NDS 506 7
+NDS 607 7
+NDS 708 7
+NDS 809 7
+# BOTTOM
+NDS 101 8
+NDS 202 8
+NDS 303 8
+NDS 404 8
+NDS 505 8
+NDS 606 8
+NDS 707 8
+NDS 808 8
+NDS 909 8
+
+END

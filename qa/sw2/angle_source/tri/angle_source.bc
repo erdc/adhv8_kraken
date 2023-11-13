@@ -1,0 +1,73 @@
+OP SW2
+OP TRN 0
+OP BLK 1
+OP INC 40
+OP PRE 1
+
+# test case
+TEST SOURCE
+
+# screen output
+SOUT RESID
+SOUT MERROR
+
+IP NTL 1e-7
+IP ITL 1e-7
+IP NIT 10
+IP MIT 100
+
+MTS 1 1
+MTS 2 2
+MTS 3 3
+MP ML 1 0
+MP ML 2 0
+MP ML 3 0
+MP SRT 1 100
+MP SRT 2 100
+MP SRT 3 100
+
+MP EVS 1 0.001 0.001 0.001
+MP EVS 2 0.001 0.001 0.001
+MP EVS 3 0.001 0.001 0.001
+
+MP MUC 1.0
+MP MU 0.0000001
+MP RHO 1000
+MP G 9.8
+
+FR MNG 1 0.0
+FR MNG 2 0.0
+FR MNG 3 0.0
+
+# Output time-series 
+SERIES AWRITE 1 1 0 0 0 0
+0 100000 1000 0
+
+# Time-step time-series
+SERIES DT 2 2 0 0 0 0
+0. 50.
+100000. 50.
+
+# No-flow time-series 
+SERIES BC 3 2 0 0 0 0
+0 0.000000
+100000. 0.000000
+
+# Water Source time-series for material 1
+SERIES BC 4 2 0 0 0 0
+0 0.001
+100000 0.001
+
+# Water Source time-series for material 2
+SERIES BC 5 2 0 0 0 0
+0 0.003
+100000 0.003
+
+# Water Source Natural Boundaries
+NB SOURCE 2 4
+NB SOURCE 3 5
+
+TC T0 0 0
+TC TF 10000 0
+
+END

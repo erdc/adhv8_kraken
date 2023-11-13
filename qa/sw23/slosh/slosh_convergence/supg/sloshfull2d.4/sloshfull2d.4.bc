@@ -1,0 +1,220 @@
+OP SW2
+OP TRN  0
+OP BLK  1
+OP INC  40
+OP PRE  1
+OP TEM  1
+#OP TPG  0
+
+#TEST SLSH23  Node  Ampltd   Length   Width  Depth  #Node at (      x,       y,     z)
+TEST SLSH23      1    0.01  25600.0  6400.0  82.50  #Node at (Unknown)
+
+#Screen output
+SOUT ALL
+
+IP NTL     1.000E-12
+IP ITL     1.000E-12
+IP NIT     15
+IP MIT     500
+
+MTS        1  1
+MP ML      1  0
+MP SRT     1  100
+
+MP EVS     1  0.00  0.00  0.00  0.00  0.00  0.00
+MP MUC     1.0
+MP MU      0.0
+MP RHO     990
+MP G       9.81
+
+FR MNG     1   0.000000E+00
+
+#
+SERIES BC  1  2  0  0  0  0
+      0.000000E+00      0.000000E+00
+      1.080000E+06      0.000000E+00
+
+#Output
+SERIES AWRITE  2  1  0  0  0  0
+  0.000000E+00       1.080000E+06       3.000000E+01     0
+
+#Time step
+SERIES DT  3  2  0  0  0  0
+      0.000000E+00      1.000000E+00
+      1.080000E+06      1.000000E+00
+
+TC T0    2.000000E+00  0
+TC TF    1.080000E+04  0
+
+#Enable XDMF output
+#PC XDF
+
+#Shallow water boundary Conditions
+NB VEL    2    1        ! No Flow
+NB VEL    3    1        ! No Flow
+NB VEL    4    1        ! No Flow
+NB VEL    5    1        ! No Flow
+
+#Edge list below:
+EGS         17         16          2
+EGS         16         15          2
+EGS         15         14          2
+EGS         14         13          2
+EGS         13         12          2
+EGS         12         11          2
+EGS         11         10          2
+EGS         10          9          2
+EGS          9          8          2
+EGS          8          7          2
+EGS          7          6          2
+EGS          6          5          2
+EGS          5          4          2
+EGS          4          3          2
+EGS          3          2          2
+EGS          2          1          2
+EGS       1105       1088          3
+EGS       1088       1071          3
+EGS       1071       1054          3
+EGS       1054       1037          3
+EGS       1037       1020          3
+EGS       1020       1003          3
+EGS       1003        986          3
+EGS        986        969          3
+EGS        969        952          3
+EGS        952        935          3
+EGS        935        918          3
+EGS        918        901          3
+EGS        901        884          3
+EGS        884        867          3
+EGS        867        850          3
+EGS        850        833          3
+EGS        833        816          3
+EGS        816        799          3
+EGS        799        782          3
+EGS        782        765          3
+EGS        765        748          3
+EGS        748        731          3
+EGS        731        714          3
+EGS        714        697          3
+EGS        697        680          3
+EGS        680        663          3
+EGS        663        646          3
+EGS        646        629          3
+EGS        629        612          3
+EGS        612        595          3
+EGS        595        578          3
+EGS        578        561          3
+EGS        561        544          3
+EGS        544        527          3
+EGS        527        510          3
+EGS        510        493          3
+EGS        493        476          3
+EGS        476        459          3
+EGS        459        442          3
+EGS        442        425          3
+EGS        425        408          3
+EGS        408        391          3
+EGS        391        374          3
+EGS        374        357          3
+EGS        357        340          3
+EGS        340        323          3
+EGS        323        306          3
+EGS        306        289          3
+EGS        289        272          3
+EGS        272        255          3
+EGS        255        238          3
+EGS        238        221          3
+EGS        221        204          3
+EGS        204        187          3
+EGS        187        170          3
+EGS        170        153          3
+EGS        153        136          3
+EGS        136        119          3
+EGS        119        102          3
+EGS        102         85          3
+EGS         85         68          3
+EGS         68         51          3
+EGS         51         34          3
+EGS         34         17          3
+EGS       1089       1090          4
+EGS       1090       1091          4
+EGS       1091       1092          4
+EGS       1092       1093          4
+EGS       1093       1094          4
+EGS       1094       1095          4
+EGS       1095       1096          4
+EGS       1096       1097          4
+EGS       1097       1098          4
+EGS       1098       1099          4
+EGS       1099       1100          4
+EGS       1100       1101          4
+EGS       1101       1102          4
+EGS       1102       1103          4
+EGS       1103       1104          4
+EGS       1104       1105          4
+EGS          1         18          5
+EGS         18         35          5
+EGS         35         52          5
+EGS         52         69          5
+EGS         69         86          5
+EGS         86        103          5
+EGS        103        120          5
+EGS        120        137          5
+EGS        137        154          5
+EGS        154        171          5
+EGS        171        188          5
+EGS        188        205          5
+EGS        205        222          5
+EGS        222        239          5
+EGS        239        256          5
+EGS        256        273          5
+EGS        273        290          5
+EGS        290        307          5
+EGS        307        324          5
+EGS        324        341          5
+EGS        341        358          5
+EGS        358        375          5
+EGS        375        392          5
+EGS        392        409          5
+EGS        409        426          5
+EGS        426        443          5
+EGS        443        460          5
+EGS        460        477          5
+EGS        477        494          5
+EGS        494        511          5
+EGS        511        528          5
+EGS        528        545          5
+EGS        545        562          5
+EGS        562        579          5
+EGS        579        596          5
+EGS        596        613          5
+EGS        613        630          5
+EGS        630        647          5
+EGS        647        664          5
+EGS        664        681          5
+EGS        681        698          5
+EGS        698        715          5
+EGS        715        732          5
+EGS        732        749          5
+EGS        749        766          5
+EGS        766        783          5
+EGS        783        800          5
+EGS        800        817          5
+EGS        817        834          5
+EGS        834        851          5
+EGS        851        868          5
+EGS        868        885          5
+EGS        885        902          5
+EGS        902        919          5
+EGS        919        936          5
+EGS        936        953          5
+EGS        953        970          5
+EGS        970        987          5
+EGS        987       1004          5
+EGS       1004       1021          5
+EGS       1021       1038          5
+EGS       1038       1055          5
+EGS       1055       1072          5
+EGS       1072       1089          5
+
+END

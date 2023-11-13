@@ -1,0 +1,9 @@
+last time-step average absoluted errors:
+h:     3.67861706191259241194e-02 :: relative error:     3.67861706191259241194e-02 
+u:     7.39068891193098931325e-01 :: relative error:     1.18083282028453487311e-01 
+
+max average absolute errors over all time: 
+h:     3.8366670566e-02
+u:     7.3987840925e-01
+
+grid_mass_error:     4.60629505599325057119e+02 :: relative error:     9.12137634850148618267e-04 

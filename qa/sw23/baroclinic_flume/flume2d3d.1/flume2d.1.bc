@@ -1,0 +1,156 @@
+OP SW2
+OP TRN  1
+OP BLK  1
+OP INC  40
+OP PRE  1
+
+#Screen output
+SOUT ALL
+
+IP NTL     1.000E-06
+IP ITL     1.000E-06
+IP NIT     15
+IP MIT     500
+
+MTS        1  1
+MP ML      1  0
+MP SRT     1  100
+
+#MP EVS     1  0.00  0.00  0.00  0.00  0.00  0.00
+MP EEV     1   0.2   3
+MP MUC     1.0
+MP MU      0.0
+MP RHO     990
+MP G       9.81
+
+FR MNG     1   0.000000E+00
+
+#
+SERIES BC  1  2  0  0  0  0
+     -1.440000E+06      0.000000E+00
+      1.440000E+06      0.000000E+00
+#
+SERIES BC  2  2  0  0  0  0
+     -1.440000E+06      2.000000E+00
+      1.440000E+06      2.000000E+00
+#
+SERIES BC  3  2  0  0  0  0
+     -1.440000E+06      4.000000E+02
+      1.440000E+06      4.000000E+02
+#
+SERIES BC  4  2  0  0  0  0
+     -1.440000E+06      0.000000E+00
+      1.440000E+06      0.000000E+00
+#
+SERIES BC  5  2  0  0  0  0
+     -1.440000E+06      1.000000E+00
+      1.440000E+06      1.000000E+00
+#
+SERIES BC  6  2  0  0  0  0
+     -1.440000E+06      0.000000E+00
+      1.440000E+06      0.000000E+00
+
+#Output
+SERIES AWRITE  7  1  0  0  0  0
+ -1.440000E+06       1.440000E+06       3.000000E+02     0
+
+#Time step
+SERIES DT  8  2  0  0  0  0
+     -1.440000E+06      6.000000E+01
+      1.440000E+06      6.000000E+01
+
+TC T0    0.000000E+00  0
+TC TF    1.440000E+04  0
+
+#Enable XDMF output
+PC XDF
+
+#Shallow water boundary Conditions
+HY INT    2             ! Strongly coupled interface
+NB VEL    3    1        ! No Flow
+NB VEL    4    2        ! Inflow
+NB VEL    5    1        ! No Flow
+
+# Salinity transport
+CN SAL  1  1        
+MP DF   1  1    0.001
+MP TRT  1  1    5000
+# Transport BCs
+#NB TRN 2 1 6   
+NB TRN 4 1 5   
+                    
+#Edge list below:
+EGS          1          2          2
+EGS          2          3          2
+EGS          3          4          2
+EGS          4          5          2
+EGS          5         10          3
+EGS         10         15          3
+EGS         15         20          3
+EGS         20         25          3
+EGS         25         30          3
+EGS         30         35          3
+EGS         35         40          3
+EGS         40         45          3
+EGS         45         50          3
+EGS         50         55          3
+EGS         55         60          3
+EGS         60         65          3
+EGS         65         70          3
+EGS         70         75          3
+EGS         75         80          3
+EGS         80         85          3
+EGS         85         90          3
+EGS         90         95          3
+EGS         95        100          3
+EGS        100        105          3
+EGS        105        110          3
+EGS        110        115          3
+EGS        115        120          3
+EGS        120        125          3
+EGS        125        130          3
+EGS        130        135          3
+EGS        135        140          3
+EGS        140        145          3
+EGS        145        150          3
+EGS        150        155          3
+EGS        155        160          3
+EGS        160        165          3
+EGS        165        164          4
+EGS        164        163          4
+EGS        163        162          4
+EGS        162        161          4
+EGS        161        156          5
+EGS        156        151          5
+EGS        151        146          5
+EGS        146        141          5
+EGS        141        136          5
+EGS        136        131          5
+EGS        131        126          5
+EGS        126        121          5
+EGS        121        116          5
+EGS        116        111          5
+EGS        111        106          5
+EGS        106        101          5
+EGS        101         96          5
+EGS         96         91          5
+EGS         91         86          5
+EGS         86         81          5
+EGS         81         76          5
+EGS         76         71          5
+EGS         71         66          5
+EGS         66         61          5
+EGS         61         56          5
+EGS         56         51          5
+EGS         51         46          5
+EGS         46         41          5
+EGS         41         36          5
+EGS         36         31          5
+EGS         31         26          5
+EGS         26         21          5
+EGS         21         16          5
+EGS         16         11          5
+EGS         11          6          5
+EGS          6          1          5
+
+END

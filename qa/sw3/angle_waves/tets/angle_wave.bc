@@ -1,0 +1,75 @@
+OP SW3
+OP TRN 0
+OP BLK 1
+OP INC 40
+OP PRE 1
+
+IP NTL 1e-10
+IP ITL 1e-10
+IP NIT 10
+IP MIT 100
+
+# test case (same as winds)
+TEST WNDH 540
+
+# wave output file
+FOUT WAVE
+
+MP ML 1 0
+MP SRT 1 100
+
+# MP EVS xx yy xy zz xz yz
+MP EVS 1 0.5 0.5 0.5 0.5 0.5 0.5
+
+MP MUC 1.0
+MP MU 0.0000001
+MP RHO 1000
+MP G 9.8
+
+FR MNG 6 0.00000
+
+TC T0 0 0
+TC TF 86400 0
+
+# TIME-SERIES **********************************
+
+SERIES DT  1  2  0  0  0  0
+0.0   900.0
+86400.0  900.0
+
+SERIES AWRITE  2  1  0  0  0  0
+0 86400 3600 0
+
+SERIES BC 3 2 0 0 0 0 
+0.0 0.0
+86400.0 0.0
+
+# wind-waves  (a mess, because grid is angled and no bilinear interp)
+#SERIES WAVE 3 2 0.0 0.0 0 0
+#0.0 0.0 0.0 0.0
+#86400. 0.0 0.0 0.0
+#
+#SERIES WAVE 4 2  -5656.8542494924  -5656.8542494924 0 0
+#0.0 0.0 0.0 0.0
+#86400. 0.0 0.0 0.0
+#
+#SERIES WAVE 5 2 28284.271247 28284.271247 0 0
+#0.0 -2.0 -2.0 -2.0
+#86400. -2.0 -2.0 -2.0
+#
+#SERIES WAVE 6 2 33941.1254969543 22627.4169979695 0 0
+#0.0 -2.0 -2.0 -2.0
+#86400. -2.0 -2.0 -2.0
+
+
+!***********************************************
+! BOUNDARY CONDITIONS **************************
+
+NB VEL 1 3
+NB VEL 2 3
+NB VEL 3 3
+NB VEL 4 3
+NB FRS 5 3
+NB BED 6 3
+
+END

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ "$1" = "debug" ]; then
+	PROG="gdb --args ../../build/pt"
+else
+	PROG=../../build/pt
+fi
+
+$PROG -t

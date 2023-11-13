@@ -1,0 +1,26 @@
+slosh3d.2 node 1 max error last time-step displacment:     1.7633006546e-05 :: relative error:    -1.0965133098e+13 
+slosh3d.2 node 1 max error last time-step x-velocity:      1.8960604075e-04 :: relative error:     9.8932319934e+00 
+slosh3d.2 node 1 max error last time-step y-velocity:      1.2972022357e-07 :: relative error:                  inf 
+slosh3d.2 node 1 max error last time-step z-velocity:      1.3454042919e-07 :: relative error:     4.3117721958e+15 
+
+slosh3d.2 node 1 error max over time displacment:     5.1322987484e-05 
+slosh3d.2 node 1 error max over time x-velocity:      1.8960604075e-04 
+slosh3d.2 node 1 error max over time y-velocity:      3.7645326914e-06 
+slosh3d.2 node 1 error max over time z-velocity:      3.3073582471e-07 
+
+2D submodels: grid RMSE error max over time displacment:     3.6593739226e-04 
+2D submodels: grid RMSE error max over time x-velocity:      1.2817152274e-04 
+2D submodels: grid RMSE error max over time y-velocity:      1.8226455570e-05 
+2D submodels: grid RMSE error max over time z-velocity:      9.0767871886e-07 
+2D submodels: grid RMSE error max over time vel-mag   :      1.2838086747e-04 
+
+3D submodels: grid RMSE error max over time displacment:     3.7609227723e-04 
+3D submodels: grid RMSE error max over time x-velocity:      1.3603930462e-04 
+3D submodels: grid RMSE error max over time y-velocity:      4.3571858831e-05 
+3D submodels: grid RMSE error max over time z-velocity:      1.1408416929e-06 
+3D submodels: grid RMSE error max over time vel-mag   :      1.3634705463e-04 
+
+Displacement FAIL
+XVel FAIL
+YVel FAIL
+ZVel FAIL 

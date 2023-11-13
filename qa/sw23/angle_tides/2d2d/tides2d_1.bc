@@ -1,0 +1,127 @@
+OP SW2
+OP TRN  0
+OP BLK  1
+OP INC  40
+OP PRE  1
+OP TEM  1
+
+#Screen output
+SOUT ALL
+
+
+IP NTL     1.000E-09
+IP ITL     1.000E-09
+IP NIT     10
+IP MIT     200
+
+MTS        1  1
+MP ML      1  0
+MP SRT     1  100
+
+MP EVS     1  0.00  0.00  0.00  0.00  0.00  0.00
+MP MUC     1.0
+MP MU      0.0
+MP RHO     990
+MP G       9.81
+
+FR MNG     1   0.000000E+00
+
+#
+SERIES BC  1  2  0  0  0  0
+      1.000000E+03      0.000000E+00
+      1.080000E+05      0.000000E+00
+
+#Output
+SERIES AWRITE  2  1  0  0  0  0
+  1.000000E+03       1.080000E+05       5.000000E+02     0
+
+#Time step
+SERIES DT  3  2  0  0  0  0
+      1.000000E+03      5.000000E+02
+      1.080000E+05      5.000000E+02
+
+TC T0    1.000000E+03  0
+TC TF    2.160000E+04  0
+
+#Enable XDMF output
+PC XDF
+
+#Shallow water boundary Conditions
+HY INT    2             ! Strongly coupled interface
+NB VEL    3    1        ! No Flow
+NB VEL    4    1        ! No Flow
+NB VEL    5    1        ! No Flow
+
+#Edge list below:
+EGS          1          2          2
+EGS          2          3          2
+EGS          3          4          2
+EGS          4          5          2
+EGS          5          6          2
+EGS          6          7          2
+EGS          7          8          2
+EGS          8          9          2
+EGS          9         10          2
+EGS         10         11          2
+EGS         11         22          3
+EGS         22         33          3
+EGS         33         44          3
+EGS         44         55          3
+EGS         55         66          3
+EGS         66         77          3
+EGS         77         88          3
+EGS         88         99          3
+EGS         99        110          3
+EGS        110        121          3
+EGS        121        132          3
+EGS        132        143          3
+EGS        143        154          3
+EGS        154        165          3
+EGS        165        176          3
+EGS        176        187          3
+EGS        187        198          3
+EGS        198        209          3
+EGS        209        220          3
+EGS        220        231          3
+EGS        231        242          3
+EGS        242        253          3
+EGS        253        264          3
+EGS        264        275          3
+EGS        275        286          3
+EGS        286        285          4
+EGS        285        284          4
+EGS        284        283          4
+EGS        283        282          4
+EGS        282        281          4
+EGS        281        280          4
+EGS        280        279          4
+EGS        279        278          4
+EGS        278        277          4
+EGS        277        276          4
+EGS        276        265          5
+EGS        265        254          5
+EGS        254        243          5
+EGS        243        232          5
+EGS        232        221          5
+EGS        221        210          5
+EGS        210        199          5
+EGS        199        188          5
+EGS        188        177          5
+EGS        177        166          5
+EGS        166        155          5
+EGS        155        144          5
+EGS        144        133          5
+EGS        133        122          5
+EGS        122        111          5
+EGS        111        100          5
+EGS        100         89          5
+EGS         89         78          5
+EGS         78         67          5
+EGS         67         56          5
+EGS         56         45          5
+EGS         45         34          5
+EGS         34         23          5
+EGS         23         12          5
+EGS         12          1          5
+
+END

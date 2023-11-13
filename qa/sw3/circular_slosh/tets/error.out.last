@@ -1,0 +1,14 @@
+node 17 max error @ last time-step :: displacment: 1.7480779e-03 :: relative error: 3.4961558e+00% 
+node 17 max error @ last time-step :: x-velocity: 3.9631651e-04 :: relative error: 2.9111697e+00% 
+node 17 max error @ last time-step :: y-velocity: 5.3215643e-04 :: relative error: 3.9089910e+00% 
+node 17 max error @ last time-step :: w-velocity: 2.3136280e-06 :: relative error: 2.2693673e+00% 
+
+node 17 max error over time:: displacment: 1.7944925e-03 :: relative error: 3.5889849e+00% 
+node 17 max error over time :: x-velocity: 7.4746808e-04 :: relative error: 5.4905774e+00% 
+node 17 max error over time :: y-velocity: 7.0736283e-04 :: relative error: 5.1959815e+00% 
+node 17 max error over time :: w-velocity: 6.4757251e-06 :: relative error: 6.3518417e+00% 
+
+grid RMSE max error over time:: displacment: 1.4394326e-02 :: relative error: 2.8788652e+01% 
+grid RMSE max error over time :: x-velocity: 6.3273200e-04 :: relative error: 4.6477757e+00% 
+grid RMSE max error over time :: y-velocity: 6.3406415e-04 :: relative error: 4.6575611e+00% 
+grid RMSE max error over time :: w-velocity: 3.7502852e-05 :: relative error: 3.6785406e+01% 

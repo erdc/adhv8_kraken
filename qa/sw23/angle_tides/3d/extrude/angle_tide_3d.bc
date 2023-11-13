@@ -1,0 +1,45 @@
+OP SW3
+
+IP NTL 1e-6
+IP ITL 1e-6
+IP NIT 10
+IP MIT 100
+
+MP MUC 1.0
+MP MU 0.0000001
+MP RHO 1000
+MP G 9.8
+
+MP ML 1 0
+MP SRT 1 100
+
+
+# EVS card :: {xx, yy, xy, zz, xz, yz} 
+MP EVS 1 0.0 0.0 0.0 0.0 0.0 0.0
+
+TC T0 1000.00000 0
+TC TF 21600.00000 0
+
+#***********************************************
+# SERIES ***************************************
+SERIES DT  1  2  0  0  0  0
+1000.00000  300.0
+21600.00000  300.0
+
+SERIES AWRITE  2  1  0  0  0  0
+1000.00000 21600.00000 1800 0
+
+SERIES BC 3 2 0 0 0 0
+1000.00000 0
+21600.00000 0
+#***********************************************
+# SIDEWALL BOUNDARY CONDITIONS *****************
+NB OTW 1 3
+NB VEL 2 3
+NB VEL 3 3
+NB VEL 4 3
+#***********************************************
+# BED AND SURFACE BOUNDARY CONDITIONS **********
+NB BED 5 3
+NB FRS 6 3
+END

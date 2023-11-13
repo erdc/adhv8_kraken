@@ -1,0 +1,70 @@
+OP SW3
+OP TRN 0
+OP BLK 1
+OP INC 40
+OP PRE 1
+
+IP NTL 1e-6
+IP ITL 1e-6
+IP NIT 10
+IP MIT 100
+
+SOUT RESID
+
+# test case
+TEST WNDH 540
+
+# wind file output
+FOUT WIND
+
+MP ML 1 0
+MP SRT 1 100
+
+!MP EVS xx yy xy zz xz yz
+MP EVS 1 0.5 0.5 0.5 0.5 0.5 0.5
+
+MP MUC 1.0
+MP MU 0.0000001
+MP RHO 1000
+MP G 9.8
+
+FR MNG 6 0.00000
+
+
+!TIME-SERIES **********************************
+
+SERIES DT  1  2  0  0  0  0
+0.0   900.0
+86400.0  900.0
+
+SERIES AWRITE  2  1  0  0  0  0
+0 86400 3600 0
+
+MP WND STR 1 0
+SERIES WIND 3 2 0.0 0.0 0 0
+0.0 0.7071067811865475 0.7071067811865475
+86400. 0.7071067811865475 0.7071067811865475
+
+TC T0 0 0
+TC TF 86400 0
+
+!***********************************************
+! NO-FLUX TIME-SERIES **************************
+
+! Zero Series (created by extrusion code)
+SERIES BC 4 2 0 0
+0  0 
+999999999 0 
+
+!***********************************************
+! BOUNDARY CONDITIONS **************************
+
+NB VEL 1 4
+NB VEL 2 4
+NB VEL 3 4
+NB VEL 4 4
+NB FRS 5 4
+NB BED 6 4
+
+END
+

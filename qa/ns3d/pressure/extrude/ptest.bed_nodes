@@ -1,0 +1,16 @@
+
+! ************* SURFACE NODES ************
+
+NDS 1 4
+NDS 5 4
+NDS 9 4
+NDS 13 4
+NDS 17 4
+
+!************* BOTTOM NODES ************
+
+NDS 4 5
+NDS 8 5
+NDS 12 5
+NDS 16 5
+NDS 20 5

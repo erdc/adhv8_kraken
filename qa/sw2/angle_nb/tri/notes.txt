@@ -1,0 +1,5 @@
+cjt ::
+
+This is a simple test for velocity advection using the NB BC. The analytic solution is meant for a rigid lid (de-coupled) problem, however, this is not possible in AdH right now so there will be some error related to depth deviations from inflow.  This error seems to get worse as dt decreases.  It doesn't seem to be a stability issue.  I have tried adding EVS, and turning the SUPG off, but neither helps.  What does help the code to converge (with dt) is adding some bottom friction.  Although
+this slightly increases the velocity errors, the case converges.  This makes me think that there is a seiche, but AdH is being handed the solution, so this shouldn't happen.
+

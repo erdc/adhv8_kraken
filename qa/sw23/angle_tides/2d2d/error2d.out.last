@@ -1,0 +1,11 @@
+node 1 max error @ last time-step :: displacment: 6.2234405e-03
+node 1 max error @ last time-step :: x-velocity: 7.0761994e-03
+node 1 max error @ last time-step :: y-velocity: 6.9697712e-03
+
+node 1 max error over time:: displacment: 1.7451179e-02
+node 1 max error over time :: x-velocity: 7.2042460e-03
+node 1 max error over time :: y-velocity: 7.1452521e-03
+
+grid RMSE max error over time:: absolute displacment: 2.1730626e-02
+grid RMSE max error over time:: absolute u: 6.7589241e-03
+grid RMSE max error over time:: absolute v: 6.7411979e-03

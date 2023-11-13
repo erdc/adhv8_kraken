@@ -1,0 +1,2 @@
+cc -c -o file_io.o file_io.c
+ar -rlc libfileio.a file_io.o

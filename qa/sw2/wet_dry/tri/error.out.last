@@ -1,0 +1,4 @@
+x-velocity abs error:     5.22431330657745595487e-05 :: relative error:     5.22431330657745595487e-05 
+y-velocity abs error:     4.58896636346922304922e-05 :: relative error:     4.58896636346922304922e-05 
+head abs error:     1.69934185307957013639e-07 :: relative error:     1.69934185307957013639e-07 
+grid_mass_error:     6.71446323394775390625e-05 :: relative error:     4.02867798855548640442e-13 

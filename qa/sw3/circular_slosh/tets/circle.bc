@@ -1,0 +1,55 @@
+OP SW3
+OP TRN 0
+OP BLK 1
+OP INC 40
+OP PRE 1
+OP TEM 1
+
+IP NTL 1e-8
+IP ITL 1e-8
+IP NIT 10
+IP MIT 100
+
+SOUT RESID
+! TEST CSLOSH [nodeid] [As] [Ro] [H]
+TEST CSLOSH 17 0.05 16000 12
+
+MP ML 1 0
+MP SRT 1 100
+
+!MP EVS xx yy xy zz xz yz
+MP EVS 1 0.0 0.0 0.0 0.0 0.0 0.0
+
+MP MUC 1.0
+MP MU 0.0
+MP RHO 1000
+MP G 9.8
+
+FR ERH 3 0.00000
+
+!TIME-SERIES **********************************
+
+SERIES DT  1  2  0  0  0  0
+0.0   20.0
+86400.0  20.0
+
+SERIES AWRITE  2  1  0  0  0  0
+0 86400 20 0
+
+! Zero Series
+SERIES BC 3 2 0 0
+0  0 
+999999999 0 
+
+!***********************************************
+! BOUNDARY CONDITIONS **************************
+
+NB VEL 1 3
+NB FRS 2 3
+NB BED 3 3
+
+TC T0 40 0
+TC TF 10000 0
+
+END
+

@@ -1,0 +1,29 @@
+SHELL=/bin/sh
+
+.SUFFIXES: .o .c .f .F
+
+include ../machines/make.$(BOX)
+
+INCD= ../include
+INCD_METIS= /opt/parmetis/3.2
+
+INCLUDE=  
+
+LB=  ../lib/libfileio.a
+
+LOBJ=$(LB)(file_io.o) 
+
+all:	$(LB)
+
+$(LB):	$(LOBJ) $(INCLUDE)
+	@echo $(LB) updated.
+
+$(LOBJ):	$(INCLUDE)
+
+.c.a :  $(INCLUDE)
+	$(CC) $(CFLAGS) $(PFLAGS) -I$(INCD)  -I$(INCD_METIS) -c $<
+	$(ARCH) $(ARCHFLAGS) $@ $*.o
+	-rm -f $*.o
+
+clean:
+	-rm -f $(LB)

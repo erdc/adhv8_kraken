@@ -1,0 +1,105 @@
+OP SW2
+OP TRN  0
+OP BLK  1
+OP INC  40
+OP PRE  1
+OP TEM  1
+#OP TPG  0
+
+#Screen output
+SOUT ALL
+
+IP NTL     1.000E-12
+IP ITL     1.000E-12
+IP NIT     15
+IP MIT     500
+
+MTS        1  1
+MP ML      1  0
+MP SRT     1  100
+
+MP EVS     1  0.00  0.00  0.00  0.00  0.00  0.00
+MP MUC     1.0
+MP MU      0.0
+MP RHO     990
+MP G       9.81
+
+FR MNG     1   0.000000E+00
+
+#
+SERIES BC  1  2  0  0  0  0
+      0.000000E+00      0.000000E+00
+      1.080000E+06      0.000000E+00
+
+#Output
+SERIES AWRITE  2  1  0  0  0  0
+  0.000000E+00       1.080000E+06       3.000000E+01     0
+
+#Time step
+SERIES DT  3  2  0  0  0  0
+      0.000000E+00      1.000000E+00
+      1.080000E+06      1.000000E+00
+
+TC T0    2.000000E+00  0
+TC TF    1.080000E+04  0
+
+#Enable XDMF output
+#PC XDF
+
+#Shallow water boundary Conditions
+HY INT    2             ! Strongly coupled interface
+NB VEL    3    1        ! No Flow
+NB VEL    4    1        ! No Flow
+NB VEL    5    1        ! No Flow
+
+#Edge list below:
+EGS          1          2          2
+EGS          2          3          2
+EGS          3          4          2
+EGS          4          5          2
+EGS          5          6          2
+EGS          6          7          2
+EGS          7          8          2
+EGS          8          9          2
+EGS          9         18          3
+EGS         18         27          3
+EGS         27         36          3
+EGS         36         45          3
+EGS         45         54          3
+EGS         54         63          3
+EGS         63         72          3
+EGS         72         81          3
+EGS         81         90          3
+EGS         90         99          3
+EGS         99        108          3
+EGS        108        117          3
+EGS        117        126          3
+EGS        126        135          3
+EGS        135        144          3
+EGS        144        153          3
+EGS        153        152          4
+EGS        152        151          4
+EGS        151        150          4
+EGS        150        149          4
+EGS        149        148          4
+EGS        148        147          4
+EGS        147        146          4
+EGS        146        145          4
+EGS        145        136          5
+EGS        136        127          5
+EGS        127        118          5
+EGS        118        109          5
+EGS        109        100          5
+EGS        100         91          5
+EGS         91         82          5
+EGS         82         73          5
+EGS         73         64          5
+EGS         64         55          5
+EGS         55         46          5
+EGS         46         37          5
+EGS         37         28          5
+EGS         28         19          5
+EGS         19         10          5
+EGS         10          1          5
+
+END

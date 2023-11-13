@@ -1,0 +1,158 @@
+#include "global_header.h"
+void read_bc_OS(SMODEL * mod, char *data)
+{
+
+  char line[MAXLINE];           /* the input line */
+  char *subdata = NULL;         /* the data after the second card   is read */
+  char *subsubdata = NULL;
+
+  int i, j, k;
+  int ientry = 0, os_nentries = 0, uout = UNSET_INT, uin = UNSET_INT, isize = 0, infact = 0;
+  double newtime = 0;
+  XY_SERS xy;                   /* temporary xy-series to add to linked list */
+  XY_ITM *os_entry;             /* temporary os-entry array for building xy entries */
+
+  SIO info = *(mod->io);   // alias
+ 
+  /* initialize this local series */
+  sxy_sers_init(&xy);
+
+      /********************************************************************/
+  /* begin reading in the data for this series *********************** */
+
+  /* series id */
+  xy.id = get_series_id(info, &data, mod->nseries);
+
+  /* series type */
+  xy.type = OUTPUT_SERIES;
+
+  /* series size */
+  os_nentries = read_int_field(info, &data);
+
+  /* series outfact */
+  uout = read_int_field(info, &data);
+  xy.outfact = tc_conversion_factor(uout, FROM);
+
+  /* sets parameters and size for an auto-built time series - dss */
+  if (mod->OUTPUT == ON)
+    fprintf(stderr, "WARNING: Overwriting output series %d with output series %d!\n", mod->sers_id_out, xy.id);
+
+  /* assign model variables */
+  mod->sers_id_out = xy.id; /* set this series to the output series */
+  mod->OUTPUT = ON;
+
+  /* allocate OS entries (only temporary to build series */
+  os_entry = (XY_ITM *) tl_alloc(sizeof(XY_ITM), os_nentries);
+
+  /* initialize entries */
+  for (ientry = 0; ientry < os_nentries; ientry++)
+    sxy_itm_init(&(os_entry[ientry]));
+
+  /* loop over OS entries */
+  for (ientry = 0; ientry < os_nentries; ientry++) {
+    fgets(line, MAXLINE, info.bc.fp);
+    data = &line[0];
+    os_entry[ientry].start = read_dbl_field(info, &data);
+    os_entry[ientry].end = read_dbl_field(info, &data);
+    os_entry[ientry].dt = read_dbl_field(info, &data);
+
+    /* series infact */
+    uin = read_int_field(info, &data);
+    infact = tc_conversion_factor(uin, TO);
+    os_entry[ientry].start *= infact;
+    os_entry[ientry].end *= infact;
+    os_entry[ientry].dt *= infact;
+
+    /* if one entries end time is greater than the next start time, reset the next start time */
+    if (ientry > 0 && (os_entry[ientry - 1].end >= os_entry[ientry].start)) {
+      os_entry[ientry].start = os_entry[ientry - 1].end + os_entry[ientry].dt;
+    }
+
+    /* check input units */
+    if (uin < SECONDS || uin > WEEKS) {
+      io_read_error(info, "Invalid time units. Use a value between 0 and 4.", TRUE);
+    }
+
+    /* calculate size of automatically built output time-series */
+    isize += (os_entry[ientry].end - os_entry[ientry].start) / os_entry[ientry].dt + 1;
+    if (fmod(isize, 1) != 0) {
+      isize += 1 - fmod(isize, 1);
+    }
+  }
+
+  /* xy-series size */
+  xy.size = (int) isize;
+
+  /* allocate the entry array */
+  xy.entry = (XY_ITM *) tl_alloc(sizeof(XY_ITM), xy.size);
+
+  /* initialize entries */
+  for (ientry = 0; ientry < xy.size; ientry++)
+    sxy_itm_init(&(xy.entry[ientry]));
+
+  /* create time-series from OS */
+  int os_final_entry = os_nentries - 1;
+  double os_final_start = os_entry[os_final_entry].start;
+  double os_final_end = os_entry[os_final_entry].end;
+  int flag = 1;                 /* am I at the begginning of an OS entry */
+  int os_ientry = 0;
+  double os_start, os_end, os_dt;
+
+  for (ientry = 0; ientry < xy.size; ientry++) {
+
+    if (flag) {
+      os_start = os_entry[os_ientry].start;
+      os_end = os_entry[os_ientry].end;
+      os_dt = os_entry[os_ientry].dt;
+      newtime = os_start;
+      flag = 0;
+    }
+    else {
+      newtime = xy.entry[ientry - 1].time + os_dt;
+    }
+    if (newtime > os_final_end) {
+      xy.entry[ientry].time = os_final_end;
+    }
+    else if (newtime >= os_end) {
+      xy.entry[ientry].time = os_end;
+
+      if (ientry < xy.size - 1) {
+        os_ientry++;
+        flag = 1;
+      }
+    }
+    else {
+      xy.entry[ientry].time = newtime;
+
+    }
+    printf("entry: %d \t time: %f \n", ientry, xy.entry[ientry].time);
+  }
+
+  /* calculate slopes */
+  for (ientry = 1; ientry < xy.size; ientry++) {
+    xy.entry[ientry - 1].slope = (xy.entry[ientry].value - xy.entry[ientry - 1].value) / (xy.entry[ientry].time - xy.entry[ientry - 1].time);
+  }
+
+  /* calculate areas */
+  for (ientry = 0; ientry < xy.size - 1; ientry++) {
+    xy.entry[ientry].area = tc_trap_area(xy.entry[ientry].value, xy.entry[ientry + 1].value, xy.entry[ientry].time, xy.entry[ientry + 1].time);
+  }
+
+  uin = uout = 0;
+  xy.infact = tc_conversion_factor(uin, TO);
+
+  //sxy_sers_print(xy, 1);
+
+  /* check xy-series */
+  sxy_sers_check(xy);
+
+  /* add new xy series to end of linked list */
+  sxy_sers_add(&xy, &(mod->xy_head), &(mod->xy_curr), TRUE);
+
+  /* free os-entry array used to build real xy-entries */
+  os_entry = (XY_ITM *) tl_free(sizeof(XY_ITM), os_nentries, os_entry);
+
+  /* free temporary xy-series */
+  xy.entry = (XY_ITM *) tl_free(sizeof(XY_ITM), xy.size, xy.entry);
+
+}

@@ -13,13 +13,8 @@ int main(int argc, char *argv[]) {
     
     int i,j;
     
-    // CJT :: Test PETSC
-    //int flag = petsc_test(argc,argv);
-    //    return(1);
-    
     
     /* Check the arguments */
-    //if (argc < 2 || argc > 3) {
     if (argc < 2 || argc > 5) {
         fprintf(stderr, "\n Missing argument.\n Usage:\n" "   To run a simulation:\n     adh file_base -s (optional)\n" "   Or,\n   For version information:\n      adh -v\n");
         exit(0);

@@ -101,6 +101,14 @@ void read_bc_NB(SMODEL *mod, char *data) {
             iseries = sseries_set_type(mod, &subdata, TIME_SERIES);
             mod->str_values[ibc].ol_flow.isigma = iseries;
             break;
+        case CARD_ZDG:
+            ibc = get_string_id(info, &subdata, nstring);
+            mod->str_values[ibc].ol_flow.bc_flag = BCT_ZERO_DEPTH_GRAD;
+            break;
+        case CARD_CD:
+            ibc = get_string_id(info, &subdata, nstring);
+            mod->str_values[ibc].ol_flow.bc_flag = BCT_CRITICAL_DEPTH;
+            break;
         case CARD_BED:
             ibc = get_string_id(info, &subdata, nstring);
             mod->str_values[ibc].bed.bc_flag = BCT_BED;

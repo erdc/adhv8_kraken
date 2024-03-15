@@ -116,6 +116,8 @@ void ssuperModel_alloc_init(SSUPER_MODEL **superModel_ptr, int nsupermodels, int
 /***********************************************************/
 /***********************************************************/
 
+// cjt -- I think this will greatly change if only one grid file is read for interfacial coupling instead of 2
+
 void ssuperModel_forward_map(SSUPER_MODEL *sm) {
     int i, j, k, sub_pe,ii;
     SINTERFACE *ifce;
@@ -129,15 +131,11 @@ void ssuperModel_forward_map(SSUPER_MODEL *sm) {
         for (i=0; i<sm->nsubmodels; i++) sm->fmap_nodes[i]=0;
         sm->fmap = (int **) tl_alloc(sizeof(int *) , sm->nsubmodels);
     }
-    //old_fmap = (int **) tl_alloc(sizeof(int *) , sm->nsubmodels);
-    for (i=0; i<sm->nsubmodels; i++){
+    for (i=0; i<sm->nsubmodels; i++){ // this can be called more than once due to adaption
         if(sm->submodel[i].proc_flag==1){
             if (sm->submodel[i].grid->max_nnodes > sm->fmap_nodes[i]){
                 sm->submodel[i].fmap = NULL; /* to prevent memory leak? I think! */
                 sm->fmap[i] = (int *) tl_realloc(sizeof(int) , sm->submodel[i].grid->max_nnodes, sm->fmap_nodes[i], sm->fmap[i]); // realloc for adaptivity
-                // for(j=0;j<sm->submodel[i].grid->nnodes; j++){
-                //     sm->fmap[i][j] = 0;
-                // }
                 sm->fmap_nodes[i] = sm->submodel[i].grid->max_nnodes;
             }
         }
@@ -166,15 +164,6 @@ void ssuperModel_forward_map(SSUPER_MODEL *sm) {
             sm->total_macro_nnodes += sm->submodel[i].grid->macro_nnodes;
         }
     }
-    
-    // // Sending ghost nodes to the end
-    // nnodes_cum_sum = my_nnodes_cum_sum; // will be updated in the following loop
-    // for (i=0; i<sm->nsubmodels; i++){
-    //     for (j=sm->submodel[i].grid->my_nnodes; j<sm->submodel[i].grid->nnodes; j++){
-    //         fmap[i][j] = nnodes_cum_sum + (j-sm->submodel[i].grid->my_nnodes); // Slightly complicated mapping!
-    //     }
-    //     nnodes_cum_sum += (sm->submodel[i].grid->nnodes - sm->submodel[i].grid->my_nnodes);
-    // }
     
     int i_pe; /* counter for PE's */
     nnodes_cum_sum = my_nnodes_cum_sum; // will be updated in the following loop

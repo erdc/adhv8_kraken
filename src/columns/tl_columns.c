@@ -734,14 +734,12 @@ int find_3d_hashvalue(SGRID *grid, int ie)
 /****************************************************************/
 
 void classify_2d_elements(SGRID **grid3d) {
-
+    
     
     //tl_check_all_pickets(__FILE__, __LINE__);
     
     int i, ie, inode, ival;
     SGRID *grid = (*grid3d); // alias
-    
-    //assert(grid->type == COLUMNAR);
     
     grid->nelems2d_sur = 0;
     grid->nelems2d_bed = 0;
@@ -776,6 +774,16 @@ void classify_2d_elements(SGRID **grid3d) {
         tl_free(sizeof(int), grid->isize_sidewall_elems, (void *) grid->elem2d_sidewall);
     }
     
+    // cjt -- note arrays are padded for adaption here, but not later.  Need to look at this more 12//7/22
+    if (grid->max_nnodes_sur > 0) {
+        tl_free(sizeof(int), grid->max_nnodes_sur, (void *) grid->nodeID_2d_to_3d_sur);
+        tl_free(sizeof(int), grid->max_nnodes, (void *) grid->nodeID_3d_to_2d_sur);
+    }
+    if (grid->max_nnodes_bed > 0) {
+        tl_free(sizeof(int), grid->max_nnodes_bed, (void *) grid->nodeID_2d_to_3d_bed);
+        tl_free(sizeof(int), grid->max_nnodes, (void *) grid->nodeID_3d_to_2d_bed);
+    }
+    
     if(grid->nelems2d_sur>0)grid->elem3d_sur = tl_alloc(sizeof(int), grid->nelems2d_sur);
     if(grid->nelems2d_sur>0)grid->elem2d_sur = tl_alloc(sizeof(int), grid->nelems2d_sur);
     if(grid->nelems2d_bed>0)grid->elem3d_bed = tl_alloc(sizeof(int), grid->nelems2d_bed);
@@ -790,13 +798,13 @@ void classify_2d_elements(SGRID **grid3d) {
     for (i = 0; i < grid->nelems2d_sur; i++) {
         grid->elem3d_sur[i] = UNSET_INT;   // 3d surface element id belonging to column i
         grid->elem2d_sur[i] = UNSET_INT;   // 2d surface element id belonging to column i
-	/*mwf looks like these should be looped separately from surface? using nelems2d_bed*/
+        /*mwf looks like these should be looped separately from surface? using nelems2d_bed*/
         /* grid->elem3d_bed[i] = UNSET_INT;   // 3d bedom element id belonging to column i */
         /* grid->elem2d_bed[i] = UNSET_INT;   // 2d bedom element id belonging to column i */
     }
     for (i = 0; i < grid->nelems2d_bed; i++) {
-         grid->elem3d_bed[i] = UNSET_INT;   // 3d bedom element id belonging to column i
-         grid->elem2d_bed[i] = UNSET_INT;   // 2d bedom element id belonging to column i
+        grid->elem3d_bed[i] = UNSET_INT;   // 3d bedom element id belonging to column i
+        grid->elem2d_bed[i] = UNSET_INT;   // 2d bedom element id belonging to column i
     }
     for (i = 0; i < grid->nelems2d_sidewall; i++) {
         grid->elem3d_sidewall[i] = UNSET_INT;   // 3d sidewall element belonging to column i
@@ -898,40 +906,41 @@ void classify_2d_elements(SGRID **grid3d) {
         }
     }
     
+    // cjt -- added for DW/GW Coupling || Just used for output
+    if (grid->type != COLUMNAR) {
+        grid->nnodes_sur_prev = grid->nnodes_sur;
+        grid->nnodes_bed_prev = grid->nnodes_bed;
+        grid->old_max_nnodes_sur = grid->nnodes_sur;
+        grid->old_max_nnodes_bed = grid->nnodes_bed;
+    }
+    
     /* allocate maps */
-    /*mwf separate out bed and surface logic? */
-    //if (grid->type == COLUMNAR) {
-        if(grid->max_nnodes_sur == 0){
-            grid->nodeID_2d_to_3d_sur = (int *) tl_alloc(sizeof(int), grid->nnodes_sur);
-            grid->nodeID_3d_to_2d_sur = (int *) tl_alloc(sizeof(int), grid->nnodes);
+    grid->nodeID_2d_to_3d_sur = (int *) tl_alloc(sizeof(int), grid->nnodes_sur);
+    grid->nodeID_3d_to_2d_sur = (int *) tl_alloc(sizeof(int), grid->max_nnodes);
+    grid->nodeID_2d_to_3d_bed = (int *) tl_alloc(sizeof(int), grid->nnodes_bed);
+    grid->nodeID_3d_to_2d_bed = (int *) tl_alloc(sizeof(int), grid->max_nnodes);
+    
+    /* initialize maps */
+    sarray_init_value_int(grid->nodeID_2d_to_3d_sur, grid->nnodes_sur, UNSET_INT);
+    sarray_init_value_int(grid->nodeID_2d_to_3d_bed, grid->nnodes_bed, UNSET_INT);
+    sarray_init_value_int(grid->nodeID_3d_to_2d_sur, grid->nnodes, UNSET_INT);
+    sarray_init_value_int(grid->nodeID_3d_to_2d_bed, grid->nnodes, UNSET_INT);
+    
+    /* count the number of surface nodes */
+    int nsur = 0;
+    int nbed = 0;
+    for (inode = 0; inode < grid->nnodes; inode++) {
+        if (sur_nodes[inode] == 1) {
+            grid->nodeID_3d_to_2d_sur[inode] = nsur;
+            grid->nodeID_2d_to_3d_sur[nsur] = inode;
+            nsur++;
+        };
+        if (bed_nodes[inode] == 1) {
+            grid->nodeID_3d_to_2d_bed[inode] = nbed;
+            grid->nodeID_2d_to_3d_bed[nbed] = inode;
+            nbed++;
         }
-        if(grid->max_nnodes_bed == 0){
-            grid->nodeID_2d_to_3d_bed = (int *) tl_alloc(sizeof(int), grid->nnodes_bed);
-            grid->nodeID_3d_to_2d_bed = (int *) tl_alloc(sizeof(int), grid->nnodes);
-        }
-        
-        /* initialize maps */
-        sarray_init_value_int(grid->nodeID_2d_to_3d_sur, grid->nnodes_sur, UNSET_INT);
-        sarray_init_value_int(grid->nodeID_2d_to_3d_bed, grid->nnodes_bed, UNSET_INT);
-        sarray_init_value_int(grid->nodeID_3d_to_2d_sur, grid->nnodes, UNSET_INT);
-        sarray_init_value_int(grid->nodeID_3d_to_2d_bed, grid->nnodes, UNSET_INT);
-        
-        /* count the number of surface nodes */
-        int nsur = 0;
-        int nbed = 0;
-        for (inode = 0; inode < grid->nnodes; inode++) {
-            if (sur_nodes[inode] == 1) {
-                grid->nodeID_3d_to_2d_sur[inode] = nsur;
-                grid->nodeID_2d_to_3d_sur[nsur] = inode;
-                nsur++;
-            };
-            if (bed_nodes[inode] == 1) {
-                grid->nodeID_3d_to_2d_bed[inode] = nbed;
-                grid->nodeID_2d_to_3d_bed[nbed] = inode;
-                nbed++;
-            }
-        }
-    //}
+    }
     
     if (sur_nodes != NULL) sur_nodes = (int*) tl_free(sizeof(int), grid->nnodes, sur_nodes);
     if (bed_nodes != NULL) bed_nodes = (int*) tl_free(sizeof(int), grid->nnodes, bed_nodes);

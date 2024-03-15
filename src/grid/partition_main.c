@@ -130,6 +130,10 @@ void partition_main(SMODEL *mod, int flag) {
             }
         }
         node_renumber_surface(mod);
+    }  else {
+        if (mod->grid->ndim == 3) {
+            classify_2d_elements(&mod->grid);  // CJT Added to make sure GW/NS/etc surface arrays are renumbered
+        }
     }
     
 #ifdef _DEBUG
@@ -394,6 +398,11 @@ void partition_main(SMODEL *mod, int flag) {
                 if (mod->flag.GW_FLOW) {
                     mod->sgw->elem_3d_data = (ELEMENT_3D_DATA *) tl_realloc(sizeof(ELEMENT_3D_DATA),mod->grid->nelems3d,mod->grid->nelems3d_old,mod->sgw->elem_3d_data);
                     mod->sgw->elem_gw_flux = (SVECT *) tl_realloc(sizeof(SVECT),mod->grid->nelems3d,mod->grid->nelems3d_old,mod->sgw->elem_gw_flux);
+                    
+                    // cjt :: added to make sure when 3D GW grid is partitition, the surface grid reflects this.
+                    for (i=0; i<MAX_NNODES_ON_ELEM2D; i++) {
+                        mod->sw->d2->elem_rhs_dacont_extra_terms[i] = (double *) tl_realloc(sizeof(double),mod->grid->nelems2d,mod->grid->nelems2d_old,mod->sw->d2->elem_rhs_dacont_extra_terms[i]);
+                    }
                 }
 #endif
 

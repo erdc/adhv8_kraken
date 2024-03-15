@@ -1,0 +1,39 @@
+
+
+Task List
+(1) Multiple Material Overlays (NEW FEATURE) --- MARK/COREY
+(2) Merge all branches** ---- COREY/MARK
+(3) Auto physics change (NEW FEATURE)** ---- MARK (WORK IN PROGRESS)
+(4) Generalized Coupling Framework (NEW FEATURE)** ---- MARK/COREY
+(WORK IN PROGRESS)
+(5) Flux-coupling (NEW FEATURE)** - maybe just for overlay coupling
+now ---- COREY
+(6) How to create/import complex multi-physics geometry setups (SMS??)
+---- GAURAV/MARK/COREY
+(7) Extrusion for GW too (not just SW3D) (NEW FEATURE) ---- ANYONE
+(8) Re-frame sediment transport as just another model ----
+GARY/MARK/COREY -- Happens during merge to Master
+(9) Get rid of weird numeric card tokens - just do string comparisons
+--- MARK
+(10) Normalized residuals --- MARK 
+(11) Add heat transport (NEW FEATURE) --- MARK/COREY
+(12) Test other elements - quads/etc (NEW FEATURE) ---- MARK/COREY
+(13) Scotch Domain Decomp  --- PET 
+(14) Get rid of packing/unpacking --- PET/COREY/MARK
+
+
+** time-consuming
+
+
+Would be nice:
+- General operator splitting framework (Strang Splitting, for example)
+  ---- MARK/COREY
+- Add a surface wind-wave model** ---- MARK
+
+
+
+Notes:
+- 
+
+
+

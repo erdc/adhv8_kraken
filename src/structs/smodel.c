@@ -299,8 +299,15 @@ void smodel_init(SMODEL *mod, const char *adh_root) {
 #ifdef _DEBUG
     if (DEBUG_WITH_PICKETS == ON) tl_check_all_pickets(__FILE__,__LINE__);
 #endif
+
+    if (mod->grid->type == COLUMNAR) {
+        build_columns(mod->grid, 1);
+    } else {
+        if (mod->grid->ndim == 3) {
+            classify_2d_elements(&mod->grid); // cjt :: added for GW/DW
+        }
+    }
     
-    if (mod->grid->type == COLUMNAR) build_columns(mod->grid, 1);
 #ifdef _DEBUG
     if (DEBUG_WITH_PICKETS == ON) tl_check_all_pickets(__FILE__,__LINE__);
 #endif

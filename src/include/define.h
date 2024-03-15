@@ -383,6 +383,10 @@ typedef enum
 #define BCT_HYBRID_INTERNAL 37
 #define BCT_HYBRID_EXTERNAL 38  /* gkc 2d-3d FLUX coupling, for flagging interface edges/surfaces */
 
+// overland flow
+#define BCT_ZERO_DEPTH_GRAD 50
+#define BCT_CRITICAL_DEPTH 51
+
 /* well types */
 #define EXTRACTION_WELL 12	/* an extraction well */
 #define INJECTION_WELL 13	/* an injection well */

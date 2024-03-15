@@ -180,6 +180,10 @@ typedef enum {
     CARD_OVH    = 11781,
     CARD_BED    = 5663,
     CARD_OF     = 237,
+    
+    // bc cards - for overland flow (cjt)
+    CARD_ZDG    = 9757,
+    CARD_CD     = 151,
 
 
 	// bc cards Structures

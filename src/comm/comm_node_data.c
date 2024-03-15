@@ -176,7 +176,7 @@ void comm_node_data(int *nnode_out, /* the number of nodes going to each process
             
             messg_pack_alloc(&node_ibuffer, send_nd_msg + isd, g->smpi->ADH_COMM);
             messg_pack_alloc(&node_dbuffer, send_nd_msg + isd, g->smpi->ADH_COMM);
-            if(g->type == COLUMNAR){
+            if(g->type == COLUMNAR  && node_dbuffer_surface.nitem > 0){
                 messg_pack_alloc(&node_dbuffer_surface, send_nd_msg + isd, g->smpi->ADH_COMM);
                 messg_pack_alloc(&node_dbuffer_bed, send_nd_msg + isd, g->smpi->ADH_COMM);
             }
@@ -190,7 +190,7 @@ void comm_node_data(int *nnode_out, /* the number of nodes going to each process
             /* pack the buffer */
             messg_pack(&node_ibuffer, send_nd_msg + isd, g->smpi->ADH_COMM);
             messg_pack(&node_dbuffer, send_nd_msg + isd, g->smpi->ADH_COMM);
-            if(g->type == COLUMNAR){
+            if(g->type == COLUMNAR && node_dbuffer_surface.nitem > 0){
                 messg_pack(&node_dbuffer_surface, send_nd_msg + isd, g->smpi->ADH_COMM);
                 messg_pack(&node_dbuffer_bed, send_nd_msg + isd, g->smpi->ADH_COMM);
             }
@@ -254,7 +254,7 @@ void comm_node_data(int *nnode_out, /* the number of nodes going to each process
             /* unpacks the buffers from the recv buffer */
             messg_unpack(&recv_nd_msg, &node_ibuffer, g->smpi->ADH_COMM);
             messg_unpack(&recv_nd_msg, &node_dbuffer, g->smpi->ADH_COMM);
-            if(g->type == COLUMNAR){
+            if(g->type == COLUMNAR && node_dbuffer_surface.nitem > 0){
                 messg_unpack(&recv_nd_msg, &node_dbuffer_surface, g->smpi->ADH_COMM);
                 messg_unpack(&recv_nd_msg, &node_dbuffer_bed, g->smpi->ADH_COMM);
             }

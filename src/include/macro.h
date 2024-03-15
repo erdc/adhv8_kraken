@@ -804,6 +804,25 @@
                 new_elem_rhs99[i99].y_eq *= xsi99; \
         } \
 }
+#define RE_DISTRIBUTE_1D(x99,new_x99,new_elem_rhs99,only99) \
+{ \
+        int     i99, j99; \
+        double xsi99, l99[2]; \
+        SVECT2D vec[2]; \
+        for(i99=0;i99<2;i99++) { \
+                if(i99==only99) continue; \
+                DIR_LENGTH_VEC(x99[only99],new_x99[i99],x99[i99],vec); \
+                for(j99=0;j99<2;j99++) \
+                        l99[j99] = vec[j99].x*vec[j99].x + vec[j99].y*vec[j99].y; \
+                xsi99 = sqrt(l99[0]/l99[1]); \
+                new_elem_rhs99[only99].c_eq += (1.0-xsi99) * new_elem_rhs99[i99].c_eq; \
+                new_elem_rhs99[only99].x_eq += (1.0-xsi99) * new_elem_rhs99[i99].x_eq; \
+                new_elem_rhs99[only99].y_eq += (1.0-xsi99) * new_elem_rhs99[i99].y_eq; \
+                new_elem_rhs99[i99].c_eq *= xsi99; \
+                new_elem_rhs99[i99].x_eq *= xsi99; \
+                new_elem_rhs99[i99].y_eq *= xsi99; \
+        } \
+}
 #define RE_DISTRIBUTE_RES(x99,new_x99,new_elem_rhs99,only99) \
 { \
         int     i99, j99; \

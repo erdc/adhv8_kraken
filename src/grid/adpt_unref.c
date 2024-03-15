@@ -168,7 +168,9 @@ void adpt_unref(SMODEL *mod) {
     elem2d_renumber(mod->grid);//print_grid_to_file(grid,"POST_UNREF_ELEM2D");
     elem1d_renumber(mod->grid);//print_grid_to_file(grid,"POST_UNREF_ELEM1D");
     adpt_fix_global_ids(mod->grid);//print_grid_to_file(grid,"POST_UNREF_GID");
-    classify_2d_elements(&mod->grid);
+    if (mod->grid->ndim == 3) {
+        classify_2d_elements(&mod->grid);
+    }
     
     
     //print_grid_to_file(grid,"POST_UNREF_RENUM");

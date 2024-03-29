@@ -30,6 +30,16 @@ void fe_supermodel_init(SSUPER_MODEL *sm) {
         if(sm->submodel[isubmodel].proc_flag==1){
             mod = &(sm->submodel[isubmodel]); // alias
             
+
+            //Mark comment: We may want to rethink initializations
+            // what exactly goes into the model class now that the
+            // grid is independent of it
+            // the initialization should definitely build up
+            // the dof map
+
+            // we probably want to make physics modules only elemental routines?
+
+
             // Diffusive Wave
             if (mod->flag.DIFFUSIVE_WAVE){
                 mod->nsys = 1;
@@ -161,6 +171,9 @@ void fe_build_supermodel_residual(SSUPER_MODEL *sm) {
         
         // Transport
         fe_transport_resid(sm,isubmodel);
+
+
+
     
 #ifdef _DEBUG
     if (FILE_DEBUG==ON) tl_check_all_pickets(__FILE__, __LINE__);
@@ -168,8 +181,101 @@ void fe_build_supermodel_residual(SSUPER_MODEL *sm) {
     
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-}
+    }
 
+       //Mark Comments
+    //assuming the supermodel has a graph of 3d elem, 2d elem and 1d elem
+
+    //One hydro loop conditional
+    //in smodel have one flag for Hydro (SW2,DW or SW3)
+    //cut down on if conditions when no hydro is active
+    //actually, find specific number of elements per physics
+    // and loop this way
+
+    //keep working on this!!
+    //model
+    int i;
+    for (i = 0; i<sm->grid->nelem3dgw; i++){
+        //pull data for that element
+        //each model will have a list of elements!!!
+        ie = sm->grid->elem3dgw[i]
+        current_element = sm->grid->elem3d[i];
+        global_dofs = current_element->dofs;
+        active_physics= current_element->physics ; sm->model->?
+        //call any possible marked physics
+        //Think about exactly what residual routine needs
+        //for now assuming all relevant info is in the element structure
+
+        //Alternative idea, have the nsubmodels as elemental attribute and call those
+        if(active_physics == GW_FLOW){
+            elem_resid = fe_gw_body_resid(current_element);
+        }
+        if(active_physics == NS3){
+            elem_resid += fe_ns_body_resid(current_element);
+        }
+        if(active_physics == SW3){
+            elem_resid += fe_hvel_body_resid(current_element);
+        }
+
+        //load elem_resid into global vector using global_dofs
+        sm->residual[global_dofs] = elem_resid
+
+    }
+    // now 2d elements
+    for (i=0; i<sm->grid->nelem2d; i++){
+        //pull data for that element
+        current_element = sm->grid->elem2d[i];
+        global_dofs = current_element->dofs;
+        active_physics = current_element->physics;
+        //we need to incorporate logic here of what is ok/not ok combo of physics
+        if(active_physics == SW2_flow){
+            elem_resid = fe_sw2_body_resid(current_element);
+        }
+        if(active_physics == DW_FLOW){
+            elem_resid = fe_diffusive_body_resid(current_element);
+        }
+        if(active_physics == TRANSPORT){
+            elem_resid = fe_transport_body_resid(current_element);
+        }
+
+        //maybe look at using bflag
+        //also call any boundary resids from 3d models
+        if(active_physics == GW_FLOW){
+            elem_resid = fe_gw_boundary_resid(current_element);
+        }
+        if(active_physics == NS3){
+            elem_resid = fe_ns_boundary_resid(current_element);
+        }
+        if(active_physics == SW3){
+            elem_resid = fe_hvel_boundary_resid(current_element);
+        }
+
+        //load elem_resid into global vector using global dofs
+        sm->residual[global_dofs] = elem_resid
+
+    }
+    //now 1d elements, these will only be the elements that are marked
+    for (i=0;i<sm->grid->nelem1d;i++){
+        //pull data for that element
+        current_element = sm->grid->elem2d[i];
+        global_dofs = current_element->dofs;
+        active_physics = current_element->physics;
+        //we need to incorporate logic here of what is ok/not ok combo of physics
+        if(active_physics == SW2_flow){
+            elem_resid = fe_sw2_boundary_resid(current_element);
+        }
+        if(active_physics == DW_FLOW){
+            elem_resid = fe_diffusive_boundary_resid(current_element);
+        }
+        if(active_physics == TRANSPORT){
+            elem_resid = fe_transport_boundary_resid(current_element);
+        }
+
+
+        //load elem_resid into global vector using global dofs
+        global_vec[global_dofs] = elem_resid
+    }
+}
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

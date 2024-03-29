@@ -35,6 +35,8 @@ int fe_main(SAPP *app) {
     // Loop over all SuperModels -------------------------------------------------
     for (isuperModel=0; isuperModel<app->nsuperModels; isuperModel++) {
         sm =  &(app->supermodel[isuperModel]);
+
+        //Mark Note: Each super model = one linear system of equations
         
         //****************************************************************************
         // allocates FE matrix memory if necessary -----------------------------------
@@ -54,6 +56,8 @@ int fe_main(SAPP *app) {
             return (NO);
         }
         
+        //Flux coupled models go somewhere here
+
         //****************************************************************************
         // calculate mass errors for all submodels -----------------------------------
         //fe_calculate_mass_errors(sm);

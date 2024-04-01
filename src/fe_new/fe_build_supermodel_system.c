@@ -155,53 +155,137 @@ void fe_build_supermodel_residual(SSUPER_MODEL *sm) {
     // zero global residual vector
     int ierr = fe_initialize_supermodel_residual(sm);
     
-    /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-    /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-    // Loop over *ONLY* monolithically solved submodels
-    for (isubmodel = 0; isubmodel<sm->nsubmodels; isubmodel++) {
-        
-        // 3D HydroModels
-        fe_hvel_resid(sm,isubmodel);
-        fe_ns_resid(sm,isubmodel);
-        fe_gw_resid(sm,isubmodel);
-        
-        // 2D HydroModels
-        fe_sw2_resid(sm,isubmodel);
-        fe_diffusive_resid(sm,isubmodel);
-        
-        // Transport
-        fe_transport_resid(sm,isubmodel);
 
 
-
-    
-#ifdef _DEBUG
-    if (FILE_DEBUG==ON) tl_check_all_pickets(__FILE__, __LINE__);
-#endif
-    
-    /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-    /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-    }
-
-       //Mark Comments
+    //Mark Comments
     //assuming the supermodel has a graph of 3d elem, 2d elem and 1d elem
 
     //One hydro loop conditional
     //in smodel have one flag for Hydro (SW2,DW or SW3)
     //cut down on if conditions when no hydro is active
-    //actually, find specific number of elements per physics
-    // and loop this way
 
-    //keep working on this!!
-    //model
+    //option 1 loop over models and then elements within each model
+    // this requires no logic but multiple calls to global matrix
     int i;
-    for (i = 0; i<sm->grid->nelem3dgw; i++){
+    //loop through each possibly activated physics
+    //for (isubmodel = 0; isubmodel<sm->nsubmodels; isubmodel++) {
+    //GW first
+
+    //maybe have a hardcoded order of models?
+
+
+    //Subsurface models
+    ///////////////
+    //GW
+    isubmodel=0;
+    mod = &(sm->submodel[isubmodel]);
+    for(i=0; i<sm->grid->nelem3dgw;i++){
+        current_element = sm->grid->elem3dgw[i];
+        global_dofs = current_element->dofs;
+        elem_resid = fe_gw_body_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+
+    for (i=0; i<sm->grid->nelem2dgw; i++){
+        elem_resid = fe_gw_boundary_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    //////////////////
+
+    //Surface dynamics here
+    ////////////////
+    //SW3
+    isubmodel+=1;
+    mod = &(sm->submodel[isubmodel]);
+    for(i=0; i<sm->grid->nelem3dsw3;i++){
+        current_element = sm->grid->elem3dsw3[i];
+        global_dofs = current_element->dofs;
+        elem_resid = fe_hvel_body_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    for (i=0; i<sm->grid->nelem2dsw3; i++){
+        elem_resid = fe_hvel_boundary_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    //NS
+    isubmodel+=1;
+    mod = &(sm->submodel[isubmodel]);
+    for(i=0; i<sm->grid->nelem3dns;i++){
+        current_element = sm->grid->elem3dns[i];
+        global_dofs = current_element->dofs;
+        elem_resid = fe_ns_body_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    for (i=0; i<sm->grid->nelem2dns; i++){
+        elem_resid = fe_ns_boundary_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    //SW2
+    isubmodel+=1;
+    mod = &(sm->submodel[isubmodel]);
+    for(i=0; i<sm->grid->nelem2dsw2;i++){
+        current_element = sm->grid->elem2dsw2[i];
+        global_dofs = current_element->dofs;
+        elem_resid = fe_sw2_body_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    for (i=0; i<sm->grid->nelem1dsw2; i++){
+        elem_resid = fe_sw2_boundary_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    //DW
+    isubmodel+=1;
+    mod = &(sm->submodel[isubmodel]);
+    for(i=0; i<sm->grid->nelem2ddw;i++){
+        current_element = sm->grid->elem2ddw[i];
+        global_dofs = current_element->dofs;
+        elem_resid = fe_diffusive_body_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    for (i=0; i<sm->grid->nelem1ddw; i++){
+        elem_resid = fe_diffusive_boundary_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    //////////////////
+
+    //Transport dynamics
+    ///////////////
+    //passive scalar transport
+    isubmodel+=1;
+    mod = &(sm->submodel[isubmodel]);
+    for(i=0; i<sm->grid->nelem2ddw;i++){
+        current_element = sm->grid->elem2dtrans[i];
+        global_dofs = current_element->dofs;
+        elem_resid = fe_transport_body_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+    for (i=0; i<sm->grid->nelem1ddw; i++){
+        elem_resid = fe_transport_boundary_resid(mod);
+        sm->residual[global_dofs] = elem_resid
+    }
+
+    //any other kind of transport goes here
+    ///////////////////////
+
+    ////////////////////
+    //Waves
+
+    ////////////////////
+
+    // option 2
+    //or is this faster?? this requires conditionals I think 
+    //but only 1 assembly at each global element
+    // maybe there is way to eliminate logic?
+
+    //Idea:
+    //partition elements into types, where they can only be a single kind of physics on to avoid extra logic
+    for (i = 0; i<sm->grid->nelem3d; i++){
         //pull data for that element
         //each model will have a list of elements!!!
-        ie = sm->grid->elem3dgw[i]
+        ie = sm->grid->elem3d[i]
         current_element = sm->grid->elem3d[i];
         global_dofs = current_element->dofs;
-        active_physics= current_element->physics ; sm->model->?
+        active_physics= current_element->physics ;
         //call any possible marked physics
         //Think about exactly what residual routine needs
         //for now assuming all relevant info is in the element structure
@@ -275,7 +359,15 @@ void fe_build_supermodel_residual(SSUPER_MODEL *sm) {
         //load elem_resid into global vector using global dofs
         global_vec[global_dofs] = elem_resid
     }
+
+#ifdef _DEBUG
+    if (FILE_DEBUG==ON) tl_check_all_pickets(__FILE__, __LINE__);
+#endif
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

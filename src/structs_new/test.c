@@ -10,8 +10,10 @@ int main(int argc, char *argv[]) {
     
     // create a design model with 2 supermodels
     design_model_alloc_init(&(dmod),nSuperModels);
-    
     design_model_printScreen(&(dmod[0]));
+    
+    sgrid_read(&(dmod->grid), NULL, NULL);
+    sgrid_printScreen(dmod[0].grid);
     
     return 0;
 }

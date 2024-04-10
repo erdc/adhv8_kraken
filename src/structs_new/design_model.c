@@ -28,6 +28,7 @@ void design_model_alloc_init(DESIGN_MODEL **dmod, int nSuperModels) {
     
     // allocate
     (*dmod) = (DESIGN_MODEL *) tl_alloc(sizeof(DESIGN_MODEL), 1);
+
     
     // allocate the design grid (may choose to do different superModel grids later)
     // Need to add SFILE_IN gridFile to SGRID STRUCTURE

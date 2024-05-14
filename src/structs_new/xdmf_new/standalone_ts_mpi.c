@@ -15,7 +15,13 @@
 void
 init_hdf5_file(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *fbase)
 {
-    hid_t     file_id, dset_id, memspace, filespace, plist_id, grp1,grp2;
+    assert(mpi_size==4);
+    //this function should do the following
+    // 1. Create HDf5 File for the simulation
+    // 2. Create all necessary data groups for the run
+
+    hid_t     file_id, dset_id, memspace, filespace, plist_id;
+    hid_t     grp1,grp2,grp3,grp4,grp5,grp6,grp7,grp8,grp9;
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
     //setting options for parallel
     H5Pset_fapl_mpio(plist_id, comm, info);
@@ -30,6 +36,9 @@ init_hdf5_file(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *f
     file_id = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
     H5Pclose(plist_id);
 
+
+    //1st 2 groups always active even if data is empty
+
     //group 1 is anything with mesh
     grp1 = H5Gcreate(file_id, "/Mesh", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -37,26 +46,47 @@ init_hdf5_file(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *f
     //group 2 contains any info with data
     grp2 = H5Gcreate(file_id, "/Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
+    //Eventually want a routine to handle this based on active models but for
+    
+
+    //now just hard code some exmamples
+    grp3 = H5Gcreate(grp2, "Time", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    grp4 = H5Gcreate(grp2, "NodalScalar", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    grp5 = H5Gcreate(grp2, "ElementalScalar", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    grp6 = H5Gcreate(grp2, "NodalVector", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    grp7 = H5Gcreate(grp2, "ElementalVector", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    //these groups on the other hand will always be there so this can be hard coded
+    grp8 = H5Gcreate(grp1, "XY", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    grp9 = H5Gcreate(grp1, "Elements", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+
 
     H5Gclose(grp1);
     H5Gclose(grp2);
+    H5Gclose(grp3);
+    H5Gclose(grp4);
+    H5Gclose(grp5);
+    H5Gclose(grp6);
+    H5Gclose(grp7);
+    H5Gclose(grp8);
+    H5Gclose(grp9);
     H5Fclose(file_id);
 
 
 }
 
-void
-write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *fbase)
-{
+void write_hdf5_mesh(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *fbase, int nt){
+    //given a time step number, rights a mesh to the hdf5 file
 
-    //for this simple test case assert the size is only 4
-    assert(mpi_size==4);
-
-
-    hid_t     file_id, dset_id, memspace, filespace, plist_id, grp1,grp2;
+    hid_t     file_id, plist_id, filespace, dset_id, memspace;
+    hid_t     grp1,grp2;
+    char      fname[50];
     hsize_t   dims[RANK];
-    //float *xyz;
-    int i;
     hsize_t   offset[RANK];
     herr_t    status; 
     hsize_t   count[RANK];
@@ -64,15 +94,17 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     int elem_per_pe=1;
 
 
-    //mesh properties
+    char number[50] = "";
+    sprintf(number, "%d", nt);
+
+     //mesh properties
     int numQuad;
     int numTri;
     int *connectivity;
     numQuad = 2;
     numTri = 2;
 
-    //tutorial at
-    //https://docs.hdfgroup.org/hdf5/v1_14/v1_14_4/_ex_a_p_i.html
+
 
 
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -81,22 +113,15 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     //H5Pset_all_coll_metadata_ops(plist_id, true);
     //H5Pset_coll_metadata_write(plist_id, true);
 
-
-    //create file
-    char fname[50];
+    //open file
     strcpy(fname,fbase);
     strcat(fname, ".h5");
     file_id = H5Fopen(fname, H5F_ACC_RDWR, plist_id);
     H5Pclose(plist_id);
 
-    //group 1 is anything with mesh
-    grp1 = H5Gopen(file_id, "Mesh", H5P_DEFAULT);
 
-
-    //group 2 contains any info with data
-    grp2 = H5Gopen(file_id, "Data", H5P_DEFAULT);
-
-
+    //group 1 is anything with mesh nodes
+    grp1 = H5Gopen(file_id, "/Mesh/XY", H5P_DEFAULT);
 
     //////////////////////////////
     //Writing Nodes//////////////
@@ -121,8 +146,8 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
         xyz[0][0] = 2.0;xyz[0][1] = 0.0;
         xyz[1][0] = 2.0;xyz[1][1] = 1.0; }
     else if(mpi_rank==3){
-        xyz[0][0] = 2.0;xyz[0][1] = 2.0; 
-        xyz[1][0] = 0.0;xyz[1][1] = 2.0;} 
+        xyz[0][0] = 2.0;xyz[0][1] = 2.0+nt; 
+        xyz[1][0] = 0.0;xyz[1][1] = 2.0+nt;} 
 
 
 
@@ -136,7 +161,7 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     filespace = H5Screate_simple(2, dims, NULL);
 
     //create a parallel dataset object and close filespace
-    dset_id = H5Dcreate(grp1, "XY", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate(grp1, number, H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(filespace);
 
     //create a simple dataspace where each process has a few of the rows
@@ -175,16 +200,22 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     H5Sclose(filespace);
     H5Sclose(memspace);
     H5Pclose(plist_id);
-
+    H5Gclose(grp1);
     //////////////////////////
     ////Nodal write complete//
 
 
+
+    //Now write elemental data
     //////////////////////////
     //Element data set///////
     // Connectivity data 
     //size of array should be numQuad*(4+1) + numTri*(3+1) + numTet*(4+1) + numPrism*(6+1)
     //+1 is for element code
+    grp2 = H5Gopen(file_id, "/Mesh/Elements", H5P_DEFAULT);
+
+
+
 
     //global attributes
     int nentry;
@@ -230,7 +261,7 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     dims[0] = nentry;
     filespace = H5Screate_simple(1, dims, NULL);
     //create a parallel dataset object and close filespace
-    dset_id = H5Dcreate(grp1, "Elements", H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate(grp2, number, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(filespace);
     //give the part that each processor will give
     // this one assumes each process is the same
@@ -254,11 +285,80 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     H5Sclose(filespace);
     H5Sclose(memspace);
     H5Pclose(plist_id);
+    H5Gclose(grp2);
 
     ////////////////////////////////////
     ///Elemental connections complete///
 
+    //close mesh file
+    H5Fclose(file_id);
 
+}
+
+void
+write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *fbase, int nt, float t)
+{
+    //writes hdf5 data at particular time step nt
+    //for this simple test case assert the size is only 4
+    assert(mpi_size==4);
+
+
+    hid_t     file_id, dset_id, memspace, filespace, plist_id, grp;
+    hsize_t   dims[RANK];
+    //float *xyz;
+    int i;
+    hsize_t   offset[RANK];
+    herr_t    status; 
+    hsize_t   count[RANK];
+    int nodes_per_pe,indx;
+    nodes_per_pe=2;
+    int elem_per_pe=1;
+
+
+    //mesh properties
+    int numQuad;
+    int numTri;
+    int *connectivity;
+    numQuad = 2;
+    numTri = 2;
+
+
+    char number[50] = "";
+    sprintf(number, "%d", nt);
+
+    //tutorial at
+    //https://docs.hdfgroup.org/hdf5/v1_14/v1_14_4/_ex_a_p_i.html
+
+
+
+    //Open file for parallel i/o
+    ////////////////////////////////////////////////
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    //setting options for parallel
+    H5Pset_fapl_mpio(plist_id, comm, info);
+    //H5Pset_all_coll_metadata_ops(plist_id, true);
+    //H5Pset_coll_metadata_write(plist_id, true);
+
+
+    //open file
+    char fname[50];
+    strcpy(fname,fbase);
+    strcat(fname, ".h5");
+    file_id = H5Fopen(fname, H5F_ACC_RDWR, plist_id);
+    H5Pclose(plist_id);
+    ////////////////////////////////////////////////
+
+
+
+    
+    //Open up data groups
+    //group 2 contains any info with data
+    grp = H5Gopen(file_id, "/Data/NodalScalar", H5P_DEFAULT);
+
+
+
+
+    
     //////Scalar data write////////////////
     //Nodally based data first
 
@@ -267,7 +367,7 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
         
     for(indx = 0; indx < nodes_per_pe; indx++)
     {   
-        scalardata[indx] = (mpi_rank*nodes_per_pe+indx)*100;
+        scalardata[indx] = (mpi_rank*nodes_per_pe+indx)*100 + t*50;
     }
 
     dims[0] = NumNodes;
@@ -275,7 +375,7 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     offset[0] = mpi_rank * count[0];
     filespace = H5Screate_simple(1, dims, NULL);
     //create a parallel dataset object and close filespace
-    dset_id = H5Dcreate(grp2, "Scalar1", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate(grp, number, H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(filespace);
     //give the part that each processor will give
     // this one assumes each process is the same
@@ -299,21 +399,25 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     H5Sclose(filespace);
     H5Sclose(memspace);
     H5Pclose(plist_id);
+    H5Gclose(grp);
+
 
 
     //End of Nodal based scalar
 
+    
+
 
     //Write some elementally based data ////////////
     //Elementally based data
-
+    grp = H5Gopen(file_id, "/Data/ElementalScalar", H5P_DEFAULT);
      
     float *scalardata2; 
     scalardata2 = (float *)malloc(sizeof(float) * elem_per_pe);
         
     for(indx = 0; indx < 1; indx++)
     {   
-        scalardata2[indx] = (mpi_rank)*100;
+        scalardata2[indx] = (mpi_rank)*100 + t*50;
     }
 
     dims[0] = NumElements;
@@ -321,7 +425,7 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     offset[0] = mpi_rank * count[0];
     filespace = H5Screate_simple(1, dims, NULL);
     //create a parallel dataset object and close filespace
-    dset_id = H5Dcreate(grp2, "Scalar2", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate(grp, number, H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(filespace);
     //give the part that each processor will give
     // this one assumes each process is the same
@@ -345,19 +449,21 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     H5Sclose(filespace);
     H5Sclose(memspace);
     H5Pclose(plist_id);
+    H5Gclose(grp);
 
     //End of elementally based data
     /////////////////////////////////////////////
 
-
+    
     ////////////////////////////////////////////
     
     //vector based nodal data
+    grp = H5Gopen(file_id, "/Data/NodalVector", H5P_DEFAULT);
     float (*vectordata)[2] = malloc(sizeof(float[nodes_per_pe][2]));
         
     for(indx = 0; indx < nodes_per_pe; indx++)
     {   
-        vectordata[indx][0] = 1;
+        vectordata[indx][0] = 1+t;
         vectordata[indx][1] = 1;
     }
 
@@ -369,7 +475,7 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     offset[1] = 0;
     filespace = H5Screate_simple(2, dims, NULL);
     //create a parallel dataset object and close filespace
-    dset_id = H5Dcreate(grp2, "Vector1", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate(grp, number, H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(filespace);
     //give the part that each processor will give
     // this one assumes each process is the same
@@ -393,18 +499,19 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     H5Sclose(filespace);
     H5Sclose(memspace);
     H5Pclose(plist_id);
-
+    H5Gclose(grp);
     //end of nodal vectors
     /////////////////////////////////////////////////////
 
 
     //Elementally based vectors
     //////////////////////////////////////////////////////
+    grp =  H5Gopen(file_id, "/Data/ElementalVector", H5P_DEFAULT);
     float (*vectordata2)[2] = malloc(sizeof(float[elem_per_pe][2]));
         
     for(indx = 0; indx < elem_per_pe; indx++)
     {   
-        vectordata2[indx][0] = 1;
+        vectordata2[indx][0] = 1-t;
         vectordata2[indx][1] = 1;
     }
 
@@ -416,7 +523,7 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     offset[1] = 0;
     filespace = H5Screate_simple(2, dims, NULL);
     //create a parallel dataset object and close filespace
-    dset_id = H5Dcreate(grp2, "Vector2", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate(grp, number, H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(filespace);
     //give the part that each processor will give
     // this one assumes each process is the same
@@ -440,15 +547,13 @@ write_hdf5_data(MPI_Comm comm, MPI_Info info, int mpi_rank, int mpi_size, char *
     H5Sclose(filespace);
     H5Sclose(memspace);
     H5Pclose(plist_id);
+    H5Gclose(grp);
 
     
 
 
 
     /////////////////////////////////////////////////////
-
-    H5Gclose(grp1);
-    H5Gclose(grp2);
     H5Fclose(file_id);
 
     if (mpi_rank == 0)
@@ -466,13 +571,14 @@ void xdmf_init(FILE *xmf, char *fbase){
     //fprintf(xmf, "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n");
     fprintf(xmf, "<Xdmf Version=\"3.0\">\n");
     //Domain information
-    fprintf(xmf, "\t <Domain>\n");
-    
+    fprintf(xmf, "\t <Domain Name=\"Adh Sim\">\n");
+    //Time based grid start
+    fprintf(xmf, "\t\t<Grid Name=\"MeshTime\" GridType=\"Collection\" CollectionType=\"Temporal\">\n");
     fclose(xmf);
 }
 
 
-void xdmf_write_dataset(FILE *xmf, char *fbase){
+void xdmf_write_dataset(FILE *xmf, char *fbase, int nt, int mesh_no, float t){
     char fname[50];
     strcpy(fname, fbase);
     strcat(fname, ".xmf");
@@ -480,56 +586,63 @@ void xdmf_write_dataset(FILE *xmf, char *fbase){
 
 
 
+
     //Grid start
-        fprintf(xmf, "\t\t<Grid Name=\"2D Unstructured Mesh\">\n");
+        fprintf(xmf, "\t\t\t<Grid Name=\"2D Unstructured Mesh\">\n");
+            fprintf(xmf, "\t\t\t<Time Value=\"%f\" />\n",t);
             //Geometry start, this is nodes
-            fprintf(xmf, "\t\t\t<Geometry GeometryType=\"XY\">\n");
-            fprintf(xmf, "\t\t\t\t<DataItem Dimensions=\"%d %d\" Format=\"HDF\">\n", NumNodes,2);
-            fprintf(xmf, "\t\t\t\t\t%s.h5:/Mesh/XY\n",fbase);
-            fprintf(xmf, "\t\t\t\t</DataItem>\n");
-            fprintf(xmf, "\t\t\t</Geometry>\n");
+            fprintf(xmf, "\t\t\t\t<Geometry GeometryType=\"XY\">\n");
+            fprintf(xmf, "\t\t\t\t\t<DataItem Dimensions=\"%d %d\" Format=\"HDF\">\n", NumNodes,2);
+            fprintf(xmf, "\t\t\t\t\t\t%s.h5:/Mesh/XY/%d\n",fbase,mesh_no);
+            fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
+            fprintf(xmf, "\t\t\t\t</Geometry>\n");
             //Geometry finish, this is nodes
 
             //Topology start
-            fprintf(xmf, "\t\t\t<Topology TopologyType=\"Mixed\" NumberOfElements=\"%d\">\n", NumElements);
+            fprintf(xmf, "\t\t\t\t<Topology TopologyType=\"Mixed\" NumberOfElements=\"%d\">\n", NumElements);
             //Data Item is the mixed connectivity
-            fprintf(xmf, "\t\t\t\t<DataItem Dimensions=\"%d\" Format=\"HDF\">\n", NEntry);
-            fprintf(xmf, "\t\t\t\t\t%s.h5:/Mesh/Elements\n",fbase);    
-            fprintf(xmf, "\t\t\t\t</DataItem>\n");
-            fprintf(xmf, "\t\t\t</Topology>\n");
+            fprintf(xmf, "\t\t\t\t\t<DataItem Dimensions=\"%d\" Format=\"HDF\">\n", NEntry);
+            fprintf(xmf, "\t\t\t\t\t\t%s.h5:/Mesh/Elements/%d\n",fbase,mesh_no);    
+            fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
+            fprintf(xmf, "\t\t\t\t</Topology>\n");
             //Topology finish, this contains connectivities
-
+            
+            
             //Any nodal data we can also write
-            fprintf(xmf, "\t\t\t<Attribute Name=\"NodalData\" AttributeType=\"Scalar\" Center=\"Node\">\n");
-            fprintf(xmf, "\t\t\t\t<DataItem Dimensions=\"%d\" Format=\"HDF\">\n", NumNodes);
-            fprintf(xmf, "\t\t\t\t\t%s.h5:/Data/Scalar1\n",fbase);
-            fprintf(xmf, "\t\t\t\t</DataItem>\n");
-            fprintf(xmf, "\t\t\t</Attribute>\n");
+            fprintf(xmf, "\t\t\t\t<Attribute Name=\"NodalData\" AttributeType=\"Scalar\" Center=\"Node\">\n");
+            fprintf(xmf, "\t\t\t\t\t<DataItem Dimensions=\"%d\" Format=\"HDF\">\n", NumNodes);
+            fprintf(xmf, "\t\t\t\t\t\t%s.h5:/Data/NodalScalar/%d\n",fbase,nt);
+            fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
+            fprintf(xmf, "\t\t\t\t</Attribute>\n");
             //Nodal data finish
+            
 
             //Should also be way to write elemental data here too just change Center=\"Node" to Center=\"Cell"
-            fprintf(xmf, "\t\t\t<Attribute Name=\"ElementalData\" AttributeType=\"Scalar\" Center=\"Cell\">\n");
-            fprintf(xmf, "\t\t\t\t<DataItem Dimensions=\"%d\" Format=\"HDF\">\n", NumElements);
-            fprintf(xmf, "\t\t\t\t\t%s.h5:/Data/Scalar2\n",fbase);
-            fprintf(xmf, "\t\t\t\t</DataItem>\n");
-            fprintf(xmf, "\t\t\t</Attribute>\n");
+            fprintf(xmf, "\t\t\t\t<Attribute Name=\"ElementalData\" AttributeType=\"Scalar\" Center=\"Cell\">\n");
+            fprintf(xmf, "\t\t\t\t\t<DataItem Dimensions=\"%d\" Format=\"HDF\">\n", NumElements);
+            fprintf(xmf, "\t\t\t\t\t\t%s.h5:/Data/ElementalScalar/%d\n",fbase,nt);
+            fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
+            fprintf(xmf, "\t\t\t\t</Attribute>\n");
+            
             
             //Should also be way to write elemental data here too just change Center=\"Node" to Center=\"Cell"
-            fprintf(xmf, "\t\t\t<Attribute Name=\"NodalVector\" AttributeType=\"Vector\" Center=\"Node\">\n");
-            fprintf(xmf, "\t\t\t\t<DataItem Dimensions=\"%d %d\" Format=\"HDF\">\n", NumNodes,RANK);
-            fprintf(xmf, "\t\t\t\t\t%s.h5:/Data/Vector1\n",fbase);
-            fprintf(xmf, "\t\t\t\t</DataItem>\n");
-            fprintf(xmf, "\t\t\t</Attribute>\n");
+            fprintf(xmf, "\t\t\t\t<Attribute Name=\"NodalVector\" AttributeType=\"Vector\" Center=\"Node\">\n");
+            fprintf(xmf, "\t\t\t\t\t<DataItem Dimensions=\"%d %d\" Format=\"HDF\">\n", NumNodes,RANK);
+            fprintf(xmf, "\t\t\t\t\t\t%s.h5:/Data/NodalVector/%d\n",fbase,nt);
+            fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
+            fprintf(xmf, "\t\t\t\t</Attribute>\n");
 
             //Should also be way to write elemental data here too just change Center=\"Node" to Center=\"Cell"
-            fprintf(xmf, "\t\t\t<Attribute Name=\"ElementalVector\" AttributeType=\"Vector\" Center=\"Cell\">\n");
-            fprintf(xmf, "\t\t\t\t<DataItem Dimensions=\"%d %d\" Format=\"HDF\">\n", NumElements,RANK);
-            fprintf(xmf, "\t\t\t\t\t%s.h5:/Data/Vector2\n",fbase);
-            fprintf(xmf, "\t\t\t\t</DataItem>\n");
-            fprintf(xmf, "\t\t\t</Attribute>\n");
+            fprintf(xmf, "\t\t\t\t<Attribute Name=\"ElementalVector\" AttributeType=\"Vector\" Center=\"Cell\">\n");
+            fprintf(xmf, "\t\t\t\t\t<DataItem Dimensions=\"%d %d\" Format=\"HDF\">\n", NumElements,RANK);
+            fprintf(xmf, "\t\t\t\t\t\t%s.h5:/Data/ElementalVector/%d\n",fbase,nt);
+            fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
+            fprintf(xmf, "\t\t\t\t</Attribute>\n");
+            
+            
             
         
-        fprintf(xmf, "\t\t</Grid>\n");
+        fprintf(xmf, "\t\t\t</Grid>\n");
         fclose(xmf);
 }
 
@@ -541,6 +654,7 @@ void xdmf_finalize(FILE *xmf, char *fbase){
 
 
      //Grid Finish
+    fprintf(xmf, "\t\t</Grid>\n");
     fprintf(xmf, "\t</Domain>\n");
     //Domain finished
     fprintf(xmf, "</Xdmf>\n");
@@ -559,38 +673,55 @@ main(int argc, char *argv[])
 
     int mpi_size,mpi_rank;
     char *fbase;
+    int idx;
     fbase="Timseries_parallel2";
-    printf("%s \n",fbase);
+    //printf("%s \n",fbase);
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(comm, &mpi_size);
     MPI_Comm_rank(comm, &mpi_rank);
 
-    // loop trhough time and write a vector as well as scalar function
+    // loop through time and write a vector as well as scalar function
     int nt = 5;
+    float t=0.0;
+    float dt = 2.0;
 
 
 
 
     //split up hdf5 into basic parts
+    //always initialize file and write initial mesh, and initial conditions
     init_hdf5_file(comm,info,mpi_rank,mpi_size,fbase);
-    write_hdf5_data(comm,info,mpi_rank,mpi_size,fbase);
+    write_hdf5_mesh(comm,info,mpi_rank,mpi_size,fbase,0);
+    write_hdf5_data(comm,info,mpi_rank,mpi_size,fbase,0,t);
 
+    if (mpi_rank==0){printf("Initializing xmf file \n");
+                    FILE *xmf = 0;
+                    xdmf_init(xmf,fbase);
+                    xdmf_write_dataset(xmf,fbase,idx,idx,t);}
 
+    
+    for (idx=1;idx<nt+1;idx++){
+        
+        t+=dt;
+        //adaptive meshing
+        write_hdf5_mesh(comm,info,mpi_rank,mpi_size,fbase,idx);
+        write_hdf5_data(comm,info,mpi_rank,mpi_size,fbase,idx,t);
 
-    if (mpi_rank ==0){
-        //initialize everything before time loop
-        FILE *xmf = 0;
-        /*
-        * Open the file and write the XML description of the mesh.
-        */
-        printf("Initializing xmf file \n");
-        xdmf_init(xmf,fbase);
-        printf("Filling xmf file\n");
-        xdmf_write_dataset(xmf, fbase);
-        printf("closing xmf file\n");
-        xdmf_finalize(xmf, fbase);
+        if (mpi_rank ==0){
+            printf("Time step %d\n",idx);
+            //
+            // Open the file and write the XML description of the mesh.
+            //
+            FILE *xmf = 0;
+            xdmf_write_dataset(xmf, fbase,idx,idx,t);
+
+        }
     }
+    
+    if (mpi_rank==0){printf("closing xmf file\n");
+                    FILE *xmf = 0;
+                    xdmf_finalize(xmf, fbase);}
     MPI_Finalize();
  
     return 0;

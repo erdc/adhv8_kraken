@@ -21,16 +21,13 @@ typedef struct {
     SVECT nrml;               /* the normal to the face */
     int string;               /* string # associated with this 2d element*/
     int mat;                  /* 2d element material type */
-    int my_pe;                /* cjt :: just a flag, not the actual PE id */
-    int bflag;                /* element boundary flag :: 0 = surface, 1 = bottom, 2 = sidewall (3d) */
+    int bflag;                /* element boundary flag :: -1 = body, 0 = surface, 1 = bottom, 2 = sidewall (3d) */
     SVECT2D *grad_shp;        /* the gradients of the shape functions */
     int *nodes;               /* the nodes in the element */
     int *levels;              /* the node levels in the element */
     int nedges;               /* the number of edges on the element */
-    int **edges;              /* the 2D element local nodes IDs for each edge*/
-    
-    /*owning processor */
-    int resident_pe;          /*initially used for grid mass purposes */
+    double area;
+    int resident_pe;          /* arbitrary since AdH decomp is node-based. Defines as lowest node PE */
     
     /*interface flag to prevent adaption */
     int interface;
@@ -43,8 +40,10 @@ typedef struct {
 /*********************************************************/
 /* struct methods -------------------------------------- */
 
-
+void selem2d_get_triangle_local_shape(double xhat, double yhat, double zhat, double *lshape);
+void selem2d_get_quadrilateral_local_shape(double xhat, double yhat, double zhat, double *lshape);
 void selem2d_alloc(SELEM_2D *elem2d, int nnodes_on_elem);
+void selem2d_load(SELEM_2D *elem2d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds);
 void selem2d_free(SELEM_2D *elem2d);
 void selem2d_alloc_array(SELEM_2D **elem2d, int nelems2d);
 void selem2d_free_array(SELEM_2D *elem2d, int nelems2d);
@@ -53,6 +52,17 @@ void selem2d_init_array(SELEM_2D *elem2d, int nelems2d);
 void selem2d_init_alloc_array(SELEM_2D **elem2d, int nelems2d);
 void selem2d_copy(SELEM_2D *to, SELEM_2D from);
 void selem2d_printScreen(SELEM_2D *elem2d);
+SVECT selem2d_get_triangle_centroid(SNODE nd1, SNODE nd2, SNODE nd3);
+double selem2d_get_triangle_orientation(SNODE nd1, SNODE nd2, SNODE nd3, SVECT ref_vec);
+void selem2d_get_triangle_linear_djac_nrml_gradPhi(SELEM_2D *elem2d, SNODE *nd_SNODE, SVECT *nd_SVECT);
+SVECT selem2d_get_elem2d_normals(SVECT *nd);
+double selem2d_get_quadrilateral_linear_djac2d(double xhat, double yhat, SVECT *nd);
+double selem2d_get_quadrilateral_linear_djac_gradPhi(double xhat, double yhat, SVECT *nd, SVECT *grad_shp);
+void selem2d_get_triangle_local_shape_quad(double xhat, double yhat, double zhat, double *lshape);
+void selem2d_get_quadrilateral_local_shape_quad(double xhat, double yhat, double zhat, double *lshape);
+void selem2d_get_triangle_local_shape_gradients(SVECT *lgrad_shp);
+void selem2d_get_quadrilateral_local_shape_gradients(double xhat, double yhat, double zhat, SVECT *lgrad_shp);
+double selem2d_get_elem2d_area2d(SELEM_2D *elem2d, SVECT *nds);
 
 /***********************************************************/
 /***********************************************************/

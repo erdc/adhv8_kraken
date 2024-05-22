@@ -6,12 +6,6 @@
 #include "header_tl_alloc.h"
 #include "debug.h"
 
-#ifdef _MESSG
-//#include "mpi.h"
-#else
-static int myid = 0;
-#endif
-
 /*!
  \brief Free allocated memory
  
@@ -77,8 +71,9 @@ void *tl_free_debug(
     char *mypntr = NULL;		/* pointer for memory purposes */
 #ifdef _MESSG
     int myid, ierr_code;
-    
     ierr_code = MPI_Comm_rank(debug_comm, &myid); // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD, &myid);
+#else
+    int myid = 0;
 #endif
     
     if((obj_size == 0) || (number < 0)) {

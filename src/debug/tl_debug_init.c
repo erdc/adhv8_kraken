@@ -6,11 +6,6 @@
 #include "header_tl_alloc.h"
 #include "debug.h"
 
-#ifdef _MESSG
-//#include "mpi.h"
-#else
-static int myid = 0;
-#endif
 #ifndef _DEBUG
 int allocated_memory = 0;
 int  max_allocated_memory = 0;
@@ -73,8 +68,8 @@ void debug_finalize()
         printf("\n");
         printf("**********************************************************************\n");
         printf("Memory/Debug Info:\n");
-        printf("MYID = %4d, Exiting, (unfreed) Allocated Memory of %d Bytes\n", myid, allocated_memory);
-        printf("MYID = %4d, Maximum Allocated Memory %lu B = %lu kB = %lu MB = %lu GB\n",
+        printf("MYID = %4d, Exiting, (unfreed) Allocated Memory of %zu Bytes\n", myid, allocated_memory);
+        printf("MYID = %4d, Maximum Allocated Memory %zu B = %zu kB = %zu MB = %zu GB\n",
                myid, max_allocated_memory, max_allocated_memory / 1024,
                max_allocated_memory / 1048576, max_allocated_memory / 1073741824);
         printf("**********************************************************************\n");

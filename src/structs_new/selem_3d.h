@@ -3,9 +3,8 @@
 
 // dependencies: SVECT
 
-/***********************************************************/
-/***********************************************************/
-/***********************************************************/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 typedef struct {
 
@@ -17,7 +16,6 @@ typedef struct {
     double djac;              /* the jacobian of the element */
     int string;               /* string number associated with this element */
     int mat;                  /* 2d element material type */
-    int my_pe;                /* owning processor */
     int icol;                 /* the column this tet belongs to */
     int elem2d_sur;           /* the 2d surface element of the column this tet belongs to */
     int elem2d_bed;           /* the 2d bed element of the column this tet belongs to */
@@ -27,17 +25,20 @@ typedef struct {
     int *nodes;               /* the nodes in the element */
     int *levels;              /* the node levels in the element */
     int nedges;               /* the number of edges on the element */
-    int **edges;              /* the 3D element local nodes IDs for each edge*/
+    double volume;
+    int resident_pe;
     
     /*interface flag to prevent adaption */
     int interface;
 
 } SELEM_3D;
 
-/*********************************************************/
-/* struct methods -------------------------------------- */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+// struct methods
 
 void selem3d_alloc(SELEM_3D *elem3d, int nnodes_on_elem);
+void selem3d_load(SELEM_3D *elem3d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds);
 void selem3d_free(SELEM_3D *elem3d);
 void selem3d_alloc_array(SELEM_3D **elem3d, int nelems3d);
 void selem3d_free_array(SELEM_3D *elem3d, int nelems3d);
@@ -46,9 +47,21 @@ void selem3d_init_array(SELEM_3D *elem3d, int nelems3d);
 void selem3d_init_alloc_array(SELEM_3D **elem3d, int nelems3d);
 void selem3d_copy(SELEM_3D *to, SELEM_3D from);
 void selem3d_printScreen(SELEM_3D *elem3d);
+void selem3d_get_tet_local_shape(double xhat, double yhat, double zhat, double *lshape);
+void selem3d_get_triprism_local_shape(double xhat, double yhat, double zhat, double *lshape);
+void selem3d_get_tet_local_shape_quad(double xhat, double yhat, double zhat, double *lshape_quad);
+void selem3d_get_triprism_local_shape_quad(double xhat, double yhat, double zhat, double *lshape_quad);
+void selem3d_get_tet_local_shape_gradients(SVECT *lgrad_shp);
+void selem3d_get_triprism_local_shape_gradients(double xhat, double yhat, double zhat, SVECT *lgrad_shp);
+double selem3d_get_triprism_djac(double xhat, double yhat, double zhat, SVECT *nd);
+double selem3d_get_triprism_linear_djac_gradPhi(double xhat, double yhat, double zhat, SVECT *nd, SVECT *grad_shp);
+void selem3d_get_tet_linear_djac_gradPhi(SELEM_3D *elem3d, SNODE *nd_SNODE, SVECT *nd_SVECT);
+double selem3d_get_tet_linear_djac(SNODE *nd_SNODE, SVECT *nd_SVECT);
+double selem3d_get_tet_linear_djac_gradPhi2(SNODE *nd_SNODE, SVECT *nd_SVECT, SVECT *grad_shp);
+double selem3d_get_elem3d_volume(SVECT *node, int nnodes);
+double selem3d_get_triprism_volume(SVECT *node);
 
-/***********************************************************/
-/***********************************************************/
-/***********************************************************/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #endif

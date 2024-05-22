@@ -23,18 +23,19 @@
  */
 #include "header_tl_alloc.h"
 #include "debug.h"
-#ifdef _MESSG
-//#include "mpi.h"
-#else
-extern int myid = 0;
-#endif
-
 #ifdef _DEBUG
 /*!
  \brief Set Pickets Before/After Allocate Memory
  */
-void tl_set_picket(char *pntr, size_t isize)
-{
+void tl_set_picket(char *pntr, size_t isize) {
+
+#ifdef _MESSG
+    int myid, ierr_code;
+    ierr_code = MPI_Comm_rank(debug_comm, &myid); // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD, &myid);
+#else
+    int myid = 0;
+#endif
+
     size_t ii = 0, jj = 0;      /* loop counters */
     char *mypntr = NULL;        /* Pointer to 1 Byte */
     
@@ -118,10 +119,12 @@ void tl_check_picket(char *pntr, size_t isize, int linenumber, char *filename)
 void tl_check_all_pickets(char *filename, int linenumber)
 {
     size_t ii = 0;              /* loop counter */
+    
 #ifdef _MESSG
-    int ierr_code;
-    int myid;
+    int myid, ierr_code;
     ierr_code = MPI_Comm_rank(debug_comm, &myid); // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD, &myid);
+#else
+    int myid = 0;
 #endif
     DEBUG_MEM_ENTRY *entry = NULL;
     
@@ -163,12 +166,14 @@ unsigned long tl_get_allocated_memory_size(void *pntr)
  */
 void tl_check_unfreed(void)
 {
-    int ii = 0, myid = 0;
+    int ii = 0;
     DEBUG_MEM_ENTRY *entry = NULL;
     
 #ifdef _MESSG
-        int ierr_code;
-        ierr_code = MPI_Comm_rank(debug_comm, &myid); // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD, &myid);
+    int myid, ierr_code;
+    ierr_code = MPI_Comm_rank(debug_comm, &myid); // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD, &myid);
+#else
+    int myid = 0;
 #endif
     
     for (ii = 0; ii < DEBUG_HASHSIZE; ii++) {

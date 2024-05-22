@@ -2,8 +2,8 @@
 /*! \file  sgrid.c This file collects methods of the DESIGN_MODEL structure */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-//#include "global_header.h"
-#include "local_header.h"
+#include "global_header.h"
+//#include "local_header.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
@@ -23,8 +23,6 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void design_model_alloc_init(DESIGN_MODEL **dmod, int nSuperModels) {
     int i;
-    
-    // assertions
     
     // allocate
     (*dmod) = (DESIGN_MODEL *) tl_alloc(sizeof(DESIGN_MODEL), 1);

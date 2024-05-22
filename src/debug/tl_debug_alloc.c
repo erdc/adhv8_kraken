@@ -79,7 +79,7 @@ void *tl_alloc(size_t obj_size, /* the size of the object to be allocated */
     /* allocate the array, point to beginning of useful memory */
     mypntr = (char *) malloc(isize);
     if (mypntr == NULL) {
-        printf("MYID %4d, Memory Request Failing (tl_alloc), Current Allocated_Memory = %lu MB\n", myid, allocated_memory / 1048576);
+        printf("MYID %4d, Memory Request Failing (tl_alloc), Current Allocated_Memory = %d MB\n", myid, allocated_memory / 1048576);
         printf("MYID %4d, Asking for = %lu MB\n", myid, isize / 1048576);
         printf("MYID %4d, Run with USE_PACKAGE_DEBUG turned ON, to find FILE:LINE of request.\n", myid);
         exit(EXIT_FAILURE);
@@ -135,15 +135,22 @@ void *tl_alloc_debug(size_t obj_size,   /* the size of the object to be allocate
     picket_size = sizeof(int) * ((size_t) (BWIDTH));
     
     /* allocate the array, point to beginning of useful memory */
+    //printf("picket_size: %lu\n",picket_size);
+    //printf("debug_size: %lu\n", debug_size);
+    //printf("isize: %lu\n", isize);
+    //printf("size: %lu\n",isize + 2 * picket_size + debug_size);
     mypntr = (char *) malloc(isize + 2 * picket_size + debug_size);
     if (mypntr == NULL) {
         printf("MYID %4d, Error (file:line) %s:%d\n", myid, filename, linenumber);
         exit(EXIT_FAILURE);
     }
     pntr = mypntr + picket_size + debug_size;
+    //tag();
     
     /* Set Pickets */
+    //printf("mypntr: %s\n",mypntr);
     tl_set_picket(mypntr + debug_size, isize);
+    //tag();
     
     /* Store Size at very beginning of memory */
     *((unsigned long *) (mypntr)) = (unsigned long) (isize);

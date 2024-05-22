@@ -1,18 +1,59 @@
-//#include "global_header.h"
-#include "local_header.h"
+#include "global_header.h"
+//#include "local_header.h"
 
 /***********************************************************/
 /***********************************************************/
+void selem1d_alloc(SELEM_1D *elem1d) {
+    elem1d->nnodes = 2;
+    elem1d->grad_shp = (double *) tl_alloc(sizeof(double), 2);
+    elem1d->nodes =  (int *) tl_alloc(sizeof(int), 2);
+    elem1d->levels = (int *) tl_alloc(sizeof(int), 2);
+    int i;
+    for (i=0; i<2; i++) {
+        elem1d->grad_shp[i] = UNSET_FLT;
+        elem1d->nodes[i] = UNSET_INT;
+        elem1d->levels[i] = 0;
+    }
+}
+
+/***********************************************************/
 /***********************************************************/
 void selem1d_alloc_array(SELEM_1D **elem1d, int nelems1d) {
+    assert(nelems1d > 0);
     (*elem1d) = (SELEM_1D *) tl_alloc(sizeof(SELEM_1D), nelems1d);
-    int ie;
-    for (ie=0; ie<nelems1d; ie++) {
-        (*elem1d)[ie].nnodes = 2;
-        (*elem1d)[ie].grad_shp = (double *) tl_alloc(sizeof(double), (*elem1d)[ie].nnodes);
-        (*elem1d)[ie].nodes = (int *) tl_alloc(sizeof(int), (*elem1d)[ie].nnodes);
-        (*elem1d)[ie].levels = (int *) tl_alloc(sizeof(int), (*elem1d)[ie].nnodes);
+}
+
+/***********************************************************/
+/***********************************************************/
+void selem1d_load(SELEM_1D *elem1d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds) {
+    
+    assert(elem_nnodes == 2);
+    
+    elem1d->id = lid;
+    elem1d->gid = gid;
+    elem1d->id_orig = lid; // hmmm, what if we call this later?
+    elem1d->bflag = bflag;
+    elem1d->nnodes = elem_nnodes;
+    selem1d_alloc(elem1d);
+    elem1d->nodes[0] = local_node_ids[0];
+    elem1d->nodes[1] = local_node_ids[1];
+    
+    /* computes the jacobian */
+    elem1d->djac = DIST_2D(nds[0], nds[1]);
+    elem1d->length = elem1d->djac;
+    if (elem1d->djac < SMALL6) {
+        fprintf(stderr,"ERROR :: Improperly numbered line segment GID = %d || Nodes %d %d Jacobian is: %20.10f \n",
+                gid,elem1d->nodes[0],elem1d->nodes[1],elem1d->djac);
+        tl_error("ERROR: Improperly numbered line segment given");
     }
+    
+    /* computes the gradient of the shape functions */
+    elem1d->grad_shp[0] = -1.0 / elem1d->djac;
+    elem1d->grad_shp[1] =  1.0 / elem1d->djac;
+    
+    /* computes 1D element normal in the 2D plane */
+    elem1d->nrml.x =   (nds[1].y - nds[0].y) / elem1d->djac;
+    elem1d->nrml.y =  -(nds[1].x - nds[0].x) / elem1d->djac;
 }
 
 /***********************************************************/
@@ -163,6 +204,18 @@ void selem1d_outward_nrml(SELEM_1D *elem1d, SNODE *node, SELEM_2D elem2d){
 
 /***********************************************************/
 /***********************************************************/
+
+void selem1d_get_elem1d_linear_djac_gradPhi(SELEM_1D *elem1d, SVECT nd1, SVECT nd2) {
+    
+    
+    /* computes the jacobian */
+    elem1d->djac = DIST_2D(nd1, nd2);
+    
+    /* computes the gradient of the shape functions */
+    elem1d->grad_shp[0] = -1.0 / elem1d->djac;
+    elem1d->grad_shp[1] =  1.0 / elem1d->djac;
+}
+
 /***********************************************************/
 
 

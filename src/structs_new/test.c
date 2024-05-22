@@ -1,6 +1,19 @@
-#include "local_header.h"
+#include "global_header.h"
 
 int main(int argc, char *argv[]) {
+    int ierror = 0;
+    
+#ifdef _MESSG
+    MPI_Comm ADH_COMM;
+    ADH_COMM = MPI_COMM_WORLD;
+#endif
+    
+#ifndef _MESSG
+    debug_initialize();
+#else
+    ierror = MPI_Init(&argc, &argv);
+    debug_initialize(ADH_COMM); // uses COMM_DUPLICATE
+#endif
     
     DESIGN_MODEL *dmod;
     int nSuperModels = 2;
@@ -12,8 +25,16 @@ int main(int argc, char *argv[]) {
     design_model_alloc_init(&(dmod),nSuperModels);
     design_model_printScreen(&(dmod[0]));
     
-    sgrid_read(&(dmod->grid), NULL, NULL);
+#ifndef _MESSG
+    sgrid_read(&(dmod->grid), "test");
+#else
+    sgrid_read(&(dmod->grid), "test", ADH_COMM);
+#endif
     sgrid_printScreen(dmod[0].grid);
+    
+#ifdef _MESSG
+    MPI_Finalize();
+#endif
     
     return 0;
 }

@@ -36,11 +36,11 @@
 
 /*******************************************************/
 // CSTORM **********************************************/
-#ifdef _MESSG
-MPI_Comm cstorm_comm;
-#endif
+//#ifdef _MESSG
+//MPI_Comm cstorm_comm;
+//#endif
 // cjt :: since new AdH does not have global variables ...
-SMODEL *mod_cstorm;
+//SMODEL *mod_cstorm;
 /******************************************************/
 
 /*******************************************************/
@@ -77,15 +77,15 @@ double TIME_IN_NS3_RESID;
 
 /*******************************************************/
 // MISCELLANIOUS
-int ROTATE; // replace momentum on boundaries in 3D
-SDEBUG debug;
-double DEBUG_TIME;
-SSCREEN_OUTPUT screen_output;
-STESTCASE test_case_flag;
-
-double ***coupled_normal_flux;
-int **root_ids;
-double total_mass_flux_from_2d;
-double total_mass_flux_into_2d;
-double total_mass_flux_from_3d;
-double total_mass_flux_into_3d;
+//int ROTATE; // replace momentum on boundaries in 3D
+//SDEBUG debug;
+//double DEBUG_TIME;
+//SSCREEN_OUTPUT screen_output;
+//STESTCASE test_case_flag;
+//
+//double ***coupled_normal_flux;
+//int **root_ids;
+//double total_mass_flux_from_2d;
+//double total_mass_flux_into_2d;
+//double total_mass_flux_from_3d;
+//double total_mass_flux_into_3d;

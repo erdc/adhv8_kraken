@@ -1,10 +1,11 @@
-//#include "global_header.h"
-#include "local_header.h"
+#include "global_header.h"
+//#include "local_header.h"
 
 /***********************************************************/
 /***********************************************************/
 /***********************************************************/
 void snode_alloc_array(SNODE **node, int nnodes) {
+    assert(nnodes > 0);
     (*node) = (SNODE *) tl_alloc(sizeof(SNODE), nnodes);
 }
 
@@ -145,6 +146,7 @@ void snode_printScreen(SNODE nd) {
     printf("els_flag: %d\n",nd.els_flag);
     printf("level: %d \t block: %d\n",nd.level,nd.block);
     printf("parents %d %d \n", nd.parent[0],nd.parent[1]);
+    printf("resident_pe: %d\n",nd.resident_pe);
     printf("myid: %d\n",nd.myid);
 #ifdef _MESSG
     printf("parents res pe %d %d \n", nd.parent_res_pe[0],nd.parent_res_pe[1]);

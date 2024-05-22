@@ -74,6 +74,12 @@
 #define UNSTRUCTURED 2
 #define COLUMNAR 3
 
+#define BODY -1
+#define SURFACE 0
+#define BED 1
+#define SIDEWALL 2
+#define COLUMN 3
+
 #define NDONSEG 2       /* nodes on line segment */
 #define NDONTRI 3       /* nodes on triangle */
 #define NDONTRIQUAD 6

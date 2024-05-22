@@ -6,13 +6,6 @@
 // macros
 #define MAX(a,b) (a > b ? a : b)
 
-
-#ifdef _MESSG
-//#include "mpi.h"
-#else
-static int myid = 0;
-#endif
-
 #include "header_tl_alloc.h"
 #include "debug.h"
 
@@ -48,7 +41,10 @@ void *tl_realloc(
 #ifdef _MESSG
     int myid, ierr_code;
     ierr_code = MPI_Comm_rank(debug_comm, &myid); // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD, &myid);
+#else
+    int myid = 0;
 #endif
+    
     /* compute the size of the desired space */
     isize = obj_size * ((size_t) (number));
     old_size = obj_size * ((size_t) (old_number));
@@ -112,10 +108,14 @@ void *tl_realloc_debug(
     size_t picket_size = 0;	/* picket size for memory debugging */
     size_t debug_size = 0;	/* the size of the array for memory debugging */
     char *mypntr = NULL;		/* pointer for memory allocation purposes */
+    
 #ifdef _MESSG
     int myid, ierr_code;
-    ierr_code = MPI_Comm_rank(debug_comm, &myid);  // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD, &myid);
+    ierr_code = MPI_Comm_rank(debug_comm, &myid); // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD, &myid);
+#else
+    int myid = 0;
 #endif
+    
     /* compute the size of the desired space */
     isize = obj_size * ((size_t) (number));
     old_size = obj_size * ((size_t) (old_number));

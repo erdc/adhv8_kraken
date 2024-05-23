@@ -102,7 +102,7 @@ void sgrid_read(SGRID **pgrid, char *filename, MPI_Comm model_comm);
 #else
 void sgrid_read(SGRID **pgrid, char *filename);
 #endif
-
+void sgrid_write_hdf5(SGRID *g)
 
 /***********************************************************/
 /***********************************************************/

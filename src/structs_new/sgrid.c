@@ -119,6 +119,11 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     g->macro_nelems1d = 0;
     g->macro_nnodes_sur = 0;
     g->macro_nnodes_bed = 0;
+    //Mark added
+    g->macro_nTets = 0;
+    g->macro_nPrisms = 0;
+    g->macro_nQuads = 0;
+    g->macro_nTris = 0; 
     while ((read = getline(&line, &len, fp)) != -1) {
         strcpy(line_save,line);
         token = strtok(line,delim); token[strcspn(token, "\n")] = 0;
@@ -128,14 +133,23 @@ void sgrid_read(SGRID **pgrid, char *root_filename
             sscanf(line_save, "%s %d",cdum,&(g->macro_nnodes_sur));
         } else if (strcmp(token, "NODES_BED") == 0) {
             sscanf(line_save, "%s %d",cdum,&(g->macro_nnodes_bed));
-        } else if (strcmp(token, "ELEMS1D") == 0) {
+        } else if (strcmp(token, "ELEMS_SEG") == 0) {
             sscanf(line_save, "%s %d",cdum,&(g->macro_nelems1d));
-        } else if (strcmp(token, "ELEMS2D") == 0) {
-            sscanf(line_save, "%s %d",cdum,&(g->macro_nelems2d));
-        } else if (strcmp(token, "ELEMS3D") == 0) {
-            sscanf(line_save, "%s %d",cdum,&(g->macro_nelems3d));
+        } else if (strcmp(token, "ELEMS_TRI") == 0) {
+            sscanf(line_save, "%s %d",cdum,&(g->macro_nTris));
+        } else if (strcmp(token, "ELEMS_QUAD") == 0) {
+            sscanf(line_save, "%s %d",cdum,&(g->macro_nQuads));
+        } else if (strcmp(token, "ELEMS_TET") == 0) {
+            sscanf(line_save, "%s %d",cdum,&(g->macro_nTets));
+        } else if (strcmp(token, "ELEMS_PRISM") == 0) {
+            sscanf(line_save, "%s %d",cdum,&(g->macro_nQuads));
         }
     }
+
+    //use element types to compute totals
+    g->macro_nelems2d = g->macro_nTris + g->macro_nQuads;
+    g->macro_nelems3d = g->macro_nTets + g->macro_nPrisms;
+
     assert(g->macro_nnodes > 0);
     assert(g->macro_nnodes_sur > 0);
     assert(g->macro_nnodes_bed > 0);
@@ -234,8 +248,11 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         g->my_nnodes_sur = g->macro_nnodes_sur;
         g->my_nnodes_bed = g->macro_nnodes_bed;
         g->nelems1d = g->macro_nelems1d;
-        g->nelems2d = g->macro_nelems2d;
-        g->nelems3d = g->macro_nelems3d;
+        //g->nelems2d = g->macro_nelems2d;
+        //g->nelems3d = g->macro_nelems3d;
+        //Mark add at end to get totals
+        g->nelems2d = g->macro_nTris + g->macro_nQuads;
+        g->nelems3d = g->macro_nTets + g->macro_nPrisms;
         assert(g->nnodes > 0);
     }
     
@@ -264,25 +281,36 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     if (npes > 1) {
 #ifdef _MESSG
         g->nelems1d = 0; g->nelems2d = 0; g->nelems3d = 0;
+        //mark also add
+        g->nTris=0; g->nQuads=0; g->nTets=0; g->nPrisms=0;
+
         while ((read = getline(&line, &len, fp)) != -1) {
             strcpy(line_save,line);
             token = strtok(line,delim); token[strcspn(token, "\n")] = 0;
             if        (strcmp(token, "SEG") == 0) {
                 g->nelems1d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,2,1,true);
             } else if (strcmp(token, "TRI") == 0) {
-                g->nelems2d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,3,2,true);
+                g->nTris += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,3,2,true);
             } else if (strcmp(token, "QUAD") == 0) {
-                g->nelems2d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,2,true);
+                g->nQuads += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,2,true);
             } else if (strcmp(token, "TET") == 0) {
-                g->nelems3d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,3,true);
+                g->nTets += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,3,true);
             } else if (strcmp(token, "PRISM") == 0) {
-                g->nelems3d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,6,3,true);
+                g->nPrisms += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,6,3,true);
             }
         }
+        //Mark add at end to get totals
+        g->nelems2d = g->nTris + g->nQuads;
+        g->nelems3d = g->nTets + g->nPrisms;
+        
+
+
         g->nnodes = g->my_nnodes + num_ghosts;
         rewind(fp);
 #endif
+
     }
+    
     assert(g->nnodes > 0);
     //MPI_Finalize();
     //exit(-1);
@@ -323,29 +351,48 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     // Read through again to store elements
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     g->nelems1d = 0; g->nelems2d = 0; g->nelems3d = 0;
+    g->my_nelems1d=0; g->my_nelems2d=0; g->my_nelems3d=0;
+    g->my_nTris=0; g->my_nQuads=0; g->my_nTets=0; g->my_nPrisms=0;
     g->haveSegs = false; g->haveTets = false;
     g->havePrisms = false; g->haveQuads = false;
+    int temp=0;
     while ((read = getline(&line, &len, fp)) != -1) {
         strcpy(line_save,line);
         token = strtok(line,delim); token[strcspn(token, "\n")] = 0;
-        if        (strcmp(token, "SEG") == 0) {
+        if (strcmp(token, "SEG") == 0) {
             g->haveSegs = true;
-            g->nelems1d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,2,1,false);
+            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,2,1,false);
+            g->nelems1d += temp;
+            //Mark fix later
+            if(false){g->my_nelems1d+=temp;}
         } else if (strcmp(token, "TRI") == 0) {
             g->haveTris = true;
-            g->nelems2d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,3,2,false);
+            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,3,2,false);
+            g->nelems2d += temp;
+            if(g->elem2d[g->nelems2d-1].resident_pe == myid){g->my_nTris+=temp;}
         } else if (strcmp(token, "QUAD") == 0) {
             g->haveQuads = true;
-            g->nelems2d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,2,false);
+            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,2,false);
+            g->nelems2d += temp;
+            if(g->elem2d[g->nelems2d-1].resident_pe == myid){g->my_nQuads+=temp;}
         } else if (strcmp(token, "TET") == 0) {
             g->haveTets = true;
-            g->nelems3d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,3,false);
+            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,3,false);
+            g->nelems3d += temp;
+            if(g->elem3d[g->nelems3d-1].resident_pe == myid){g->my_nTets+=temp;}
         } else if (strcmp(token, "PRISM") == 0) {
             g->havePrisms = true;
-            g->nelems3d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,6,3,false);
+            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,6,3,false);
+            g->nelems3d += temp;
+            if(g->elem3d[g->nelems3d-1].resident_pe == myid){g->my_nPrisms+=temp;}
         }
         //tl_check_all_pickets(__FILE__,__LINE__);
     }
+    
+
+    //Mark add at end to get totals
+    g->my_nelems2d = g->my_nTris + g->my_nQuads;
+    g->my_nelems3d = g->my_nTets + g->my_nPrisms;
     
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // find highest grid dimension
@@ -409,6 +456,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         g->y_max = messg_dsum(g->my_y_max, g->smpi->ADH_COMM);
         g->z_min = messg_dsum(g->my_z_min, g->smpi->ADH_COMM);
         g->z_max = messg_dsum(g->my_z_max, g->smpi->ADH_COMM);
+        //sums go hear
 #endif
     } else {
         g->mesh_length = g->my_mesh_length;
@@ -585,6 +633,8 @@ int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, 
         }
     }
     
+
+
     // if we're just counting for allocation, bail here
     if(JUST_COUNT) return 1;
     
@@ -594,6 +644,7 @@ int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, 
         if (g->node[local_id[i]].resident_pe < lowest_pe) lowest_pe = g->node[local_id[i]].resident_pe;
     }
     if (myid == lowest_pe) elem_resid_on_myid = true;
+    
     
     // load elements into AdH elemental array and add to subdomain mesh volume if the element is a body element
     if (elem_dim == 1)      {
@@ -694,6 +745,12 @@ void sgrid_printScreen(SGRID *g) {
         printf("---------- total # global 1D elements: %d || original: %d\n", g->macro_nelems1d,g->orig_macro_nelems1d);
         printf("---------- total # global 2D elements: %d || original: %d\n", g->macro_nelems2d,g->orig_macro_nelems2d);
         printf("---------- total # global 3D elements: %d || original: %d\n", g->macro_nelems3d,g->orig_macro_nelems3d);
+
+        printf("---------- total # global Triangle elements: %d\n", g->macro_nTris);
+        printf("---------- total # global Quadrilateral elements: %d\n", g->macro_nQuads);
+        printf("---------- total # global Prism elements: %d\n", g->macro_nPrisms);
+        printf("---------- total # global Tetrahedral elements: %d\n", g->macro_nTets);
+
         //printf("---------- total 1D grid edge length: %20.10e\n", g->mesh_length);
         printf("---------- total 2D grid body area: %10.2f\n",   g->mesh_area);
         printf("---------- total 3D grid surface area: %10.2f\n", g->mesh_area_surface);
@@ -767,6 +824,34 @@ void sgrid_printScreen(SGRID *g) {
                 printf("------------ PE: %d || nelems3d: %d || max_nelems3d: %d || nelems3d_old: %d\n",i,buffer1[i],buffer2[i],buffer3[i]);
             }
         }
+
+
+        // print local element types for 1D
+        sarray_init_int(buffer1, UNSET_INT); messg_gather_int(0, &g->my_nelems1d,  buffer1, 1, g->smpi->ADH_COMM);
+        if (myid == 0) {
+            for (i=0; i<npes; i++) {
+                printf("------------ PE: %d || my_nelems1d: %d \n",i,buffer1[i]);
+            }
+        }
+        // print local element types for 2D
+        sarray_init_int(buffer1, UNSET_INT); messg_gather_int(0, &g->my_nelems2d,  buffer1, 1, g->smpi->ADH_COMM);
+        sarray_init_int(buffer2, UNSET_INT); messg_gather_int(0, &g->my_nQuads, buffer2, 1, g->smpi->ADH_COMM);
+        sarray_init_int(buffer3, UNSET_INT); messg_gather_int(0, &g->my_nTris, buffer3, 1, g->smpi->ADH_COMM);
+        if (myid == 0) {
+            for (i=0; i<npes; i++) {
+                printf("------------ PE: %d || my_nelems2d: %d || my_nQuads: %d || my_nTris: %d\n",i,buffer1[i],buffer2[i],buffer3[i]);
+            }
+        }
+        // print local element types for 3D
+        sarray_init_int(buffer1, UNSET_INT); messg_gather_int(0, &g->my_nelems3d,  buffer1, 1, g->smpi->ADH_COMM);
+        sarray_init_int(buffer2, UNSET_INT); messg_gather_int(0, &g->my_nTets, buffer2, 1, g->smpi->ADH_COMM);
+        sarray_init_int(buffer3, UNSET_INT); messg_gather_int(0, &g->my_nPrisms, buffer3, 1, g->smpi->ADH_COMM);
+        if (myid == 0) {
+            for (i=0; i<npes; i++) {
+                printf("------------ PE: %d || my_nelems3d: %d || my_nTets: %d || my_nPrisms: %d\n",i,buffer1[i],buffer2[i],buffer3[i]);
+            }
+        }
+        
         
         // print local mesh areas
         sarray_init_dbl(dbuffer1, 0); messg_gather_dbl(0, &g->my_mesh_area_surface,   dbuffer1, 1, g->smpi->ADH_COMM);
@@ -842,8 +927,12 @@ void sgrid_printScreen(SGRID *g) {
 #define VECTOR_RANK 1 // Always be 1
 #define SPATIAL_DIM 3 // Always be 3
 
+
+/*
 void sgrid_write_hdf5(SGRID *g){
-    
+
+
+
 #ifdef _ADH_HDF5
 
     hid_t     file_id, plist_id, filespace, dset_id, memspace;
@@ -852,6 +941,8 @@ void sgrid_write_hdf5(SGRID *g){
     hsize_t   dims[MATRIX_RANK];
     herr_t    status;
     hsize_t   count[MATRIX_RANK];
+    int nt=0; 
+    MPI_Info info  = MPI_INFO_NULL;
     
     // for adaptive grid writing
     char number[50] = "";
@@ -862,7 +953,7 @@ void sgrid_write_hdf5(SGRID *g){
 
     // create object to store h5 config
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(plist_id, comm, info);
+    H5Pset_fapl_mpio(plist_id, g->smpi->ADH_COMM, info);
 
     // open file
     strcpy(fname,g->filename);
@@ -892,8 +983,8 @@ void sgrid_write_hdf5(SGRID *g){
     //create a local dataspace where each process has a few of the rows
     count[0]  = g->my_nnodes;
     count[1]  = dims[1];
-    offset[0] = g->node[0].gid;
-    offset[1] = 0;
+    //offset[0] = g->node[0].gid;
+    //offset[1] = 0;
 
     // give the part that each processor will give
     // this one assumes each process is the same
@@ -909,7 +1000,7 @@ void sgrid_write_hdf5(SGRID *g){
     // the values in coord1 should be the global node numbers, this time it is trivial
     int i,j,k=0;
     for (i=0; i<g->my_nnodes; i++){
-        for(j=0;j<SPACE_DIM;j++) {
+        for(j=0;j<SPATIAL_DIM;j++) {
             coord1[k] = g->node[i].gid;
             coord1[k+1] = j;
             k += MATRIX_RANK;
@@ -1025,3 +1116,4 @@ void sgrid_write_hdf5(SGRID *g){
 #endif
 
 }
+*/

@@ -3,9 +3,9 @@ GRID COLUMNAR
 NODES 57
 NODES_SURFACE 21
 NODES_BED 21
-ELEMS1D 0
-ELEMS2D 104
-ELEMS3D 96
+ELEMS_SEG 0
+ELEMS_TRI 104
+ELEMS_TET 96
 TET         1        13        10         1        14      1  
 TET         2        14        10         1        11      1  
 TET         3        14        11         1         2      1   

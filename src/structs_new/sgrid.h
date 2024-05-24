@@ -23,6 +23,12 @@ typedef struct {
     int nelems3d;        // number of ghost + residential 3d elements
     int nelems2d;        // number of ghost + residential 2d elements
     int nelems1d;        // number of ghost + residential 1d elements
+    int nTets;
+    int nPrisms;
+    int nTris;
+    int nQuads;
+
+
     SNODE *node;         // number of ghost + residential nodes
     SELEM_3D *elem3d;    // an array of 3d elements on this grid
     SELEM_2D *elem2d;    // an array of 2d elements on this grid
@@ -35,6 +41,10 @@ typedef struct {
     int macro_nelems3d;        // total # of 3d elements in the global mesh
     int macro_nelems2d;        // total # of 2d elements in the global mesh
     int macro_nelems1d;        // total # of 1d elements in the global mesh
+    int macro_nTets;           // total # of tetrahedron elements in global mesh
+    int macro_nPrisms;         // total # of prism elements in global mesh
+    int macro_nQuads;          // total # of quadrilateral elements in global mesh
+    int macro_nTris;           // total # of triangle elements in global mesh
     int orig_macro_nnodes;     // total number of original nodes in the global mesh
     int orig_macro_nnodes_sur; // total number of original surface nodes in the global mesh
     int orig_macro_nnodes_bed; // total number of original bed nodes in the global mesh
@@ -47,6 +57,10 @@ typedef struct {
     int my_nelems3d;        // total # of residential only 3d elements in the global mesh
     int my_nelems2d;        // total # of residential only 2d elements in the global mesh
     int my_nelems1d;        // total # of residential only 1d elements in the global mesh
+    int my_nTets;           // total # of residential only tetrahedron elements in global mesh
+    int my_nPrisms;         // total # of residential only prism elements in global mesh
+    int my_nQuads;          // total # of residential only quadrilateral elements in global mesh
+    int my_nTris;           // total # of residential only triangle elements in global mesh
 
     // Refinement-oriented counts
     int max_nnodes;          // number of ghost + residential nodes + nalloc_inc
@@ -102,7 +116,7 @@ void sgrid_read(SGRID **pgrid, char *filename, MPI_Comm model_comm);
 #else
 void sgrid_read(SGRID **pgrid, char *filename);
 #endif
-void sgrid_write_hdf5(SGRID *g)
+void sgrid_write_hdf5(SGRID *g);
 
 /***********************************************************/
 /***********************************************************/

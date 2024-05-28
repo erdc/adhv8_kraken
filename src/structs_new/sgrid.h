@@ -117,6 +117,11 @@ void sgrid_read(SGRID **pgrid, char *filename, MPI_Comm model_comm);
 void sgrid_read(SGRID **pgrid, char *filename);
 #endif
 void sgrid_write_hdf5(SGRID *g);
+void init_hdf5_file(SGRID *g);
+void sgrid_write_xdmf(SGRID *g);
+void sgrid_write_nodal_pe(SGRID *g);
+void sgrid_write_elemental_pe(SGRID *g);
+//void sgrid_write_xdmf_nodal_pe(SGRID *g);
 
 /***********************************************************/
 /***********************************************************/

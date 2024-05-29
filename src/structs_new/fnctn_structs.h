@@ -2,6 +2,8 @@
 #include "stdbool.h"
 #include "svect2d.h"        // dependencies :: smpi.h with _MESSG active
 #include "svect.h"          // dependencies :: smpi.h with _MESSG active
+#include "stensor.h"
+#include "smeteor.h"
 #include "snode.h"
 #include "squad.h"
 #include "selem_1d.h"       // dependencies :: svect2d.h

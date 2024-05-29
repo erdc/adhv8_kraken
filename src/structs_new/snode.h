@@ -1,9 +1,29 @@
 #ifndef H_SNODE_
 #define H_SNODE_
 
-/***********************************************************/
-/***********************************************************/
-/***********************************************************/
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+
+typedef struct {
+
+    // winds
+    SMETEOR_FILE wind_file;
+    SWIND winds;
+
+    // waves
+    SMETEOR_FILE wave_file;
+    SWAVE waves;
+
+    // rain
+    SMETEOR_FILE rain_file;
+    double rain;
+    
+} SNODE_ATTRIBUTES;
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 typedef struct {
 
@@ -32,7 +52,12 @@ typedef struct {
     int resident_pe;        /* (sd) owning processor */
     int resident_id;        /* (rnode) node number on OWNING precessor - if this is     ghost, this will be different than calling node */
 
+    SNODE_ATTRIBUTES attribute;
+
 } SNODE;
+
+
+
 
 
 /*********************************************************/

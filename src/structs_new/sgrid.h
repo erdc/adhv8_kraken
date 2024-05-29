@@ -1,9 +1,29 @@
 #ifndef H_SGRID_
 #define H_SGRID_
 
-/***********************************************************/
-/***********************************************************/
-/***********************************************************/
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+
+typedef struct {
+
+    // winds
+    SMETEOR_FILE *wind_file;
+    SWIND *winds;
+
+    // waves
+    SMETEOR_FILE *wave_file;
+    SWAVE *waves;
+
+    // rain
+    SMETEOR_FILE *rain_file;
+    double *rain;
+    
+} NODAL_ATTRIBUTES;
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 typedef struct {
     char filename[100];  // grid filename
@@ -101,6 +121,9 @@ typedef struct {
     SMPI *smpi;
     SMPI *part_smpi; // MPI struct for processors participating in re-partioning
     int *part_map;   // maps partition processor ids to main grid MPI ids
+    
+    // Nodal Attributes
+    NODAL_ATTRIBUTES nodal_attribute;
     
 } SGRID;
 

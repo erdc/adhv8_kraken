@@ -1348,11 +1348,9 @@ if(g->smpi->myid==0){
     strcpy(fname, g->filename);
     strcat(fname, ".xmf");
     xmf = fopen(fname, "w");
-    fprintf(xmf, "<Xdmf Version=\"3.0\">\n");
-    //Domain information
-    fprintf(xmf, "\t <Domain Name=\"Adh Sim\">\n");
-    //Time based grid start
-    fprintf(xmf, "\t\t<Grid Name=\"MeshTime\" GridType=\"Collection\" CollectionType=\"Temporal\">\n");
+    
+    //call from xdmf utils
+    write_xdmf_header(xmf);
     
     fprintf(xmf, "\t\t\t<Grid Name=\"2D Unstructured Mesh\">\n");
             fprintf(xmf, "\t\t\t<Time Value=\"%f\" />\n",t);
@@ -1373,29 +1371,11 @@ if(g->smpi->myid==0){
             fprintf(xmf, "\t\t\t\t</Topology>\n");
             //Topology finish, this contains connectivities
 
-            //nodal PEs
-            fprintf(xmf, "\t\t\t\t<Attribute Name=\"NodalData\" AttributeType=\"Scalar\" Center=\"Node\">\n");
-            fprintf(xmf, "\t\t\t\t\t<DataItem Dimensions=\"%d\" Format=\"HDF\">\n", g->macro_nnodes);
-            fprintf(xmf, "\t\t\t\t\t\t%s.h5:/Data/NodalScalar/%d\n",g->filename,mesh_no);
-            fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
-            fprintf(xmf, "\t\t\t\t</Attribute>\n");
 
-
-            //Should also be way to write elemental data here too just change Center=\"Node" to Center=\"Cell"
-            fprintf(xmf, "\t\t\t\t<Attribute Name=\"ElementalData\" AttributeType=\"Scalar\" Center=\"Cell\">\n");
-            fprintf(xmf, "\t\t\t\t\t<DataItem Dimensions=\"%d\" Format=\"HDF\">\n", g->macro_nelems1d+ g->macro_nelems2d+g->macro_nelems3d);
-            fprintf(xmf, "\t\t\t\t\t\t%s.h5:/Data/ElementalScalar/%d\n",g->filename,mesh_no);
-            fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
-            fprintf(xmf, "\t\t\t\t</Attribute>\n");
             
 
-
-    fprintf(xmf, "\t\t\t</Grid>\n");
-    //Grid Finish
-    fprintf(xmf, "\t\t</Grid>\n");
-    fprintf(xmf, "\t</Domain>\n");
-    //Domain finished
-    fprintf(xmf, "</Xdmf>\n");
+    //call from xdmf utils        
+    write_xdmf_tail(xmf);
     //XDMF File finished
     
     fclose(xmf);
@@ -1422,7 +1402,7 @@ if(g->smpi->myid==0){
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-/*
+
 void sgrid_write_xdmf_nodal_pe(SGRID *g){
 
 if(g->smpi->myid==0){
@@ -1436,23 +1416,23 @@ if(g->smpi->myid==0){
 
 
   int lines = 0;
-  char line[256];
+  int nchar = 0,nline=0;
+  char line[256],c;
 
+  //get line count first
+  // Extract characters from file and store in character c
+  for (c = getc(xmf); c != EOF; c = getc(xmf))
+        if (c == '\n') // Increment count if this character is newline
+            nline+= 1;
+  printf("Nline,%d\n",nline);
+  rewind(xmf);
   // Count lines and move to the second last line (considering 0-based indexing)
   while (fgets(line, sizeof(line), xmf) != NULL) {
     lines++;
-    fseek ( pFile , -1*len , SEEK_CUR );
-    if (lines > 1) {
-      fseek(xmf, -4 * sizeof(line), SEEK_CUR);  // Move back 4 lines
-      break;
+    if(lines==nline-4){break;}
     }
-  }
-
-  // Check if there are enough lines for insertion
-  if (lines < 4) {
-    printf("Error: File has less than 4 lines\n");
-    fclose(xmf);
-  }
+    //get the pointer
+    fseek(xmf, 0, SEEK_CUR);
 
   // Insert text before the current position
   //Any nodal data we can also write
@@ -1462,10 +1442,8 @@ if(g->smpi->myid==0){
             fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
             fprintf(xmf, "\t\t\t\t</Attribute>\n");
 
-  // Read remaining lines and append to the end
-  while (fgets(line, sizeof(line), xmf) != NULL) {
-    fputs(line, xmf);
-  }
+  // append file tail
+  write_xdmf_tail(xmf);
 
 
 
@@ -1478,7 +1456,79 @@ if(g->smpi->myid==0){
 
 
 }
-*/
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Print an AdH grid to XDMF
+ *  \author    Corey Trahan, Ph.D.
+ *  \author    Mark Loveand, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ * @param[inout] g           (SGRID *)  pointer to an AdH grid
+ *
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+void sgrid_write_xdmf_elemental_pe(SGRID *g){
+
+if(g->smpi->myid==0){
+    FILE *xmf = 0;
+    char fname[50];
+    float t=0;
+    int mesh_no=0;
+    strcpy(fname, g->filename);
+    strcat(fname, ".xmf");
+    xmf = fopen(fname, "r+");
+
+
+  int lines = 0;
+  int nchar = 0,nline=0;
+  char line[256],c;
+
+  //get line count first
+  // Extract characters from file and store in character c
+  for (c = getc(xmf); c != EOF; c = getc(xmf))
+        if (c == '\n') // Increment count if this character is newline
+            nline+= 1;
+  printf("Nline,%d\n",nline);
+  rewind(xmf);
+  // Count lines and move to the second last line (considering 0-based indexing)
+  while (fgets(line, sizeof(line), xmf) != NULL) {
+    lines++;
+    if(lines==nline-4){break;}
+    }
+    //get the pointer
+    fseek(xmf, 0, SEEK_CUR);
+  
+
+  // Insert text before the current position
+  //Any nodal data we can also write
+  //Should also be way to write elemental data here too just change Center=\"Node" to Center=\"Cell"
+            fprintf(xmf, "\t\t\t\t<Attribute Name=\"ElementalData\" AttributeType=\"Scalar\" Center=\"Cell\">\n");
+            fprintf(xmf, "\t\t\t\t\t<DataItem Dimensions=\"%d\" Format=\"HDF\">\n", g->macro_nelems1d+ g->macro_nelems2d+g->macro_nelems3d);
+            fprintf(xmf, "\t\t\t\t\t\t%s.h5:/Data/ElementalScalar/%d\n",g->filename,mesh_no);
+            fprintf(xmf, "\t\t\t\t\t</DataItem>\n");
+            fprintf(xmf, "\t\t\t\t</Attribute>\n");
+
+  // append file tail
+  write_xdmf_tail(xmf);
+
+    //XDMF File finished
+    
+    fclose(xmf);
+    
+
+}
+
+
+}
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

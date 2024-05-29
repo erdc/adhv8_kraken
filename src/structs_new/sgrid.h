@@ -121,7 +121,8 @@ void init_hdf5_file(SGRID *g);
 void sgrid_write_xdmf(SGRID *g);
 void sgrid_write_nodal_pe(SGRID *g);
 void sgrid_write_elemental_pe(SGRID *g);
-//void sgrid_write_xdmf_nodal_pe(SGRID *g);
+void sgrid_write_xdmf_nodal_pe(SGRID *g);
+void sgrid_write_xdmf_elemental_pe(SGRID *g);
 
 /***********************************************************/
 /***********************************************************/

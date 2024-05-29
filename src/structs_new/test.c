@@ -31,6 +31,15 @@ int main(int argc, char *argv[]) {
     sgrid_read(&(dmod->grid), "test", ADH_COMM);
 #endif
     sgrid_printScreen(dmod[0].grid);
+
+    //call grid writer
+    init_hdf5_file(dmod->grid);
+    sgrid_write_hdf5(dmod->grid);
+    sgrid_write_xdmf(dmod->grid);
+    sgrid_write_nodal_pe(dmod->grid);
+    sgrid_write_elemental_pe(dmod->grid);
+    //sgrid_write_xdmf_nodal_pe(dmod->grid);
+
     
 #ifdef _MESSG
     MPI_Finalize();

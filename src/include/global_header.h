@@ -27,6 +27,7 @@
 #include "type.h"
 
 #include "fnctn_structs.h"
+#include "../xdmf/fnctn_xdmf.h"
 #include "friction_ext.h"
 
 

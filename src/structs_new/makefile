@@ -35,8 +35,6 @@ MPI_SRC_FILES = $(wildcard $(MPI_SRC_DIR)/*.c)
 INC_DIR = $(MASTER_SRC_DIR)../debug/include/ 
 INC_DIR2 = $(MASTER_SRC_DIR)../include/
 
-
-
 SOURCES = $(subst $(MASTER_SRC_DIR),$(SOURCE_DIR),$(MASTER_SRC_FILES)) \
 $(subst $(DEBUG_SRC_DIR),$(SOURCE_DIR),$(DEBUG_SRC_FILES)) \
 $(subst $(MPI_SRC_DIR),$(SOURCE_DIR),$(MPI_SRC_FILES)) \
@@ -59,7 +57,7 @@ $(OBJ)/%.o: $(MPI_SRC_DIR)/%.c
 	$(CC) -c $< -o $@ $(CFLAGS) -I$(INC_DIR) -I$(INC_DIR2) -I$(MASTER_SRC_DIR) -I$(INC_MPI) -I$(INC_HDF5)
 	
 $(OBJ)/%.o: $(XDMF_SRC_DIR)/%.c
-	$(CC) -c $< -o $@ $(CFLAGS) -I$(INC_MPI) -I$(INC_HDF5)
+	$(CC) -c $< -o $@ $(CFLAGS) -I$(INC_DIR) -I$(INC_DIR2) -I$(MASTER_SRC_DIR) -I$(INC_MPI) -I$(INC_HDF5)
 
 .PHONY: clean
 clean:

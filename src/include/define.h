@@ -79,6 +79,7 @@
 #define BED 1
 #define SIDEWALL 2
 #define COLUMN 3
+#define BODY2D 4
 
 #define NDONSEG 2       /* nodes on line segment */
 #define NDONTRI 3       /* nodes on triangle */

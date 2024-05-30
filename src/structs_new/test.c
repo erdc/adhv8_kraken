@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     sgrid_write_elemental_pe(dmod->grid);
     sgrid_write_xdmf_nodal_pe(dmod->grid);
     sgrid_write_xdmf_elemental_pe(dmod->grid);
-
+    sgrid_read_nodal_attribute(dmod->grid);
     
 #ifdef _MESSG
     MPI_Finalize();

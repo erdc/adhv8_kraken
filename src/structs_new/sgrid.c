@@ -229,13 +229,6 @@ void sgrid_read(SGRID **pgrid, char *root_filename
             nodes_per_pe[ipe] = end_node_id[ipe] - start_node_id[ipe];
         }
         
-        // Columnar grid variables
-        if (g->columnar) {
-            //not correct
-            g->my_nnodes_sur = nodes_per_pe[myid]; // residential surface nodes
-            g->my_nnodes_bed = nodes_per_pe[myid]; // residential bed nodes
-        }
-        
         // Grid residential nodes
         g->my_nnodes = end_node_id[myid] - start_node_id[myid] + 1; // residential nodes
 #endif
@@ -246,12 +239,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         
         g->nnodes = g->macro_nnodes;
         g->my_nnodes = g->macro_nnodes;
-        g->my_nnodes_sur = g->macro_nnodes_sur;
-        g->my_nnodes_bed = g->macro_nnodes_bed;
         g->nelems1d = g->macro_nelems1d;
-        //g->nelems2d = g->macro_nelems2d;
-        //g->nelems3d = g->macro_nelems3d;
-        //Mark add at end to get totals
         g->nelems2d = g->macro_nTris + g->macro_nQuads;
         g->nelems3d = g->macro_nTets + g->macro_nPrisms;
         assert(g->nnodes > 0);
@@ -303,9 +291,6 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         //Mark add at end to get totals
         g->nelems2d = g->nTris + g->nQuads;
         g->nelems3d = g->nTets + g->nPrisms;
-        
-
-
         g->nnodes = g->my_nnodes + num_ghosts;
         rewind(fp);
 #endif
@@ -433,11 +418,34 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     g->nelems2d_old = g->nelems2d;
     g->nelems3d_old = g->nelems3d;
     
-    //g->my_nnodes_old = g->my_nnodes;
-    g->max_nnodes_sur = g->my_nnodes_sur;
-    g->max_nnodes_bed = g->my_nnodes_bed;
-    g->nnodes_sur_old = g->my_nnodes_sur;
-    g->nnodes_bed_old = g->my_nnodes_bed;
+    g->my_nnodes_sur = 0; g->nnodes_sur = 0;
+    g->my_nnodes_bed = 0; g->nnodes_bed = 0;
+    for (i=0; i<g->nnodes; i++) {
+        if (myid==0) printf("PE: %d || bflag: %d || gid: %d || node PE: %d\n",myid,g->node[i].bflag,g->node[i].gid,g->node[i].resident_pe);
+        if (g->node[i].bflag == SURFACE) {
+            g->nnodes_sur++;
+            if (g->node[i].resident_pe == myid) {
+                g->my_nnodes_sur++;
+            }
+        } else if (g->node[i].bflag == BED) {
+            g->nnodes_bed++;
+            if (g->node[i].resident_pe == myid) {
+                g->my_nnodes_bed++;
+            }
+        } else if (g->node[i].bflag == BODY2D) {
+            g->nnodes_sur++;
+            g->nnodes_bed++;
+            if (g->node[i].resident_pe == myid) {
+                g->my_nnodes_sur++;
+                g->my_nnodes_bed++;
+            }
+        }
+    }
+    g->max_nnodes_sur = g->nnodes_sur;
+    g->max_nnodes_bed = g->nnodes_bed;
+    g->nnodes_sur_old = g->nnodes_sur;
+    g->nnodes_bed_old = g->nnodes_bed;
+    printf("PE: %d || g->my_nnodes_sur: %d || g->my_nnodes_bed: %d \n",myid,g->my_nnodes_sur,g->my_nnodes_bed);
     
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // calculate total grid length, area, and/or volume over all PEs
@@ -635,27 +643,29 @@ int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, 
         }
     }
     
-
-
     // if we're just counting for allocation, bail here
     if(JUST_COUNT) return 1;
-    
 
-    //warning, still thinking through what to do wth 2D body elements...
-    //sidewalls must be read first or this wont work
-    if(elem_dim ==2){
-    if(bflag == BODY){
-        for (i = 0; i < nnodes_on_elem; i++){g->node[local_id[i]].bflag = BODY2D;}
-    }else if(bflag==SURFACE){
-        for (i = 0; i < nnodes_on_elem; i++){g->node[local_id[i]].bflag = SURFACE;}
-    }else if(bflag==BED){
-        for (i = 0; i < nnodes_on_elem; i++){g->node[local_id[i]].bflag = BED;}
-    }else if(bflag==SIDEWALL){
-        for (i = 0; i < nnodes_on_elem; i++){g->node[local_id[i]].bflag = SIDEWALL;}
+    // CJT: Some of these will be ambiguous.  Surface/Bed always over-ride
+    if(elem_dim == 2){
+        if(bflag == BODY){
+            for (i = 0; i < nnodes_on_elem; i++){
+                if (g->node[local_id[i]].bflag == UNSET_INT) { // CJT: if this node is already defined, leave it alone
+                    g->node[local_id[i]].bflag = BODY2D;
+                }
+            }
+        }else if(bflag == SURFACE){
+            for (i = 0; i < nnodes_on_elem; i++){g->node[local_id[i]].bflag = SURFACE;} // overide previous bflag
+        }else if(bflag == BED){
+            for (i = 0; i < nnodes_on_elem; i++){g->node[local_id[i]].bflag = BED;}     // overide previous bflag
+        }else if(bflag == SIDEWALL){
+            for (i = 0; i < nnodes_on_elem; i++){
+                if (g->node[local_id[i]].bflag == UNSET_INT) { // CJT: if this node is already defined, leave it alone
+                    g->node[local_id[i]].bflag = SIDEWALL;
+                }
+            }
+        }
     }
-    }   
-
-
 
     // if the element has some ghost nodes, arbitrarily assing its resident element PE to the lowest resident node PE
     int lowest_pe = 99999999;
@@ -790,7 +800,7 @@ void sgrid_printScreen(SGRID *g) {
         sarray_init_int(buffer3, UNSET_INT); messg_gather_int(0, &g->nnodes_old, buffer3, 1, g->smpi->ADH_COMM);
         if (myid == 0) {
             for (i=0; i<npes; i++) {
-                printf("------------ PE: %d || nnodes: %d || max_nnodes: %d || nnodes_old: %d\n",i,buffer1[i],buffer2[i],buffer3[i]);
+                printf("------------ PE: %d || my_nnodes: %d || max_nnodes: %d || nnodes_old: %d\n",i,buffer1[i],buffer2[i],buffer3[i]);
             }
         }
         
@@ -800,7 +810,7 @@ void sgrid_printScreen(SGRID *g) {
         sarray_init_int(buffer3, UNSET_INT); messg_gather_int(0, &g->nnodes_sur_old, buffer3, 1, g->smpi->ADH_COMM);
         if (myid == 0) {
             for (i=0; i<npes; i++) {
-                printf("------------ PE: %d || surface || nnodes: %d || max_nnodes: %d || nnodes_old: %d\n",i,buffer1[i],buffer2[i],buffer3[i]);
+                printf("------------ PE: %d || surface || my_nnodes: %d || max_nnodes: %d || nnodes_old: %d\n",i,buffer1[i],buffer2[i],buffer3[i]);
             }
         }
         
@@ -810,7 +820,7 @@ void sgrid_printScreen(SGRID *g) {
         sarray_init_int(buffer3, UNSET_INT); messg_gather_int(0, &g->nnodes_bed_old, buffer3, 1, g->smpi->ADH_COMM);
         if (myid == 0) {
             for (i=0; i<npes; i++) {
-                printf("------------ PE: %d || bed || nnodes: %d || max_nnodes: %d || nnodes_old: %d\n",i,buffer1[i],buffer2[i],buffer3[i]);
+                printf("------------ PE: %d || bed || my_nnodes: %d || max_nnodes: %d || nnodes_old: %d\n",i,buffer1[i],buffer2[i],buffer3[i]);
             }
         }
         

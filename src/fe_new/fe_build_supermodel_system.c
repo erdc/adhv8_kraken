@@ -25,6 +25,9 @@ void fe_supermodel_init(SSUPER_MODEL *sm) {
     
     int isubmodel, inode;
     SMODEL *mod = NULL;
+
+    //only do this if grid has been refined
+    //use info from elem physics (doesnt change over time)
     
     for (isubmodel=0;isubmodel<sm->nsubmodels;isubmodel++) {
         if(sm->submodel[isubmodel].proc_flag==1){

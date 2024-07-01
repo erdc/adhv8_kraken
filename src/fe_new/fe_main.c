@@ -30,8 +30,9 @@ int fe_main(DESIGN_MODEL *dm) {
     SSUPER_MODEL *sm = NULL;
     int isuperModel;
     
-    //initialize grid stuff
-
+    //initialize grid stuff?
+    SGRID grid = dm->grid;
+    SMAT mat = dm->mat;
 
 
     //****************************************************************************
@@ -43,24 +44,28 @@ int fe_main(DESIGN_MODEL *dm) {
 
         //****************************************************************************
         // initialize submodels of the SuperModel ------------------------------------
-        fe_supermodel_init(sm);
+        //importantly this will be used to create the dofmap, ndof
+        //this will occur outside of fe main if we stick with how it was done last version
+        //update_elem_physics(sm,grid);
 
-        
+        //after maps are set up then reallocate/initialize
+        //and allocate any model specific structures for convenient i/o
+        fe_supermodel_init(sm);   
+
         //****************************************************************************
         // allocates memory to solve linear system if necessary ----------------------
         fe_allocate_initialize_linear_system(sm);
 
         //potentially pass info for coupling between super models?
         //how to we want to pass info from one sm to another?
+        //we restrict this to full mesh <-> full surface of mesh
 
 
         //****************************************************************************
         // solve the SuperModel for one dt -------------------------------------------
-        if (fe_newton(sm, isuperModel, mod->grid->my_nnodes, mod->grid->nnodes, mod->grid->macro_nnodes,
-#ifdef _MESSG
-            sm->supersmpi,
-#endif
-            fe_sw2_init, fe_sw2_update, fe_sw2_resid, fe_sw2_load, fe_sw2_inc) == NO) {
+
+        //need to put grid as surface grid if only surface is defined maybe
+        if (fe_newton(sm, isuperModel, grid, mat) == NO) {
             return (NO);
         }
         

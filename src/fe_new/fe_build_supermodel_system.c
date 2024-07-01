@@ -22,106 +22,43 @@ static int FILE_DEBUG = OFF;
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void fe_supermodel_init(SSUPER_MODEL *sm) {
-    
-    int isubmodel, inode;
-    SMODEL *mod = NULL;
+    int i;
 
-    //only do this if grid has been refined
-    //use info from elem physics (doesnt change over time)
-    
-    for (isubmodel=0;isubmodel<sm->nsubmodels;isubmodel++) {
-        if(sm->submodel[isubmodel].proc_flag==1){
-            mod = &(sm->submodel[isubmodel]); // alias
-            
-            // Diffusive Wave
-            if (mod->flag.DIFFUSIVE_WAVE){
-                mod->nsys = 1;
-                mod->nsys_sq = 1;
-                fe_diffusive(mod);
-            }
-            
-            // Ground water
-            if (mod->flag.GW_FLOW){
-                mod->nsys = 1;
-                mod->nsys_sq = 1;
-                fe_gw(mod);
-            }
-            
-            // 2D Shallow Water
-            else if (mod->flag.SW2_FLOW){
-                mod->nsys = 3;
-                mod->nsys_sq = 9;
-                if (debug.no_hydro == OFF) {
-                    fe_sw2(mod);
-                } else {
-                    printf("\nAssigning Predetermined hydro values\n");
-                    for (inode = 0; inode < sm->grid->nnodes; inode++) {
-                        mod->sw->d2->vel[inode].x = debug.u_vel;
-                        mod->sw->d2->vel[inode].y = debug.v_vel;
-                        mod->sw->d2->head[inode] = debug.hard_disp;
-                        mod->sw->d2->old_vel[inode].x = debug.u_vel;
-                        mod->sw->d2->old_vel[inode].y = debug.v_vel;
-                        mod->sw->d2->old_head[inode] = debug.hard_disp;
-                        mod->sw->d2->older_vel[inode].x = debug.u_vel;
-                        mod->sw->d2->older_vel[inode].y = debug.v_vel;
-                        mod->sw->d2->older_head[inode] = debug.hard_disp;
-                    }
-                }
-            }
-            
-            // 3D Shallow Water
-            else if (mod->flag.SW3_FLOW){
-                mod->nsys = 3;
-                mod->nsys_sq = 9;
-                if (debug.no_hydro == OFF) {
-                    fe_sw3(mod);
-                } else {
-                    printf("\nAssigning Predetermined hydro values\n");
-                    double scale = 1.;
-                    for (inode = 0; inode < mod->grid->nnodes; inode++) {
-                        mod->sw->d3->vel[inode].x = scale * debug.u_vel;
-                        mod->sw->d3->vel[inode].y = scale * debug.v_vel;
-                        mod->sw->d3->vel[inode].z = scale * debug.w_vel;
-                        mod->sw->d3->displacement[inode] = debug.hard_disp;
-                        mod->sw->d3->old_vel[inode].x = scale * debug.u_vel;
-                        mod->sw->d3->old_vel[inode].y = scale * debug.v_vel;
-                        mod->sw->d3->old_vel[inode].z = scale * debug.w_vel;
-                        mod->sw->d3->old_displacement[inode] = debug.hard_disp;
-                        mod->sw->d3->older_vel[inode].x = scale * debug.u_vel;
-                        mod->sw->d3->older_vel[inode].y = scale * debug.v_vel;
-                        mod->sw->d3->older_vel[inode].z = scale * debug.w_vel;
-                        mod->sw->d3->older_displacement[inode] = debug.hard_disp;
-                    }
-                }
-            }
-            
-            // Navier Stokes Flow
-            else if (mod->flag.NS_FLOW) {
-                mod->nsys = 4;
-                mod->nsys_sq = 16;
-                if (debug.no_hydro == OFF) {
-                    fe_ns3(mod);
-                } else {
-                    printf("\nAssigning Predetermined hydro values\n");
-                    double scale = 1.;
-                    for (inode = 0; inode < mod->grid->nnodes; inode++) {
-                        mod->ns->d3->vel[inode].x = scale * debug.u_vel;
-                        mod->ns->d3->vel[inode].y = scale * debug.v_vel;
-                        mod->ns->d3->vel[inode].z = scale * debug.w_vel;
-                        mod->ns->d3->displacement[inode] = debug.hard_disp;
-                        mod->ns->d3->old_vel[inode].x = scale * debug.u_vel;
-                        mod->ns->d3->old_vel[inode].y = scale * debug.v_vel;
-                        mod->ns->d3->old_vel[inode].z = scale * debug.w_vel;
-                        mod->ns->d3->old_displacement[inode] = debug.hard_disp;
-                        mod->ns->d3->older_vel[inode].x = scale * debug.u_vel;
-                        mod->ns->d3->older_vel[inode].y = scale * debug.v_vel;
-                        mod->ns->d3->older_vel[inode].z = scale * debug.w_vel;
-                        mod->ns->d3->older_displacement[inode] = debug.hard_disp;
-                    }
-                }
-            }
-        }
+
+    //this will update sm solution structs that depend on time
+    //is there a better way so if we add a variable we dont have to add bunches of things
+    //everywhere?
+    for (i = 0; i < grid->nhead ; i ++){
+        sm->older_head[i]  = sm->old_head[i];
+        sm->old_head[i] = sm->head[i];
     }
+
+
+    for (i = 0; i < grid->nvel2d; i++) {
+        sm->older_vel2d[i].x = sm->old_vel2d[i].x;
+        sm->older_vel2d[i].y = sm->old_vel2d[i].y;
+        sm->old_vel2d[i].x = sm->vel2d[i].x;
+        sm->old_vel2d[i].y = sm->vel2d[i].y;
+    }
+
+    //not gonna work
+    for (i = 0; i < grid->nvel3d; i++) {
+        sm->older_vel3d[i].x = sm->old_vel3d[i].x;
+        sm->older_vel3d[i].y = sm->old_vel3d[i].y;
+        sm->older_vel3d[i].z = sm->old_vel3d[i].z;
+        sm->old_vel3d[i].x = sm->vel3d[i].x;
+        sm->old_vel3d[i].y = sm->vel3d[i].y;
+        sm->old_vel3d[i].z = sm->vel3d[i].x;
+    }
+
+    //maybe loop over number of constituents
+    //need some sort of convention
+    for (i = 0; i < sm->nconcentration ; i ++){
+        sm->older_concentration[i]  = sm->old_concentration[i];
+        sm->old_concentration[i] = sm->concentration[i];
+    }
+
+
 }
     
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

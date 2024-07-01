@@ -13,6 +13,7 @@ typedef struct {
     void *fe_resid; // this could be body or boundary, depending on what element
     void *fe_load;
     
+    int ndof;
 } ELEM_PHYSICS;
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

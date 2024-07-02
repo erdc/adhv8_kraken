@@ -91,6 +91,86 @@ void fe_elem_assemble(SSUPER_MODEL *sm, SGRID *grid, double *fmap, int *GnodeIDs
     
 }
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This file initializes the SuperModel Newton residual
+ *  \author    Count Corey J. Trahan
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
+ *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
+ *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
+ *  @param[in] int nnodes - the number of local nodes on the element
+ *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
+ *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
+ * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void initialize_system(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
+    int j,k;
+
+    //seems like the easiest way?
+    //maybe think about this
+    double fmap3d = sm->fmap3d;
+    double fmap2d = sm->fmap2d;
+    double fmap1d = sm->fmap1d;
+    //zero out stuff
+    #ifdef _PETSC
+        ierr = VecZeroEntries(sm->residual);
+    #else
+        sarray_init_dbl(sm->residual, sm->ndofs);
+    #endif
+
+
+    //this will update sm solution structs that depend on time
+    //is there a better way so if we add a variable we dont have to add bunches of things
+    //everywhere?
+    for (i = 0; i < grid->nhead ; i ++){
+        sm->older_head[i]  = sm->old_head[i];
+        sm->old_head[i] = sm->head[i];
+    }
+
+
+    for (i = 0; i < grid->nvel2d; i++) {
+        sm->older_vel2d[i].x = sm->old_vel2d[i].x;
+        sm->older_vel2d[i].y = sm->old_vel2d[i].y;
+        sm->old_vel2d[i].x = sm->vel2d[i].x;
+        sm->old_vel2d[i].y = sm->vel2d[i].y;
+    }
+
+    //not gonna work
+    for (i = 0; i < grid->nvel3d; i++) {
+        sm->older_vel3d[i].x = sm->old_vel3d[i].x;
+        sm->older_vel3d[i].y = sm->old_vel3d[i].y;
+        sm->older_vel3d[i].z = sm->old_vel3d[i].z;
+        sm->old_vel3d[i].x = sm->vel3d[i].x;
+        sm->old_vel3d[i].y = sm->vel3d[i].y;
+        sm->old_vel3d[i].z = sm->vel3d[i].x;
+    }
+
+    //maybe loop over number of constituents
+    //need some sort of convention
+    for (i = 0; i < sm->nconcentration ; i ++){
+        sm->older_concentration[i]  = sm->old_concentration[i];
+        sm->old_concentration[i] = sm->concentration[i];
+    }   
+
+
+    //Dirichlet condition handling go here
+    
+}
+
+
+
+
+
+
+
+
+
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

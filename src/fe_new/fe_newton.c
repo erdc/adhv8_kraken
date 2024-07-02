@@ -198,7 +198,7 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
     
     /* initial setup */
     //(*init_fnctn) (sm,isuperModel);
-    initalize_resid(sm,grid,mat);
+    initalize_system(sm,grid,mat);
 
     //it = 0;
     //(*update_fnctn) (sm,isuperModel);

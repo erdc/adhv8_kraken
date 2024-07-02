@@ -70,6 +70,17 @@ typedef struct {
     double *old_head;    /* pressure from the previous time step at time t_{n-1} */
     double *older_head;  /* pressure from the time step before last t_{n-2} */
 
+    //3d sw
+    int ndisplacement;
+    double *displacement;
+    double *old_displacement;
+    double *older_displacement;
+
+    //navier stokes
+    double *prs;
+    double *old_prs;
+    double *older_prs;
+
     //2d velocity
     //present in SW2D, NS2D
     int nvel2d;
@@ -84,22 +95,39 @@ typedef struct {
     SVECT *older_vel3d;
 
     //concentrations for transport (do we need more than one for sediment too?)
-    //int nconcentration;
-    //double *concentration;
-    //double *old_concentration;
-    //double *older_concentration;
+    int *nconcentration;
+    double *concentration;
+    double *old_concentration;
+    double *older_concentration;
 
-    //sediment
+
+    //sediment solution variable, maybe find better name than c
+    int nc;
+    double *c;          // concentration
+    double *old_c;      // old concentration
+    double *older_c;    // older concentration
+
+
+
+    // END OF SOLUTION VARIABLES
+
+
+
+    //structures to contain data from other models OTHER than solution variables
     //maybe just add scon and ssed
 #ifdef _SEDIMENT
     SSED *sed;
 #endif
 
-    SSW *SSW;
+    //potentially surround these with different ifdefs
+    SSW_2D *ssw2d;
+    SSW_3D *ssw3d;
     SGW *sgw;
     SCON *con;
+    SNS_2D *sns2d;
+    SNS_3D *sns3d;
 
-    // END OF SOLUTION VARIABLES
+    
 
 
 

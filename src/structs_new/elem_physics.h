@@ -11,6 +11,8 @@ typedef struct {
     void *fe_update;
     void *fe_solve;
     void *fe_resid; // this could be body or boundary, depending on what element
+    //void *fe_boundary_resid;
+    //void *fe_body_resid;
     void *fe_load;
     
     int ndof;

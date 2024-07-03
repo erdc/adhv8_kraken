@@ -41,7 +41,7 @@ void fe_supermodel_init(SSUPER_MODEL *sm) {
         sm->old_vel2d[i].y = sm->vel2d[i].y;
     }
 
-    //not gonna work
+
     for (i = 0; i < grid->nvel3d; i++) {
         sm->older_vel3d[i].x = sm->old_vel3d[i].x;
         sm->older_vel3d[i].y = sm->old_vel3d[i].y;
@@ -57,6 +57,24 @@ void fe_supermodel_init(SSUPER_MODEL *sm) {
         sm->older_concentration[i]  = sm->old_concentration[i];
         sm->old_concentration[i] = sm->concentration[i];
     }
+
+
+    for (i=0;i>sm->ndisplacement;i++){
+        sm->older_displacement[i] = sm->old_displacement[i];
+        sm->old_displacement[i] = sm->displacement[i];
+    }
+
+
+    for (i=0;i>sm->nprs;i++){
+        sm->older_prs[i] = sm->old_prs[i];
+        sm->old_prs[i] = sm->prs[i];
+    }    
+
+
+    for (i=0;i>sm->nc;i++){
+        sm->older_c[i] = sm->old_c[i];
+        sm->old_c[i] = sm->c[i];
+    } 
 
 
 }
@@ -277,3 +295,29 @@ void fe_build_supermodel_matrix(SSUPER_MODEL *sm) {
         /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 }
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This file initalizes a SuperModel Newton residual
+ *  \author    Count Corey J. Trahan
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct
+ *  \returns ierr = error flag for initializing residual
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+int fe_initialize_supermodel_residual(SSUPER_MODEL *sm) {
+    ierr = 0;
+#ifdef _PETSC
+    ierr = VecZeroEntries(sm->residual);
+#else
+    sarray_init_dbl(sm->residual, sm->matrix_size);
+#endif
+    return ierr;
+}
+

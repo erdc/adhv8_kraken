@@ -11,90 +11,6 @@ static int FILE_DEBUG = OFF;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This file initalizes a SuperModel Newton residual
- *  \author    Count Corey J. Trahan
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct
- *  \returns ierr = error flag for initializing residual
- * \note
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int fe_initialize_supermodel_residual(SSUPER_MODEL *sm) {
-    ierr = 0;
-#ifdef _PETSC
-    ierr = VecZeroEntries(sm->residual);
-#else
-    sarray_init_dbl(sm->residual, sm->matrix_size);
-#endif
-    return ierr;
-}
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
- *  \brief     This file assembles a local 3 degree-of-freedom element into the global SuperModel Newton residual
- *  \author    Count Corey J. Trahan
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
- *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void fe_elem_assemble(SSUPER_MODEL *sm, SGRID *grid, double *fmap, int *GnodeIDs, int nnodes, DOF_3 *elem_rhs) {
-    int i,j;
-    
-#ifdef _PETSC
-    PetscScalar values[3];
-    for (i=0; i<nnodes; i++) {
-        // No explicitly programmed ghost nodes so only add values from residential nodes
-        if(grid->node[GNodeIDs[i]].resident_pe == grid->smpi->myid){
-            j = fmap[GNodeIDs[i]];
-            if (sm->max_ndof == 1) { // cjt :: why do we still use a 3dof matrix here?
-                values[0] = -elem_rhs[i].c_eq;
-                values[1] = 0;
-                values[2] = 0;
-            } else if (sm->max_ndof == 3) {
-                values[0] = -elem_rhs[i].x_eq;
-                values[1] = -elem_rhs[i].y_eq;
-                values[2] = -elem_rhs[i].c_eq;
-            } else {
-                tl_error("max_ndof should be 1 or 3\n");
-            }
-            VecSetValuesBlockedLocal(sm->residual,1,&j,values,ADD_VALUES);
-        }
-    }
-#else
-    for (i=0; i<nnodes; i++) {
-        if (sm->max_ndof == 1) {
-            j = 1 * fmap[GNodeIDs[i]];
-            sm->residual[j] = -elem_rhs[i].c_eq;
-        } else if (sm->max_ndof == 3) {
-            j = 3 * fmap[GNodeIDs[i]];
-            sm->residual[j]     -= elem_rhs[i].x_eq;
-            sm->residual[j + 1] -= elem_rhs[i].y_eq;
-            sm->residual[j + 2] -= elem_rhs[i].c_eq;
-        }
-        else {
-            tl_error("max_ndof should be 1 or 3\n");
-        }
-    }
-#endif
-    
-}
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
  *  \brief     This file initializes the SuperModel Newton residual
  *  \author    Count Corey J. Trahan
  *  \bug       none
@@ -117,49 +33,84 @@ void initialize_system(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     double fmap3d = sm->fmap3d;
     double fmap2d = sm->fmap2d;
     double fmap1d = sm->fmap1d;
-    //zero out stuff
-    #ifdef _PETSC
-        ierr = VecZeroEntries(sm->residual);
-    #else
-        sarray_init_dbl(sm->residual, sm->ndofs);
-    #endif
 
 
     //this will update sm solution structs that depend on time
     //is there a better way so if we add a variable we dont have to add bunches of things
     //everywhere?
     for (i = 0; i < grid->nhead ; i ++){
-        sm->older_head[i]  = sm->old_head[i];
-        sm->old_head[i] = sm->head[i];
+        sm->head[i] = sm->old_head[i]; 
     }
 
 
     for (i = 0; i < grid->nvel2d; i++) {
-        sm->older_vel2d[i].x = sm->old_vel2d[i].x;
-        sm->older_vel2d[i].y = sm->old_vel2d[i].y;
-        sm->old_vel2d[i].x = sm->vel2d[i].x;
-        sm->old_vel2d[i].y = sm->vel2d[i].y;
+        sm->vel2d[i].x = sm->old_vel2d[i].x ;
+        sm->vel2d[i].y = sm->old_vel2d[i].y;
     }
 
-    //not gonna work
+
     for (i = 0; i < grid->nvel3d; i++) {
-        sm->older_vel3d[i].x = sm->old_vel3d[i].x;
-        sm->older_vel3d[i].y = sm->old_vel3d[i].y;
-        sm->older_vel3d[i].z = sm->old_vel3d[i].z;
-        sm->old_vel3d[i].x = sm->vel3d[i].x;
-        sm->old_vel3d[i].y = sm->vel3d[i].y;
-        sm->old_vel3d[i].z = sm->vel3d[i].x;
+        sm->vel3d[i].x = sm->old_vel3d[i].x ;
+        sm->vel3d[i].y = sm->old_vel3d[i].y;
+        sm->vel3d[i].x = sm->old_vel3d[i].z ;
     }
 
-    //maybe loop over number of constituents
+    //need to add loop over number of constituents
     //need some sort of convention
     for (i = 0; i < sm->nconcentration ; i ++){
-        sm->older_concentration[i]  = sm->old_concentration[i];
-        sm->old_concentration[i] = sm->concentration[i];
-    }   
+        sm->concentration[i] = sm->old_concentration[i];
+    }
+
+    for (i=0;i>sm->ndisplacement;i++){
+        sm->displacement[i] = sm->old_displacement[i];
+    }
+
+
+    for (i=0;i>sm->nprs;i++){
+        sm->prs[i] = sm->old_prs[i];
+    }    
+
+
+    for (i=0;i>sm->nc;i++){
+        sm->c[i] = sm->old_c[i];
+    }    
+
+
 
 
     //Dirichlet condition handling go here
+    //loop through elem_physics and call init routines
+    //since 3d is max dimension there should not be anything here
+    //for (j=0;j<grid->nelem3d;j++){
+    //    for (k=0;k<sm.nSubMods3d[j];k++){
+
+            //would this work for vector functions?
+            //would it be better to put global residual outside inner loop if possible?
+    //        sm.elem3d_physics[j][k]->fe_init(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+    //    }
+
+    //}
+
+    //loop through all nelem2d on faces?
+    for (j=0;j<grid->nelem2d;j++){
+        for (k=0;k<sm.nSubMods2d[j];k++){
+            //would this work for vector functions?
+            sm.elem3d_physics[j][k]->fe_init(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+
+
+        }
+    }
+
+
+    //loop through all nelem1d
+    //no 1d init for now?
+    for (j=0;j<grid->nelem1d;j++){
+        for (k=0;k<sm.nSubMods1d[j];k++){
+            //would this work for vector functions?
+            sm.elem2d_physics[j][k]->fe_init(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+
+        }
+    }    
     
 }
 
@@ -206,9 +157,10 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     #endif
 
 
-    double temp[max_elem_dofs]
+    double temp[max_elem_dofs];
     //loop through all nelem3d
     for (j=0;j<grid->nelem3d;j++){
+        sarray_init_dbl(temp,max_elem_dofs);
         for (k=0;k<sm.nSubMods3d[j];k++){
 
             //would this work for vector functions?
@@ -224,9 +176,10 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 
     //loop through all nelem2d
     for (j=0;j<grid->nelem2d;j++){
+        sarray_init_dbl(temp,max_elem_dofs);
         for (k=0;k<sm.nSubMods2d[j];k++){
             //would this work for vector functions?
-            sm->residual[fmap2d[j,k]] += sm.elem2d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+            sm.elem2d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
 
             for (l=0;l<elem3d_physics[j][k].ndof;l++){        
                 sm->residual[fmap3d[j,k,l]] +=  temp[l];
@@ -237,9 +190,10 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 
     //loop through all nelem1d
     for (j=0;j<grid->nelem1d;j++){
+        sarray_init_dbl(temp,max_elem_dofs);
         for (k=0;k<sm.nSubMods1d[j];k++){
             //would this work for vector functions?
-            sm->residual[fmap1d[j,k]] += sm.elem1d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+            sm.elem1d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
 
             for (l=0;l<elem3d_physics[j][k].ndof;l++){        
                 sm->residual[fmap3d[j,k,l]] +=  temp[l];
@@ -254,7 +208,67 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This file assembles a local 3 element into the global SuperModel Newton residual
+ *  \brief     Updates any model specific quantities using fe_update routines
+ *  \author    Count Corey J. Trahan
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
+ *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
+ *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
+ *  @param[in] int nnodes - the number of local nodes on the element
+ *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
+ *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
+ * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void update_function(SSUPER_MODEL *sm,SGRID *grid,SMAT *mat){
+    int j,k;
+
+
+    //loop through all nelem3d
+    for (j=0;j<grid->nelem3d;j++){
+        for (k=0;k<sm.nSubMods3d[j];k++){
+
+            //would this work for vector functions?
+            //would it be better to put global residual outside inner loop if possible?
+            sm.elem3d_physics[j][k]->fe_update(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+
+        }
+
+    }
+
+    //loop through all nelem2d
+    for (j=0;j<grid->nelem2d;j++){
+        for (k=0;k<sm.nSubMods2d[j];k++){
+            //would this work for vector functions?
+            sm.elem2d_physics[j][k]->fe_update(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+
+        }
+    }
+
+
+    //loop through all nelem1d
+    for (j=0;j<grid->nelem1d;j++){
+        for (k=0;k<sm.nSubMods1d[j];k++){
+            //would this work for vector functions?
+            sm.elem1d_physics[j][k]->fe_update(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+
+        }
+    }    
+
+
+}
+
+
+
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This file assembles a local 3 matrix into the global SuperModel Newton matrix
  *  \author    Count Corey J. Trahan
  *  \bug       none
  *  \warning   none
@@ -283,20 +297,26 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
         sarray_init_dbl(sm->residual, sm->ndofs);
     #endif
     
+
+    double temp[max_elem_dofs,max_elem_dofs];
     //loop through all nelem3d
     for (j=0;j<grid->nelem3d;j++){
-        for (k=0;k<sm.nSubMods3d[j];k++){
-            //would this work for vector functions?
-            //would it be better to put global residual outside inner loop if possible?
-            sm->residual[fmap3d[j,k]] += sm.elem3d_physics[j][k].fe_resid(sm,grid,mat);
-        }
+            sarray_init_dbl(temp,max_elem_dofs**2);
+            for (k=0;k<sm.nSubMods3d[j];k++){
+                //would this work for vector functions?
+                //would it be better to put global residual outside inner loop if possible?
+                add_replace(temp,sm.elem3d_physics[j][k].fe_load(sm,grid,mat));
+            }
+            //store in global using the map
+            sm->residual[fmap2d[j,k]] += //???
+
     }
 
     //loop through all nelem2d
     for (j=0;j<grid->nelem2d;j++){
         for (k=0;k<sm.nSubMods2d[j];k++){
             //would this work for vector functions?
-            sm->residual[fmap2d[j,k]] += sm.elem2d_physics[j][k].fe_resid(sm,grid,mat);
+            sm->residual[fmap2d[j,k]] += sm.elem2d_physics[j][k].fe_load(sm,grid,mat);
         }
     }
 
@@ -305,7 +325,7 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     for (j=0;j<grid->nelem1d;j++){
         for (k=0;k<sm.nSubMods1d[j];k++){
             //would this work for vector functions?
-            sm->residual[fmap1d[j,k]] += sm.elem1d_physics[j][k].fe_resid(sm,grid,mat);
+            sm->residual[fmap1d[j,k]] += sm.elem1d_physics[j][k].fe_load(sm,grid,mat);
         }
     }    
 }

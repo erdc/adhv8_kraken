@@ -198,12 +198,12 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
     
     /* initial setup */
     //(*init_fnctn) (sm,isuperModel);
-    initalize_system(sm,grid,mat);
+    initialize_system(sm,grid,mat);
 
     //it = 0;
     //(*update_fnctn) (sm,isuperModel);
     it=0;
-    update_resid(sm,grid,mat);
+    update_function(sm,grid,mat);
     //*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // get initial residual
     //(*residual_fnctn) (sm,isuperModel);
@@ -290,7 +290,11 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
         /* forms the matrix */
         if (DEBUG_FULL) printf("\nLoading from fe_newton before another newton iteration ...\n");
 #endif
-        (*load_fnctn) (sm,isuperModel);
+        //loads global sparse system of equations
+        //(*load_fnctn) (sm,isuperModel);
+        assemble_matrix(sm,grid,mat);
+
+
 #ifdef _PETSC
         // print preallocation statistics if using PETSc
         ierr = MatGetInfo(sm->A,MAT_LOCAL,&info);

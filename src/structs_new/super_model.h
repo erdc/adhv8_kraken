@@ -50,10 +50,21 @@ typedef struct {
     ELEM_PHYSICS **elem3d_physics;  // [nelems3d][nsubmods_3d] the fe routines for each type of physics on each 3D element
 
     
-    int ndofs;
+    int ndofs; // local number of degrees of freedom
     int dofs_old; //local numer of solution variables the processor is in charge of
 
+    int *nodal_ndofs;
 
+    /* boundary conditions mask */
+    bcmask *bc_mask;
+
+    STR_VALUE *str_values;    /* strings */
+    SSERIES *series_head;
+    SSERIES *series_curr;
+    SSERIES *series_dt;       /* time-step series */
+    SSERIES *series_out;      /* output series */
+    SSERIES *series_wind_head, *series_wind_curr;
+    SSERIES *series_wave_head, *series_wave_curr;
 
     //stripping out models and putting info in here
 

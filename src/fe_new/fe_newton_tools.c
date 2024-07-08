@@ -30,9 +30,6 @@ void initialize_system(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 
     //seems like the easiest way?
     //maybe think about this
-    double fmap3d = sm->fmap3d;
-    double fmap2d = sm->fmap2d;
-    double fmap1d = sm->fmap1d;
 
 
     //this will update sm solution structs that depend on time
@@ -76,41 +73,78 @@ void initialize_system(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     }    
 
 
+}
 
+
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This file initializes the SuperModel Newton residual
+ *  \author    Count Corey J. Trahan
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
+ *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
+ *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
+ *  @param[in] int nnodes - the number of local nodes on the element
+ *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
+ *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
+ * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void initialize_dirichlet_bc(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 
     //Dirichlet condition handling go here
-    //loop through elem_physics and call init routines
-    //since 3d is max dimension there should not be anything here
-    //for (j=0;j<grid->nelem3d;j++){
-    //    for (k=0;k<sm.nSubMods3d[j];k++){
+    int istart = 0, isers = 0, istr = 0;
+    for (i = 0; i < grid->nnodes; i++) {
 
-            //would this work for vector functions?
-            //would it be better to put global residual outside inner loop if possible?
-    //        sm.elem3d_physics[j][k]->fe_init(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-    //    }
+        //re-establish bc mask
+        set_bc_mask_no(sm.bc_mask[i]);
+        
+        
+        //what about different sting for supermodel?
+        //maybe grid->node->string is array of length n sm?
+        if (grid->node[i].string > NORMAL){
+            istr = grid->node[i].string;
 
-    //}
+            //check any possible available boundary conditions
 
-    //loop through all nelem2d on faces?
-    for (j=0;j<grid->nelem2d;j++){
-        for (k=0;k<sm.nSubMods2d[j];k++){
-            //would this work for vector functions?
-            sm.elem3d_physics[j][k]->fe_init(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+            //SW2 Model here, add more later
+            //maybe more modular way to do this?
+            if (sm->str_vals[istr] == BCT_VEL_DIR) {
 
+                sm->bc_mask[i].u = YES;
+                sm->bc_mask[i].v = YES;
+                isers = sm->str_values[istr].ol_flow.ivx;
+                sm->vel2d[i].x = sseries_get_value(isers, sm->series_head,0);
+                isers = sm->str_values[istr].ol_flow.ivy;
+                sm->vel2d[i].y = sseries_get_value(isers, sm->series_head,0);
+            }
+            else if (str_values[istr] == BCT_PRS_DIR) {
+                sm->bc_mask[i].head = YES;
+                isers = sm->str_values[istr].ol_flow.iu_0;
+                sm->head[i] = sseries_get_value(isers, sm->series_head,0);
+            }
+            else if (str_values[istr] == BCT_VEL_PRS_DIR) {
+                sm->bc_mask[i].head = YES;
+                sm->bc_mask[i].u = YES;
+                sm->bc_mask[i].v = YES;
+                isers = sm->str_values[istr].ol_flow.ivx;
+                sm->vel2d[i].x = sseries_get_value(isers, sm->series_head,0);
+                isers = sm->str_values[istr].ol_flow.ivy;
+                sm->vel2d[i].y = sseries_get_value(isers, sm->series_head,0);
+                isers = sm->str_values[istr].ol_flow.iu_0;
+                sm->head[i] = sseries_get_value(isers, sm->series_head,0);
+            }
 
         }
-    }
 
 
-    //loop through all nelem1d
-    //no 1d init for now?
-    for (j=0;j<grid->nelem1d;j++){
-        for (k=0;k<sm.nSubMods1d[j];k++){
-            //would this work for vector functions?
-            sm.elem2d_physics[j][k]->fe_init(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-
-        }
-    }    
+     }
     
 }
 
@@ -360,27 +394,27 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-void get_residual_norms(int my_nnodes, int nnodes, int macro_nnodes
+void get_residual_norms(SGRID *grid, int nnodes, int *ndof, int macro_ndof
 #ifdef _PETSC
-        , Vec residual, Vec sol, int max_nsys
+        , Vec residual, Vec sol
 #else
         , double *residual, double *sol
 #endif
-        , int nsys, double *resid_max_norm, double *resid_l2_norm, double *inc_max_norm, int *imax_node, int *iinc_node, int *include_node
-#ifdef _MESSG
-                        , SMPI *supersmpi
-#endif
+        , double *resid_max_norm, double *resid_l2_norm, double *inc_max_norm, int *imax_node, int *iinc_node, int *include_node
+        
 ) {
     
     int i, j, idof, include_node_flag;
+    idof=0;
     double lolh = 1.0;
     double partial_l2_norm = 0.;
     double partial_max_norm = 0.;
     double partial_inc_max_norm = 0.;
     int ierr = 0;
+    int ctr = 0;
     
 #ifdef _MESSG
-    int myid = supersmpi->myid; /* gkc temp warning come back later and check. */
+    int myid = grid->smpi->myid; /* gkc temp warning come back later and check. */
 #else
     int myid = 0;
 #endif
@@ -399,60 +433,61 @@ void get_residual_norms(int my_nnodes, int nnodes, int macro_nnodes
     ierr = VecGetArrayRead(residual, &(read_residual));
 #endif
     
-    for (i = 0; i < my_nnodes; i++) {
-        for (j = 0; j<nsys; j++) {
-#ifdef _PETSC
-            // Here, i gets multiplied by max_nsys because
-            // PETSC Vecs (and Mats) are sized based on max_nsys
-            idof = i*max_nsys + j;
-#else
-            idof = i*nsys + j;
-#endif
-            
-            include_node_flag = 1;
-            if (include_node != NULL) {
-                if (include_node[i] != YES) include_node_flag = 0;
-            }
+    for (i = 0; i < nnodes; i++) {
+
+            //WARNING, NEED TO ONLY FIND NDOF that are residential!!!!!
+            //need to fix this
+            //i is different probably? this only works if ndof is locally owned on nodes 0 to my_nnode
+            //check here
+            if (grid->node[i].resident_pe == grid->smpi->myid){  
+                for(j=0; j<ndof[i],j++){
+                    idof+=1;
+                    //think this is for multiple grids
+                    //include_node_flag = 1;
+                    //if (include_node != NULL) {
+                    //    if (include_node[i] != YES) include_node_flag = 0;
+                    //}
            
 #ifdef _PETSC
-            // Use pointers to PETSc residual and sol
-            if ( (fabs(read_sol[idof]) > partial_inc_max_norm) && include_node_flag == 1) {
-                partial_inc_max_norm = fabs(read_sol[idof]);
-                *iinc_node = i;
-            }
-            if (solv_isnan(read_residual[idof])){
-                printf("\nERROR :: myid %d  || residual[%d] = %f || equation: %d\n", myid, idof, read_residual[idof], j);
-                printf("ERROR :: fe_newton.c :: get_residual_norms :: residual[%d] = %20.10f\n",idof,read_residual[idof]);
-                ierr = 1;
-                exit(-1);
-            }
+                    // Use pointers to PETSc residual and sol
+                if ( (fabs(read_sol[idof]) > partial_inc_max_norm) && include_node_flag == 1) {
+                    partial_inc_max_norm = fabs(read_sol[idof]);
+                    *iinc_node = i;
+                }
+                if (solv_isnan(read_residual[idof])){
+                    printf("\nERROR :: myid %d  || residual[%d] = %f || equation: %d\n", myid, idof, read_residual[idof], j);
+                    printf("ERROR :: fe_newton.c :: get_residual_norms :: residual[%d] = %20.10f\n",idof,read_residual[idof]);
+                    ierr = 1;
+                    exit(-1);
+                }
             
-            if ((fabs(read_residual[idof]) > partial_max_norm) && include_node_flag == 1) {
-                partial_max_norm = fabs(read_residual[idof]);
-                *imax_node = i;
-            }
+                if ((fabs(read_residual[idof]) > partial_max_norm) && include_node_flag == 1) {
+                    partial_max_norm = fabs(read_residual[idof]);
+                    *imax_node = i;
+                }
             
-            partial_l2_norm += read_residual[idof] * read_residual[idof];
+                partial_l2_norm += read_residual[idof] * read_residual[idof];
 #else
-            // Directly use residual and sol double arrays
-            if ( (fabs(sol[idof]) > partial_inc_max_norm) && include_node_flag == 1) {
-                partial_inc_max_norm = fabs(sol[idof]);
-                *iinc_node = i;
-            }
-            if (solv_isnan(residual[idof])){
-                printf("\nERROR :: myid %d  || residual[%d] = %f || equation: %d\n", myid, idof, residual[idof], j);
-                printf("ERROR :: fe_newton.c :: get_residual_norms :: residual[%d] = %20.10f\n",idof,residual[idof]);
-                ierr = 1;
-                exit(-1);
-            }
+                // Directly use residual and sol double arrays
+                if ( (fabs(sol[idof]) > partial_inc_max_norm) && include_node_flag == 1) {
+                    partial_inc_max_norm = fabs(sol[idof]);
+                    *iinc_node = i;
+                }
+                if (solv_isnan(residual[idof])){
+                    printf("\nERROR :: myid %d  || residual[%d] = %f || equation: %d\n", myid, idof, residual[idof], j);
+                    printf("ERROR :: fe_newton.c :: get_residual_norms :: residual[%d] = %20.10f\n",idof,residual[idof]);
+                    ierr = 1;
+                    exit(-1);
+                }
             
-            if ((fabs(residual[idof]) > partial_max_norm) && include_node_flag == 1) {
-                partial_max_norm = fabs(residual[idof]);
-                *imax_node = i;
-            }
+                if ((fabs(residual[idof]) > partial_max_norm) && include_node_flag == 1) {
+                    partial_max_norm = fabs(residual[idof]);
+                    *imax_node = i;
+                }
             
-            partial_l2_norm += residual[idof] * residual[idof];
+                partial_l2_norm += residual[idof] * residual[idof];
 #endif
+            }
         }
     }
     *resid_max_norm = partial_max_norm;
@@ -465,9 +500,9 @@ void get_residual_norms(int my_nnodes, int nnodes, int macro_nnodes
     
     // CJT ::  below should only include include_node == YES, but is shouldn't make a huge difference
 #ifdef _MESSG
-    *resid_l2_norm = sqrt(messg_dsum(partial_l2_norm, supersmpi->ADH_COMM) / (macro_nnodes * nsys));
+    *resid_l2_norm = sqrt(messg_dsum(partial_l2_norm, smpi->ADH_COMM) / (macro_ndof));
 #else
-    *resid_l2_norm = sqrt(messg_dsum(partial_l2_norm) / (nnodes * nsys));
+    *resid_l2_norm = sqrt(messg_dsum(partial_l2_norm) / (ndof));
 #endif
     *inc_max_norm = partial_inc_max_norm;
     if((ierr > 0) && (myid == 0)) printf("\n +++++++ WARNING NaN generated!!! ++++++++ \n");

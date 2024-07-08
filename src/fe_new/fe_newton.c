@@ -198,20 +198,25 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
     
     /* initial setup */
     //(*init_fnctn) (sm,isuperModel);
+    //split up into 2 steps
     initialize_system(sm,grid,mat);
+    initialize_dirichlet_bc(sm, grid, mat)
+
 
     //it = 0;
     //(*update_fnctn) (sm,isuperModel);
     it=0;
+    //updates any other quantities not in solution or for MPI
     update_function(sm,grid,mat);
     //*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // get initial residual
     //(*residual_fnctn) (sm,isuperModel);
-
     //elemental loops are now part of call
     assemble_residual(sm,grid, mat);
     
+    //Mark ignore for now, ask about this later
     // Do not require this if WVEL is being called, since no 2D is used
+    /*
     if (is_2d_hydro == TRUE && include_node_norm != NULL) {
         for (i=0; i<sm->nsubmodels; i++) {
             if(sm->submodel[i].proc_flag==1 && sm->submodel[i].flag.SW2_FLOW){
@@ -221,7 +226,11 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
         }
     }
     mod=NULL;
-   
+    */
+
+
+//Old call
+/*
     get_residual_norms(my_nnodes, nnodes, macro_nnodes, sm->residual, sm->sol,
 #ifdef _PETSC
             sm->max_nsys,
@@ -231,8 +240,19 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
                        ,supersmpi
 #endif
                        );
+*/
+//New call
+    get_residual_norms(grid,nnodes,sm->nodal_ndof,macro_ndof, sm->residual, sm->sol,
+                    &resid_max_norm, &resid_l2_norm, &inc_max_norm, &imax_node, &iinc_node, include_node_norm
+                       );
+
+
+
+
+
+
 #ifdef _MESSG
-    resid_max_norm = messg_dmax(resid_max_norm, supersmpi->ADH_COMM);
+    resid_max_norm = messg_dmax(resid_max_norm, smpi->ADH_COMM);
 #endif
     
 #ifdef _DEBUG
@@ -249,7 +269,7 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
 #ifdef _DEBUG
     if (DEBUG_FULL) {
 #ifdef _MESSG
-        tag(supersmpi->ADH_COMM);
+        tag(smpi->ADH_COMM);
 #else
         tag();
 #endif
@@ -269,6 +289,11 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
             if(myid==0)printf("\n%s TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[solver->PRN_NEWTON - 1], sm->submodel[0].t_prev, sm->dt, (100.0 * (sm->submodel[0].t_prev - sm->submodel[0].t_init) / (sm->submodel[0].t_final - sm->submodel[0].t_init)), it + 1);
         }
         
+        
+        sm->nonlinear_it_total++;
+
+        //Old code. dont think  this applies anymore
+        /*
         if (init_fnctn == fe_hvel_init || init_fnctn == fe_sw_hybrid_init) {
             sm->nonlinear_it_total_hvel++;
             sm->nonlinear_it_total++;
@@ -285,13 +310,15 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
             sm->nonlinear_it_total++;
         }	
 #endif
-        
+        */
+
 #ifdef _DEBUG
         /* forms the matrix */
         if (DEBUG_FULL) printf("\nLoading from fe_newton before another newton iteration ...\n");
 #endif
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
+        //Mark stopped here
         assemble_matrix(sm,grid,mat);
 
 
@@ -310,7 +337,7 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
         
         /* Set initial guess */
 #ifndef _PETSC
-        solv_init_dbl(nnodes * nsys, sm->sol);
+        solv_init_dbl(ndof, sm->sol);
 #endif
         
 #ifdef _DEBUG

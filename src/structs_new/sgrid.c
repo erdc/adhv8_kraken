@@ -1453,7 +1453,7 @@ if(g->smpi->myid==0){
   for (c = getc(xmf); c != EOF; c = getc(xmf))
         if (c == '\n') // Increment count if this character is newline
             nline+= 1;
-  printf("Nline,%d\n",nline);
+  //printf("Nline,%d\n",nline);
   rewind(xmf);
   // Count lines and move to the second last line (considering 0-based indexing)
   while (fgets(line, sizeof(line), xmf) != NULL) {
@@ -1479,7 +1479,7 @@ if(g->smpi->myid==0){
     //XDMF File finished
     
     fclose(xmf);
-    printf("Text inserted successfully!\n");
+    //printf("Text inserted successfully!\n");
 
 }
 
@@ -1526,7 +1526,7 @@ if(g->smpi->myid==0){
   for (c = getc(xmf); c != EOF; c = getc(xmf))
         if (c == '\n') // Increment count if this character is newline
             nline+= 1;
-  printf("Nline,%d\n",nline);
+  //printf("Nline,%d\n",nline);
   rewind(xmf);
   // Count lines and move to the second last line (considering 0-based indexing)
   while (fgets(line, sizeof(line), xmf) != NULL) {
@@ -1874,30 +1874,33 @@ void sgrid_read_nodal_attribute(SGRID *g){
     #ifdef _ADH_HDF5
 
     int i,j=0;
-    int nsurf=0;
+    int nsurf,my_nsurf;
     int lnode3d;
 
+    //hard code one nodal attribute?
+    g->nodal_attribute.rain = (double *) tl_alloc(sizeof(double), nsurf);
 
-
-    for (i=0;i<g->nnodes;i++){
-        if (g->node[i].bflag==SURFACE || g->node[i].bflag==BODY2D){
-            //includes ghost nodes
-            //printf("%d\n",g->node[i].global_surf_id);
-            nsurf+=1;         
-    }
-    }
+    
     //Note, need these to match to avoid above loop
-    printf("PE %d, nnodes_sur = %d, garbage %d\n",g->smpi->myid,nsurf,g->nnodes_sur_old);
-    int mapping[nsurf];
+    nsurf = g->nnodes_sur;
+    //doesnt appear to be neccesary
+    //my_nsurf = g->my_nnodes_sur;
+    //printf("PE %d || nsurf %d || my nsurf %d || macro_nsurf%d\n",g->smpi->myid,g->nnodes_sur,g->my_nnodes_sur,g->macro_nnodes_sur);
+    int local_to_global_sur[nsurf];
     int nodeID_2d_to_3d_sur[nsurf];
     //set up map to go from local to global
     for (i=0;i<g->nnodes;i++){
+        //printf("PE %d || global id %d Global surface id %d\n",g->smpi->myid,g->node[i].gid, g->node[i].global_surf_id);
         if (g->node[i].bflag==SURFACE || g->node[i].bflag==BODY2D){
+            //not necessary for read but will need this map most likely in residual routines
+            //add to grid class?
             nodeID_2d_to_3d_sur[j] = i;
-            mapping[j]=g->node[i].global_surf_id;
+            //necessary for reading surface properly
+            local_to_global_sur[j]=g->node[i].global_surf_id;
             j+=1;
         }
     }
+    assert(j==nsurf);
     //key attribute here, 
     //g->node[local_index].global_surf_id
     //localSurf2GlobalMap[nnodes_surf]; initialize to UNSET_INT
@@ -1912,7 +1915,6 @@ void sgrid_read_nodal_attribute(SGRID *g){
 
     //attempt to read in H5 file in parallel
     hid_t     file_id, plist_id, filespace, dset_id, memspace;
-    hid_t     grp1,grp2;
     char      fname[50];
     hsize_t   dims[MATRIX_RANK];
     herr_t    status;
@@ -1934,7 +1936,7 @@ void sgrid_read_nodal_attribute(SGRID *g){
     // open file
 
     strcpy(fname,g->filename);
-    strcat(fname, ".h5");
+    strcat(fname, ".att.h5");
     file_id = H5Fopen(fname, H5F_ACC_RDONLY, plist_id);
     H5Pclose(plist_id);
 
@@ -1947,18 +1949,19 @@ void sgrid_read_nodal_attribute(SGRID *g){
     // declare global sizes of data set nodes first. This is local data.
     //Nodally based scalar data, maybe outsource this to other routine later
 
-    int *scalardata; 
-    scalardata = (int *)malloc(sizeof(int) * g->my_nnodes);
+    //double *scalardata; 
+    //scalardata = (double *)malloc(sizeof(double) * nsurf);
 
 
 
     //create a parallel dataset object and close filespace
-    dset_id = H5Dopen(file_id, "/Data/NodalScalar/0", H5P_DEFAULT);
+    //For now hard code but this should be an argument into the function
+    dset_id = H5Dopen(file_id, "/NodalAttributes/Rain", H5P_DEFAULT);
     
 
     //create a local dataspace where each process has a few of the rows
-    count[0]  = g->my_nnodes;
-    count[1]  = dims[1];
+    count[0]  = nsurf;
+    count[1]  = 0;
     
 
     // give the part that each processor will give
@@ -1970,22 +1973,16 @@ void sgrid_read_nodal_attribute(SGRID *g){
     filespace = H5Dget_space(dset_id);
     
     // the 2 is dimension of our data structure
-    hsize_t   coord1[g->my_nnodes];
-    
-    // the values in coord1 should be the global node numbers, this time it is trivial
-    int l=0;
-    for (i=0; i<g->nnodes; i++){
-        //temporarily store PE
-        if(g->node[i].resident_pe == g->smpi->myid){
-            //scalardata[l] = g->node[i].resident_pe;
-            coord1[l] = g->node[i].gid;
-            l+=1;
+    hsize_t   coord1[nsurf];
 
-    }
+    //fill in
+    for (i=0; i<nsurf; i++){
+        coord1[i] = local_to_global_sur[i];
+        //printf("PE %d || local surface no. %d , global surface id %d\n",g->smpi->myid,i,mapping[i]);
     }
 
-    assert(l==g->my_nnodes);
-    H5Sselect_elements(filespace, H5S_SELECT_SET,g->my_nnodes,(const hsize_t *)&coord1);
+
+    H5Sselect_elements(filespace, H5S_SELECT_SET,nsurf,(const hsize_t *)&coord1);
     
     // Create property list for collective dataset write.
     // declare collextive data file writing
@@ -1995,7 +1992,7 @@ void sgrid_read_nodal_attribute(SGRID *g){
         H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
     #endif
     //collective write
-    status = H5Dread(dset_id, H5T_NATIVE_INT, memspace, filespace, plist_id, scalardata);
+    status = H5Dread(dset_id, H5T_NATIVE_DOUBLE, memspace, filespace, plist_id, g->nodal_attribute.rain);
 
 
 
@@ -2012,12 +2009,13 @@ void sgrid_read_nodal_attribute(SGRID *g){
     H5Fclose(file_id);
 
 
-    for (i=0; i<g->nnodes; i++){
-        if(g->node[i].resident_pe == g->smpi->myid){
-            printf("PE %d, gid %d, scalardat = %d\n",g->smpi->myid,g->node[i].gid,scalardata[i]);
-        }
+    
+
+    for (i=0; i<nsurf; i++){
+            printf("PE %d, global sur id %d, gid %d, Rain data = %f\n",g->smpi->myid,local_to_global_sur[i],g->node[nodeID_2d_to_3d_sur[i]].gid,g->nodal_attribute.rain[i]);
     }
-    free(scalardata);
+
+
 
     #endif
 

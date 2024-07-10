@@ -22,7 +22,7 @@ void selem3d_alloc(SELEM_3D *elem3d, int nnodes_on_elem) {
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void selem3d_load(SELEM_3D *elem3d, int gid, int lid, int elem_nnodes, int *local_node_ids, int column, SVECT *nds) {
+void selem3d_load(SELEM_3D *elem3d, int gid, int lid, int elem_nnodes, int *local_node_ids, int column, SVECT *nds, int mat) {
     
     int i;
     
@@ -30,6 +30,7 @@ void selem3d_load(SELEM_3D *elem3d, int gid, int lid, int elem_nnodes, int *loca
     elem3d->gid = gid;
     elem3d->id_orig = lid; // hmmm, what if we call this later?
     elem3d->icol = column;
+    elem3d->mat = mat;
     elem3d->nnodes = elem_nnodes;
     selem3d_alloc(elem3d, elem_nnodes);
     for (i=0;i<elem_nnodes;i++) elem3d->nodes[i] = local_node_ids[i];
@@ -94,6 +95,7 @@ void selem3d_init(SELEM_3D *elem3d) {
     elem3d->djac = UNSET_FLT;
     elem3d->string = UNSET_INT;
     elem3d->mat = UNSET_INT;
+    elem3d->nvars = 0;
     elem3d->icol = UNSET_INT;
     elem3d->elem2d_sur = UNSET_INT;
     elem3d->elem2d_bed = UNSET_INT;

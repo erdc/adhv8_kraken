@@ -10,7 +10,14 @@ typedef struct {
     double dt_prev;
     double inc_nonlin;
     double tol_nonlin;
-    
+ 
+
+
+    double *head, *old_head, *older_heard;
+    double *dpl, *old_dpl, *older_dpl;
+    SVECT *vel, *old_vel, *older_vel;
+
+
     //FE_MATRIX *matrix;  // stores matrix
 
 } SUPER_MODEL;

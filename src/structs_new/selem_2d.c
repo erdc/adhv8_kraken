@@ -50,7 +50,7 @@ void selem2d_alloc(SELEM_2D *elem2d, int nnodes_on_elem) {
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void selem2d_load(SELEM_2D *elem2d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds) {
+void selem2d_load(SELEM_2D *elem2d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds, int mat) {
     
     int i;
     
@@ -58,6 +58,7 @@ void selem2d_load(SELEM_2D *elem2d, int gid, int lid, int elem_nnodes, int *loca
     elem2d->gid = gid;
     elem2d->id_orig = lid; // hmmm, what if we call this later?
     elem2d->bflag = bflag;
+    elem2d->mat = mat;
     elem2d->nnodes = elem_nnodes;
     selem2d_alloc(elem2d, elem_nnodes);
     for (i=0;i<elem_nnodes;i++) elem2d->nodes[i] = local_node_ids[i];
@@ -147,6 +148,7 @@ void selem2d_init(SELEM_2D *elem2d) {
     svect_init(&(elem2d->nrml));
     elem2d->string = UNSET_INT;
     elem2d->mat = UNSET_INT;
+    elem2d->nvars = 0;
     elem2d->bflag = UNSET_INT;
     elem2d->nedges = UNSET_INT;
     elem2d->nnodes_quad = UNSET_INT;

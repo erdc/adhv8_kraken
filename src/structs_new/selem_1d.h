@@ -25,7 +25,8 @@ typedef struct {
     double djac;        /* the jacobian of the element */
     SVECT2D nrml;       /* this is the 2d outward normal to the element this is connected to in the x-y plane */
     int string;         /* boundary conditions to to this 1d element if there is one */
-    int mat;            /* material id */
+    int mat;            /* element physics material id */
+    int nvars:          /* the total number of independent variables on this element */
     double *grad_shp;   /* the gradients of the shape functions */
     int *nodes;         /* the nodes in the element */
     int *levels;        /* the node levels in the element */
@@ -39,7 +40,7 @@ typedef struct {
 /* struct methods -------------------------------------- */
 
 void selem1d_alloc_array(SELEM_1D **elem1d, int nelems1d);
-void selem1d_load(SELEM_1D *elem1d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds);
+void selem1d_load(SELEM_1D *elem1d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds, int mat);
 void selem1d_realloc_array(SELEM_1D **elem1d, int nelems1d_old, int nelem1d_new);
 void selem1d_free_array(SELEM_1D *elem1d, int nelems1d);
 void selem1d_init(SELEM_1D *elem1d);

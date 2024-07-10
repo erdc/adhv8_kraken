@@ -20,7 +20,8 @@ typedef struct {
     double djac3d_fixed;      /* the area of the original element in 3D */
     SVECT nrml;               /* the normal to the face */
     int string;               /* string # associated with this 2d element*/
-    int mat;                  /* 2d element material type */
+    int mat;                  /* 2d element physics material type */
+    int nvars:          /* the total number of independent variables on this element */
     int bflag;                /* element boundary flag :: -1 = body, 0 = surface, 1 = bottom, 2 = sidewall (3d) */
     SVECT2D *grad_shp;        /* the gradients of the shape functions */
     int *nodes;               /* the nodes in the element */
@@ -43,7 +44,7 @@ typedef struct {
 void selem2d_get_triangle_local_shape(double xhat, double yhat, double zhat, double *lshape);
 void selem2d_get_quadrilateral_local_shape(double xhat, double yhat, double zhat, double *lshape);
 void selem2d_alloc(SELEM_2D *elem2d, int nnodes_on_elem);
-void selem2d_load(SELEM_2D *elem2d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds);
+void selem2d_load(SELEM_2D *elem2d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds, int *mat);
 void selem2d_free(SELEM_2D *elem2d);
 void selem2d_alloc_array(SELEM_2D **elem2d, int nelems2d);
 void selem2d_free_array(SELEM_2D *elem2d, int nelems2d);

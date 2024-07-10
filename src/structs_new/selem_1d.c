@@ -25,7 +25,7 @@ void selem1d_alloc_array(SELEM_1D **elem1d, int nelems1d) {
 
 /***********************************************************/
 /***********************************************************/
-void selem1d_load(SELEM_1D *elem1d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds) {
+void selem1d_load(SELEM_1D *elem1d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds, int mat) {
     
     assert(elem_nnodes == 2);
     
@@ -33,6 +33,7 @@ void selem1d_load(SELEM_1D *elem1d, int gid, int lid, int elem_nnodes, int *loca
     elem1d->gid = gid;
     elem1d->id_orig = lid; // hmmm, what if we call this later?
     elem1d->bflag = bflag;
+    elem1d->mat = mat;
     elem1d->nnodes = elem_nnodes;
     selem1d_alloc(elem1d);
     elem1d->nodes[0] = local_node_ids[0];
@@ -94,6 +95,7 @@ void selem1d_init(SELEM_1D *elem1d) {
     elem1d->nrml.y = UNSET_FLT;
     elem1d->string = UNSET_INT;
     elem1d->mat = UNSET_INT;
+    elem1d->nvars = 0;
     for (i = 0; i < elem1d->nnodes; i++) {
         elem1d->grad_shp[i] = UNSET_FLT;
         elem1d->nodes[i] = UNSET_INT;

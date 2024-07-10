@@ -15,7 +15,8 @@ typedef struct {
     int nnodes_quad;          /* the total number of quadratic nodes on element */
     double djac;              /* the jacobian of the element */
     int string;               /* string number associated with this element */
-    int mat;                  /* 2d element material type */
+    int mat;                  /* 3d element physics material type */
+    int nvars:                /* the total number of independent variables on this element */
     int icol;                 /* the column this tet belongs to */
     int elem2d_sur;           /* the 2d surface element of the column this tet belongs to */
     int elem2d_bed;           /* the 2d bed element of the column this tet belongs to */
@@ -38,7 +39,7 @@ typedef struct {
 // struct methods
 
 void selem3d_alloc(SELEM_3D *elem3d, int nnodes_on_elem);
-void selem3d_load(SELEM_3D *elem3d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds);
+void selem3d_load(SELEM_3D *elem3d, int gid, int lid, int elem_nnodes, int *local_node_ids, int bflag, SVECT *nds, int *mat);
 void selem3d_free(SELEM_3D *elem3d);
 void selem3d_alloc_array(SELEM_3D **elem3d, int nelems3d);
 void selem3d_free_array(SELEM_3D *elem3d, int nelems3d);

@@ -324,22 +324,40 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     double fmap3d = sm->fmap3d;
     double fmap2d = sm->fmap2d;
     double fmap1d = sm->fmap1d;
-    //zero out stuff
-    #ifdef _PETSC
-        ierr = VecZeroEntries(sm->residual);
-    #else
-        sarray_init_dbl(sm->residual, sm->ndofs);
-    #endif
     
 
+    //zero out stuff
+#ifdef _PETSC
+        // Zero the PETSc matrix
+        ierr = MatZeroEntries(sm->A);   // TODO: DO WE NEED THIS - SAM
+#else
+        init_adh_matrix(grid->nnodes, mod->max_nsys_sq, sm->matrix, sm->diagonal);
+#endif
+    
+    int nvar,nnode, var_code;
     double temp[max_elem_dofs,max_elem_dofs];
     //loop through all nelem3d
     for (j=0;j<grid->nelem3d;j++){
-            sarray_init_dbl(temp,max_elem_dofs**2);
-            for (k=0;k<sm.nSubMods3d[j];k++){
+            nvar = grid->elem3d[j].nvars;
+            
+            nnode = grid->elem3d[j].nnodes;
+            sarray_init_dbl(temp,nvar*nnodes*nnodes);
+
+            //need to loop over each variable and perturb it
+            for (k=0;k<nvar;k++){
+
+                //use var code like PERTURB_H ,. ...
+                var_code = elem3d[j].var[k];
+                //want to loop over variables not necessarily submodels right?
+                //need to think about this more
+                //like sw2 is vector equation so that we would need 3 perturbations
+                perturb_var(sm, grid, mat, 3, nodes_on_element, nvar, j, var_code, temp, DEBUG)
+
+                //for (k=0;k<sm.nSubMods3d[j];k++){
                 //would this work for vector functions?
                 //would it be better to put global residual outside inner loop if possible?
                 add_replace(temp,sm.elem3d_physics[j][k].fe_load(sm,grid,mat));
+            
             }
             //store in global using the map
             sm->residual[fmap2d[j,k]] += //???
@@ -363,6 +381,143 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
         }
     }    
 }
+
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Adds perturbation to a variable for each node in element for Newton Jacobian calculation.
+ *  \author    Gaurav Savant, Ph.D.
+ *  \author    Corey Trahan, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ *  @param[in,out] elem_mat_h stores the Jacobian, elemental matrix for the head perturbation
+ *  @param[in]  mod a pointer to an AdH model where depth should be updated
+ *  @param[in] nodes_on_element the number of nodes on the element
+ *  @param[in] ie the element
+ *  @param[in] dim the dimension of the resid
+ *  @param[in] DEBUG a debug option
+ *
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void perturb_var(SSUPER_MODEL *mod, SGRID *grid, SMAT *mat, int dim, int nodes_on_element, int nvar, int ie, int var_code, double *elem_mat, int DEBUG) {
+    
+#ifdef _DEBUG
+    assert(dim == 1 || dim == 2 || dim==3);
+#endif
+    
+    int i,j, GlobalNodeID = UNSET_INT;
+    double epsilon = 0., epsilon2 = 0.;
+    //pertrubation may depend on physics?
+    double perturbation = sqrt(SMALL);
+    double elem_rhs_P[nodes_on_element*nvar];    // +head perturbation initialized by elem_resid
+    double elem_rhs_M[nodes_on_element*nvar];    // -head perturbation initialized by elem_resid
+    
+    
+    //DEBUG = ON;
+
+    if (dim == 1) {
+         SELEM_1D elem;
+         elem = grid->elem1d[ie];
+    }
+    else if (dim == 2) {
+        SELEM_2D elem;
+        elem = grid->elem2d[ie];
+    }
+    else if (dim==3) {
+        SELEM_3D elem;
+        elem = grid->elem3d[ie];
+    }
+
+
+    
+
+
+    //switch case for which sm->sol_var
+    double temp_sol[nnode];
+    if (var_code == PERTURB_H){
+        temp_sol = sm->head;
+    }else if (var_code == PERTURB_U){
+        temp_sol = sm->vel2d[].x;
+    }else if (var_code == PERTURB_V){
+        temp_sol = sm->vel2d.y
+    }
+
+
+    for (i=0; i<nodes_on_element; i++) {
+        GlobalNodeID = elem.nodes[i];
+
+            //Mark add switch cases for sol_var
+            
+            NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol[GlobalNodeID], perturbation);    // calculates epsilon and 2*epsilon
+            
+            //safe assumption that all submodels on an element depend on all of the variables?
+            for (j=0;j<nsubModels;j++){            
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // (+) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
+#ifdef _DEBUG
+            if (DEBUG) printf("\nload :: body pertubing +h for %dd element %d :: perturbation: %20.10e\n",dim,ie,epsilon);
+#endif
+            sm.elem2d_physics[ie][j]->fe_resid(sm,temp,grid,mat,ie, epsilon,i, var_code, +1, DEBUG);
+            
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
+#ifdef _DEBUG
+            if (DEBUG) printf("\nload :: body pertubing -h for %dd element %d :: perturbation: %20.10e\n",dim,ie,epsilon);
+#endif
+            //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
+            sm.elem2d_physics[ie][j]->fe_resid(sm,temp,grid,mat,ie, epsilon,i, var_code, -1, DEBUG);
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // calculate local contribution to Jacobian matrix++++++++++++++++++++++++++++++
+        elem_matrix_deriv(i, nodes_on_element, elem_rhs_P, elem_rhs_M, elem_mat_h, epsilon2); // gradient
+        }
+    }
+    
+    //DEBUG =  OFF;
+}
+
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Calculates a 3 DOF first order finite difference of a Jacobi matrix elemental block
+ *  \author    Corey Trahan, Ph.D.
+ *  \author    Gaurav Savant, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ *  @param[out] mat a 3 DOF matrix which stores the gradients
+ *  @param[in] indx the block starting position
+ *  @param[in] nnodes the total number of nodes on the element
+ *  @param[in] local1 a 3 DOF residual with a (+) perturbation
+ *  @param[in] local2 a 3 DOF residual with a (-) perturbation
+ *  @param[in] diff_ep two times the perturbations size
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void elem_matrix_deriv(int indx, int nnodes, double *local1, double *local2, double *mat, double diff_ep) {
+    int inode;
+    for (inode=0; inode<nnodes; inode++) {
+        for (j=0; j<nvar; j++){
+            mat[ indx + inode*nnodes ].x_eq = (local1[inode].x_eq - local2[inode].x_eq)/diff_ep;
+            mat[ indx + inode*nnodes ].y_eq = (local1[inode].y_eq - local2[inode].y_eq)/diff_ep;
+            mat[ indx + inode*nnodes ].c_eq = (local1[inode].c_eq - local2[inode].c_eq)/diff_ep;
+        }
+    }
+
+
+
+
+
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -507,6 +662,20 @@ void get_residual_norms(SGRID *grid, int nnodes, int *ndof, int macro_ndof
     *inc_max_norm = partial_inc_max_norm;
     if((ierr > 0) && (myid == 0)) printf("\n +++++++ WARNING NaN generated!!! ++++++++ \n");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void print_concentration(SSUPER_MODEL *sm, int isuperModel, int myid, int npes);

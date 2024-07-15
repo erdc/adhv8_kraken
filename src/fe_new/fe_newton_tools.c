@@ -180,9 +180,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 
     //seems like the easiest way?
     //maybe think about this
-    double fmap3d = sm->fmap3d;
-    double fmap2d = sm->fmap2d;
-    double fmap1d = sm->fmap1d;
+    double fmap = sm->fmap; 
     //zero out stuff
     #ifdef _PETSC
         ierr = VecZeroEntries(sm->residual);
@@ -223,7 +221,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
         }
 
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->residual, elem_rhs, nnodes, j, fmap3d, sm->elem3d_nvars[j], sm->elem3d_vars[j], sm->nodal_nvars, sm->nodal_vars,3);
+        load_global_resid(sm->residual, elem_rhs, nnodes, j, fmap, sm->elem3d_nvars[j], sm->elem3d_vars[j], sm->nodal_nvars, sm->nodal_vars,3);
 
     }
 
@@ -239,7 +237,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
         }
 
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->residual, elem_rhs, nnodes, j, fmap2d, sm->elem2d_nvars[j], sm->elem2d_vars[j], sm->nodal_nvars, sm->nodal_vars,2);
+        load_global_resid(sm->residual, elem_rhs, nnodes, j, fmap, sm->elem2d_nvars[j], sm->elem2d_vars[j], sm->nodal_nvars, sm->nodal_vars,2);
 
     }
 
@@ -256,7 +254,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
         }
 
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->residual, elem_rhs, nnodes, j, fmap1d, sm->elem1d_nvars[j], sm->elem1d_vars[j], sm->nodal_nvars, sm->nodal_vars,1);
+        load_global_resid(sm->residual, elem_rhs, nnodes, j, fmap, sm->elem1d_nvars[j], sm->elem1d_vars[j], sm->nodal_nvars, sm->nodal_vars,1);
     }
 
 
@@ -509,10 +507,11 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 
     //seems like the easiest way?
     //maybe think about this
-    double fmap3d = sm->fmap3d;
-    double fmap2d = sm->fmap2d;
-    double fmap1d = sm->fmap1d;
-    
+    double fmap = sm->fmap;
+    int nsubMods;
+    int nvar_ele,nnode, var_code;
+    int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
+    double temp[max_elem_dofs,max_elem_dofs];
 
     //zero out stuff
 #ifdef _PETSC
@@ -522,24 +521,25 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
         init_adh_matrix(grid->nnodes, mod->max_nsys_sq, sm->matrix, sm->diagonal);
 #endif
     
-    int nvar,nnode, var_code;
-    double temp[max_elem_dofs,max_elem_dofs];
+
     //loop through all nelem3d
     for (j=0;j<grid->nelem3d;j++){
-            nvar = grid->elem3d[j].nvars;
+            nvar_ele = grid->elem3d[j].nvars;
             
             nnode = grid->elem3d[j].nnodes;
-            sarray_init_dbl(temp,nvar*nnodes*nnodes);
+            nsubMods = sm->nSubMods3d[j];
+
+            sarray_init_dbl(temp,nvar_ele*nnodes*nnodes);
 
             //need to loop over each variable and perturb it
-            for (k=0;k<nvar;k++){
+            for (k=0;k<nvar_ele;k++){
 
                 //use var code like PERTURB_H ,. ...
-                var_code = elem3d[j].var[k];
+                var_code = sm->elem3d_vars[j][k];
                 //want to loop over variables not necessarily submodels right?
                 //need to think about this more
                 //like sw2 is vector equation so that we would need 3 perturbations
-                perturb_var(sm, grid, mat, 3, nodes_on_element, nvar, j, var_code, temp, DEBUG)
+                perturb_var(temp, sm, grid, mat, 3, j, nodes_on_element, nvar_ele,  var_code, nsubMods, k, DEBUG)
 
                 //for (k=0;k<sm.nSubMods3d[j];k++){
                 //would this work for vector functions?
@@ -594,7 +594,7 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void perturb_var(SSUPER_MODEL *mod, SGRID *grid, SMAT *mat, int dim, int nodes_on_element, int nvar, int ie, int var_code, double *elem_mat, int DEBUG) {
+void perturb_var(double *elem_mat, SSUPER_MODEL *mod, SGRID *grid, SMAT *mat, int dim, int ie, int nodes_on_element, int nvar_ele,  int var_code, int nsubModels, int dof_no, int DEBUG) {
     
 #ifdef _DEBUG
     assert(dim == 1 || dim == 2 || dim==3);
@@ -602,31 +602,43 @@ void perturb_var(SSUPER_MODEL *mod, SGRID *grid, SMAT *mat, int dim, int nodes_o
     
     int i,j, GlobalNodeID = UNSET_INT;
     double epsilon = 0., epsilon2 = 0.;
+    
+
     //pertrubation may depend on physics?
     double perturbation = sqrt(SMALL);
-    double elem_rhs_P[nodes_on_element*nvar];    // +head perturbation initialized by elem_resid
-    double elem_rhs_M[nodes_on_element*nvar];    // -head perturbation initialized by elem_resid
-    
+
+
+    double temp_P[MAX_NVAR*MAX_NNODE];
+    double temp_M[MAX_NVAR*MAX_NNODE];
+    double elem_rhs_P[MAX_NVAR*MAX_NNODE];    // +head perturbation initialized by elem_resid
+    double elem_rhs_M[MAX_NVAR*MAX_NNODE];    // -head perturbation initialized by elem_resid
+    int eq_var_code,eq_var_code2;
+
+    //maybe pass as argument instead?
+    int **elem_vars;
     
     //DEBUG = ON;
 
     if (dim == 1) {
          SELEM_1D elem;
          elem = grid->elem1d[ie];
+         elem_vars = sm->elem1d_vars[ie];
     }
     else if (dim == 2) {
         SELEM_2D elem;
         elem = grid->elem2d[ie];
+        elem_vars = sm->elem2d_vars[ie];
     }
     else if (dim==3) {
         SELEM_3D elem;
         elem = grid->elem3d[ie];
+        elem_vars = sm->elem3d_vars[ie];
     }
 
 
     
 
-
+    //Mark add switch cases for all sol_var
     //switch case for which sm->sol_var
     double temp_sol[nnode];
     if (var_code == PERTURB_H){
@@ -637,22 +649,27 @@ void perturb_var(SSUPER_MODEL *mod, SGRID *grid, SMAT *mat, int dim, int nodes_o
         temp_sol = sm->vel2d.y
     }
 
-
+    
     for (i=0; i<nodes_on_element; i++) {
         GlobalNodeID = elem.nodes[i];
+        NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol[GlobalNodeID], perturbation);    // calculates epsilon and 2*epsilon
+        sarray_init_dbl(elem_rhs_P,MAX_NVAR*MAX_NNODE);
+        sarray_init_dbl(elem_rhs_M,MAX_NVAR*MAX_NNODE);
 
-            //Mark add switch cases for sol_var
-            
-            NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol[GlobalNodeID], perturbation);    // calculates epsilon and 2*epsilon
-            
-            //safe assumption that all submodels on an element depend on all of the variables?
-            for (j=0;j<nsubModels;j++){            
+        //safe assumption that all submodels on an element depend on all of the variables?
+        for (j=0;j<nsubModels;j++){ 
+            sarray_init_dbl(temp_P,MAX_NVAR*MAX_NNODE);
+            sarray_init_dbl(temp_M,MAX_NVAR*MAX_NNODE);        
+
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (+) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _DEBUG
             if (DEBUG) printf("\nload :: body pertubing +h for %dd element %d :: perturbation: %20.10e\n",dim,ie,epsilon);
 #endif
-            sm.elem2d_physics[ie][j]->fe_resid(sm,temp,grid,mat,ie, epsilon,i, var_code, +1, DEBUG);
+
+            //this will give a local residual, in temp and will give code for model vars
+            eq_var_code = sm.elem2d_physics[ie][j]->fe_resid(sm,temp_P,grid,mat,ie, epsilon,i, var_code, +1, DEBUG);
+            add_replace_elem_rhs(elem_rhs_P,temp_P,elem_vars,nvar_ele,var_code,nodes_on_element);
             
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
@@ -660,11 +677,15 @@ void perturb_var(SSUPER_MODEL *mod, SGRID *grid, SMAT *mat, int dim, int nodes_o
             if (DEBUG) printf("\nload :: body pertubing -h for %dd element %d :: perturbation: %20.10e\n",dim,ie,epsilon);
 #endif
             //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
-            sm.elem2d_physics[ie][j]->fe_resid(sm,temp,grid,mat,ie, epsilon,i, var_code, -1, DEBUG);
+            //should always be same as var_code
+            eq_var_code2 = sm.elem2d_physics[ie][j]->fe_resid(sm,temp_M,grid,mat,ie, epsilon,i, var_code, -1, DEBUG);
+            add_replace_elem_rhs(elem_rhs_M,temp_M,elem_vars,nvar_ele,var_code,nodes_on_element);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        // calculate local contribution to Jacobian matrix++++++++++++++++++++++++++++++
-        elem_matrix_deriv(i, nodes_on_element, elem_rhs_P, elem_rhs_M, elem_mat_h, epsilon2); // gradient
+
         }
+        // calculate local contribution to a local elemental Jacobian matrix++++++++++++++++++++++++++++++
+        // fills in one column
+        elem_matrix_deriv(i, dof_no, nodes_on_element, nvar_ele, elem_rhs_P, elem_rhs_M, elem_mat, epsilon2); // gradient
     }
     
     //DEBUG =  OFF;
@@ -692,15 +713,17 @@ void perturb_var(SSUPER_MODEL *mod, SGRID *grid, SMAT *mat, int dim, int nodes_o
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-inline void elem_matrix_deriv(int indx, int nnodes, double *local1, double *local2, double *mat, double diff_ep) {
-    int inode;
+inline void elem_matrix_deriv(int node_no, int dof_no, int nnodes, int elem_nvars, double *local1, double *local2, double *mat, double diff_ep) {
+    int inode,jvar, col_no, indx;
+    col_no = node_no*elem_nvars + dof_no;
+
     for (inode=0; inode<nnodes; inode++) {
-        for (j=0; j<nvar; j++){
-            mat[ indx + inode*nnodes ].x_eq = (local1[inode].x_eq - local2[inode].x_eq)/diff_ep;
-            mat[ indx + inode*nnodes ].y_eq = (local1[inode].y_eq - local2[inode].y_eq)/diff_ep;
-            mat[ indx + inode*nnodes ].c_eq = (local1[inode].c_eq - local2[inode].c_eq)/diff_ep;
+        for (jvar=0; jvar<elem_nvars; jvar++) {
+            indx = inode*elem_nvars + jvar;
+            mat[indx,col_no]= (local1[indx] - local2[indx])/diff_ep;
         }
     }
+}
 
 
 

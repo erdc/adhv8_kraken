@@ -18,17 +18,17 @@
  *  \author    Gaurav Savant, Ph.D.
  *  \author    Gary Brown
  *  \author    Corey Trahan, Ph.D.
+ *  \author    Mark Loveland, Ph.D.
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
+ * 
+ * \returns YES for a good calculation and NO for a bad calculation
  *
- * @param[in]  mod             (SMODEL *) a pointer to an AdH model
- * @param[in]  grid            (SGRID *) a pointer to a grid in the AdH model
- * @param[in]  init_fnctn      (void *) a pointer to a function for initializing the AdH solutions
- * @param[in]  update_fnctn    (void *) a pointer to a function for updating the solution for parallel runs
- * @param[in]  residual_fnctn  (void *) a pointer to a function for calculating the nonlinear residual
- * @param[in]  load_fnctn      (void *) a pointer to a function for building the Jacobi matrix
- * @param[in]  inc_fnctn       (void *) a pointer to a function for incrementing the solution
+ * @param[in,out] sm           (SSUPERMODEL *) a pointer to an AdH super model
+ * @param[in] isuperModel      int the supermodel index
+ * @param[in]  grid            (SGRID *) a pointer to a grid in the AdH design model
+ * @param[in]  mat             (SMAT *) a pointer to the material properties in the AdH grid
  *
  * \note
  */
@@ -199,8 +199,8 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
     /* initial setup */
     //(*init_fnctn) (sm,isuperModel);
     //split up into 2 steps
-    initialize_system(sm,grid,mat);
-    initialize_dirichlet_bc(sm, grid, mat)
+    initialize_system(sm);
+    initialize_dirichlet_bc(sm, grid)
 
 
     //it = 0;

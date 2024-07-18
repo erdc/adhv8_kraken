@@ -2,18 +2,14 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This file assembles a local 3 degree-of-freedom element into the global SuperModel Newton residual
+ *  \brief     This function assembles the global residual
  *  \author    Count Corey J. Trahan
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
+ *  @param[in,out] SSUPER_MODEL *sm - the super model where the residual resides
  *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
- *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ *  @param[in] SMAT *mat - the materials structure
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
@@ -44,7 +40,6 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     for (j=0;j<grid->nelem3d;j++){
         sarray_init_dbl(elem_rhs,nentry);
         nnodes = grid->elem3d[j].nnodes;
-
         for (k=0;k<sm.nSubMods3d[j];k++){
             sarray_init_dbl(temp,nentry);
             //would this work for vector functions?
@@ -60,42 +55,36 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
             //in order to do this we will need elemental vars and info about fe_resid routine
             add_replace_elem_rhs(elem_rhs,temp,sm->elem3d_vars[j],sm->elem3d_nvars[j],var_code,nnodes);
         }
-
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->residual, elem_rhs, nnodes, j, fmap, sm->elem3d_nvars[j], sm->elem3d_vars[j], sm->nodal_nvars, sm->nodal_vars,3);
-
+        load_global_resid(sm->residual, elem_rhs, nnodes, grid->elem3d[j].nodes, fmap, sm->elem3d_nvars[j], sm->elem3d_vars[j], sm->nodal_nvars, sm->nodal_vars);
     }
 
     //loop through all nelem2d
     for (j=0;j<grid->nelem2d;j++){
-        sarray_init_dbl(temp,nentry);
+        sarray_init_dbl(elem_rhs,nentry);
         nnodes = grid->elem2d[j].nnodes;
         for (k=0;k<sm.nSubMods2d[j];k++){
-
+            sarray_init_dbl(temp,nentry);
             var_code = sm.elem2d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-
             add_replace_elem_rhs(elem_rhs,temp,sm->elem2d_vars[j],sm->elem2d_nvars[j],var_code,nnodes);
         }
-
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->residual, elem_rhs, nnodes, j, fmap, sm->elem2d_nvars[j], sm->elem2d_vars[j], sm->nodal_nvars, sm->nodal_vars,2);
+        load_global_resid(sm->residual, elem_rhs, nnodes, grid->elem2d[j].nodes, fmap, sm->elem2d_nvars[j], sm->elem2d_vars[j], sm->nodal_nvars, sm->nodal_vars);
 
     }
 
 
     //loop through all nelem1d
     for (j=0;j<grid->nelem1d;j++){
-        sarray_init_dbl(temp,max_elem_dofs);
+        sarray_init_dbl(elem_rhs,nentry);
         nnodes = grid->elem1d[j].nnodes;
         for (k=0;k<sm.nSubMods1d[j];k++){
-
+            sarray_init_dbl(temp,nentry);
             var_code = sm.elem1d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-
             add_replace_elem_rhs(elem_rhs,temp,sm->elem1d_vars[j],sm->elem1d_nvars[j],var_code,nnodes);
         }
-
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->residual, elem_rhs, nnodes, j, fmap, sm->elem1d_nvars[j], sm->elem1d_vars[j], sm->nodal_nvars, sm->nodal_vars,1);
+        load_global_resid(sm->residual, elem_rhs, nnodes, grid->elem1d[j].nodes, fmap, sm->elem1d_nvars[j], sm->elem1d_vars[j], sm->nodal_nvars, sm->nodal_vars);
     }
 
 
@@ -107,18 +96,20 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This file assembles a local 3 degree-of-freedom element into the global SuperModel Newton residual
+ *  \brief     This function adds the residual of one PDE into the elemental residual
  *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
- *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ *  @param[in,out]  double *elem_rhs array containing the elemental residual
+ *  @param[in]      double *eq_rhs array containg the residual from a single PDE routine
+ *  @param[in]      int *elem_vars array containg the unique variables defined on an element
+ *  @param[in]      int elem_nvars integer that is the length of *elem_nvars
+ *  @param[in]      int eq_vars integer that contains the unique variables defined by an equation on each digit
+ *  @param[in]      int nnodes  integer that is the number of nodes on one element
+ * 
+ *  \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int *elem_vars, int elem_nvars, int eq_vars, int nnodes){
@@ -167,18 +158,15 @@ void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int *elem_vars, int 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This file assembles a local 3 degree-of-freedom element into the global SuperModel Newton residual
+ *  \brief     Short routine that couns the number of digits in a given integer
  *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
- *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ *  @param[in] int num - the integer we want to find the number of digits
+ *  \returns   int count - the number of digits
+ *  \note assumes num > 0
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int count_digits(int num) {
@@ -195,49 +183,35 @@ int count_digits(int num) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This file assembles a local 3 degree-of-freedom element into the global SuperModel Newton residual
+ *  \brief     This function takes an elemental residual and loads into gloval residual
  *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
+ *  @param[in,out] double *residual - the global residual
+ *  @param[in] double *elem_rhs - the local element right-hand-side
  *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
- *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
+ *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
+ *  @param[in] int *fmap - a map from the specific global node ID to the first supermodel dof on that node
+ *  @param[in] int elem_nvars - the number of active variables on the element
+ *  @param[in] int *elem_vars - an array of length elem_nvars the codes of the active variable
+ *  @param[in] int nodal_nvars - the number of active variables on the node (must always be >= elem_nvars)
+ *  @param[in] int *nodal_vars - an array of length nodal_nvars the codes of the active variable on a node
  * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void load_global_resid(double *residual, double *elem_rhs, int nnodes, int ie, int nvars, int *fmap, int elem_nvars, int elem_vars, int nodal_nvars, int *nodal_vars, int dim) {
+void load_global_resid(double *residual, double *elem_rhs, int nnodes, int *GnodeIDs, int *fmap, int elem_nvars, int *elem_vars, int *nodal_nvars, int **nodal_vars) {
     int i,j,k,save_k,index;
     int current_var;
     bool notFound;
-
-
-    //get global node numbers
-    int node_no[nnodes];
-
-    if(dim==1){
-        for (i=0;i<nnodes;i++){
-            node_no[i] = grid->elem1d[ie].nodes[i];
-        }
-    }else if (dim ==2){
-        for (i=0;i<nnodes;i++){
-            node_no[i] = grid->elem2d[ie].nodes[i];
-        }
-    }else if (dim==3){
-        for (i=0;i<nnodes;i++){
-            node_no[i] = grid->elem3d[ie].nodes[i];
-        }
-    }
     
 
 
     /// assembles global residual
     for (i=0; i<nnodes; i++) {
         //not sure if this is correct or not
-        current_nodal_vars = nodal_vars[node_no[i]];
+        current_nodal_vars = nodal_vars[GnodeIDs[i]];
         for (j=0; j<elem_nvars; j++){
 #ifdef _PETSC
             //Mark need to figure this out
@@ -253,8 +227,7 @@ void load_global_resid(double *residual, double *elem_rhs, int nnodes, int ie, i
                 }
                 k+=1;
             }
-                    
-            index = fmap[node_no[i]] + save_k;
+            index = fmap[GnodeIDs[i]] + save_k;
             //does minus convention hold for all residuals?
             residual[index]     -= elem_rhs[i*elem_nvars+j];
 #endif

@@ -17,7 +17,10 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 
     //seems like the easiest way?
     //maybe think about this
-    double fmap = sm->fmap; 
+    //we want/need a local and global mapping (local as in local to PE)
+    //maybe encapsulate as a function instead of hardcoding as vector?
+    int fmaplocal = sm->fmaplocal; 
+    int fmapglobal = sm->fmapglobal; 
     //zero out stuff
     #ifdef _PETSC
         ierr = VecZeroEntries(sm->residual);
@@ -32,18 +35,21 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     double elem_rhs[nentry];
     //also create a temporary variable which will recieve the residuals from individual fe_resid routines
     double temp[nentry];
+    //dofs means to the process in this case, not cell
+    //for a given elemental rhs, this will give index local to process where we should put entries
+    int dofs[nentry];
     int nnodes;
 
     int var_code;
 
+    int nvars_elem;
     //loop through all nelem3d
     for (j=0;j<grid->nelem3d;j++){
         sarray_init_dbl(elem_rhs,nentry);
         nnodes = grid->elem3d[j].nnodes;
+        nvars_elem = sm->elem3d_nvars[j];
         for (k=0;k<sm.nSubMods3d[j];k++){
             sarray_init_dbl(temp,nentry);
-            //would this work for vector functions?
-            //would it be better to put global residual outside inner loop if possible?
             //convention for filling temp will be:
             // for i in node (for j in nvar temp[nnode*i + j] = result)
 
@@ -53,24 +59,29 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 
             //add temp to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
-            add_replace_elem_rhs(elem_rhs,temp,sm->elem3d_vars[j],sm->elem3d_nvars[j],var_code,nnodes);
+            add_replace_elem_rhs(elem_rhs,temp,nvars_elem,sm->elem3d_vars[j],var_code,nnodes);
         }
+        //for residual we only need dof numbers local to process (including ghost nodes)
+        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+        get_cell_dofs(dofs,fmaplocal,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->residual, elem_rhs, nnodes, grid->elem3d[j].nodes, fmap, sm->elem3d_nvars[j], sm->elem3d_vars[j], sm->nodal_nvars, sm->nodal_vars);
+        load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
 
     //loop through all nelem2d
     for (j=0;j<grid->nelem2d;j++){
         sarray_init_dbl(elem_rhs,nentry);
         nnodes = grid->elem2d[j].nnodes;
+        nvars_elem = sm->elem2d_nvars[j];
         for (k=0;k<sm.nSubMods2d[j];k++){
             sarray_init_dbl(temp,nentry);
             var_code = sm.elem2d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            add_replace_elem_rhs(elem_rhs,temp,sm->elem2d_vars[j],sm->elem2d_nvars[j],var_code,nnodes);
+            add_replace_elem_rhs(elem_rhs,temp,nvars_elem,sm->elem2d_vars[j],var_code,nnodes);
         }
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->residual, elem_rhs, nnodes, grid->elem2d[j].nodes, fmap, sm->elem2d_nvars[j], sm->elem2d_vars[j], sm->nodal_nvars, sm->nodal_vars);
-
+        get_cell_dofs(dofs,fmaplocal,nnodes,grid->elem2d[j].nodes,nvars_elem,sm->elem2d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //puts elem_rhs into global residual, applies Dirichlet conditions too?
+        load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
 
 
@@ -78,13 +89,16 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     for (j=0;j<grid->nelem1d;j++){
         sarray_init_dbl(elem_rhs,nentry);
         nnodes = grid->elem1d[j].nnodes;
+        nvars_elem = sm->elem1d_nvars[j];
         for (k=0;k<sm.nSubMods1d[j];k++){
             sarray_init_dbl(temp,nentry);
             var_code = sm.elem1d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            add_replace_elem_rhs(elem_rhs,temp,sm->elem1d_vars[j],sm->elem1d_nvars[j],var_code,nnodes);
+            add_replace_elem_rhs(elem_rhs,temp,nvars_elem, sm->elem1d_vars[j],var_code,nnodes);
         }
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->residual, elem_rhs, nnodes, grid->elem1d[j].nodes, fmap, sm->elem1d_nvars[j], sm->elem1d_vars[j], sm->nodal_nvars, sm->nodal_vars);
+        get_cell_dofs(dofs,fmaplocal,nnodes,grid->elem1d[j].nodes,nvars_elem,sm->elem1d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //puts elem_rhs into global residual, applies Dirichlet conditions too?
+        load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
 
 
@@ -112,7 +126,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
  *  \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int *elem_vars, int elem_nvars, int eq_vars, int nnodes){
+void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int elem_nvars, int *elem_vars,  int eq_vars, int nnodes){
 
     //for each node, place the rhs entries of a specific pde residual routine in the correct slots of an elemental rhs
 
@@ -152,6 +166,55 @@ void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int *elem_vars, int 
 }
 
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Short routine that gives the degrees of freedom local to the current process
+ *  \\ sepearated as function so that maybe other functions can be constructed in future
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] local_dofs - an array of integers that will give the equation numbers for a
+ *  given cell local to the process
+ *  @param[in]  int ie - the local (to process) cell number
+ *  @param[in]  int * - the map that takes in local node number and produces the start equation number
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, int *nodal_nvars, int **nodal_vars){
+
+    int i,j,k,save_k,index,temp,ctr;
+    int current_var;
+    ctr =0;
+
+
+
+    for (i=0; i<nnodes; i++){
+        //on this node get nodal vars
+        //need to iron this out, this is an array of ints
+        current_nodal_vars = nodal_vars[local_node_ids[i]];
+        temp = fmaplocal[local_node_ids[i]];
+        for (j=0; j<elem_nvars; j++){
+            //map the current var from the residual to the correct var number in global residual
+            k=0;
+            notFound=TRUE;
+            current_var = elem_vars[j];
+            while (notFound){
+                //note current_nodal_vars depends on i
+                if(current_var == current_nodal_vars[k]){
+                    notFound=FALSE;
+                    save_k = k;
+                }
+                k+=1;
+            }
+            local_dofs[ctr] =  temp + save_k;
+            ctr+=1
+        }
+    }
+
+}
 
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -201,38 +264,18 @@ int count_digits(int num) {
  * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void load_global_resid(double *residual, double *elem_rhs, int nnodes, int *GnodeIDs, int *fmap, int elem_nvars, int *elem_vars, int *nodal_nvars, int **nodal_vars) {
-    int i,j,k,save_k,index;
-    int current_var;
-    bool notFound;
-    
-
-
+void load_global_resid(double *residual, double *elem_rhs, int nnodes, int elem_nvars, int *local_dofs) {
+    int index;
     /// assembles global residual
-    for (i=0; i<nnodes; i++) {
-        //not sure if this is correct or not
-        current_nodal_vars = nodal_vars[GnodeIDs[i]];
-        for (j=0; j<elem_nvars; j++){
-#ifdef _PETSC
-            //Mark need to figure this out
-#else
-            //map the current var from the residual to the correct var number in global residual
-            k=0;
-            notFound=TRUE;
-            current_var = elem_vars[j];
-            while (notFound){
-                if(current_var == current_nodal_vars[k]){
-                    notFound=FALSE;
-                    save_k = k;
-                }
-                k+=1;
-            }
-            index = fmap[GnodeIDs[i]] + save_k;
+    for (i=0; i<nnodes*elem_nvars; i++) {
+
+            //map the current var from the residual to the correct var number in processor residual
+            //using local_dofs map
+
+            index = local_dofs[i];
             //does minus convention hold for all residuals?
-            residual[index]     -= elem_rhs[i*elem_nvars+j];
-#endif
+            residual[index]     -= elem_rhs[i];
                     
         }
-    }
 
 }

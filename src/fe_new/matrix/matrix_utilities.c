@@ -16,11 +16,7 @@
 void fe_allocate_initialize_linear_system(SSUPER_MODEL *sm) {
 
     if (sm->ndofs > sm->ndofs_old){    
-        #ifdef _PETSC
-            allocate_petsc_system(sm);
-        #else
-            allocate_adh_system(sm);
-        #endif
+        allocate_adh_system(sm);
     }
 }
 
@@ -51,17 +47,19 @@ void fe_allocate_initialize_linear_system(SSUPER_MODEL *sm) {
     sarray_init_dbl(sm->sol, sm->ndofs);
     
     // proprietary AdH matrix allocation
-    int inode;
-    sm->diagonal = (double *) tl_realloc(sizeof(double), sm->ndofs, sm->ndofs_old, sm->diagonal);
-    sm->matrix = (SPARSE_VECT *) tl_realloc(sizeof(SPARSE_VECT), sm->ndofs, sm->ndofs_old, sm->matrix);
-    for (inode = sm->ndofs_old; inode < sm->ndofs; inode++) {
-            sm->matrix[inode].value           = (double *) tl_alloc(sizeof(double), SPV_BLOCK);
-            sm->matrix[inode].index           = (int *)    tl_alloc(sizeof(int),    SPV_BLOCK); //this used to nodal, is this what we want?
-            sm->matrix[inode].max_size        = SPV_BLOCK;
-            sm->matrix[inode].size            = 0; //what is this?
-        }
+    // standard CSR format
+    // indptr points to where column indeces for each row starts (length of nrows+1)
+    // indices array of integers that contains column position of each nonzero
+    // vals array of doubles containing matrix entries (same length as indices)
     
-    init_adh_matrix(sm->matrix, sm->diagonal, sm->ndofs);
+    //call routine to determine nnz? and where should we determine cols?
+    //should we also keep nnz_row array ?
+    
+    sm->indptr = (int *) tl_realloc(sizeof(int), sm->my_ndofs+1, sm->my_ndofs_old+1, sm->indptr);
+    sm->indices = (int *) tl_realloc(sizeof(int), sm->nnz, sm->nnz_old, sm->indices);
+    sm->vals = (double *) tl_realloc(sizeof(double), sm->nnz, sm->nnz_old, sm->vals);
+    
+    sarray_init_dbl(sm->vals, sm->nnz_old);
 }
 
 

@@ -26,12 +26,7 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     double temp[max_elem_dofs,max_elem_dofs];
 
     //zero out stuff
-#ifdef _PETSC
-        // Zero the PETSc matrix
-        ierr = MatZeroEntries(sm->A);   // TODO: DO WE NEED THIS - SAM
-#else
-        init_adh_matrix(grid->nnodes, mod->max_nsys_sq, sm->matrix, sm->diagonal);
-#endif
+    sarray_init_dbl(sm->vals, sm->nnz_old);
     
 
     //loop through all nelem3d
@@ -55,12 +50,8 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
                 perturb_var(temp, sm, grid, mat, sm->elem3d_physics, j, nodes_on_ele, nvar_ele, sm->elem3d_vars[j],var_code, nsubMods, k, grid->elem3d[j].nodes, DEBUG);
             }
             //store in global using the fmap
-            //temp has local elemental matrix 
-#ifdef _PETSC
-            //in progress
-#else           
-            load_global_mat(sm->diagonal, sm->matrix, temp, nodes_on_ele, grid->elem3d[j].nodes, fmap, nvar_ele, sm->elem3d_vars[j], sm->nodal_nvars, sm->nodal_vars);
-#endif
+            //temp has local elemental matrix       
+            load_global_mat(sm->vals, sm->indptr, sm->indices, temp, nodes_on_ele, grid->elem3d[j].nodes, fmap, nvar_ele, sm->elem3d_vars[j], sm->nodal_nvars, sm->nodal_vars);
     }
 
     //loop through all nelem2d
@@ -132,10 +123,14 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
  * \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void load_global_mat(double *diagonal, SPARSE_VECT *matrix, double **elem_mat, int nodes_on_ele, int *GnodeIDs, int *fmap, int elem_nvars, int *elem_vars, int *nodal_nvars, int **nodal_vars){
-    int i,j,k,l,m,n;
+void load_global_mat(double *vals, int *indptr, int *indices, double **elem_mat, int nodes_on_ele, int *GnodeIDs, int *fmap, int elem_nvars, int *elem_vars, int *nodal_nvars, int **nodal_vars){
+    int i,j,k,l,m,n,p;
     int elem_row,elem_col;
     int save_m,save_n;
+    //need local to global mapping
+    //assume we have at least global row start that this PE owns
+    int row_start;
+
     /// assembles global residual
     // i and j are the row number
     for (i=0; i<nodes_on_ele; i++){
@@ -153,7 +148,8 @@ void load_global_mat(double *diagonal, SPARSE_VECT *matrix, double **elem_mat, i
                     }
                 m+=1;
             }
-            row_index = fmap[GnodeIDs[i]]+save_m;
+            //local row index to go in
+            local_row_index = fmap[GnodeIDs[i]]+save_m;
 
 
             //k and l are column number
@@ -172,17 +168,20 @@ void load_global_mat(double *diagonal, SPARSE_VECT *matrix, double **elem_mat, i
                         }
                     n+=1;
                     }
-                    
-                    col_index = fmap[GnodeIDs[k]] + save_n;
+                    //local column index to go in
+                    local_col_index = fmap[GnodeIDs[k]] + save_n;
 
+                    
                     //both conditions should be true or both should be false I think
-                    //maybe check when we run a test
-                    if  (elem_row==elem_col ){
-                        diagonal[row_index]+=elem_mat[elem_row,elem_col];
-                    }else{
-                        matrix[??]+=elem_mat[elem_row,elem_col];
+                    //given a local row and column number, fit into CSR
+                    index_start = indptr[row_index]
+                    index_end = indptr[row_index+1]
+                    //use these to find correct column index
+                    for(p=0;p<index_end-index_start;p++){
+
                     }
 
+                    
 
 
                 }

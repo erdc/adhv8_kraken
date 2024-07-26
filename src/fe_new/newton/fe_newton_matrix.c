@@ -21,6 +21,7 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     //maybe think about this
     double fmap = sm->fmap;
     int nsubMods;
+    int ndofs;
     int nvar_ele,nodes_on_ele, var_code;
     int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
     double temp[max_elem_dofs,max_elem_dofs];
@@ -35,6 +36,7 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
             //pull all global information to local memory
             nvar_ele = sm->elem3d_nvars[j];
             nodes_on_ele = grid->elem3d[j].nnodes;
+            ndofs = nvar_ele*nodes_on_ele;
             nsubMods = sm->nSubMods3d[j];
             //needs to be for 2d matrix
             sarray_init_dbl(temp,maxe_elem_dofs*max_elem_dofs);
@@ -49,9 +51,14 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
                 //like sw2 is vector equation so that we would need 3 perturbations
                 perturb_var(temp, sm, grid, mat, sm->elem3d_physics, j, nodes_on_ele, nvar_ele, sm->elem3d_vars[j],var_code, nsubMods, k, grid->elem3d[j].nodes, DEBUG);
             }
-            //store in global using the fmap
+            //store in global using 2 mappings
+            //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+            //this gets dofs local to process
+            get_cell_dofs(dofs,fmaplocal,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+            //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
+            local_dofs_to_global_dofs(global_dofs,ndofs,dofs,local_range,ghosts);
             //temp has local elemental matrix       
-            load_global_mat(sm->vals, sm->indptr, sm->indices, temp, nodes_on_ele, grid->elem3d[j].nodes, fmap, nvar_ele, sm->elem3d_vars[j], sm->nodal_nvars, sm->nodal_vars);
+            load_global_mat(sm->vals, sm->indptr, sm->indices, temp, ndofd, global_dofs);
     }
 
     //loop through all nelem2d
@@ -71,11 +78,8 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
         }
         //store in global using the fmap
         //temp has local elemental matrix 
-#ifdef _PETSC
-            //in progress
-#else           
-            load_global_mat(sm->diagonal, sm->matrix, temp, nodes_on_ele, grid->elem2d[j].nodes, fmap, nvar_ele, var_ele, sm->nodal_nvars, sm->nodal_vars);
-#endif
+   
+            load_global_mat(sm->diagonal, sm->matrix, temp, nodes_on_ele, nvar_ele, global_dofs);
     }
     //loop through all nelem1d
     for (j=0;j<grid->nelem1d;j++){
@@ -94,12 +98,51 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
         }
         //store in global using the fmap
         //temp has local elemental matrix 
-#ifdef _PETSC
-        //in progress
-#else           
+       
         load_global_mat(sm->diagonal, sm->matrix, temp, nodes_on_ele, grid->elem1d[j].nodes, fmap, nvar_ele, var_ele, sm->nodal_nvars, sm->nodal_vars);
-#endif
+
     }    
+}
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function maps a local, dense matrix from an element and put into global sparse matrix
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out]  double *diagonal pointer to the diagonal  (block) part of the sparse matrix
+ *  @param[in,out]  SPARSE_VECT *matrix pointer to the off-diagonal part of the sparse matrix
+ *  @param[in] double **elem_mat - the local matrix that contains values we want to add to global sparse system
+ *  @param[in] int nodes_on_ele - the number of nodes on element
+ *  @param[in] int *fmap - a map from node number to row # in system of equations
+ *  @param[in] in elem_nvars - number of distinct variables active on an element e.g. h,u,v would be 3
+ *  @param[in] int *elem_vars - an array of length elem_nvars that contains the variable codes
+ *  @param[in] in nodal_nvars - array of distinct variables active on each node e.g. h,u,v would be 3
+ *  @param[in] int **nodal_nvars - an array of length nodal_nvars*nnodes that contains the variable codes
+ * \note 
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void local_dofs_to_global_dofs(int *global_dofs,int ndofs,int *dofs,int *local_range,int *ghosts){
+    
+    int i;
+    int local_size = local_range[1]-local_range[0];
+
+
+    for(i=0;i<ndofs;i++){
+        if(dofs[i]<local_size){
+            //residential dof
+            global_dofs[i] = dofs[i] + local_range[0];
+        }else{
+            global_dofs[i] = ghosts[dofs[i]-local_size];
+        }
+    }
+
+
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

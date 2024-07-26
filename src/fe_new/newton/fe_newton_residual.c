@@ -63,6 +63,8 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
         }
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+        //usually would take the local cell number and compute the associated dofs
+        //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
         get_cell_dofs(dofs,fmaplocal,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);

@@ -16,91 +16,109 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     int j,k;
-
-    //seems like the easiest way?
-    //maybe think about this
     double fmap = sm->fmap;
     int nsubMods;
-    int ndofs;
+    int ndofs_ele;
     int nvar_ele,nodes_on_ele, var_code;
+
+    //maybe change this from 3 to 2 to 1
     int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
-    double temp[max_elem_dofs,max_elem_dofs];
+    double elem_mat[max_elem_dofs,max_elem_dofs];
+    int dofs[max_elem_dofs],global_dofs[max_elem_dofs];
 
     //zero out stuff
     sarray_init_dbl(sm->vals, sm->nnz_old);
-    
-
+    local_range = ??sm->local_range
+    //need sm->local_range whih is array of integers giving range (if process owned rows 0,1,2,3) then 
+    // local range would be 0,4
     //loop through all nelem3d
     for (j=0;j<grid->nelem3d;j++){
 
             //pull all global information to local memory
+
+            //Get this from mat instead!!
             nvar_ele = sm->elem3d_nvars[j];
+            //allows for mixed geometry quad/tri mesh
             nodes_on_ele = grid->elem3d[j].nnodes;
-            ndofs = nvar_ele*nodes_on_ele;
+            ndofs_ele = nvar_ele*nodes_on_ele;
             nsubMods = sm->nSubMods3d[j];
             //needs to be for 2d matrix
-            sarray_init_dbl(temp,maxe_elem_dofs*max_elem_dofs);
+            sarray_init_dbl(elem_mat,max_elem_dofs*max_elem_dofs);
             //maybe pull local nodal nvars and vars here too
             //need to loop over each variable and perturb it
             for (k=0;k<nvar_ele;k++){
 
                 //use var code like PERTURB_H ,. ...
+                //maybe get this from mat instead too!
                 var_code = sm->elem3d_vars[j][k];
                 //want to loop over variables not necessarily submodels right?
                 //need to think about this more
                 //like sw2 is vector equation so that we would need 3 perturbations
-                perturb_var(temp, sm, grid, mat, sm->elem3d_physics, j, nodes_on_ele, nvar_ele, sm->elem3d_vars[j],var_code, nsubMods, k, grid->elem3d[j].nodes, DEBUG);
+                perturb_var(elem_mat, sm, grid, mat, sm->elem3d_physics, j, nodes_on_ele, nvar_ele, sm->elem3d_vars[j],var_code, nsubMods, k, grid->elem3d[j].nodes, DEBUG);
             }
             //store in global using 2 mappings
             //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
             //this gets dofs local to process
-            get_cell_dofs(dofs,fmaplocal,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+            get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
             //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-            local_dofs_to_global_dofs(global_dofs,ndofs,dofs,local_range,ghosts);
+            local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
             //temp has local elemental matrix       
-            load_global_mat(sm->vals, sm->indptr, sm->indices, temp, ndofd, global_dofs);
+            load_global_mat(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range)
     }
+
+    //maybe change max_elem_dofs from element to element?
+
 
     //loop through all nelem2d
     for (j=0;j<grid->nelem2d;j++){
         nvar_ele = sm->elem2d_nvars[j];
         nodes_on_ele = grid->elem2d[j].nnodes;
+        ndofs_ele = nvar_ele*nodes_on_ele;
         nsubMods = sm->nSubMods2d[j];
         //needs to be for 2d matrix
-        sarray_init_dbl(temp,maxe_elem_dofs*max_elem_dofs);
+        sarray_init_dbl(elem_mat,maxe_elem_dofs*max_elem_dofs);
         for (k=0;k<nvar_ele;k++){
             //use var code like PERTURB_H ,. ...
             var_code = sm->elem2d_vars[j][k];
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(temp, sm, grid, mat, sm->elem2d_physics, j, nodes_on_ele, nvar_ele, sm->elem2d_vars[j],var_code, nsubMods, k, grid->elem2d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, grid, mat, sm->elem2d_physics, j, nodes_on_ele, nvar_ele, sm->elem2d_vars[j],var_code, nsubMods, k, grid->elem2d[j].nodes, DEBUG);
         }
-        //store in global using the fmap
-        //temp has local elemental matrix 
-   
-            load_global_mat(sm->diagonal, sm->matrix, temp, nodes_on_ele, nvar_ele, global_dofs);
+        //store in global using 2 mappings
+        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+        //this gets dofs local to process
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,sm->elem2d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
+        //temp has local elemental matrix       
+        load_global_mat(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
+    
     }
     //loop through all nelem1d
     for (j=0;j<grid->nelem1d;j++){
         nvar_ele = sm->elem1d_nvars[j];
         nodes_on_ele = grid->elem1d[j].nnodes;
+        ndofs_ele = nvar_ele*nodes_on_ele;
         nsubMods = sm->nSubMods1d[j];
         //needs to be for 2d matrix
-        sarray_init_dbl(temp,maxe_elem_dofs*max_elem_dofs);
+        sarray_init_dbl(elem_mat,maxe_elem_dofs*max_elem_dofs);
         for (k=0;k<nvar_ele;k++){
             //use var code like PERTURB_H ,. ...
             var_code = sm->elem1d_vars[j][k];
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(temp, sm, grid, mat, sm->elem1d_physics, j, nodes_on_ele, nvar_ele, sm->elem1d_vars[j],var_code, nsubMods, k, grid->elem1d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, grid, mat, sm->elem1d_physics, j, nodes_on_ele, nvar_ele, sm->elem1d_vars[j],var_code, nsubMods, k, grid->elem1d[j].nodes, DEBUG);
         }
-        //store in global using the fmap
-        //temp has local elemental matrix 
-       
-        load_global_mat(sm->diagonal, sm->matrix, temp, nodes_on_ele, grid->elem1d[j].nodes, fmap, nvar_ele, var_ele, sm->nodal_nvars, sm->nodal_vars);
-
+        //store in global using 2 mappings
+        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+        //this gets dofs local to process
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
+        //temp has local elemental matrix       
+        load_global_mat(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
     }    
 }
 
@@ -127,13 +145,13 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
  * \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void local_dofs_to_global_dofs(int *global_dofs,int ndofs,int *dofs,int *local_range,int *ghosts){
+void local_dofs_to_global_dofs(int *global_dofs,int ndofs_on_ele,int *dofs,int *local_range,int *ghosts){
     
     int i;
     int local_size = local_range[1]-local_range[0];
 
 
-    for(i=0;i<ndofs;i++){
+    for(i=0;i<ndofs_on_ele;i++){
         if(dofs[i]<local_size){
             //residential dof
             global_dofs[i] = dofs[i] + local_range[0];
@@ -166,74 +184,62 @@ void local_dofs_to_global_dofs(int *global_dofs,int ndofs,int *dofs,int *local_r
  * \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void load_global_mat(double *vals, int *indptr, int *indices, double **elem_mat, int nodes_on_ele, int *GnodeIDs, int *fmap, int elem_nvars, int *elem_vars, int *nodal_nvars, int **nodal_vars){
-    int i,j,k,l,m,n,p;
-    int elem_row,elem_col;
-    int save_m,save_n;
-    //need local to global mapping
+void load_global_mat(double *vals, int *indptr, int *indices, double **elem_mat, int ndofs_ele, int *global_dofs, int *local_range){
+    int i,j;
+    //need local to global mapping stores in global_dofs
     //assume we have at least global row start that this PE owns
-    int row_start;
+    int col_start_ind,col_end_ind,col_index;
+    int global_row,row;
 
     /// assembles global residual
-    // i and j are the row number
-    for (i=0; i<nodes_on_ele; i++){
-        //get current nodal row vars
-        current_nodal_row_vars = nodal_vars[GnodeIDs[i]];
-        for (j=0;j<elem_nvars;j++){
-            elem_row = i*elem_nvars + j;
-            m=0;
-            notFound_row=TRUE;
-            current_var_row = elem_vars[j];
-            while (notFound_row){
-                if(current_var_row == current_nodal_row_vars[m]){
-                    notFound_row=FALSE;
-                    save_m = m;
-                    }
-                m+=1;
+    // i and j are the row number and col number in elemental matrix
+    //we only want rows local to process
+    //this can easily be checked with global_dofs argument
+    for (i=0; i<ndofs_ele; i++){
+        //global row number
+        global_row = global_dofs[i];
+        //loop through each row of the local elemental matrix
+        //we only need to fill in columns if the current row is local to process
+        if(global_row>=local_range[0] && global_row < local_range[1]){
+            //get row local to process
+            row = global_row-local_range[0]
+            //get column indices for this specific row
+            col_start_ind = indptr[row];
+            col_end_ind = indptr[row+1];
+            for (j=0; j<ndofs_ele;j++){
+                //get global column number
+                global_col = global_dofs[j];
+                //get offset of where to place value by binary search through part of the indices array
+                col_index = binary_search_part(indices, col_start_ind, col_end_ind, global_col);
+                //now that we have the index, add to values
+                vals[col_index] +=elem_mat[i,j];
             }
-            //local row index to go in
-            local_row_index = fmap[GnodeIDs[i]]+save_m;
-
-
-            //k and l are column number
-            for(k=0;k<nodes_on_ele;k++){
-                current_nodal_col_vars = nodal_vars[GnodeIDs[k]];
-                for(l=0;l<elem_nvars;l++){
-                    elem_col = k*elem_nvars + l;
-                    //map the current var from the residual to the correct var number in global residual
-                    n=0;
-                    notFound_col=TRUE;
-                    current_var_col = elem_vars[l];
-                    while (notFound_col){
-                        if(current_var_col == current_nodal_col_vars[m]){
-                            notFound=FALSE;
-                            save_n = n;
-                        }
-                    n+=1;
-                    }
-                    //local column index to go in
-                    local_col_index = fmap[GnodeIDs[k]] + save_n;
-
-                    
-                    //both conditions should be true or both should be false I think
-                    //given a local row and column number, fit into CSR
-                    index_start = indptr[row_index]
-                    index_end = indptr[row_index+1]
-                    //use these to find correct column index
-                    for(p=0;p<index_end-index_start;p++){
-
-                    }
-
-                    
-
-
-                }
-            }
-
         }
     }
 
 }
+
+
+//a small helper function, move this later
+int binary_search_part(int *arr, int start, int end, int target) {
+    int low = start;
+    int high = end - 1;
+
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+
+        if (arr[mid] == target) {
+            return mid; // Target found
+        } else if (arr[mid] < target) {
+            low = mid + 1; // Search upper half
+        } else {
+            high = mid - 1; // Search lower half
+        }
+    }
+
+    return -1; // Target not found
+}
+
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -258,7 +264,7 @@ void load_global_mat(double *vals, int *indptr, int *indices, double **elem_mat,
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void perturb_var(double *elem_mat, SSUPER_MODEL *sm, SGRID *grid, SMAT *mat, SELEM_PHYSICS **elem_physics, 
+void perturb_var(double **elem_mat, SSUPER_MODEL *sm, SGRID *grid, SMAT *mat, SELEM_PHYSICS **elem_physics, 
     int ie, int nodes_on_element, int nvar_ele, int *elem_vars ,int perturb_var_code, int nsubModels, int ele_var_no, int *GlobalNodeIDs, int DEBUG) {
     
     

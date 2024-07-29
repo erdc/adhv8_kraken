@@ -19,8 +19,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     //maybe think about this
     //we want/need a local and global mapping (local as in local to PE)
     //maybe encapsulate as a function instead of hardcoding as vector?
-    int fmaplocal = sm->fmaplocal; 
-    int fmapglobal = sm->fmapglobal; 
+    int fmap = sm->fmap;
     //zero out stuff
     #ifdef _PETSC
         ierr = VecZeroEntries(sm->residual);
@@ -34,7 +33,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     int nentry = MAX_NVAR*MAX_NNODE;     
     double elem_rhs[nentry];
     //also create a temporary variable which will recieve the residuals from individual fe_resid routines
-    double temp[nentry];
+    double eq_rhs[nentry];
     //dofs means to the process in this case, not cell
     //for a given elemental rhs, this will give index local to process where we should put entries
     int dofs[nentry];
@@ -47,25 +46,27 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     for (j=0;j<grid->nelem3d;j++){
         sarray_init_dbl(elem_rhs,nentry);
         nnodes = grid->elem3d[j].nnodes;
+        //maybe this just comes from mat instead
         nvars_elem = sm->elem3d_nvars[j];
         for (k=0;k<sm.nSubMods3d[j];k++){
-            sarray_init_dbl(temp,nentry);
+            sarray_init_dbl(eq_rhs,nentry);
             //convention for filling temp will be:
             // for i in node (for j in nvar temp[nnode*i + j] = result)
 
             //either modify resid routines to return int or add an argument, can decide later
             //var_code will contain ordered digits of each equation, same codes used in elem*_vars[]
-            var_code = sm.elem3d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+            //maybe elem_physics comes from mat as well? instead of elem number, get mat number
+            var_code = sm.elem3d_physics[j][k]->fe_resid(sm,eq_rhs,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
 
-            //add temp to elem_rhs
+            //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
-            add_replace_elem_rhs(elem_rhs,temp,nvars_elem,sm->elem3d_vars[j],var_code,nnodes);
+            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,sm->elem3d_vars[j],var_code,nnodes);
         }
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmaplocal,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
@@ -81,7 +82,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
             add_replace_elem_rhs(elem_rhs,temp,nvars_elem,sm->elem2d_vars[j],var_code,nnodes);
         }
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        get_cell_dofs(dofs,fmaplocal,nnodes,grid->elem2d[j].nodes,nvars_elem,sm->elem2d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,sm->elem2d_vars[j],sm->nodal_nvars, sm->nodal_vars);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
@@ -98,7 +99,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
             add_replace_elem_rhs(elem_rhs,temp,nvars_elem, sm->elem1d_vars[j],var_code,nnodes);
         }
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        get_cell_dofs(dofs,fmaplocal,nnodes,grid->elem1d[j].nodes,nvars_elem,sm->elem1d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,sm->elem1d_vars[j],sm->nodal_nvars, sm->nodal_vars);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }

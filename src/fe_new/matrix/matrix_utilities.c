@@ -53,15 +53,187 @@ void fe_allocate_initialize_linear_system(SSUPER_MODEL *sm) {
     // vals array of doubles containing matrix entries (same length as indices)
     
     //call routine to determine nnz? and where should we determine cols?
-    //should we also keep nnz_row array ?
+    //should we also keep nnz_row array for petsc? maybe not necessary
+
+    //where does local_range get determined?
+    //we now number of rows is sum(my_nnode*nodal_nvars)
+    sm->indptr = (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->indptr);
     
-    sm->indptr = (int *) tl_realloc(sizeof(int), sm->my_ndofs+1, sm->my_ndofs_old+1, sm->indptr);
-    sm->indices = (int *) tl_realloc(sizeof(int), sm->nnz, sm->nnz_old, sm->indices);
-    sm->vals = (double *) tl_realloc(sizeof(double), sm->nnz, sm->nnz_old, sm->vals);
-    
-    sarray_init_dbl(sm->vals, sm->nnz_old);
+    //find nnz and store in indices
+    create_sparsity(sm, grid);
+    //do we want to stor nnz? it is stored in sm->indptr[nrows]
+    //do we want to store local_size = local_range[1]-local_range[0]
+    sarray_init_dbl(sm->vals, sm->nnz);
 }
 
+
+
+
+void create_sparsity(sm, grid){
+    //
+    // We know that each row contains at least one non-zero entry, and the number of rows is known upfront. 
+    // Thus, (i,j)-pairs can be represented as a vector of vectors
+    //first allocate this by guessing a max size of nnz per row
+
+    //guesses at max number of adjacent nodes in each dimension
+    //multiply by max dof per node
+    int nCon1d = 2*MAX_NVAR;
+    int nCon2d = 7*3*MAX_NVAR;
+    int nCon3d = 16*4*MAX_NVAR;
+
+    int nrows = sm->local_range[1]-sm->local_range[0]
+
+    // preallocate upfront with these dimensions. work out syntax later
+    int temp_rows[nrows,nCon3d];
+    int nnz_rows[nrows];
+    sarray_init_dbl(nnz_rows, nrows);
+
+
+    //loop through all nelem3d to mark sparsity
+
+    int global_row;
+    //loop thorugh each element and find sparsity
+    for (j=0;j<grid->nelem3d;j++){
+        nnodes = grid->elem3d[j].nnodes;
+        //maybe this just comes from mat instead
+        nvars_elem = sm->elem3d_nvars[j];
+        ndofs_ele = nnodes*nvars_elem;
+        //for residual we only need dof numbers local to process (including ghost nodes)
+        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+        //usually would take the local cell number and compute the associated dofs
+        //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //puts elem_rhs into global residual, applies Dirichlet conditions too?
+        //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
+        //keep sparsity pattern in temp_rows
+        for (k=0;k<ndofs_ele;k++){
+            global_row = global_dofs[k];
+            //loop through each row of the local elemental matrix
+            //we only need to fill in columns if the current row is local to process
+        if(global_row>=local_range[0] && global_row < local_range[1])
+            //get row local to process
+            row = global_row-local_range[0];
+            for (l=0;l<ndofs_ele;l++){
+                temp_rows[row,nnz_rows[k]]=global_dof[l];
+                nnz_rows[k]+=1;
+            }
+        }
+
+    }
+
+    //do 2d elements and then 1d
+    for (j=0;j<grid->nelem2d;j++){
+        nnodes = grid->elem2d[j].nnodes;
+        //maybe this just comes from mat instead
+        nvars_elem = sm->elem2d_nvars[j];
+        ndofs_ele = nnodes*nvars_elem;
+        //for residual we only need dof numbers local to process (including ghost nodes)
+        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+        //usually would take the local cell number and compute the associated dofs
+        //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,sm->elem2d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //puts elem_rhs into global residual, applies Dirichlet conditions too?
+        //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
+        //keep sparsity pattern in temp_rows
+        for (k=0;k<ndofs_ele;k++){
+            global_row = global_dofs[k];
+            //loop through each row of the local elemental matrix
+            //we only need to fill in columns if the current row is local to process
+        if(global_row>=local_range[0] && global_row < local_range[1])
+            //get row local to process
+            row = global_row-local_range[0];
+            for (l=0;l<ndofs_ele;l++){
+                temp_rows[row,nnz_rows[k]]=global_dof[l];
+                nnz_rows[k]+=1;
+            }
+        }
+
+    }
+
+    for (j=0;j<grid->nelem1d;j++){
+        nnodes = grid->elem1d[j].nnodes;
+        //maybe this just comes from mat instead
+        nvars_elem = sm->elem1d_nvars[j];
+        ndofs_ele = nnodes*nvars_elem;
+        //for residual we only need dof numbers local to process (including ghost nodes)
+        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+        //usually would take the local cell number and compute the associated dofs
+        //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,sm->elem1d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //puts elem_rhs into global residual, applies Dirichlet conditions too?
+        //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
+        //keep sparsity pattern in temp_rows
+        for (k=0;k<ndofs_ele;k++){
+            global_row = global_dofs[k];
+            //loop through each row of the local elemental matrix
+            //we only need to fill in columns if the current row is local to process
+        if(global_row>=local_range[0] && global_row < local_range[1])
+            //get row local to process
+            row = global_row-local_range[0];
+            for (l=0;l<ndofs_ele;l++){
+                temp_rows[row,nnz_rows[k]]=global_dof[l];
+                nnz_rows[k]+=1;
+            }
+        }
+
+    }
+
+    //now that all nnz_rows and temp_rows are filled, we need to sort and remove duplicates
+    // counter for the total number of non-zero entries
+    int NNZ = 0;
+    int *nnz_row;
+    //note nnz-rows is not actually nnz per row, includes duplicates
+    //could be done with hybrid omp too?
+    for (i=0;i<nrows;i++){
+        // sort the column indices (j-entries)
+        //use stdlib.h qsort
+        qsort(temp_rows[i], nnz_rows[i], sizeof(int), compare_ints);
+        //this should hopefully remove duplicates?
+        nnz_row = unique(temp_rows[i], temp_rows[i] + (sizeof(temp_rows[i])/ sizeof(int)));
+        //add nnz in a row to the NNZ
+        //maybe overwrire nnz_rows[i] instead if we want this stored, and then sum it
+        NNZ+=*nnz_row;
+    }
+    sm->nnz = NNZ;
+    // resize as needed
+    sm->indices = (int *) tl_realloc(sizeof(int), sm->nnz, sm->nnz_old, sm->indices);
+    sm->vals = (double *) tl_realloc(sizeof(double), sm->nnz, sm->nnz_old, sm->vals);
+    // enumerate the sorted indices to populate COL_INDEX and ROW_INDEX
+    for(i=0;i<nrows;i++){
+        sm->indptr[i] = count;
+        //ask corey about syntax
+        &rn = *temp_rows[i];
+        //think about how to do this since each temp_rows may be different size
+        for(j=0;j<sizeof(rn)/sizeof(int),j++){
+            sm->indices[count] = rn[j];
+            count++;
+        }
+    }
+    //also last sm->indptr  needs to be the last entry
+    sm->indptr[nrows] = count;
+    //destroy temp_rows?
+}
+
+
+int* unique (int* first, int* last)
+{
+  if (first==last) return last;
+
+  int* result = first;
+  while (++first != last)
+  {
+    if (!(*result == *first)) 
+      *(++result)=*first;
+  }
+  return ++result;
+}
+
+int compare_ints(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b); // Ascending order
+}
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

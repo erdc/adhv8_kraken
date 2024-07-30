@@ -27,7 +27,7 @@ void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     int dofs[max_elem_dofs],global_dofs[max_elem_dofs];
 
     //zero out stuff
-    sarray_init_dbl(sm->vals, sm->nnz_old);
+    sarray_init_dbl(sm->vals, sm->nnz);
     local_range = ??sm->local_range
     //need sm->local_range whih is array of integers giving range (if process owned rows 0,1,2,3) then 
     // local range would be 0,4

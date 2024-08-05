@@ -320,39 +320,11 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
         //(*load_fnctn) (sm,isuperModel);
         //Mark stopped here
         assemble_matrix(sm,grid,mat);
-
-
-#ifdef _PETSC
-        // print preallocation statistics if using PETSc
-        ierr = MatGetInfo(sm->A,MAT_LOCAL,&info);
-
-        printf("Mallocs = %f\n",info.mallocs);
-        printf("nz_allocated = %f\n",info.nz_allocated);
-        printf("nz_used = %f\n",info.nz_used);
-        printf("nz_unneeded = %f\n",info.nz_unneeded);
-#endif
-//        printf("myid: %d nsys: %d nnodes: %d\n",myid,nsys,nnodes);
-//        tl_check_all_pickets(__FILE__,__LINE__);
-//        MPI_Barrier(MPI_COMM_WORLD);
         
         /* Set initial guess */
-#ifndef _PETSC
         solv_init_dbl(ndof, sm->sol);
-#endif
-        
-#ifdef _DEBUG
-//        printf("myid: %d nsys: %d nnodes: %d\n",myid,nsys,nnodes);
-//        tl_check_all_pickets(__FILE__,__LINE__);
-//        MPI_Barrier(MPI_COMM_WORLD); tag(MPI_COMM_WORLD); tl_error("test");
-
-	    /*mwf debug  
-	    printScreen_matrix("matrix before solving", sm->diagonal, sm->matrix, nnodes, sm->max_nsys_sq,__LINE__, __FILE__);
-	    printScreen_resid("residual before solving", sm->residual, grid->nnodes, nsys, __LINE__, __FILE__);
-	    */
-#endif
 
 #ifdef _DEBUG
-#ifndef _PETSC
         if (DEBUG_FULL) {
 #ifdef _MESSG
             for(proc_count=0;proc_count<supersmpi->npes;proc_count++){
@@ -371,15 +343,33 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
 #endif
         }
 #endif
-#endif
 
+
+        //Set up system + solve
+        //Either use proprietary solver
+        //or pipe to PETSC 
+
+        //PETSC option
 #ifdef _PETSC
         // Solver
+        //be sure values get updated since we used set with split arrays ...
         KSPSetOperators(sm->ksp,sm->A,sm->A);
         // TODO: can I call this once in fe_main instead?
         // Does the matrix operator need to be specified before SetFromOptions each time?
         //KSPSetFromOptions(sm->ksp);
         // TODO: I don't think sol needs to be initialized to zero but should double-check
+        // set resid and solution into PETSdc objects here
+        // what about ghost values?
+        //solution goes in X
+        int rows[sm->my_ndofs];
+        int z;
+        for (z=0;z<sm->my_ndofs;z++){
+            rows[z] = z+sm->local_range[0];
+        }
+        VecSetValues(sm->X, sm->my_ndofs,rows,sm->sol, INSERT_VALUES);
+        VecSetValues(sm->B, sm->my_ndofs,rows,sm->resid, INSERT_VALUES);
+
+
         KSPSolve(sm->ksp,sm->residual,sm->sol);
         KSPGetIterationNumber(sm->ksp, &its);
         printf("KSP iterations: %i\n",its);
@@ -413,6 +403,8 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
         }
 #endif
 #else
+        //Non-PETSc option
+        //Mark stopped here
         /* solves the matrix */
         solv_linear_sys_setup(solver, sm->bc_mask, sm->matrix, sm->diagonal, sm->residual, sm->sol, sm->scale_vect, my_nnodes, nnodes, nsys
 #ifdef _MESSG
@@ -426,6 +418,9 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
 #endif
                                           );
 #endif
+        
+        
+
         
         /* adds the increment to the solution */
         (*inc_fnctn) (sm,isuperModel);

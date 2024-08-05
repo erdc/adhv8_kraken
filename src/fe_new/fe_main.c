@@ -1,7 +1,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     The FE engine driver for a given Design model, advanves the model one time step
+ *  \brief     The FE engine driver for a given Design model, advances the model one time step
  *  \author    Charlie Berger, Ph.D.
  *  \author    Gary Brown
  *  \author    Gaurav Savant, Ph.D.

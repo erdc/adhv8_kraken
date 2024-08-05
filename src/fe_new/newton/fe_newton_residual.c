@@ -21,11 +21,7 @@ void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
     //maybe encapsulate as a function instead of hardcoding as vector?
     int fmap = sm->fmap;
     //zero out stuff
-    #ifdef _PETSC
-        ierr = VecZeroEntries(sm->residual);
-    #else
-        sarray_init_dbl(sm->residual, sm->ndofs);
-    #endif
+    sarray_init_dbl(sm->residual, sm->ndofs);
 
     //create array which is the max_nvar in the supermodel
     //and max_nnode of the grid

@@ -318,7 +318,6 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
 #endif
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
-        //Mark stopped here
         assemble_matrix(sm,grid,mat);
         
         /* Set initial guess */
@@ -361,11 +360,17 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
         // set resid and solution into PETSdc objects here
         // what about ghost values?
         //solution goes in X
+
+
         int rows[sm->my_ndofs];
         int z;
         for (z=0;z<sm->my_ndofs;z++){
             rows[z] = z+sm->local_range[0];
         }
+        // what about ghost values?
+        // see https://petsc.org/release/manualpages/Vec/VecCreateGhostWithArray/
+        // or https://petsc.org/release/manualpages/Vec/VecCreateGhost/
+        // and https://petsc.org/release/manualpages/Vec/VecGhostGetLocalForm/
         VecSetValues(sm->X, sm->my_ndofs,rows,sm->sol, INSERT_VALUES);
         VecSetValues(sm->B, sm->my_ndofs,rows,sm->resid, INSERT_VALUES);
 

@@ -18,17 +18,17 @@
  *  \author    Gaurav Savant, Ph.D.
  *  \author    Gary Brown
  *  \author    Corey Trahan, Ph.D.
+ *  \author    Mark Loveland, Ph.D.
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
+ * 
+ * \returns YES for a good calculation and NO for a bad calculation
  *
- * @param[in]  mod             (SMODEL *) a pointer to an AdH model
- * @param[in]  grid            (SGRID *) a pointer to a grid in the AdH model
- * @param[in]  init_fnctn      (void *) a pointer to a function for initializing the AdH solutions
- * @param[in]  update_fnctn    (void *) a pointer to a function for updating the solution for parallel runs
- * @param[in]  residual_fnctn  (void *) a pointer to a function for calculating the nonlinear residual
- * @param[in]  load_fnctn      (void *) a pointer to a function for building the Jacobi matrix
- * @param[in]  inc_fnctn       (void *) a pointer to a function for incrementing the solution
+ * @param[in,out] sm           (SSUPERMODEL *) a pointer to an AdH super model
+ * @param[in] isuperModel      int the supermodel index
+ * @param[in]  grid            (SGRID *) a pointer to a grid in the AdH design model
+ * @param[in]  mat             (SMAT *) a pointer to the material properties in the AdH grid
  *
  * \note
  */
@@ -199,8 +199,8 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
     /* initial setup */
     //(*init_fnctn) (sm,isuperModel);
     //split up into 2 steps
-    initialize_system(sm,grid,mat);
-    initialize_dirichlet_bc(sm, grid, mat)
+    initialize_system(sm);
+    initialize_dirichlet_bc(sm, grid)
 
 
     //it = 0;
@@ -318,41 +318,12 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
 #endif
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
-        //Mark stopped here
         assemble_matrix(sm,grid,mat);
-
-
-#ifdef _PETSC
-        // print preallocation statistics if using PETSc
-        ierr = MatGetInfo(sm->A,MAT_LOCAL,&info);
-
-        printf("Mallocs = %f\n",info.mallocs);
-        printf("nz_allocated = %f\n",info.nz_allocated);
-        printf("nz_used = %f\n",info.nz_used);
-        printf("nz_unneeded = %f\n",info.nz_unneeded);
-#endif
-//        printf("myid: %d nsys: %d nnodes: %d\n",myid,nsys,nnodes);
-//        tl_check_all_pickets(__FILE__,__LINE__);
-//        MPI_Barrier(MPI_COMM_WORLD);
         
         /* Set initial guess */
-#ifndef _PETSC
         solv_init_dbl(ndof, sm->sol);
-#endif
-        
-#ifdef _DEBUG
-//        printf("myid: %d nsys: %d nnodes: %d\n",myid,nsys,nnodes);
-//        tl_check_all_pickets(__FILE__,__LINE__);
-//        MPI_Barrier(MPI_COMM_WORLD); tag(MPI_COMM_WORLD); tl_error("test");
-
-	    /*mwf debug  
-	    printScreen_matrix("matrix before solving", sm->diagonal, sm->matrix, nnodes, sm->max_nsys_sq,__LINE__, __FILE__);
-	    printScreen_resid("residual before solving", sm->residual, grid->nnodes, nsys, __LINE__, __FILE__);
-	    */
-#endif
 
 #ifdef _DEBUG
-#ifndef _PETSC
         if (DEBUG_FULL) {
 #ifdef _MESSG
             for(proc_count=0;proc_count<supersmpi->npes;proc_count++){
@@ -371,15 +342,39 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
 #endif
         }
 #endif
-#endif
 
+
+        //Set up system + solve
+        //Either use proprietary solver
+        //or pipe to PETSC 
+
+        //PETSC option
 #ifdef _PETSC
         // Solver
+        //be sure values get updated since we used set with split arrays ...
         KSPSetOperators(sm->ksp,sm->A,sm->A);
         // TODO: can I call this once in fe_main instead?
         // Does the matrix operator need to be specified before SetFromOptions each time?
         //KSPSetFromOptions(sm->ksp);
         // TODO: I don't think sol needs to be initialized to zero but should double-check
+        // set resid and solution into PETSdc objects here
+        // what about ghost values?
+        //solution goes in X
+
+
+        int rows[sm->my_ndofs];
+        int z;
+        for (z=0;z<sm->my_ndofs;z++){
+            rows[z] = z+sm->local_range[0];
+        }
+        // what about ghost values?
+        // see https://petsc.org/release/manualpages/Vec/VecCreateGhostWithArray/
+        // or https://petsc.org/release/manualpages/Vec/VecCreateGhost/
+        // and https://petsc.org/release/manualpages/Vec/VecGhostGetLocalForm/
+        VecSetValues(sm->X, sm->my_ndofs,rows,sm->sol, INSERT_VALUES);
+        VecSetValues(sm->B, sm->my_ndofs,rows,sm->resid, INSERT_VALUES);
+
+
         KSPSolve(sm->ksp,sm->residual,sm->sol);
         KSPGetIterationNumber(sm->ksp, &its);
         printf("KSP iterations: %i\n",its);
@@ -413,6 +408,8 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
         }
 #endif
 #else
+        //Non-PETSc option
+        //Mark stopped here
         /* solves the matrix */
         solv_linear_sys_setup(solver, sm->bc_mask, sm->matrix, sm->diagonal, sm->residual, sm->sol, sm->scale_vect, my_nnodes, nnodes, nsys
 #ifdef _MESSG
@@ -426,6 +423,9 @@ int fe_newton(SSUPER_MODEL *sm,                           /* input supermodel */
 #endif
                                           );
 #endif
+        
+        
+
         
         /* adds the increment to the solution */
         (*inc_fnctn) (sm,isuperModel);

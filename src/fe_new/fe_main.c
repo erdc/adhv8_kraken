@@ -1,19 +1,20 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     The FE engine driver for a given Design model
+ *  \brief     The FE engine driver for a given Design model, advances the model one time step
  *  \author    Charlie Berger, Ph.D.
  *  \author    Gary Brown
  *  \author    Gaurav Savant, Ph.D.
  *  \author    Corey Trahan, Ph.D.
  *  \author    Gajanan Choudhary, Ph.D.
+ *  \author    Mark Loveland, Ph.D.
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
  *
  *  \returns YES for a good calculation and NO for a bad calculation
  *
- * @param[in] SSUPER_MODEL *sm :: ONE  Super Model
+ * @param[in,out] DESIGN_MODEL *dm :: ONE  Design Model
  * \note CJT \:: matrix size will grow with refinement. It never shrinks with unrefinement!
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

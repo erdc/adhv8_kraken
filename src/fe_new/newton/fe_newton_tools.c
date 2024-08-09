@@ -1,6 +1,6 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*! \file fe_newton_tools.c This file  contains all routines for initialization, allocation, etc of the Jacobian and Residual */
+/*! \file fe_newton_tools.c This file  contains miscellanious routines used in Newton solve */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -11,42 +11,35 @@ static int FILE_DEBUG = OFF;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This file initializes the SuperModel Newton residual
+ *  \brief     This function initializes the SuperModel Newton solution
  *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
  *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void initialize_system(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
+void initialize_system(SSUPER_MODEL *sm) {
     int j,k;
 
     //seems like the easiest way?
     //maybe think about this
-
-
     //this will update sm solution structs that depend on time
     //is there a better way so if we add a variable we dont have to add bunches of things
     //everywhere?
-    for (i = 0; i < grid->nhead ; i ++){
+    for (i = 0; i < sm->nhead ; i ++){
         sm->head[i] = sm->old_head[i]; 
     }
 
 
-    for (i = 0; i < grid->nvel2d; i++) {
+    for (i = 0; i < sm->nvel2d; i++) {
         sm->vel2d[i].x = sm->old_vel2d[i].x ;
         sm->vel2d[i].y = sm->old_vel2d[i].y;
     }
 
 
-    for (i = 0; i < grid->nvel3d; i++) {
+    for (i = 0; i < sm->nvel3d; i++) {
         sm->vel3d[i].x = sm->old_vel3d[i].x ;
         sm->vel3d[i].y = sm->old_vel3d[i].y;
         sm->vel3d[i].x = sm->old_vel3d[i].z ;
@@ -74,29 +67,21 @@ void initialize_system(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
 
 
 }
-
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This file initializes the SuperModel Newton residual
+ *  \brief     This function initializes the SuperModel bc mask for any dirichlet conditions
  *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
  *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ *  @parma[in] grid (*SGRID) pointer to the grid from a design model
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void initialize_dirichlet_bc(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
+void initialize_dirichlet_bc(SSUPER_MODEL *sm, SGRID *grid) {
 
     //Dirichlet condition handling go here
     int istart = 0, isers = 0, istr = 0;
@@ -147,112 +132,19 @@ void initialize_dirichlet_bc(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
      }
     
 }
-
-
-
-
-
-
-
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This file assembles a local 3 degree-of-freedom element into the global SuperModel Newton residual
+ *  \brief     Updates any model specific non-solution quantities using fe_update routines
  *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
  *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void assemble_residual(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
-    int j,k;
-
-    //seems like the easiest way?
-    //maybe think about this
-    double fmap3d = sm->fmap3d;
-    double fmap2d = sm->fmap2d;
-    double fmap1d = sm->fmap1d;
-    //zero out stuff
-    #ifdef _PETSC
-        ierr = VecZeroEntries(sm->residual);
-    #else
-        sarray_init_dbl(sm->residual, sm->ndofs);
-    #endif
-
-
-    double temp[max_elem_dofs];
-    //loop through all nelem3d
-    for (j=0;j<grid->nelem3d;j++){
-        sarray_init_dbl(temp,max_elem_dofs);
-        for (k=0;k<sm.nSubMods3d[j];k++){
-
-            //would this work for vector functions?
-            //would it be better to put global residual outside inner loop if possible?
-            sm.elem3d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-
-            for (l=0;l<elem3d_physics[j][k].ndof;l++){        
-                sm->residual[fmap3d[j,k,l]] +=  temp[l];
-            }
-        }
-
-    }
-
-    //loop through all nelem2d
-    for (j=0;j<grid->nelem2d;j++){
-        sarray_init_dbl(temp,max_elem_dofs);
-        for (k=0;k<sm.nSubMods2d[j];k++){
-            //would this work for vector functions?
-            sm.elem2d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-
-            for (l=0;l<elem3d_physics[j][k].ndof;l++){        
-                sm->residual[fmap3d[j,k,l]] +=  temp[l];
-            }
-        }
-    }
-
-
-    //loop through all nelem1d
-    for (j=0;j<grid->nelem1d;j++){
-        sarray_init_dbl(temp,max_elem_dofs);
-        for (k=0;k<sm.nSubMods1d[j];k++){
-            //would this work for vector functions?
-            sm.elem1d_physics[j][k]->fe_resid(sm,temp,grid,mat,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-
-            for (l=0;l<elem3d_physics[j][k].ndof;l++){        
-                sm->residual[fmap3d[j,k,l]] +=  temp[l];
-            }
-        }
-    }    
-}
-
-
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
- *  \brief     Updates any model specific quantities using fe_update routines
- *  \author    Count Corey J. Trahan
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
- *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
+ *  @param[in] SGRID *grid - the grid
+ *  @param[in] SMAT *mat - the set of materials
  * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -293,77 +185,6 @@ void update_function(SSUPER_MODEL *sm,SGRID *grid,SMAT *mat){
 
 
 }
-
-
-
-
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
- *  \brief     This file assembles a local 3 matrix into the global SuperModel Newton matrix
- *  \author    Count Corey J. Trahan
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] double *fmap - a map from the specific model dof to the supermodel dof
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] DOF_3 *elem_rhs - the local element right-hand-side
- *  @param[in,out]  SSUPER_MODEL *sm pointer to an instant of the SuperModel struct - adjusts the residual
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void assemble_matrix(SSUPER_MODEL *sm, SGRID *grid, SMAT *mat) {
-    int j,k;
-
-    //seems like the easiest way?
-    //maybe think about this
-    double fmap3d = sm->fmap3d;
-    double fmap2d = sm->fmap2d;
-    double fmap1d = sm->fmap1d;
-    //zero out stuff
-    #ifdef _PETSC
-        ierr = VecZeroEntries(sm->residual);
-    #else
-        sarray_init_dbl(sm->residual, sm->ndofs);
-    #endif
-    
-
-    double temp[max_elem_dofs,max_elem_dofs];
-    //loop through all nelem3d
-    for (j=0;j<grid->nelem3d;j++){
-            sarray_init_dbl(temp,max_elem_dofs**2);
-            for (k=0;k<sm.nSubMods3d[j];k++){
-                //would this work for vector functions?
-                //would it be better to put global residual outside inner loop if possible?
-                add_replace(temp,sm.elem3d_physics[j][k].fe_load(sm,grid,mat));
-            }
-            //store in global using the map
-            sm->residual[fmap2d[j,k]] += //???
-
-    }
-
-    //loop through all nelem2d
-    for (j=0;j<grid->nelem2d;j++){
-        for (k=0;k<sm.nSubMods2d[j];k++){
-            //would this work for vector functions?
-            sm->residual[fmap2d[j,k]] += sm.elem2d_physics[j][k].fe_load(sm,grid,mat);
-        }
-    }
-
-
-    //loop through all nelem1d
-    for (j=0;j<grid->nelem1d;j++){
-        for (k=0;k<sm.nSubMods1d[j];k++){
-            //would this work for vector functions?
-            sm->residual[fmap1d[j,k]] += sm.elem1d_physics[j][k].fe_load(sm,grid,mat);
-        }
-    }    
-}
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
@@ -507,6 +328,20 @@ void get_residual_norms(SGRID *grid, int nnodes, int *ndof, int macro_ndof
     *inc_max_norm = partial_inc_max_norm;
     if((ierr > 0) && (myid == 0)) printf("\n +++++++ WARNING NaN generated!!! ++++++++ \n");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void print_concentration(SSUPER_MODEL *sm, int isuperModel, int myid, int npes);

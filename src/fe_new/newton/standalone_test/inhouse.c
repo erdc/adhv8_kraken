@@ -9,12 +9,19 @@
 void solv_linear_sys_setup(int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *residual, 
   double *sol, double *scale_vect, int local_size, int size_with_ghosts, int rank,int *ghosts);
+void solv_linear_sys_bcgstab(int *indptr_diag, int *cols_diag, double *vals_diag, 
+  int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *residual, 
+  double *sol, double *scale_vect, int local_size, int size_with_ghosts, int rank,int *ghosts);
 double find_max_in_row(int *indptr, double *vals,int row_num);
 void comm_update_double(double *vec,int size_v, int npe,int rank);
 int global_to_local(int global_col_no,int local_size,int *ghosts);
-void precondition_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow);
+void prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow);
+void solve_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow);
+void umfpack_clear();
+void solv_init_dbl(int n,double *v);
 
-
+//keep umfpack calls in one script
+static  void *Symbolic, *Numeric;
 
 int main(int argc, char **argv) {
   int k;
@@ -165,9 +172,13 @@ int main(int argc, char **argv) {
   
 
   //now create routine that does the preconcitioning and then solve
+  //scales matrix and factors with umfpack
   solv_linear_sys_setup(indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
      vals_off_diag, resid, sol, scale_vect, m, n+nghost,rank, ghosts);
 
+  //actually solve matrix
+  solv_linear_sys_bcgstab(indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
+     vals_off_diag, resid, sol, scale_vect, m, n+nghost,rank, ghosts);
 
   //print scale vec to see
   //for(k=0;k<m+nghost;k++){
@@ -224,7 +235,7 @@ void solv_linear_sys_setup(int *indptr_diag, int *cols_diag, double *vals_diag,
       scale_vect[i] = 1.0 / sqrt(fabs(scale_vect[i]));
 
   /* scales the equations */
-    /*
+  
   double factor;
   for (i = 0; i < size_with_ghosts; i++) {
     factor = scale_vect[i];
@@ -264,70 +275,126 @@ void solv_linear_sys_setup(int *indptr_diag, int *cols_diag, double *vals_diag,
       vals_off_diag[ind_start+j]*=scale_vect[i]*scale_vect[col_no];
     }
   }
-  */
+  
 
+  //factor the matrix preconditioner
+  prep_umfpack(indptr_diag,cols_diag,vals_diag, sol, residual, local_size);
 
-  /*
-  for (i = 0; i < nnodes; i++) {
-    ctr2=ctr;
-    nodal_block_size = ndof_node[i]; 
-    for (j=0;j<nodal_block_size;j++){
-      row_factor[j] = scale_vect[ctr];
-      ctr+=1;
-    }
-    //now change (nodal) diagonal and off diagonal block vals
-
-    for (j = 0; j<nodal_block_size;j++){
-      //index in vals and cols of first entry for this row
-      row_ind_start=indptr_diag[ctr2+j];
-      //find starting index for this node by finding column number
-      finding_col = True;
-      l=row_ind_start;
-      while(finding_col){
-        if(cols_diag[l]==(ctr2+j)){
-          finding_col=False;
-        }else{
-          l+=1;
-        }
-      }
-      //l is index where the values should start for a given row ctr2+j
-      for (k = 0; k<nodal_block_size;k++){
-        //find appropriate val entry and scale
-        vals_diag[l+k] *= row_factor[j] * row_factor[k];
-      }
-    }
-    //scale off diagonal bit anything involving this nodal block
-    spv_vscale(matrix + i, scale_vect, row_factor, p);
-  }
-  */
-
-  // now that matrix is scaled
-  /* sets up block Jacobi / additive Schwarz preconditioning */
-  /* this will use umfpack at some point*/
-  //int version [3] ;
-  //umfpack_version(version);
-  //printf("Umfpack version %d.%d.%d\n",version[0],version[1],version[2]);
-  //we will only be preconditioning the diagonal blocks
-  precondition_umfpack(indptr_diag,cols_diag,vals_diag, sol, residual, local_size);
+  //show what happened to scalevec?
+  //for(k=0;k<size_with_ghosts;k++){
+  //  printf("Rank %d, scalevec[%d] = %f\n",rank,k,scale_vect[k]);
+  //}
 
   //show what happened to residual?
-  for(k=0;k<local_size;k++){
-    printf("Rank %d, scaled sol after umfpack[%d] = %f\n",rank,k,sol[k]);
-  }
+  //for(k=0;k<local_size;k++){
+  //  printf("Rank %d, scaled residual[%d] = %f\n",rank,k,residual[k]);
+  //}
+  //show what happened to nnz block?
+  //for(k=0;k<4;k++){
+  //  printf("Rank %d, scaled vals diag[%d] = %f\n",rank,k,vals_diag[k]);
+  //}
+
+  //does stuff get modified in sparse matrix too?
+  //No
+  //for(k=0;k< 7;k++){
+  //  printf("Rank %d, scaled vals after umfpack[%d] = %f\n",rank,k,vals_diag[k]);
+  //}
 
 }
 
 
-void precondition_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow){
+void prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow){
   //load into umfpack, need to transpose because umfpack uses ccs format
   int status, sys, nz;
-  void *Symbolic, *Numeric ;
+
   double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
 
   status = umfpack_di_symbolic (nrow, nrow, indptr_diag, cols_diag, vals_diag, &Symbolic, Control, Info);
   status = umfpack_di_numeric (indptr_diag, cols_diag, vals_diag, Symbolic, &Numeric, Control, Info) ;
+  //Adh Stops here, how do we want to call other stuff?
+
+}
+
+void solve_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow){
+  int status, sys, nz;
+  double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
   //try this to account for CSR format, use solution as RHS for some reason
   status = umfpack_di_solve (UMFPACK_Aat, indptr_diag, cols_diag, vals_diag, sol, resid, Numeric, Control, Info);
+}
+
+//now call bigcstab
+void solve_linear_sys_bcgstab(int *indptr_diag, int *cols_diag, double *vals_diag, 
+  int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *residual, 
+  double *sol, double *scale_vect, int local_size, int size_with_ghosts, int rank,
+  int *ghosts){
+
+  int it;                     /* loop counter over the cg iterations */
+  //int iapprox_update_flag;    /* flag for performing an update of the approximation */
+  //int iresid_update_flag;     /* flag for performing an update of the residual */
+  double rnorm;               /* the norm of the residual */
+  double alpha = 1.0;         /* scalar */
+  double omega = 1.0;         /* scalar */
+  double beta = 0.0;          /* scalar */
+  double gamma = 0.0;         /* p dot ap */
+  double rho = 1.0;           /* scalar */
+  double rhop;                /* rho from the previous iteration */
+  double bnorm;               /* the norm of the right hand side */
+  //double snorm;               /* the norm of s */
+  double conv_tol;            /* the convergence tolerance */
+  double min_conv_tol;        /* the minimum convergence tolerance */
+
+  /* allocates memory if needed */
+  // need to do different allocation later
+  isize_prev = isize;
+  isize = ndof_solv;
+  double solv_r[size_with_ghosts];
+  double solv_p[size_with_ghosts];
+  double solv_Ap[size_with_ghosts];
+  double solv_Mp[size_with_ghosts];
+  double solv_q[size_with_ghosts];
+  double solv_s[size_with_ghosts];
+  double solv_As[size_with_ghosts];
+  double solv_Ms[size_with_ghosts];
+  double solv_Au[size_with_ghosts];
+  double solv_u0[size_with_ghosts];
+  double solv_ptmp[size_with_ghosts];
+
+
+  /* zeroes the arrays */
+  solv_copy(size_with_ghosts, sol, solv_u0);
+  solv_init_dbl(size_with_ghosts, sol);
+  solv_init_dbl(size_with_ghosts, solv_r);
+  solv_init_dbl(size_with_ghosts, solv_q);
+  solv_init_dbl(size_with_ghosts, solv_p);
+  solv_init_dbl(size_with_ghosts, solv_Mp);
+  solv_init_dbl(size_with_ghosts, solv_Ap);
+  solv_init_dbl(size_with_ghosts, solv_s);
+  solv_init_dbl(size_with_ghosts, solv_As);
+  solv_init_dbl(size_with_ghosts, solv_Ms);
+
+  solv_copy(size_with_ghosts, residual, solv_p);
+  //in original routine but doesnt seem necessary
+  //solv_init_dbl(size_with_ghosts, residual);
+  //why??
+  //solv_copy(size_with_ghosts, solv_p, residual);
+
+  //apply left preconditioning to RHS, this is stored in residual
+  solve_umfpack(indptr_diag, cols_diag, vals_diag, residual, solv_p, local_size);
+  //zero out rhs
+  solv_init_dbl(ndof_solv, solv_p);
+
+  /* Now Form Actual Residual */
+  /* Assuming x=0 as the initial guess would have given r=b (the rhs). Easy, right? */
+  /* However, we miss an opportunity if our preconditioner is meaningful. */
+  /* This will basically take r = S b - S A x, where x = S b, as the initial guess. */
+  //should it really be updating the ghosts?
+  solv_copy(size_with_ghosts, residual, sol);
+
+
+}
+
+
+void umfpack_clear(){
   //clear memory
   umfpack_di_free_symbolic (&Symbolic) ;
   umfpack_di_free_numeric (&Numeric) ;
@@ -369,6 +436,29 @@ double find_max_in_row(int *indptr, double *vals,int row_num){
 }
 
 
+void solv_init_dbl(
+                   int n,     /* the number of degrees of freedom */
+                   double *v      /* the vector */
+)
+{
+    int ii = 0;     /* loop counter */
+    
+    /* zeroes the array */
+    for(ii = 0; ii < n; ii++)
+    {
+        v[ii] = 0;
+    }
+    return;
+}
+
+void solv_copy(int n, double *vec_from, double *vec_to){
+  //better routine elsewhere
+  int ii;
+  for(ii=0;ii<n;ii++){
+    vec_to[ii] = vec_from[ii];
+  }
+  return;
+}
 
 /*!
    \brief Update the Ghost Node Values (Get Info From Owning Processor)

@@ -1,3 +1,23 @@
+/* This is a biconjugate gradient squared stabilized matrix solver. 
+ It is a Krylov-based iterative method used to solve nonsymmetric
+ linear systems.  
+ 
+ Ref:  H. A. vanderVorst, "Bi-CGStab:  A fast and smoothly converging 
+ variant to Bi-CG for the solution of nonsymmetric systems",
+ SIAM J. Sci. Statist. Comput., 13 (1992), pp. 631-644.
+ 
+ or       C. T. Kelley, "Iterative Methods for Linear and Nonlinear
+ Equations", SIAM, Philadelphia, PA, 1995.
+ 
+ In general, the Bi-CGStab solver constructs bases for the Krylov 
+ subspaces (A,b) and (A^T,c), where b is the right-hand-side vector
+ and c is usually chosen so that c=b.  The method may break down, 
+ although this does not seem to happen often in practice.
+ 
+ Return: Linear Solver Failure?
+ NO or YES
+ */
+
 #include <mpi.h>
 #include <stdio.h>
 #include <math.h>
@@ -9,30 +29,29 @@
      _a > _b ? _a : _b; })
 #define SOLV_TOL 1e-5
 #define MAX_NODAL_DOF 4
-void linear_sys_setup(int *indptr_diag, int *cols_diag, double *vals_diag, 
+void scale_linear_system(int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *residual, 
   double *sol, double *scale_vect, int local_size, int size_with_ghosts, int rank,int *ghosts, int nghost);
-void solve_linear_sys_bcgstab(int *indptr_diag, int *cols_diag, double *vals_diag, 
-  int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *residual, 
-  double *sol, double *scale_vect, int local_size, int size_with_ghosts, int rank,int *ghosts, int nghost);
+void solve_linear_sys_bcgstab(double *sol, int *indptr_diag, int *cols_diag, double *vals_diag, 
+  int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *residual,
+   double *scale_vect, int local_size, int size_with_ghosts, int rank,int *ghosts, int nghost);
 double find_max_in_row(int *indptr, double *vals,int row_num);
 void comm_update_double(double *vec,int size_v, int npe,int rank);
 int global_to_local(int global_col_no,int local_size,int *ghosts, int nghost);
 void prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow);
-void solve_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow);
+void solve_umfpack(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, double *b, int nrow);
 void umfpack_clear();
-void solv_init_dbl(int n,double *v);
-void solv_amult(double *Ax, int *indptr_diag, int *cols_diag, double *vals_diag, 
+void split_CSR_mat_vec_mult(double *Ax, int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag, double *vals_off_diag,
   double *x, int nrows, int *ghosts, int nghost);
-void solv_copy(int n, double *vec_from, double *vec_to);
-void solv_init_dbl(int n,double *v);
-void solv_daxpy(int n, double alpha, double *x, double *y);
+void copy_array_to_from(double *vec_to, double *vec_from, int n);
+void zero_dbl_array(double *v, int n);
+void y_plus_ax(double *y, double alpha, double *x,int n );
 double get_global_max(double x);
-double solv_infty_norm(int n, double *v1);
-double solv_dot(int n, double *x,double *y);
+double l_infty_norm(int n, double *v1);
+double dot_dbl_array(int n, double *x,double *y);
 double messg_dsum(double x);
-
+void scale_dbl_array(double *v,  double alpha, int n);
 
 //keep umfpack calls in one script
 static  void *Symbolic, *Numeric;
@@ -189,10 +208,13 @@ int main(int argc, char **argv) {
 //  }
 
   //now create routine that does the preconcitioning and then solve
-  //scales matrix and factors with umfpack
-  linear_sys_setup(indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
+  //scales matrix, rhs(residual), solution, and sets scale_vec
+  scale_linear_system(indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
      vals_off_diag, resid, sol, scale_vect, m, n+nghost,rank, ghosts, nghost);
 
+  //factor the matrix preconditioner
+  prep_umfpack(indptr_diag,cols_diag,vals_diag, sol, resid, m);
+  //and factors with umfpack
   //for(k=0;k<nnz_diag;k++){
   //  printf("Rank %d, vals_diag[%d] = %f\n",rank,k,vals_diag[k]);
   //}
@@ -202,8 +224,8 @@ int main(int argc, char **argv) {
   //}
 
   //actually solve matrix
-  solve_linear_sys_bcgstab(indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
-     vals_off_diag, resid, sol, scale_vect, m, n+nghost,rank, ghosts, nghost);
+  solve_linear_sys_bcgstab(sol, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
+     vals_off_diag, resid, scale_vect, m, n+nghost,rank, ghosts, nghost);
 
   //print scale vec to see
   //for(k=0;k<m+nghost;k++){
@@ -220,8 +242,7 @@ int main(int argc, char **argv) {
 }
 
 
-//preconditioning
-void linear_sys_setup(int *indptr_diag, int *cols_diag, double *vals_diag, 
+void scale_linear_system(int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *residual, 
   double *sol, double *scale_vect, int local_size, int size_with_ghosts, int rank,
   int *ghosts, int nghost){
@@ -243,7 +264,7 @@ void linear_sys_setup(int *indptr_diag, int *cols_diag, double *vals_diag,
 
   }
 
-  //ghosts of scale vect needs to be communicated
+  //ghosts of scale vect probably needed to be communicated
   //previously used comm_update_double
   //hardcoded for now
   comm_update_double(scale_vect, local_size, 3,rank);
@@ -300,12 +321,8 @@ void linear_sys_setup(int *indptr_diag, int *cols_diag, double *vals_diag,
       vals_off_diag[ind_start+j]*=scale_vect[i]*scale_vect[col_no];
     }
   }
-  
 
-  //factor the matrix preconditioner
-  prep_umfpack(indptr_diag,cols_diag,vals_diag, sol, residual, local_size);
-
-  //show what happened to scalevec?
+    //show what happened to scalevec?
   //for(k=0;k<size_with_ghosts;k++){
   //  printf("Rank %d, scalevec[%d] = %f\n",rank,k,scale_vect[k]);
   //}
@@ -324,8 +341,8 @@ void linear_sys_setup(int *indptr_diag, int *cols_diag, double *vals_diag,
   //for(k=0;k< 7;k++){
   //  printf("Rank %d, scaled vals after umfpack[%d] = %f\n",rank,k,vals_diag[k]);
   //}
-
 }
+
 
 
 void prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow){
@@ -340,17 +357,17 @@ void prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *s
 
 }
 
-void solve_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow){
+void solve_umfpack(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, double *b, int nrow){
   int status, sys, nz;
   double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
   //try this to account for CSR format, use solution as RHS for some reason
-  status = umfpack_di_solve (UMFPACK_Aat, indptr_diag, cols_diag, vals_diag, sol, resid, Numeric, Control, Info);
+  status = umfpack_di_solve (UMFPACK_Aat, indptr_diag, cols_diag, vals_diag, x, b, Numeric, Control, Info);
 }
 
 //now call bigcstab
-void solve_linear_sys_bcgstab(int *indptr_diag, int *cols_diag, double *vals_diag, 
+void solve_linear_sys_bcgstab(double *sol, int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *residual, 
-  double *sol, double *scale_vect, int local_size, int size_with_ghosts, int rank,
+  double *scale_vect, int local_size, int size_with_ghosts, int rank,
   int *ghosts, int nghost){
 
   int it;                     /* loop counter over the cg iterations */
@@ -384,39 +401,38 @@ void solve_linear_sys_bcgstab(int *indptr_diag, int *cols_diag, double *vals_dia
 
 
   /* zeroes the arrays */
-  solv_copy(size_with_ghosts, sol, solv_u0);
-  solv_init_dbl(size_with_ghosts, sol);
-  solv_init_dbl(size_with_ghosts, solv_r);
-  solv_init_dbl(size_with_ghosts, solv_q);
-  solv_init_dbl(size_with_ghosts, solv_p);
-  solv_init_dbl(size_with_ghosts, solv_Mp);
-  solv_init_dbl(size_with_ghosts, solv_Ap);
-  solv_init_dbl(size_with_ghosts, solv_s);
-  solv_init_dbl(size_with_ghosts, solv_As);
-  solv_init_dbl(size_with_ghosts, solv_Ms);
+  copy_array_to_from(solv_u0, sol, size_with_ghosts);
+  zero_dbl_array(sol, size_with_ghosts);
+  zero_dbl_array(solv_r, size_with_ghosts);
+  zero_dbl_array(solv_q, size_with_ghosts);
+  zero_dbl_array(solv_p, size_with_ghosts);
+  zero_dbl_array(solv_Mp, size_with_ghosts);
+  zero_dbl_array(solv_Ap, size_with_ghosts);
+  zero_dbl_array(solv_s, size_with_ghosts);
+  zero_dbl_array(solv_As, size_with_ghosts);
+  zero_dbl_array(solv_Ms, size_with_ghosts);
 
-  solv_copy(size_with_ghosts, residual, solv_p);
+  copy_array_to_from(solv_p, residual, size_with_ghosts);
   //in original routine but doesnt seem necessary
-  //solv_init_dbl(size_with_ghosts, residual);
-  //why??
-  //solv_copy(size_with_ghosts, solv_p, residual);
+  zero_dbl_array(residual,size_with_ghosts);
   int i;
   //apply left preconditioning to RHS, this is stored in residual
-  solve_umfpack(indptr_diag, cols_diag, vals_diag, residual, solv_p, local_size);
+  solve_umfpack(residual, indptr_diag, cols_diag, vals_diag, solv_p, local_size);
   //zero out rhs
-  solv_init_dbl(size_with_ghosts, solv_p);
+  zero_dbl_array(solv_p, size_with_ghosts);
   //update ghosts
-  comm_update_double(residual, local_size, 3, rank);
+
   /* Now Form Actual Residual */
   /* Assuming x=0 as the initial guess would have given r=b (the rhs). Easy, right? */
   /* However, we miss an opportunity if our preconditioner is meaningful. */
   /* This will basically take r = S b - S A x, where x = S b, as the initial guess. */
   //should it really be updating the ghosts?
-  solv_copy(size_with_ghosts, residual, sol);
+  copy_array_to_from(sol, residual, size_with_ghosts);
   //for (i=0;i<local_size;i++){
   //  printf("Rank %d, x[%d] = %f\n",rank,i,vals_off_diag[i]);
   //}
-  solv_amult(solv_Mp, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag,
+  comm_update_double(sol, local_size, 3, rank);
+  split_CSR_mat_vec_mult(solv_Mp, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag,
    sol, local_size,ghosts,nghost);
   //update matrix vector indices. is this necessary?
   comm_update_double(solv_Mp, local_size, 3, rank);
@@ -424,24 +440,22 @@ void solve_linear_sys_bcgstab(int *indptr_diag, int *cols_diag, double *vals_dia
   //  printf("Rank %d, Ax[%d] = %f\n",rank,i,solv_Mp[i]);
   //}
   //next, apply preconditioner to solv_Mp, save in solv_Ap
-  solve_umfpack(indptr_diag, cols_diag, vals_diag, solv_Ap, solv_Mp, local_size);
+  solve_umfpack(solv_Ap, indptr_diag, cols_diag, vals_diag, solv_Mp, local_size);
   //print vector
-  for (i=0;i<local_size;i++){
-    printf("Rank %d, Ax[%d] = %f\n",rank,i,solv_Ap[i]);
-  }
-  //from b to r and add to solc_Ap
-  solv_copy(size_with_ghosts, residual, solv_r);
-  solv_daxpy(size_with_ghosts, 1, solv_Ap, solv_r);
-  solv_init_dbl(size_with_ghosts, solv_Mp);
-  solv_init_dbl(size_with_ghosts, solv_Ap);
-  solv_copy(size_with_ghosts, solv_r, solv_q);
+  //for (i=0;i<local_size;i++){
+  //  printf("Rank %d, Ax[%d] = %f\n",rank,i,solv_Ap[i]);
+  //}
+  //from b to r and set as r = b-Ax with prexondition
+  copy_array_to_from(solv_r, residual, size_with_ghosts);
+  y_plus_ax(solv_r, -1, solv_Ap, size_with_ghosts );
+  zero_dbl_array(solv_Mp, size_with_ghosts);
+  zero_dbl_array(solv_Ap, size_with_ghosts);
+  copy_array_to_from(solv_q, solv_r, size_with_ghosts);
   //print vector
-  for (i=0;i<local_size;i++){
-    printf("Rank %d, solvq[%d] = %f\n",rank,i,solv_q[i]);
-  }
+
   //take linf norms of vectors
-  rnorm = solv_infty_norm(local_size, solv_r);
-  bnorm = solv_infty_norm(local_size, residual);
+  rnorm = l_infty_norm(local_size, solv_r);
+  bnorm = l_infty_norm(local_size, residual);
   //if it is in parallel. collect with allreduce
   rnorm = get_global_max(rnorm);
   bnorm = get_global_max(bnorm);
@@ -453,39 +467,98 @@ void solve_linear_sys_bcgstab(int *indptr_diag, int *cols_diag, double *vals_dia
   it = 0;
   min_conv_tol = 1e-10;
   conv_tol = 1e-5;
-  rho = solv_dot(local_size, solv_r, solv_q);
+  rho = dot_dbl_array(local_size, solv_r, solv_q);
   //if in parallel sum among processors
   rho = messg_dsum(rho);
-  
-
+  //printf("RHO = %f\n",rho);
+  int max_it = 100;
   //start itertative loop
-  while (rnorm > (min_conv_tol + bnorm * conv_tol) && it < solver->max_lin_it) {
+  while (rnorm > (min_conv_tol + bnorm * conv_tol) && it < max_it){
     // a
     it++;
 
-    /* (b) */
+    //(b)
     beta = (rho * alpha) / (rhop * omega);
 
+
     // c //
-    solv_daxpy(size_with_ghosts, -omega, solv_Ap, solv_p);
-    solv_scal(size_with_ghosts, beta, solv_p);
-    solv_daxpy(size_with_ghosts, 1, solv_r, solv_p);
+    y_plus_ax(solv_p, -omega, solv_Ap,size_with_ghosts );
+    scale_dbl_array(solv_p,beta, size_with_ghosts);
+    y_plus_ax(solv_p, 1, solv_r, size_with_ghosts);
+    //for (i=0;i<local_size;i++){
+    //printf("Rank %d, solv_p[%d] = %f\n",rank,i,solv_p[i]);
+    //}
+    //need comm_update_double befor matvec mult
+    comm_update_double(solv_p, local_size, 3, rank);
 
-    /* (d) */
-    solv_init_dbl(ndof_solv, solv_Mp);
-    solv_init_dbl(ndof_solv, solv_Ap);
-    solv_amult(solv_Mp, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag,
+    // (d) //
+    zero_dbl_array(solv_Mp, size_with_ghosts);
+    zero_dbl_array(solv_Ap,size_with_ghosts);
+    split_CSR_mat_vec_mult(solv_Mp, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag,
     solv_p, local_size,ghosts,nghost);
+    //if MPI
+    //preconfitioner is local only
+    //comm_update_double(solv_Mp, local_size, 3, rank);
     //next, apply preconditioner to solv_Mp, save in solv_Ap
-    solve_umfpack(indptr_diag, cols_diag, vals_diag, solv_Ap, solv_Mp, local_size);
+    solve_umfpack(solv_Ap, indptr_diag, cols_diag, vals_diag, solv_Mp, local_size);
 
-    /* (e) */
-    gamma = solv_dot(local_size, solv_q, solv_Ap);
-    gamma = messg_dsum(gamma, smpi->ADH_COMM);
+    // (e) //
+    gamma = dot_dbl_array(local_size, solv_q, solv_Ap);
+    gamma = messg_dsum(gamma);
     alpha = rho / gamma;
+    //printf("gamma, alpha %f, %f\n",gamma,alpha);
 
+    /* (f) */
+    copy_array_to_from(solv_s, solv_r, size_with_ghosts);
+    y_plus_ax(solv_s, -alpha, solv_Ap, size_with_ghosts);
+    zero_dbl_array(solv_Ms, size_with_ghosts);
+    zero_dbl_array(solv_As, size_with_ghosts);
+    //need comm_update_double befor matvec mult
+    comm_update_double(solv_s, local_size, 3, rank);
+    split_CSR_mat_vec_mult(solv_Ms, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag,
+    solv_s, local_size,ghosts,nghost);
+    solve_umfpack(solv_As, indptr_diag, cols_diag, vals_diag, solv_Ms, local_size);
 
+    /* (g) */
+    omega = dot_dbl_array(local_size, solv_As, solv_s);
+    gamma = dot_dbl_array(local_size, solv_As, solv_As);
+    //if MPI is on
+    omega = messg_dsum(omega);
+    gamma = messg_dsum(gamma);
 
+    omega = omega / gamma;
+    rhop = rho;
+    rho = -1.0 * omega * dot_dbl_array(local_size, solv_As, solv_q);
+    //only MPI
+    rho = messg_dsum(rho);
+
+    /* (h) */
+    y_plus_ax(sol, alpha, solv_p,size_with_ghosts);
+    y_plus_ax(sol, omega, solv_s, size_with_ghosts);
+        
+    /* (i) */
+    copy_array_to_from(solv_r, solv_s, size_with_ghosts);
+    y_plus_ax(solv_r, -omega, solv_As, size_with_ghosts);
+    /*rnorm = solv_l2_norm_scaled(my_ndof_solv, solv_r, (double)(global_nnode)); */
+    rnorm = l_infty_norm(local_size, solv_r);
+    //only do this in parallel
+    rnorm = get_global_max(rnorm);
+    //printf("Rnorm, %f\n",rnorm);
+
+  }
+  printf("IT = %d\n\n",it);
+
+  //undo scaling (need to add in error checks)
+  for (i = 0; i < local_size; i++) {
+        sol[i] += solv_u0[i];
+        /* solv_u[i] *= scale_vect[i]; UNDO SCALING */
+    }
+  for (i = 0; i <local_size; i++){
+        sol[i] *= scale_vect[i]; /* UNDO SCALING */
+    }
+  comm_update_double(sol, local_size, 3, rank);
+  for (i = 0; i <local_size; i++){
+    printf("Rank %d Final u[%d] = %f\n",rank,i,sol[i]);
   }
 
 }
@@ -499,7 +572,15 @@ double get_global_max(double x){
   return x;
 }
 
-void solv_amult(double *Ax, int *indptr_diag, int *cols_diag, double *vals_diag, 
+void scale_dbl_array(double *v,  double alpha, int n){
+  int i;
+  //use blas maybe later
+  /* multiplies by a scalar */
+  for(i = 0; i < n; i++)
+        v[i] *= alpha;
+}
+
+void split_CSR_mat_vec_mult(double *Ax, int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag, double *vals_off_diag,
   double *x, int nrows, int *ghosts, int nghost){
 
@@ -570,9 +651,9 @@ double find_max_in_row(int *indptr, double *vals,int row_num){
 }
 
 
-void solv_init_dbl(
-                   int n,     /* the number of degrees of freedom */
-                   double *v      /* the vector */
+void zero_dbl_array(
+                   double *v,      /* the vector */
+                   int n     /* the number of degrees of freedom */
 )
 {
     int ii = 0;     /* loop counter */
@@ -585,7 +666,7 @@ void solv_init_dbl(
     return;
 }
 
-void solv_copy(int n, double *vec_from, double *vec_to){
+void copy_array_to_from(double *vec_to, double *vec_from, int n){
   //better routine elsewhere
   int ii;
   for(ii=0;ii<n;ii++){
@@ -594,12 +675,12 @@ void solv_copy(int n, double *vec_from, double *vec_to){
   return;
 }
 
-//\brief Performs daxpy operation for (double) vectors, \f$y = \alpha x  + y\f$
-void solv_daxpy(
-                int n,      /* the number of degrees of freedom */
+//\brief Performs daxpy operation for (double) vectors, y = \alpha x  + y$
+void y_plus_ax( double *y,     /* y vector (input and output) */
                 double alpha,     /* the scalar */
                 double *x,      /* x vector */
-                double *y     /* y vector */
+                int n      /* the number of degrees of freedom */
+                
 )
 {
 //can use blas or similar for this
@@ -617,7 +698,7 @@ int i = 0;      /* loop counter */
  \param n the length of the vectors (int)
  \param v1 pointer to the vector (double, length n)
  */
-double solv_infty_norm(
+double l_infty_norm(
                        int n,     /* the number of degrees of freedom */
                        double *v1     /* the vector */
                        )
@@ -644,7 +725,7 @@ double solv_infty_norm(
  \param x pointer to the first vector (double, length \a n)
  \param y pointer to the second vector (double, length \a n)
  */
-double solv_dot(
+double dot_dbl_array(
                 int n,      /* the number of degrees of freedom */
                 double *x,      /* the first vector */
                 double *y     /* the second vector */

@@ -1,0 +1,1003 @@
+% all equations utilize {align} from amsmath package
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{latex_macros}
+  [2011/01/11 v0.01 LaTeX package for my own purpose]
+
+
+\newcommand*{\lrp}[1]{(#1)}
+\newcommand*{\lrb}[1]{[{#1}]}
+\newcommand*{\lrpb}[1]{\big({#1}\big)}
+\newcommand*{\lrbb}[1]{\big[{#1}\big]}
+\newcommand*{\lrpbb}[1]{\bigg({#1}\bigg)}
+\newcommand*{\lrbbb}[1]{\bigg[{#1}\bigg]}
+\newcommand*{\lrc}[1]{\{{#1}\}}
+\newcommand*{\lrcc}[1]{\big\{{#1}\big\}}
+\newcommand*{\lrccc}[1]{\bigg\{{#1}\bigg\}}
+
+\newcommand{\ith}{i^{\,th}}
+\newcommand{\jth}{j^{\,th}}
+
+% ------------------------------------------------------------
+% equation definitions ---------------------------------
+
+\newcommand*{\Eqq}[1]{Equation (\ref{eqn:#1})}
+\newcommand*{\eqq}[1]{Eq.\,(\ref{eqn:#1})}
+\newcommand*{\eqqs}[2]{Eqs.\,(\ref{eqn:#1})-(\ref{eqn:#2})}
+
+\newcommand*{\EqAlign}[2]{
+\begin{align} 
+\label{eqn:#1}
+#2
+\end{align}
+}
+
+\newcommand*{\EqArray}[2]{
+\begin{eqnarray} 
+\label{eqn:#1}
+#2
+\end{eqnarray}
+}
+
+% ------------------------------------------------------------
+% figure definitions -------------------------------------
+
+\newcommand*{\Fig}[1]{Figure (\ref{fig:#1})}
+\newcommand*{\fig}[1]{Fig.\,(\ref{fig:#1})}
+\newcommand*{\figs}[2]{Figs.\,(\ref{fig:#1})-(\ref{fig:#2})}
+
+% ------------------------------------------------------------
+% geometry definitions --------------------------------
+
+% normals
+\newcommand{\nrml}{\mathbf{n}}
+
+% explicitly list normals, must be used in align environment
+\newcommand{\nrmlExplicit}{
+n_x &= \frac{-\ppartial{z}{x}}{\lrb{1 + \lrp{\ppartial{z}{x}}^2 + \lrp{\ppartial{z}{y}}^2}^{1/2}} \nonumber \\
+n_y &= \frac{-\ppartial{z}{y}}{\lrb{1 + \lrp{\ppartial{z}{x}}^2 + \lrp{\ppartial{z}{y}}^2}^{1/2}} \nonumber \\
+n_z &= \frac{1}{\lrb{1 + \lrp{\ppartial{z}{x}}^2 + \lrp{\ppartial{z}{y}}^2}^{1/2}} 
+}
+
+% water surface normals
+\newcommand{\nrmlExplicitWS}{
+n_x \big|_{z_{\elev{}}} = -\ppartial{\elev{h}}{x}\,n_z, \,\,\,\,\,\, n_y \big|_{z_\elev{}} =-\ppartial{\elev{h}}{y}\,{n_z}, \,\,\,\,\,\, n_z \big|_{z_\elev{}} = \frac{1}{\lrb{1 + \lrp{\ppartial{\elev{h}}{x}}^2 + \lrp{\ppartial{\elev{h}}{y}}^2}^{1/2}} 
+}
+
+% dot products
+\newcommand*{\dotp}[2]{{#1} \, \cdot \, {#2}}
+\newcommand*{\dotpb}[2]{\mathbf{{#1}} \, \cdot \, (\mathbf{{#2}})}
+
+% tensors
+\newcommand*{\rttensor}[1]{\overline{\overline{#1}}}
+\newcommand*{\tensor}[1]{\overline{\overline{{\mathbf{#1}}}}}
+
+% gradients and derivatives
+\newcommand*{\deriv}[2]{\frac{\,\partial{#1}}{\,\partial{#2}}}
+\newcommand*{\ppartial}[2]{\frac{\,\partial #1}{\,\partial #2}}
+\newcommand*{\dderiv}[2]{\frac{\,\partial^2{#1}}{\,\partial{#2}^2}}
+\newcommand*{\pderiv}[2]{\partial{#1}/\partial{#2}}
+
+\newcommand{\ddx}{\frac{\,\partial}{\,\partial x}}
+\newcommand{\ddy}{\frac{\,\partial}{\,\partial y}}
+\newcommand{\ddz}{\frac{\,\partial}{\,\partial z}}
+\newcommand{\ddt}{\frac{\,\partial}{\,\partial t}}
+
+\newcommand*{\bnabla}[1]{\mathbf{\nabla^{#1}} }   % #1 is dimension here
+\newcommand{\bbnabla}{\mathbf{\nabla}} 
+\newcommand{\grad}{\mathbf{\nabla}}
+
+% SW reduction operator
+\newcommand*{\reduce}[1]{ \widehat{O}\lrc{#1}}
+\newcommand*{\reduceB}[1]{ \widehat{O}\lrcc{#1}}
+\newcommand*{\reduceBB}[1]{ \widehat{O}\lrccc{#1}}
+
+% ------------------------------------------------------------
+% velocity definitions -----------------------------------
+
+% regular velocity,
+\newcommand{\vel}{\mathbf{v}}
+\newcommand{\velh}{\mathbf{v}^{\,h}}
+\newcommand{\uh}{u^{\,h}}
+\newcommand{\vh}{v^{\,h}}
+\newcommand{\wh}{w^{\,h}}
+
+% relative velocity
+\newcommand{\velr}{\mathbf{v}_r}
+\newcommand{\velrh}{\mathbf{v}^{\,h}_r}
+
+% depth-averaged velocity
+\newcommand*{\velb}[1]{\overline{\mathbf{v}}^{\,#1}}
+\newcommand*{\ub}[1]{\overline{u}^{\,#1}}
+\newcommand*{\vb}[1]{\overline{v}^{\,#1}}
+
+% transport velocity
+\newcommand*{\velc}[2]{\mathbf{v}_{#2}^{\,{#1}}}           % {#1} = h, {#2} bl, sl, t, etc || con velocity
+\newcommand*{\velcDA}[2]{\overline{\mathbf{v}}_{#2}^{\,{#1}}}           % {#1} = h, {#2} bl, sl, t, etc || con velocity
+\newcommand*{\velrc}[2]{\mathbf{v}_{{#2},r\,}^{\,{#1}}}   % {#1} = h, {#2} bl, sl, t, etc || relative con velocity
+
+% velocity derivatives
+\newcommand{\dudx}{\frac{\partial u}{\partial x}}
+\newcommand{\dudy}{\frac{\partial u}{\partial y}}
+\newcommand{\dudz}{\frac{\partial u}{\partial z}}
+
+\newcommand{\dvdx}{\frac{\partial v}{\partial x}}
+\newcommand{\dvdy}{\frac{\partial v}{\partial y}}
+\newcommand{\dvdz}{\frac{\partial v}{\partial z}}
+
+\newcommand{\dwdx}{\frac{\partial v}{\partial x}}
+\newcommand{\dwdy}{\frac{\partial v}{\partial y}}
+\newcommand{\dwdz}{\frac{\partial v}{\partial z}}
+
+\newcommand{\duhdx}{\frac{\partial \uh}{\partial x}}
+\newcommand{\dvhdy}{\frac{\partial \vh}{\partial y}}
+\newcommand{\dwhdz}{\frac{\partial \wh}{\partial z}}
+
+% fluxes
+\newcommand{\fluxbcn}{q_n}
+\newcommand*{\fluxSedlib}[1]{q_{#1}^{sedlib}}
+
+
+% ------------------------------------------------------------
+% basis functions ---------------------------------------
+
+\newcommand*{\phidd}[1]{\phi_{#1}}            % 2D basis functions
+\newcommand*{\phiddd}[1]{\omega_{#1}}    % 3D basis functions
+
+% 2d gradients
+\newcommand*{\dphiddx}[1]{\frac{\partial{\,\phidd{#1}}}{{\partial{x}}}}
+\newcommand*{\dphiddy}[1]{\frac{\partial{\,\phidd{#1}}}{{\partial{y}}}}
+\newcommand*{\dphiddz}[1]{\frac{\partial{\,\phidd{#1}}}{{\partial{z}}}}
+
+% 3d gradients
+\newcommand*{\dphidddx}[1]{\frac{\partial{\,\phiddd{#1}}}{{\partial{x}}}}
+\newcommand*{\dphidddy}[1]{\frac{\partial{\,\phiddd{#1}}}{{\partial{y}}}}
+\newcommand*{\dphidddz}[1]{\frac{\partial{\,\phiddd{#1}}}{{\partial{z}}}}
+
+% ------------------------------------------------------------
+% integral definitions -----------------------------------
+
+\newcommand*{\intd}[1]{\oint {#1} \, ds} 
+\newcommand*{\intdd}[1]{\int_{\Omega^{2d}} {#1} \, d\Omega^{2d}}
+\newcommand*{\intddd}[1]{\int_{\Omega^{3d}} {#1} \, d\Omega^{3d}}
+\newcommand*{\intg}[3]{\int_{\Omega^{{#2}}_{{#3}}} {#1} \, d\Omega}  % {#1} = integrand, {#2} = 2d/3d, {#3} = e
+\newcommand*{\intgb}[3]{\oint_{\partial \Omega^{{#2}}_{{#3}}} {#1} \, d(\,\bound^{{#2}}_{{#3}})}  % general integral
+\newcommand*{\intgbs}[3]{\int_{\partial \Omega^{{#2}}_{{#3}}} {#1} \, d\,\Gamma_{{#3}}}  % general boundary integral with gamma
+\newcommand*{\intgda}[3]{\int_{\partial \Omega^{{#2}}_{{#3}}} {#1} \, da}  % general boundary integral with gamma
+
+\newcommand*{\intbe}[2]{\int_{\Gamma_{\,#2}}{#1} \, d\,\Gamma}  % general boundary integral
+\newcommand*{\intesw}[1]{\int_{\swface}{#1} \, d\,\Gamma_e}  % general boundary integral
+\newcommand*{\inteb}[1]{\int_{\bface}{#1} \, d\,\Gamma_e}  % general boundary integral
+\newcommand*{\intes}[1]{\int_{\sface}{#1} \, d\,\Gamma_e}  % general boundary integral
+\newcommand*{\intv}[2]{\int_{\Omega^{3d}_{#2}} {#1} \, d\Omega}
+\newcommand*{\inta}[2]{\int_{\Omega^{2d}_{#2}} {#1} \, d\Omega}
+
+% ------------------------------------------------------------
+% shallow water related definitions -----------------
+
+% SW grid
+\newcommand{\bound}{\partial \Omega}
+\newcommand{\bface}{\Gamma^{\,\bed{}}}
+\newcommand{\sface}{\Gamma^{\,\elev{}}}
+\newcommand{\swface}{\Gamma^{\,sw}}
+
+% generic discrete function  || {#1} = h (discrete)
+\newcommand*{\f}[1]{f^{\,#1}} 
+\newcommand*{\fDA}[1]{\overline{f}^{\,#1}} 
+
+% generic function depth-average  {#1}  = latex label, {#2} = h (discrete)
+\newcommand*{\fintDA}[2]{
+\begin{equation}
+\label{#1}
+\fDA{#2} = \frac{1}{\depth{#2}} \int_{z_\bed{}}^{z_\elev{}} \, \f{#2}\, dz
+\end{equation}
+}
+
+% generic discrete function
+\newcommand{\fdiscreteDDD}{
+\f{h}(\mathbf{r},t) = \sum\limits_{i} f_i(t) \, \phiddd{i}(\mathbf{r})
+}
+
+% depth  {#1} = h (discrete)
+\newcommand*{\depth}[1]{H^{\,{#1}}}
+
+% water elevation {#1} = h (discrete)
+\newcommand*{\elev}[1]{\xi^{\,{#1}}}
+
+% bed elevation  {#1} = h (discrete)
+\newcommand*{\bed}[1]{b^{\,{#1}}}
+
+% residual definitions
+\newcommand*{\resid}[3]{R_{\,#1}^{\,{#2}{#3}}}                           % {#1} test function id, {#2} constituent id, {#3} residual name
+\newcommand*{\residDA}[3]{\overline{R}_{\,#1}^{\,{#2}{#3}}}        % {#1} test function id, {#2} constituent id, {#3} residual name
+\newcommand*{\residDAMatrix}[3]{\mathbf{\overline{R}}_{\,#1}^{\,{#2}{#3}}}        % {#1} test function id, {#2} constituent id, {#3} residual name
+
+% petrov-galerkin definitions
+\newcommand{\tauZ}{\tau_{\,z}}
+\newcommand*{\tauPG}[1]{\tau^{\,{#1}}}					% {#1} = 1d,2d,3d
+\newcommand*{\supg}[3]{P_{{#3}}^{\,{#2}}}			         % {#1} = test function index, {#2} = eqn label, {#3} = e (mandatory here)
+\newcommand*{\supgDA}[3]{\overline{P}_{#3}^{\,{#2}}}             % {#1} = test function index, {#2} = eqn label, {#3} = e (mandatory here)
+
+% source definitions
+\newcommand*{\srcGen}[3]{S_{{#1}}^{\,{#3}{#2}}} % {#1} = bl,sl,etc, {#2} = h, {#3} con id
+\newcommand*{\src}[1]{S_{#1}}
+\newcommand*{\srch}[1]{S_{#1}^{\,h}}
+
+% pressure definitions
+\newcommand*{\prs}[1]{P_{#1}}
+\newcommand*{\orsh}[1]{P_{#1}^{\,h}}
+
+% kinematic condition definitions
+\newcommand{\etah}{\eta^{\,h}}
+\newcommand{\bh}{b^{\,h}}
+
+% constituent concentrations
+\newcommand*{\ctrns}[3]{c_{#3}^{\,{#2},{#1}}}             % {#1} = h, {#2} = con id, {#3} bl, cl, etc
+
+% constituent definitions
+\newcommand{\ch}{c^{\,h}}
+\newcommand{\cjh}{c^{\,j,\,h}}
+\newcommand{\ctbjh}{(c^{\,j,\,h\,}_{bl}\,\delta^{\,h\,})}
+\newcommand{\chDA}{\overline{c}^{\,h}}
+\newcommand{\cjhDA}{\overline{c}^{\,j,\,h}}
+\newcommand{\ctbjhDA}{(\overline{c}^{\,j,\,h\,}_{bl}\,\delta^{\,h\,})}
+
+% bed thickness
+\newcommand*{\thick}[1]{\delta^{\,{#1}}}
+
+% bed load variable (c * t)
+\newcommand*{\cbl}[3]{c_{#3}^{\,{#2},{#1}}\,\thick{#1}}             % {#1} = h, {#2} = con id, {#3} bl, cl, etc
+
+% diffusion tensor
+\newcommand{\diffTensorSW}{\overline{\overline{\mathbf{T}}}}
+\newcommand{\diffTensorTRN}{\overline{\overline{\mathbf{T}}}}
+
+% diffusive flux
+\newcommand{\diffFluxSW}{\mathbf{D}}
+\newcommand{\diffFluxTRN}{\mathbf{D}}
+
+\newcommand*{\diffTensor}[4]{#3_{#1}^{\,{#4}{#2}}}                      % {#1} = bl,sl,etc, {#2} = h, {#3} tensor var, {#4} con id
+\newcommand*{\diffTensorDA}[4]{\overline{#3}_{#1}^{\,{#4}{#2}}}   % {#1} = bl,sl,etc, {#2} = h, {#3} tensor var, {#4} con id 
+
+\newcommand{\momDiffusiveFluxDDD} {
+\diffFluxSW_{mx} = 
+\begin{bmatrix}
+    (\sigma_{xx} + \nu) \frac{\partial u}{\partial x} \\
+    (\sigma_{xy} + \nu) \frac{\partial u}{\partial y} \\
+    (\sigma_{xz} + \nu) \frac{\partial u}{\partial z}
+\end{bmatrix} , \;\;
+\diffFluxSW_{my} =
+\begin{bmatrix}
+    (\sigma_{yx} +\nu)  \frac{\partial v}{\partial x} \\
+    (\sigma_{yy} + \nu) \frac{\partial v}{\partial y} \\
+    (\sigma_{yz} + \nu) \frac{\partial v}{\partial z}
+\end{bmatrix}
+}
+
+\newcommand{\momStressTensorDDD} {
+\tensor{\sigma} = 
+\begin{bmatrix}
+	\sigma_{xx} & \sigma_{xy} & \sigma_{xz} \\
+	\sigma_{yx} & \sigma_{yy} & \sigma_{yz} \\
+	\sigma_{zx} & \sigma_{zy} & \sigma_{zz} \\  
+\end{bmatrix}
+}
+
+\newcommand{\trnsStressTensorDDD} {
+\diffTensor{t}{}{\diffTensorTRN}{} = 
+\begin{bmatrix}
+	\sigma_{xx}^{\,t} & 0 & 0  \\
+	 0 & \sigma_{yy}^{\,t}  & 0  \\
+	 0 & 0 & \sigma_{zz}^{\,t}  \\  
+\end{bmatrix}
+}
+
+
+% ------------------------------------------------------------
+% continuity equations -----------------------------
+% strong continuity ----------------------------------
+\newcommand{\strgCont}{\dudx+\dvdy+\dwdz}
+\newcommand{\strgContGrad}{\bnabla \cdot \vel}
+\newcommand{\strgContH}{\duhdx+\dvhdy+\dwhdz}
+\newcommand{\strgContGradH}{\bnabla \cdot \velh}
+\newcommand{\strgDACont}{\deriv{\depth}{t} + (\bnabla{2d} \cdot \depth \velb{})}
+\newcommand{\strgDAContH}{\deriv{\depth^h}{t} + (\bnabla{2d} \cdot \depth \velb{h})}
+
+% weak continuity ----------------------------------
+% boundary integrals
+\newcommand*{\explicitContBc}[2]{ \intgbs{{#1} \, \fluxbcn}{#2}{e} }
+\newcommand*{\implicitContBc}[3]{ \intgbs{{#1} \, (\dotp{{#2}}{\nrml})}{#3}{e} }
+
+% ------------------------------------------------------------
+% momentum equations ------------------------------
+%\newcommand*{\intg}[3]{\int_{\Omega^{{#2}}_{{#3}}} {#1} \, d\Omega}  % {#1} = integrand, {#2} = 2d/3d, {#3} = e
+\newcommand*{\bodyTime}[4] {\deriv{}{t} \intg{({#3}{#4})}{#1}\,{#2}}                                                        % {#1} = 2d/3d, {#2} = e, {#3} = phi, {#4} = var
+\newcommand*{\bodySource}[4]           {\intg{\bigg( {#3}\,{#4} \bigg)}{#1}{#2}}                                                          % {#1} = 2d/3d, {#2} = e, {#3} = phi, {#4} = var
+\newcommand*{\bodyCoriolis}[4]          {\intg{\lrpb{{#3}\,{#4}\,f}}{#1}{#2}}                                              % {#1} = 2d/3d, {#2} = e, {#3} = phi. {#4} = u,v
+\newcommand*{\bodyPressure}[5]        {\intg{\lrpbb{g \,\deriv{#3}{#4} \frac{{#5}}{\rho_o}}}{#1}{#2}}       % {#1} = 2d/3d, {#2} = e, {#3} = phi, {#4} = x,y
+\newcommand*{\bodyPressureDD}[5]   {\intg{\lrpbb{g \,\deriv{#3}{#4} \frac{1}{2} {#5}^2}}{#1}{#2}}        % {#1} = 2d/3d, {#2} = e, {#3} = phi, {#4} = x,y
+\newcommand*{\bodyDensityPressureDD}[5]   {\intg{\lrpbb{g \deriv{#3}{#4} \frac{1}{2} {#5}^2 \, \frac{\bigtriangleup \rho}{\rho_o} }}{#1}{#2}}        % {#1} = 2d/3d, {#2} = e, {#3} = phi, {#4} = x,y
+\newcommand*{\bodyDiffusion}[4]         {\intg{\lrpb{\dotp{\bnabla{#1}{#3}}{#4}} }{#1}{#2}}                    % {#1} = 2d/3d, {#2} = e, {#3} = phi, {#4} = stress variable
+\newcommand*{\bodyConv}[4]              {\intg{\lrpb{\dotp{\bnabla{#1}{#3}}{#4}}  }{#1}{#2}}                    % {#1} = 1rst dot prod :: {#2} = 2nd dot prod :: {#3} = 2d/3d :: {#4} = e
+\newcommand*{\bodyFriction}[5]           {\intg{ {#3} \lrpbb{\frac{1}{2}c_f \,{#4} ||{#5}||}} {#1}{#2}}          % {#1} = 2d/3d, {#2} = e, {#3} = phi, {#4} = u,v, {#5} = vel vector
+\newcommand*{\bodyStress}[4]             {\intg{ {#3}\frac{#4}{\rho_o} } {{#1}}{{#2}}  }                              % {#1} = 2d/3d,sw,etc., {#2} = e, {#3} = phi, {#4} = stress variable
+\newcommand*{\bodySUPG}[1]{{#1}}
+
+\newcommand*{\bcStress}[4]{         \intbe{ {#3}\frac{#4}{\rho_o} } {{#1}_{#2}}  }                       % {#1} = 2d/3d,sw,etc., {#2} = e, {#3} = phi, {#4} = stress variable
+\newcommand*{\bcFriction}[5]{       \intbe{ {#3} \lrpbb{\frac{1}{2}c_f \,{#4} ||{#5}||}} {#1_#2}  }      % {#1} = 2d/3d,sw,etc., {#2} = e, {#3} = phi, {#4} = u,v, {#5} = vel vector
+\newcommand*{\bcConv}[4]{           \intbe{ {#3} \lrpb{\dotp{{#4}}{\nrml}} } {#1_#2}  }                  % {#1} = 2d/3d,sw,etc., {#2} = e, {#3} = phi, {#4} = vel * u,v
+\newcommand*{\bcPressure}[5]{     \intbe{ {#3} \lrpbb{g\,\frac{#4}{\rho_o} \, n_{#5} } }{#1_#2}  }   % {#1} = 2d/3d,sw,etc., {#2} = e, {#3} = phi, {#4} = P, {#5} = x,y
+\newcommand*{\bcPressureDD}[5]{\intbe{ {#3} \lrpbb{g\,\frac{1}{2} {#4}^2 \, n_{#5} } }{#1_#2}  }   % {#1} = 2d/3d,sw,etc., {#2} = e, {#3} = phi, {#4} = P, {#5} = x,y
+\newcommand*{\bcDensityPressureDD}[5]{\intbe{ {#3} \lrpbb{g\,\frac{1}{2} {#4}^2 \, \frac{\bigtriangleup \rho}{\rho_o}  \, n_{#5} } }{#1_#2}  }   % {#1} = 2d/3d,sw,etc., {#2} = e, {#3} = phi, {#4} = P, {#5} = x,y
+\newcommand*{\bcDiff}[4]{              \intbe{ {#3} \lrpb{\dotp{#4}{\nrml}}  }{#1_#2}  }                 % {#1} = 2d/3d,sw,etc.,  {#2} = e, {#3} = phi, {#4} = stress variable
+\newcommand*{\bcKinematic}[5]{    \intbe{ {#3} \lrpbb{\deriv{#4}{t} - #5}\,n_z }{#1_#2}  }  
+
+% {#1} = 1d/2d/3d, {#2} = "e", {#3}  = velocity, {#4} phi, {#5} strong residual
+\newcommand*{\supgEq}[5]{  \intg{ \tauPG{#1} \, (\dotp{#3}{\bnabla{#1}{#4}}) \, {#5} } {#1}{e} } 
+
+% hydrostatic pressure integral
+\newcommand{\hydroStaticP}{  \prs{}(x,y,z) = \prs{a}(x,y) + \int_z^{z_\elev{}} g \, \rho(x,y,z) dz }
+  
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Weak SW-2D equations 
+% {#1} = include "e", {#2} = include i on basis function, {#3} = include discrete h
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+\newcommand*{\weakSWDDMatrix}[1]{
+\begin{equation} \label{eqn:#1}
+\residDAMatrix{}{i}{} = \sum\limits_e \bigg[ 
+\intg{ \bigg( \phidd{i} \deriv{\mathbf{Q}}{t} -  (\bnabla{2d} \phidd{i} \cdot \mathbf{F}) + \phidd{i} \mathbf{S}  \bigg) }{2d}{e}  + 
+\intgbs{\phidd{i} \, (\mathbf{F} \cdot \mathbf{\nrml}) }{2d}{e} \, + \, \mathbf{\overline{P}}_e 
+\bigg] 
+\end{equation}
+}
+
+ 
+\newcommand*{\weakSWDAcont}[3]{
+\residDA{#2}{}{c} = & \sum\limits_{e}  
+\bigg[  
+        \bodyTime{\,2d}{#1}{\phidd{#2}}{\depth{#3}}
+     -  \bodyConv{\,2d}{#1}{\phidd{#2}}{(\velb{#3} \, \depth{#3})}
+    +  \bcConv{}{#1}{\phidd{#2}}{(\velb{#3} \, \depth{#3})}
+    +  \bodySUPG{\supgDA{#2}{c}{#1}} 
+\bigg]
+}
+
+\newcommand*{\weakSWMxDD}[3]{
+\residDA{#2}{}{mx} = & \sum\limits_{e}  
+\bigg[  
+        \bodyTime{\,2d}{#1}{\phidd{#2}}{\,\ub{#3}\depth{#3}}
+     -  \bodyConv{\,2d}{#1}{\phidd{#2}}{(\velb{#3} \, \ub{#3}\depth{#3})}
+     -  \bodyCoriolis{\,2d}{#1}{\phidd{#2}}{\depth{#3}\,\vb{#3}}                                                                \nonumber \\
+&  -   \bodyPressureDD{\,2d}{#1}{\phidd{#2}}{x}{(\depth{#3})} 
+    +  \bodyDiffusion{\,2d}{#1}{\phidd{#2}}{\depth{#3}\,\diffTensorDA{x}{#3}{\diffTensorSW}{}}
+    +  \bodyFriction{\,2d}{#1}{\phidd{#2}}{\ub{#3}}{\velb{#3}}                                                                  \nonumber \\    
+&  -   \bodyStress{\,2d}{#1}{\phidd{#2}}{\lrpb{\tau_{winds,x}^{\,#3} + \tau_{waves,x}^{\,#3}}} 
+    -   \bodySource{\,2d}{#1}{\phidd{#2}}{ g \, \depth{#3} \frac{ \partial z_\bed{}}{\partial x} }
+    +  \bcConv{}{#1}{\phidd{#2}}{(\velb{#3} \, \ub{#3} \, \depth{#3})}                                                           \nonumber \\
+&  +  \bcPressureDD{}{#1}{\phidd{#2}}{(\depth{#3})}{x}                                                                     
+     -  \bcDiff{}{#1}{\phidd{#2}}{\depth{#3}\,\diffTensorDA{x}{#3}{\diffTensorSW}{}} 
+    +  \bcFriction{}{#1}{\phidd{#2}}{\ub{#3}}{\velb{#3}}                                                                      
+    +  \bodySUPG{\supgDA{#2}{mx}{#1}} 
+\bigg]
+}
+
+\newcommand*{\weakSWMyDD}[3]{
+\residDA{#2}{}{my} = & \sum\limits_{e}  
+\bigg[  
+        \bodyTime{\,2d}{#1}{\phidd{#2}}{\,\vb{#3}\depth{#3}}
+     -  \bodyConv{\,2d}{#1}{\phidd{#2}}{(\velb{#3} \, \vb{#3}\depth{#3})}
+     +  \bodyCoriolis{\,2d}{#1}{\phidd{#2}}{\depth{#3}\,\ub{#3}}                                                                \nonumber \\
+&  -   \bodyPressureDD{\,2d}{#1}{\phidd{#2}}{y}{(\depth{#3})} 
+    +  \bodyDiffusion{\,2d}{#1}{\phidd{#2}}{\depth{#3}\,\diffTensorDA{y}{#3}{\diffTensorSW}{}}  
+    +  \bodyFriction{\,2d}{#1}{\phidd{#2}}{\vb{#3}}{\velb{#3}}                                                                    \nonumber \\    
+&  -   \bodyStress{\,2d}{#1}{\phidd{#2}}{\lrpb{\tau_{winds,y}^{\,#3} + \tau_{waves,y}^{\,#3}}} 
+    -   \bodySource{\,2d}{#1}{\phidd{#2}}{ g \, \depth{#3} \frac{ \partial z_\bed{}}{\partial y} }
+    +  \bcConv{}{#1}{\phidd{#2}}{(\velb{#3} \, \vb{#3} \, \depth{#3})}                                                            \nonumber \\
+&  +  \bcPressureDD{}{#1}{\phidd{#2}}{(\depth{#3})}{y}                                                                     
+     -  \bcDiff{}{#1}{\phidd{#2}}{\depth{#3}\, \diffTensorDA{y}{#3}{\diffTensorSW}{}}    
+    +  \bcFriction{}{#1}{\phidd{#2}}{\vb{#3}}{\velb{#3}}                                                               
+    +  \bodySUPG{\supgDA{#2}{my}{#1}} 
+\bigg]
+}
+
+% 2D SW SUPG TERMS
+% {#1} = 2d/3d, {#2} = include "e",  {#3} test function index, {#4} tx1, {#5} tx2, {#6} ty1, {#7} ty2, {#8} = c, mx, my
+\newcommand*{\weakSwCsupgDD}[8]{
+& \supgDA{#3}{#8}{#2} =  
+\intg{    
+\tauPG{#1} \lrbbb{ 
+\deriv{\phidd{#3}}{x} \bigg( {#4}\residDA{#3}{}{*c} + {#5}\residDA{#3}{}{*mx} \bigg)  + 
+\deriv{\phidd{#3}}{y} \bigg( {#6}\residDA{#3}{}{*c} + {#7}\residDA{#3}{}{*my} \bigg)
+}       
+ }{#1}{#2}
+}
+\newcommand*{\weakSwMXsupgDD}[8]{
+& \supgDA{#3}{#8}{#2} =  
+\intg{    
+\tauPG{#1} \lrbbb{ 
+\deriv{\phidd{#3}}{x} \bigg( {#4}\residDA{#3}{}{*c} + {#5}\residDA{#3}{}{*mx} \bigg)  + 
+\deriv{\phidd{#3}}{y} \bigg( {#7}\residDA{#3}{}{*mx} \bigg)
+}       
+ }{#1}{#2}
+}
+
+\newcommand*{\weakSwMYsupgDD}[8]{
+& \supgDA{#3}{#8}{#2} =  
+\intg{    
+\tauPG{#1} \lrbbb{ 
+\deriv{\phidd{#3}}{y} \bigg( {#4}\residDA{#3}{}{*c} + {#5}\residDA{#3}{}{*my} \bigg)  + 
+\deriv{\phidd{#3}}{x} \bigg( {#7}\residDA{#3}{}{*my} \bigg)
+}       
+ }{#1}{#2}
+}
+
+
+% Matrix Form
+\newcommand*{\swMatrixForm}[1]{
+\begin{align} 
+\label{eqn:{#1}}
+\mathbf{R}^* \equiv 
+\frac{\partial \mathbf{Q}}{\partial{t}} + 
+\frac{\partial \mathbf{F}_x}{\partial{x}} + 
+\frac{\partial \mathbf{F}_y}{\partial{y}}  + 
+\mathbf{\srcGen{}{}{}} = 0
+\end{align}
+}
+
+% Matrix Form - nonconservative, linear
+\newcommand*{\swMatrixFormNC}[1]{
+\begin{align} 
+\label{eqn:{#1}}
+\mathbf{R}^{*}_{\,nc} \equiv 
+\frac{\partial \mathbf{Q}_{\,nc}}{\partial{t}} + 
+\mathbf{A}_x \frac{\partial \mathbf{Q}_{\,nc}}{\partial{x}} + 
+\mathbf{A}_x \frac{\partial \mathbf{Q}_{\,nc}}{\partial{y}}  + 
+\mathbf{\srcGen{nc}{}{}} = 0
+\end{align}
+}
+
+% R
+\newcommand*{\swMatrixDefR}[1]{
+\begin{align} 
+\label{eqn:{#1}}
+\mathbf{R}^* \equiv  \left( \begin{array}{c} \residDA{}{}{*c} \\[2mm] \residDA{}{}{*mx} \\[2mm] \residDA{}{}{*my}\end{array} \right)
+\end{align}
+}
+
+% Q
+\newcommand*{\swMatrixDefQ}[1]{
+\begin{align} 
+\label{eqn:{#1}}
+\mathbf{Q} \equiv  \left(\begin{array}{c}
+\depth{} \\
+[2mm] \ub{} \depth{} \\
+[2mm] \vb{} \depth{} 
+\end{array}\right)
+\end{align}
+}
+
+% Q non-conservative, linear
+\newcommand*{\swMatrixDefQNC}[1]{
+\begin{align} 
+\label{eqn:{#1}}
+\mathbf{Q}_{\,nc} \equiv  \left(\begin{array}{c}
+\depth{} \\
+[2mm] \ub{} \\
+[2mm] \vb{}  
+\end{array}\right)
+\end{align}
+}
+
+% FX
+\newcommand*{\swMatrixDefFX}[1]{
+\begin{align} 
+\label{eqn:{#1}}
+\mathbf{F}_x \equiv  \left (
+\begin{array}{c} 
+\ub{} \depth{} \\
+[2mm]  \ub{2} \depth{} + \frac{1}{2} g \depth{2} - \depth{} \frac{\sigma_{xx}}{\rho} \\
+[2mm]  \ub{} \, \vb{}  \depth{} - \depth{} \frac{\sigma_{yx}}{\rho} \end{array} 
+\right)
+\end{align}
+}
+
+% Fy
+\newcommand*{\swMatrixDefFY}[1]{
+\begin{align} 
+\label{eqn:{#1}}
+\mathbf{F}_y \equiv  \left(
+\begin{array}{c} 
+\vb{} \depth{} \\
+[2mm] \ub{} \, \vb{} \depth{} - \depth{} \frac{\sigma_{xy}}{\rho} \\
+[2mm] \vb{2} \depth{} + \frac{1}{2} g \depth{2} - \depth{} \frac{\sigma_{yy}}{\rho} \end{array}
+\right)
+\end{align}
+}
+
+% S
+\newcommand*{\swMatrixDefS}[1]{
+\begin{align} 
+\label{eqn:{#1}}
+\mathbf{S} \equiv  \left(\begin{array}{c}
+0 \\
+[2mm] g\,\depth{}\frac{\partial z_b}{\partial x} + g\,\depth{}\,\srcGen{x}{}{} \\
+[2mm] g\,\depth{}\frac{\partial z_b}{\partial y} + g\,\depth{}\,\srcGen{y}{}{}
+\end{array}\right)
+\end{align}
+}
+
+% S nonconservative, linear
+\newcommand*{\swMatrixDefSNC}[1]{
+\begin{align} 
+\label{eqn:{#1}}
+\mathbf{S} \equiv  \left(\begin{array}{c}
+0 \\
+[2mm] g\,\frac{\partial z_b}{\partial x} + g\,\srcGen{x}{}{} \\
+[2mm] g\,\frac{\partial z_b}{\partial y} + g\,\srcGen{y}{}{}
+\end{array}\right)
+\end{align}
+}
+
+% nonconservative Jacobi matrices
+\newcommand*{\swMatrixDefANC}[1]{
+\label{eqn:{#1}}
+\begin{eqnarray}
+\mathbf{A}_x &=& \frac{\partial \mathbf{F}_x}{\partial Q_{nc}} =  \left[\begin{array}{ccc}\ub{} & \depth{} & 0\\g & \ub{} & 0 \\0 & 0 & \ub{} \end{array}\right] \\
+\mathbf{A}_y &=& \frac{\partial \mathbf{F}_y}{\partial Q_{nc}} =  \left[\begin{array}{ccc}\vb{} & 0 & \depth{}\\0 & \vb{} & 0 \\g & 0 & \vb{} \end{array}\right] \nonumber
+\end{eqnarray}
+}
+
+% matrix variable definitions
+\newcommand*{\swMatrixVars}[1]{
+\label{eqn:{#1}}
+\begin{eqnarray}
+\residDA{}{}{*c} &=& \text{the strong depth-averaged continuity equation} \nonumber \\
+\residDA{}{}{*mx,y}&=& \text{the strong depth-averaged momentum equations} \nonumber \\
+\rho &=& \text{fluid density} \ \nonumber \\
+g &=& \text{gravity} \ \nonumber \\
+z_b &=& \text{bed elevation} \ \nonumber \\
+\depth{} &=& \text{water depth} \ \nonumber \\
+{\ub{},\vb{}} &=& \text{{x,y}-components of the depth-averaged velocity} \nonumber \\
+\sigma _{ij} &=& \text{Reynold's stress tensor} \nonumber \\
+\srcGen{x,y}{}{} &=& \text{momentum sources/sinks} \nonumber
+\end{eqnarray}
+}
+
+% shallow water eigenvalue matrices || {#1} latex label, {#2} h
+\newcommand*{\swMatrixEigen}[2]{
+\label{eqn:{#1}}
+\begin{eqnarray}
+\begin{gathered}
+\mathbf{\Lambda}_x = \left[\begin{array}{ccc}\ub{#2}+\sqrt{g\,\depth{#2}} & 0 & 0 \\0 & \ub{#2}-\sqrt{g\,\depth{#2}} & 0 \\0 & 0 & \ub{#2} \end{array}\right] \\
+\mathbf{\Lambda}_y = \left[\begin{array}{ccc}\vb{#2}+\sqrt{g\,\depth{#2}} & 0 & 0 \\0 & \vb{#2}-\sqrt{g\,\depth{#2}} & 0 \\0 & 0 & \vb{#2} \end{array}\right] 
+\end{gathered}
+\end{eqnarray}
+}
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SW-3D equations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Strong formulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% {#1} = 2d,3d {#2} = velocity
+\newcommand*{\swContinuity}[2]{ \resid{}{}{*c}  = \dotp{\bnabla{#1}}{#2} = 0 }
+\newcommand*{\swMxDDD}[2]{ \resid{}{}{*mx}  = \deriv{u}{t} + \dotp{\bnabla{#1}}{(u \, #2)} + \frac{1}{\rho_o}\deriv{\prs{}}{x}  - f\,v - \frac{1}{\rho_o} \lrp{\dotp{\bnabla{#1}}{\diffTensor{mx}{}{\diffFluxSW}{}} } - \src{mx}= 0 }
+\newcommand*{\swMyDDD}[2]{ \resid{}{}{*my}  = \deriv{v}{t} + \dotp{\bnabla{#1}}{(v \, #2)} + \frac{1}{\rho_o}\deriv{\prs{}}{y}  + f\,u - \frac{1}{\rho_o} \lrp{\dotp{\bnabla{#1}}{\diffTensor{my}{}{\diffFluxSW}{}} } - \src{my}= 0 }
+
+\newcommand{\swStrongDDD}{
+\EqAlign{swStrongC}{  \swContinuity{3d}{\vel{}} }
+\EqAlign{swStrongMX}{  \swMxDDD{3d}{\vel{}} }
+\EqAlign{swStrongMY}{  \swMyDDD{3d}{\vel{}} }
+}
+
+\newcommand*{\kinematicBC}[1] {
+\frac{\partial z_{#1}}{\partial t} + u_{#1} \frac{\partial z_{#1}}{\partial x} + v_{#1} \frac{\partial z_{#1}}{\partial y}  - w_{#1} = \src{#1}
+}
+
+% Weak Formulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% The weak and discrete 3D SW continuity equation with no integration by parts ||  {#1} = i
+\newcommand*{\weakSwContNoParts}[1]{
+\resid{#1}{}{c}  = \intv{\phiddd{#1} \, (\bnabla{3d} \cdot \velh)}{} = \sum\limits_e \bigg[ \intv{\phiddd{#1} \, (\bnabla{3d} \cdot \velh)}{e} \bigg]  = 0
+}
+
+% The weak and discrete 3D SW continuity equation with no kinematic subs or SUPG term ||   {#1} = i
+\newcommand*{\weakSwContNoKinematicNoSupg}[1]{
+\resid{#1}{}{c}  = 
+\sum\limits_e \lrbbb{   \intv{\phiddd{#1} \, (\bnabla{3d} \cdot \velh )}{e} } = 
+\sum\limits_e \lrbbb{ - \intv{(\bnabla{3d} \phiddd{#1} \cdot \velh)}{e}  + \intgbs{\phiddd{#1} \, ( \velh \cdot \nrml)}{}{e} }
+}
+
+% The weak and discrete 3D SW continuity equation with no kinematic subs ||   {#1} = i
+\newcommand*{\weakSwContNoKinematic}[1]{
+\resid{#1}{}{c}  = 
+\sum\limits_e \lrbbb{ - \intv{(\bnabla{3d} \phiddd{#1} \cdot \velh)}{e}  + \intgbs{\phiddd{#1} \, ( \velh \cdot \nrml)}{}{e} +  \bodySUPG{\supg{#1}{c}{e}} }
+}
+
+% The weak and discrete 3D SW continuity equation with boundary face decomposition  || {#1} = i  
+\newcommand*{\weakSwContBoundaryDecomp}[1]{
+\intgbs{\phiddd{#1} \, ( \velh \cdot \nrml)}{}{e} &= \nonumber \\ 
+\intesw{\phiddd{#1} \, ( \velh \cdot \nrml)} + \inteb{\phiddd{#1} \,( \velh \cdot \nrml)} &+ \intes{\phiddd{#1} \,( \velh \cdot \nrml)}
+}
+
+% Surface kinematic 3D weak, discrete continuity
+\newcommand*{\weakSwContSurfaceBoundaryReplace}[1]{
+\intes{\phiddd{#1} \,( \velh \cdot \nrml)} = \intes{\phiddd{i} \, ( \uh \,n_x + \vh \, n_y  + \wh \,n_z  )}
+}
+
+% 3D weak, discrete continuity with surface  normal subs || {#1} = i
+\newcommand*{\weakSwContSurfaceNormal}[1]{
+& \lrbbb{ \intes{\phiddd{#1} \, ( \uh \,n_x + \vh \, n_y  + \wh \,n_z  )} }_{\elev{}} \\ 
+&= \intes{\phiddd{#1} \, \bigg( -\uh n_z \ppartial{\elev{h}}{x} - \vh n_z  \ppartial{\elev{h}}{y} + \wh \,n_z  \bigg)}  \\ 
+&= \intes{\phiddd{#1} \, \bigg( -\uh \ppartial{\elev{h}}{x} - \vh \ppartial{\elev{h}}{y} + \wh  \bigg) \, n_z}
+}
+
+% 3D weak, discrete continuity with surface  kinematic subs || {#1} = i
+\newcommand*{\weakSwContSurfaceKinematic}[1]{
+\intes{\phiddd{#1} \,(-\uh \ppartial{\elev{h}}{x} - \vh \ppartial{\elev{h}}{y} + \wh) n_z}  = \intes{\phiddd{#1} \, \bigg( \frac{\partial \elev{h}}{dt} - \src{\elev{}}^{\,h} \bigg) n_z} 
+}
+
+% 3D continuity surface flux natural BC
+\newcommand*{\weakSwContSurfaceFlux}[1]{
+\intes{\phiddd{#1} \src{\elev{}}\, n_z} = \sum\limits_e \intes{\phiddd{#1} \, ( \velh \cdot \nrml)}  = \sum\limits_e \intes{ (\phiddd{#1} \,\, \fluxbcn^{\elev{}}) } \
+}
+
+% 3D continuity bed flux natural BC
+\newcommand*{\weakSwContBedFlux}[1]{
+\inteb{\phiddd{#1} \src{\bed{}}\, n_z} = \sum\limits_e \inteb{\phiddd{#1} \, ( \velh \cdot \nrml)}  = \sum\limits_e \inteb{ (\phiddd{#1} \,\, \fluxbcn^{\bed{}}) } \
+}
+
+% 3D continuity sidewall flux natural BC
+\newcommand*{\weakSwContSideWallFlux}[1]{
+\sum\limits_e \intesw{\phiddd{#1} \, ( \velh \cdot \nrml)}  = \sum\limits_e \intesw{ (\phiddd{#1} \,\, \fluxbcn^{sw}) } \
+}
+
+% 3D REDUCED continuity sidewall flux natural BC
+\newcommand*{\weakSwContSideWallFluxREDUCED}[1]{
+\sum\limits_{i \in C(I)}  \sum\limits_e \intesw{\phiddd{#1} \, ( \velh \cdot \nrml)}  = \sum\limits_{i \in C(I)}  \sum\limits_e \intesw{ (\phiddd{#1} \,\, \fluxbcn^{sw}) } \
+}
+
+% 3D reduced Depth-Averaged Continuity :: {#1} = i
+\newcommand*{\weakSWDaContReduced}[1]{
+\residDA{I}{}{c} =  
+\widehat{O} (\resid{#1}{}{c} ) =  
+\sum\limits_{#1 \in C(I)} \bigg\{ \sum\limits_e  \bigg[ 
+-\intv{(\bnabla{3d} \phiddd{#1} \, \cdot \velh)}{e} +  \intgbs{\phiddd{#1} \,( \velh \cdot \nrml)}{2d}{e} +\,  \bodySUPG{\supgDA{#1}{c}{e}} 
+\bigg] \bigg\}
+}
+
+% 3D reduced DA Continuity with constant bathymetry and no sourcing :: {#1} = i
+\newcommand*{\weakSWDaContReducedSimple}[1]{
+\residDA{I}{}{c}  =  \sum\limits_{i \in C(I)} \bigg[ \sum\limits_e \bigg[ -\intv{(\bnabla{3d} \phiddd{#1} \cdot \velh)}{e} \bigg] \bigg] +  \sum\limits_e \bigg[ \intes{\phiddd{#1} \bigg( \frac{\partial \depth{h}}{\partial t} \bigg) n_z\,} +\,  \bodySUPG{\supgDA{#1}{c}{e}}  \bigg]
+}
+
+% 3D reduced Depth-Averaged Continuity - with Kinematic :: {#1} = i
+\newcommand*{\weakSWDaContReducedKinematic}[1]{
+\residDA{I}{}{c} = \sum\limits_{i \in C(I)} \bigg[  \sum\limits_e \bigg[ 
+-\intv{(\bnabla{3d} \phiddd{#1} \cdot \velh)}{e}   +  \intesw{\phiddd{#1} ( \velh \cdot \nrml)}  \bigg] \bigg] + \nonumber \\
+ \sum\limits_e \bigg[  \intes{\phiddd{#1} \bigg( \deriv{\elev{}}{t} - S_{\elev{}} \bigg) n_z\,} + \inteb{\phiddd{#1} \bigg( \deriv{\bed{}}{t} - S_{\bed{}} \bigg) n_z\,} +\,  \bodySUPG{\supgDA{#1}{c}{e}}  \bigg]
+}
+\newcommand*{\weakSWDaContReducedKinematicBody}[1]{
+&\residDA{I}{}{c} = \sum\limits_{i \in C(I)} \bigg\{  \sum\limits_e \bigg[ -\intv{(\bnabla{3d} \phiddd{#1} \cdot \velh)}{e}  +\,  \bodySUPG{\supgDA{#1}{c}{e}}  \bigg] \bigg\}
+}
+\newcommand*{\weakSWDaContReducedKinematicBounday}[1]{
+&\residDA{I}{}{c} = \sum\limits_{i \in C(I)} \bigg[  \sum\limits_e \bigg[\intesw{\phiddd{#1} ( \velh \cdot \nrml)}  \bigg] \bigg] +  \sum\limits_e \bigg[  \intes{\phiddd{#1} \bigg( \deriv{\elev{}}{t} - S_{\elev{}} \bigg) n_z\,} + \inteb{\phiddd{#1} \bigg( \deriv{\bed{}}{t} - S_{\bed{}} \bigg) n_z\,}  \bigg]
+}
+
+% Surface 3D continuity :: {#1} = include "e", {#2} = include i on basis function, {#3} = include discrete h
+\newcommand*{\weakSWContSurDDD}[3]{
+\resid{i}{}{c}  = & \sum\limits_{e}  
+\bigg[  
+     -  \bodyConv{\,3d}{#1}{\phiddd{#2}}{\vel^{#3}}
+    +  \bcConv{sw}{#1}{\phiddd{#2}}{\vel^{\,#3}}
+    +  \bcConv{b}{#1}{\phiddd{#2}}{\vel^{\,#3}}                                                                     \nonumber \\                   
+&  +  \bcKinematic{\elev{}}{#1}{\phiddd{#2}}{\elev{#3}}{S_{\elev{}}^{\,#3}}
+    +  \bodySUPG{\supg{#2}{c}{#1}} 
+\bigg]
+}
+
+% Bed 3D continuity :: {#1} = include "e", {#2} = include i on basis function, {#3} = include discrete h
+\newcommand*{\weakSWContBedDDD}[3]{
+\resid{i}{}{c}  = & \sum\limits_{e}  
+\bigg[  
+     -  \bodyConv{\,3d}{#1}{\phiddd{#2}}{\vel^{#3}}
+    +  \bcConv{sw}{#1}{\phiddd{#2}}{\vel^{\,#3}}
+    +  \bcConv{\eta}{#1}{\phiddd{#2}}{\vel^{\,#3}}                                                                     \nonumber \\                   
+&  +  \bcKinematic{\bed{}}{#1}{\phiddd{#2}}{\bed{#3}}{S_{\bed{}}^{\,#3}}
+    +  \bodySUPG{\supg{#2}{c}{#1}} 
+\bigg]
+}
+
+%---------------------------------------------------------------------------------------------------------------------------------
+% 3D x-momentum :: {#1} = include "e", {#2} = include i on basis function, {#3} = include discrete h
+\newcommand*{\weakSWMxDDD}[3]{
+\resid{i}{}{mx}  = & \sum\limits_{e}  
+\bigg[  
+        \bodyTime{\,3d}{#1}{\phiddd{#2}}{u^{\,#3}}
+     -  \bodyConv{\,3d}{#1}{\phiddd{#2}}{(\velr^{#3} \, u^{\,#3})}
+     -  \bodyCoriolis{\,3d}{#1}{\phiddd{#2}}{v^{\,#3}}                                                                \nonumber \\
+&  -   \bodyPressure{\,3d}{#1}{\phiddd{#2}}{x}{P^{\,#3}} 
+    +  \bodyDiffusion{\,3d}{#1}{\phiddd{#2}}{\diffTensor{x}{#3}{\diffFluxSW}{}}  
+     -  \bcStress{\eta}{#1}{\phiddd{#2}}{\lrpb{\tau_{winds,x}^{\,#3} + \tau_{waves,x}^{\,#3}}}   \nonumber \\
+&  +  \bcConv{}{#1}{\phiddd{#2}}{(\velr^{\,#3} \, u^{\,#3})}
+    +  \bcPressure{}{#1}{\phiddd{#2}}{P^{\,#3}}{x}
+    -   \bcDiff{}{#1}{\phiddd{#2}}{\diffTensor{mx}{#3}{\diffFluxSW}{}}                                                                      \nonumber \\
+&  +  \bcFriction{}{#1}{\phiddd{#2}}{u^{\,#3}}{\vel^{\,#3}}
+    +  \bodySUPG{\supg{#2}{mx}{#1}} 
+\bigg]
+}
+
+% 3D x-momentum :: {#1} = include "e", {#2} = include i on basis function, {#3} = include discrete h
+\newcommand*{\weakSWMxDDDBody}[3]{
+&\resid{i}{}{mx}  =  \sum\limits_{e}  
+\bigg[  
+        \bodyTime{\,3d}{#1}{\phiddd{#2}}{u^{\,#3}}
+     -  \bodyConv{\,3d}{#1}{\phiddd{#2}}{(\velr^{#3} \, u^{\,#3})}
+     -  \bodyCoriolis{\,3d}{#1}{\phiddd{#2}}{v^{\,#3}}                                                        
+     -   \bodyPressure{\,3d}{#1}{\phiddd{#2}}{x}{P^{\,#3}} 
+    +  \bodyDiffusion{\,3d}{#1}{\phiddd{#2}}{\diffTensor{x}{#3}{\diffFluxSW}{}}  
+    +  \bodySUPG{\supg{#2}{mx}{#1}} 
+\bigg]
+}
+% 3D x-momentum :: {#1} = include "e", {#2} = include i on basis function, {#3} = include discrete h
+\newcommand*{\weakSWMxDDDBoundary}[3]{
+&\resid{i}{}{mx}  =  \sum\limits_{e}  
+\bigg[  
+        \bcStress{\eta}{#1}{\phiddd{#2}}{\lrpb{\tau_{winds,x}^{\,#3} + \tau_{waves,x}^{\,#3}}} 
+    +  \bcConv{}{#1}{\phiddd{#2}}{(\velr^{\,#3} \, u^{\,#3})}
+    +  \bcPressure{}{#1}{\phiddd{#2}}{P^{\,#3}}{x}
+    -   \bcDiff{}{#1}{\phiddd{#2}}{\diffTensor{mx}{#3}{\diffFluxSW}{}}                                                                    
+    +  \bcFriction{}{#1}{\phiddd{#2}}{u^{\,#3}}{\vel^{\,#3}}
+\bigg]
+}
+
+%---------------------------------------------------------------------------------------------------------------------------------
+% 3D y-momentum :: {#1} = include "e", {#2} = include i on basis function, {#3} = include discrete h
+\newcommand*{\weakSWMyDDD}[3]{
+&\resid{i}{}{my} =  \sum\limits_{e}  
+\bigg[  
+       \bodyTime{\,3d}{#1}{\phiddd{#2}}{v^{\,#3}}
+    -  \bodyConv{\,3d}{#1}{\phiddd{#2}}{(\velr^{#3} \, v^{\,#3})}
+    + \bodyCoriolis{\,3d}{#1}{\phiddd{#2}}{u^{\,#3}}                                                                  \nonumber \\
+&  -  \bodyPressure{\,3d}{#1}{\phiddd{#2}}{y}{P^{\,#3}} 
+    +  \bodyDiffusion{\,3d}{#1}{\phiddd{#2}}{\diffTensor{y}{#3}{\diffFluxSW}{}}  
+     -  \bcStress{\eta}{#1}{\phiddd{#2}}{\lrpb{\tau_{winds,y}^{\,#3} + \tau_{waves,y}^{\,#3}}}   \nonumber \\
+&  +  \bcConv{}{#1}{\phiddd{#2}}{(\velr^{\,#3} \, v^{\,#3})}
+    +  \bcPressure{}{#1}{\phiddd{#2}}{P^{\,#3}}{y}
+     -  \bcDiff{}{#1}{\phiddd{#2}}{\diffTensor{my}{#3}{\diffFluxSW}{}}                                                                      \nonumber \\
+&   + \bcFriction{}{#1}{\phiddd{#2}}{v^{\,#3}}{\vel^{\,#3}}
+     + \bodySUPG{\supg{#2}{my}{#1}}
+\bigg]
+}
+\newcommand*{\weakSWMyDDDBody}[3]{
+&\resid{i}{}{my} =  \sum\limits_{e}  
+\bigg[  
+       \bodyTime{\,3d}{#1}{\phiddd{#2}}{v^{\,#3}}
+    -  \bodyConv{\,3d}{#1}{\phiddd{#2}}{(\velr^{#3} \, v^{\,#3})}
+    + \bodyCoriolis{\,3d}{#1}{\phiddd{#2}}{u^{\,#3}}                                                             
+    -  \bodyPressure{\,3d}{#1}{\phiddd{#2}}{y}{P^{\,#3}} 
+    +  \bodyDiffusion{\,3d}{#1}{\phiddd{#2}}{\diffTensor{y}{#3}{\diffFluxSW}{}}  
+    + \bodySUPG{\supg{#2}{my}{#1}}
+\bigg]
+}
+\newcommand*{\weakSWMyDDDBoundary}[3]{
+&\resid{i}{}{my} =  \sum\limits_{e}  
+\bigg[  
+     -  \bcStress{\eta}{#1}{\phiddd{#2}}{\lrpb{\tau_{winds,y}^{\,#3} + \tau_{waves,y}^{\,#3}}}  
+    +  \bcConv{}{#1}{\phiddd{#2}}{(\velr^{\,#3} \, v^{\,#3})}
+    +  \bcPressure{}{#1}{\phiddd{#2}}{P^{\,#3}}{y}
+     -  \bcDiff{}{#1}{\phiddd{#2}}{\diffTensor{my}{#3}{\diffFluxSW}{}}                                                                   
+    + \bcFriction{}{#1}{\phiddd{#2}}{v^{\,#3}}{\vel^{\,#3}}
+\bigg]
+}
+
+%---------------------------------------------------------------------------------------------------------------------------------
+% 3D SW MX normal boundary flux replacement with mass continuity :: {#1} i
+\newcommand*{\weakSWMomBoundaryNormal}[1]{
+\resid{#1}{}{\Gamma,\,mx}  = \sum\limits_e \intbe{\phiddd{#1} \, ( \velh \cdot \nrml)}{}  - \sum\limits_e \intbe{ (\phiddd{#1} \,\, \fluxbcn) }{}
+}
+
+% 3D SW MY tangent boundary flux
+\newcommand*{\weakSWMomBoundaryTangent}[1]{
+\resid{#1}{}{\Gamma,\,my}  = T_x \, \resid{#1}{}{mx}  + T_y \, \resid{#1}{}{my} 
+}
+
+
+% must go inside a latex align environment {#1} = h
+\newcommand*{\weakSWmomDefPressure}[1]{
+\prs{#1} &= \text{ discrete pressure} \nonumber \\
+}
+\newcommand*{\weakSWmomDefRvel}[1]{
+\velr^{#1} &=  \{ u_{r}^{#1}, v_{#1}^{}, w_{r}^{#1}\} \text{ = discrete 3D relative velocity vector}  \nonumber \\
+}
+\newcommand*{\weakSWmomDefFrictionCoeff}[1]{
+c_f &= \text{ wall coefficient of friction } \nonumber \\
+}
+\newcommand*{\weakSWmomDefRho}[1]{
+\rho_o &= \text{ reference water density (usually taken as $999.97 \; kg/m^3$) } \nonumber  \\
+}
+\newcommand*{\weakSWmomDefWinds}[1]{
+\tau_{winds,\,x/y}^{\,#1} &= \text{discrete wind stress vector} \nonumber  \\
+}
+\newcommand*{\weakSWmomDefWaves}[1]{
+\tau_{waves,\,x}^{\,#1} &= - \deriv{S_{xx}}{x} - \deriv{S_{xy}}{y} =  \text{discrete wave stress x-vector component}  \nonumber  \\
+\tau_{waves,\,y}^{\,#1} &= - \deriv{S_{xy}}{x} - \deriv{S_{yy}}{y} =  \text{discrete wave stress y-vector component} \nonumber  \\
+}
+\newcommand*{\weakSWmomDefSupg}[2]{
+\{\bodySUPG{\supg{#2}{my}{#1}},\bodySUPG{\supg{#2}{my}{#1}}\}  &= \text{ trial function gradient contributions to the Petrov-Galerkin residuals } \nonumber 
+}
+
+% 3D SW SUPG TERMS
+% {#1} = 2d/3d, {#2} = include "e",  {#3} test function index, {#4} = c, mx, my, {#5} = upwind
+\newcommand*{\weakSwDACsupgDDD}[5]{
+& \supgDA{#3}{#1,\,#4}{#2} =  \widehat{O} \bigg\{
+\intg{    
+\tauPG{2d} \lrbbb{ 
+(\dotp{#5}{\bnabla{2d}\phiddd{#2}}) \resid{i}{}{*c} + \deriv{\phiddd{#3}}{x} \resid{i}{}{*mx} + \deriv{\phiddd{#3}}{y} \resid{i}{}{*my} 
+}    \bigg\}   
+ }{#1}{#2}
+}
+% {#1} = 2d/3d, {#2} = include "e",  {#3} test function index, {#4} = c, mx, my, {#5} = upwind, {#6} Rc factor, {#7}  x,y
+\newcommand*{\weakSwMXYsupgDDD}[7]{
+& \supg{#3}{#1\,#4}{#2} =  
+\intg{    
+\tauPG{#1} \lrbbb{ 
+(\dotp{#5}{\bnabla{#1}\phiddd{#3}}) \resid{i}{}{*#4} + {#6}\deriv{\phiddd{#3}}{#7} \resid{#3}{}{*c} 
+}       
+ }{#1}{#2}
+}
+\newcommand*{\weakSwCsupgDDD}[4]{
+& \supg{#3}{#1,\,#4}{#2} =  \supgDA{#3}{#4}{#2} - 
+\intg{\lrbbb{\tauZ \deriv{\phiddd{#3}}{z} \resid{#3}{}{*c}}}{#1}{#2}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Transport (Advection/Diffusion) Equation 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% {#1} 2d,3d, {#2} include "e", {#3} include "h", {#4} test function, {#5} variable, {#6} test function id, {#7} bl, sl, t, etc, {#8} con id 
+\newcommand*{\weakTrns}[8]{
+\resid{#6}{#8,}{#7} = & \sum\limits_{e}  
+\bigg[  
+        \bodyTime{\,#1}{#2}{#4}{#5}
+     -  \bodyConv{\,#1}{#2}{#4}{ (\velc{#3}{#7} \, {#5}) }
+    +  \bodyDiffusion{\,#1}{#2}{#4}{(\diffTensorTRN \, \cjh)}                \nonumber \\
+&  -   \bodySource{\,#1}{#2}{#4}{\srcGen{#7}{#3}{#8,}}
+    +  \bcConv{}{#2}{#4}{(\velc{#3}{#7} \, {#5} }
+    -   \bcDiff{}{#2}{#4}{(\diffTensorTRN \, \cjh)}                                                     
+    +  \bodySUPG{\supg{#6}{#7}{#2}} 
+\bigg]
+}
+\newcommand*{\weakTrnsDA}[8]{
+\residDA{#6}{#8,}{#7} = & \sum\limits_{e}  
+\bigg[  
+        \bodyTime{\,#1}{#2}{#4}{#5}
+     -  \bodyConv{\,#1}{#2}{#4}{ (\velcDA{#3}{#7} \, {#5}) }
+    +  \bodyDiffusion{\,#1}{#2}{#4}{\diffTensor{#7}{#3}{\diffTensorTRN}{#8,}}                \nonumber \\
+&  -   \bodySource{\,#1}{#2}{#4}{\srcGen{#7}{#3}{#8,}}
+    +  \bcConv{}{#2}{#4}{(\velcDA{#3}{#7} \, {#5} }
+    -   \bcDiff{}{#2}{#4}{\diffTensor{#7}{#3}{\diffTensorTRN}{#8,}}                                                     
+    +  \bodySUPG{\supgDA{#6}{#7}{#2}} 
+\bigg]
+}
+
+\newcommand*{\weakTrnsDDD}[8]{
+\resid{#6}{#8,}{#7} = & \sum\limits_{e}  
+\bigg[  
+        \bodyTime{\,#1}{#2}{#4}{#5}
+     -  \bodyConv{\,#1}{#2}{#4}{ (\velc{#3}{#7,r} \, {#5}) }   \nonumber \\
+&  +  \bodyDiffusion{\,#1}{#2}{#4}{(\diffTensorTRN \, \bnabla{3d} \cjh)}               
+    -   \bodySource{\,#1}{#2}{#4}{\srcGen{#7}{#3}{#8,}} \nonumber \\
+ &  +  \bcConv{}{#2}{#4}{(\velc{#3}{#7,r} \, {#5} }
+    -   \bcDiff{}{#2}{#4}{(\diffTensorTRN \, \cjh)}                                                     
+    +  \bodySUPG{\supg{#6}{#7}{#2}} 
+\bigg]
+}
+
+\newcommand*{\weakTrnsDDDFull}[8]{
+\resid{#6}{#8,}{#7} = & \sum\limits_{e}  
+\bigg[  
+        \bodyTime{\,#1}{#2}{#4}{#5}
+     -  \bodyConv{\,#1}{#2}{#4}{ (\velc{#3}{#7,r} \, {#5}) }   \nonumber \\
+&  +  \bodyDiffusion{\,#1}{#2}{#4}{(\diffTensorTRN \, \bnabla{3d} \cjh)}              
+    -   \bodySource{\,#1}{#2}{#4}{\srcGen{#7}{#3}{#8,}}  \nonumber \\
+&  +  \bcConv{}{#2}{#4}{(\velc{#3}{#7,r} \, {#5} }
+    -   \bcDiff{}{#2}{#4}{(\diffTensorTRN \, \cjh)}    \nonumber \\                                                   
+&   +  \bodySUPG{\supg{#6}{#7}{#2}} + \widetilde{c} \,\,  \bodySUPG{\supg{}{3d,c}{#2}}  
+\bigg]
+}
+
+% {#1} dw, bl, sl, {#2} = 1d,2d,3d, {#3} solution variable, {#4} velocity
+\newcommand*{\strongTrnsLinear}[4]{
+\deriv{#3}{t} + \dotp{\bnabla{#2}}{(#3\,#4)} - \srcGen{#1}{}{}
+}
+\newcommand*{\strongTrnsLinearHomo}[4]{
+\deriv{#3}{t} + \dotp{\bnabla{#2}}{(#3\,#4)}  = 0
+}
+
+
+% {#1} dw, bl, sl, {#2} = 1d,2d,3d, {#3} solution variable, {#4} velocity, {#5} diffusion variable
+\newcommand*{\strongTrns}[5]{
+\deriv{#3}{t} + \dotp{\bnabla{#2}}{(#3\,#4)} - \dotp{\bnabla{#2}}{(#5\,\bnabla{#2}{#3})} - \srcGen{#1}{}{}
+}
+
+% Transport definitions
+\newcommand*{\strngTransportVars}[1]{
+\label{eqn:{#1}}
+\begin{eqnarray}
+\resid{}{*t}{} &=& \text{the strong transport residual equation} \nonumber \\
+\diffTensor{t}{}{\diffTensorTRN}{} &=& \text{the transport eddy viscosity tensor} \ \nonumber \\
+\velc{}{t,r} &=& \text{{x,y}-components of the constituent relative velocity} \nonumber \\
+\srcGen{t}{}{} &=& \text{transport constituent sources/sinks} \nonumber
+\end{eqnarray}
+}
+
+% Strong Transport Equation
+\newcommand{\strongTransport}{
+   \resid{}{*t}{} = \strongTrns{t}{3d}{c}{\velc{}{t,r}} {\diffTensor{t}{}{\diffTensorTRN}{}}
+ }
+ 
+% Weak Bed Load Transport Equation
+\newcommand{\weakBedTransport}{
+   \resid{i}{j,}{bl} = &
+   \bodyTime{\,2d}{e}{\phidd{i}}{\cbl{h}{j}{bl}} \,-
+   \bodyConv{\,2d}{e}{\phidd{i}}{ (\velc{h}{bl} \, \cbl{h}{j}{bl}) } \,+                               \nonumber \\
+   \bodyDiffusion{\,2d}{e}{\phidd{i}}{\diffTensor{bl}{h}{\diffTensorTRN}{j,}} \,-
+& \bodySource{\,2d}{e}{\phidd{i}}{\srcGen{bl}{h}{j,}} \,+
+   \bcConv{}{e}{\phidd{i}}{(\velb{h} \, \ctbjh)} \,+
+   \bodySUPG{\supg{i}{bl}{e}};
+ }
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% AdH JACOBI MATRIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\AdHMatrix}{
+\mathbf{J} = 
+\begin{array}{lcl}
+\dots \\
+\phiddd{i-1} * R_{mx} \\
+\phiddd{i-1} * R_{my} \\
+\phiddd{i-1} * R_{c} \\
+\phiddd{i} * R_{mx} \\
+\phiddd{i} * R_{my} \\
+\phiddd{i} * R_{c} \\
+\phiddd{i+1} * R_{mx} \\
+\phiddd{i+1} * R_{my} \\
+\phiddd{i+1} * R_{c} \\
+\dots 
+\end{array}
+\setcounter{MaxMatrixCols}{11}
+\AdHMatrixx
+}
+
+\newcommand{\AdHMatrixx}{
+\begin{bmatrix}  
+\cdots  & \cdots                                          & \cdots                                      & \cdots                                           & \cdots \\
+\cdots  & \AdHMatrixDiagonal{i-1}             & \AdHMatrixOffDiagonal{i-1}{i}  &  \AdHMatrixOffDiagonal{i-1}{i+1} & \cdots \\ 
+\cdots  & \AdHMatrixOffDiagonal{i}{i-1}     & \AdHMatrixDiagonal{i}             &  \AdHMatrixOffDiagonal{i}{i+1}    & \cdots \\ 
+\cdots  & \AdHMatrixOffDiagonal{i+1}{i-1} & \AdHMatrixOffDiagonal{i+1}{i} &  \AdHMatrixDiagonal{i+1}            & \cdots \\
+\cdots  & \cdots                                          & \cdots                                      & \cdots                                           & \cdots
+\end{bmatrix} 
+}
+
+\newcommand*{\AdHMatrixDiagonal}[1]{
+\begin{pmatrix}
+ \pderiv{R_{mx}^{\,#1}}{u^{\,#1}}  & \pderiv{R_{mx}^{\,#1}}{v^{\,#1}}  & \pderiv{R_{mx}^{\,#1}}{d^{\,#1}} \\
+ \pderiv{R_{my}^{\,#1}}{u^{\,#1}}  & \pderiv{R_{my}^{\,#1}}{v^{\,#1}}  & \pderiv{R_{my}^{\,#1}}{d^{\,#1}}  \\
+ \pderiv{R_{dc}^{\,#1}}{u^{\,#1}}   & \pderiv{R_{dc}^{\,#1}}{v^{\,#1}}   & \pderiv{R_{dc}^{\,#1}}{d^{\,#1}} 
+\end{pmatrix}
+} 
+
+\newcommand*{\AdHMatrixOffDiagonal}[2]{
+\begin{bmatrix}
+ \pderiv{R_{mx}^{\,#1}}{u^{\,#2}}  & \pderiv{R_{mx}^{\,#1}}{v^{\,#2}}  & \pderiv{R_{mx}^{\,#1}}{d^{\,#2}} \\
+ \pderiv{R_{my}^{\,#1}}{u^{\,#2}}  & \pderiv{R_{my}^{\,#1}}{v^{\,#2}}  & \pderiv{R_{my}^{\,#1}}{d^{\,#2}}  \\
+ \pderiv{R_{dc}^{\,#1}}{u^{\,#2}}   & \pderiv{R_{dc}^{\,#1}}{v^{\,#2}}   & \pderiv{R_{dc}^{\,#1}}{d^{\,#2}} 
+\end{bmatrix}
+} 
+
+
+
+
+

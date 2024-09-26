@@ -1,0 +1,1263 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FE IS MASS CONSERVATIVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@article{Hughes_FEmass,
+author={Hughes, T.J.R. and Engel, G. and Mazzei, L. and Larson, M.G.},
+title={The continuous galerkin method is locally conservative},
+journal={Journal of Computation Physics},
+year=2000,
+volume = 163,
+number = 2,
+pages={467--488}
+}
+
+@article{Berger_FEmass,
+ author=    {Berger, R.C. and Howington, S.E.},
+ title =      {Discrete Fluxes and Mass Balance in Finite Elements},
+ journal = {ASCE Journal of Hydraulic Engineering},
+ year =    2002,
+ volume = 128,
+ number = 1,
+ pages = {87--92}
+ }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SW 3D SIGMA-GRID INSTABILITY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@article{janjic1977sigma,
+  title={Pressure gradient force and advection scheme used for forecasting with steep and small scale topography},
+  author={Janjic, Z. I.},
+  journal={Beitr{\"a}ge zur Physik der Atmosph{\"a}re},
+  volume={50},
+  number={1},
+  pages={186--199},
+  year={1977}
+}
+
+
+@article {Kliem1999sigma,
+author = {Kliem, Nicolai and Pietrzak, Julie D.},
+title = {On the pressure gradient error in sigma coordinate ocean models: A comparison with a laboratory experiment},
+journal = {Journal of Geophysical Research: Oceans},
+volume = {104},
+number = {C12},
+issn = {2156-2202},
+url = {http://dx.doi.org/10.1029/1999JC900188},
+doi = {10.1029/1999JC900188},
+pages = {29781--29799},
+keywords = {Oceanography: General, Numerical modeling, Oceanography: General: Analytical modeling and laboratory experiments , Currents},
+year = {1999},
+}
+
+@article{Mesinger1982sigma,
+author = { Fedor   Mesinger },
+title = {On the convergence and error problems of the calculation of the pressure gradient force in sigma coordinate models},
+journal = {Geophysical \& Astrophysical Fluid Dynamics},
+volume = {19},
+number = {1-2},
+pages = {105-117},
+year = {1982},
+doi = {10.1080/03091928208208949},
+URL = { 
+        http://dx.doi.org/10.1080/03091928208208949  
+},
+eprint = { 
+        http://dx.doi.org/10.1080/03091928208208949
+}
+}
+
+@article{Haney1991,
+author = { Robert L.  Haney },
+title = {On the Pressure Gradient Force over Steep Topography in Sigma Coordinate Ocean Models},
+journal = {Journal of Physical Oceanography},
+volume = {21},
+number = {4},
+pages = {610-619},
+year = {1991},
+doi = {10.1175/1520-0485(1991)021<0610:OTPGFO>2.0.CO;2},
+URL = { 
+        http://dx.doi.org/10.1175/1520-0485(1991)021<0610:OTPGFO>2.0.CO;2
+},
+eprint = { 
+        http://dx.doi.org/10.1175/1520-0485(1991)021<0610:OTPGFO>2.0.CO;2
+}
+,
+    abstract = { Abstract The error in computing the pressure gradient force near steep topography using terms following (σ) coordinates is investigated in an ocean model using the family of vertical differencing schemes proposed by Arakawa and Suarez. The truncation error is estimated by substituting known buoyancy profiles into the finite difference hydrostatic and pressure gradient terms. The error due to “hydrostatic inconsistency,” which is not simply a space truncation error, is also documented. The results show that the pressure gradient error is spread throughout the water column, and it is sensitive to the vertical resolution and to the placement of the grid points relative to the vertical structure of the buoyancy field being modeled. Removing a reference state, as suggested for the atmosphere by Gary, reduces the truncation error associated with the two lowest vertical modes by a factor of 2 to 3. As an example, the error in computing the pressure gradient using a standard 10-level primitive equation model applied to buoyancy profiles and topographic slopes typical of the California Current region corresponds to a false geostrophic current of the order of 10–12 cm s−1. The analogous error in a hydrostatically consistent 30-level model with the reference state removed is about an order of magnitude smaller. }
+}
+
+% hydrostatic inconsistency conundrum
+@article{Mellor1994,
+author = { G. L.  Mellor  and  T.  Ezer  and  L-Y.  Oey },
+title = {The Pressure Gradient Conundrum of Sigma Coordinate Ocean Models},
+journal = {Journal of Atmospheric and Oceanic Technology},
+volume = {11},
+number = {4},
+pages = {1126-1134},
+year = {1994},
+doi = {10.1175/1520-0426(1994)011<1126:TPGCOS>2.0.CO;2},
+
+URL = { 
+        http://dx.doi.org/10.1175/1520-0426(1994)011<1126:TPGCOS>2.0.CO;2
+    
+},
+eprint = { 
+        http://dx.doi.org/10.1175/1520-0426(1994)011<1126:TPGCOS>2.0.CO;2
+    
+}
+,
+    abstract = { Abstract Much has been written of the error in computing the horizontal pressure gradient associated with sigma coordinates in ocean or atmospheric numerical models. There also exists the concept of “hydrostatic inconsistency” whereby, for a given horizontal resolution, increasing the vertical resolution may not be numerically convergent. In this paper, it is shown that the differencing scheme cited here, though conventional, is not hydrostatically inconsistent; the sigma coordinate, pressure gradient error decreases with the square of the vertical and horizontal grid size. Furthermore, it is shown that the pressure gradient error is advectively eliminated after a long time integration. At the other extreme, it is shown that diagnostic calculations of the North Atlantic Ocean using rather coarse resolution, and where the temperature and salinity and the pressure gradient error are held constant, do not exhibit significant differences when compared to a calculation where horizontal pressure gradients are computed on z-level coordinates. Finally, a way of canceling the error ab initio is suggested. }
+}
+
+% hydrostatic inconsistency conundrum
+@article{Ezer2002249,
+title = "Developments in terrain-following ocean models: intercomparisons of numerical aspects ",
+journal = "Ocean Modelling ",
+volume = "4",
+number = "3–4",
+pages = "249 - 267",
+year = "2002",
+note = "",
+issn = "1463-5003",
+doi = "http://dx.doi.org/10.1016/S1463-5003(02)00003-3",
+url = "http://www.sciencedirect.com/science/article/pii/S1463500302000033",
+author = "Tal Ezer and Hernan Arango and Alexander F Shchepetkin",
+keywords = "Ocean modeling",
+keywords = "Numerical methods",
+keywords = "Sigma coordinates ",
+abstract = "During the course of developing new numerical algorithms for a terrain-following ocean modeling system (TOMS), different numerical aspects have been evaluated through a comparison between two widely used community ocean models, the Princeton ocean model (POM) and the regional ocean modeling system (ROMS). While both models aim at modeling coastal to basin-scale problems using similar grids, their numerical algorithms, code structure, and parameterization options are very different. Sensitivity studies with an idealized channel flow and a steep seamount configuration demonstrate how different algorithms in the two models may affect numerical errors, the stability of the code and the computational efficiency. For example, new pressure gradient schemes using polynomial fits and new time stepping algorithms may reduce numerical errors and allow using longer time steps than standard schemes do. However, the new schemes may require more careful choices of time steps and the use of higher order advection schemes to maintain numerical stability. "
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SHALLOW WATER EQUATIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% SW bible
+@book{swBible,
+  author    = {Vreugdenhil, C. B. }, 
+  title     = {Numerical Methods for Shallow-Water Flow},
+  publisher = {Springer Netherlands},
+  year      = 1994,
+  series    = 13,
+  isbn      = {978-0-7923-3164-3}
+}
+
+% SW equation of state
+@article{Pritchard,
+title = {A summary concerning the newly adopted Practical Salinity Scale, 1978, and the International Equation of State of Seawater, 1980},
+author={Pritchard, Donald W. and Bubolo, Nicole Justine and Chang, Sherry and Larese. Stephen and Reigert, Maria and Torre, F. Jason},
+journal={Marine Sciences},
+publisher={Marine Sciences Research Center, Stony Brook University},
+year = {1982},
+volume = {8},
+abstract = {A summary of the meeting held in Sidney, B.C., Canada, 1-5 September 1980, the UNESCO/ICES/SCOR/IAPSO Joint Panel on Oceanogrpahic Tables and Standards (JPOTS) adopted a new practical salinity scale, and a new equation of the state of seawater. Complete reference listing of the most important background papers is given at the end of this report.},
+url = {http://hdl.handle.net/11401/66174}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SHALLOW WATER MODELS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% GENERAL SW
+@article {Dawson_2006,
+author = {Dawson, Clint and Westerink, Joannes J. and Feyen, Jesse C. and Pothina, Dharhas},
+title = {Continuous, discontinuous and coupled discontinuous-continuous Galerkin finite element methods for the shallow water equations},
+journal = {International Journal for Numerical Methods in Fluids},
+volume = {52},
+number = {1},
+publisher = {John Wiley & Sons, Ltd.},
+issn = {1097-0363},
+url = {http://dx.doi.org/10.1002/fld.1156},
+doi = {10.1002/fld.1156},
+pages = {63--88},
+keywords = {shallow water equations, Galerkin finite element method, discontinuous Galerkin method, coupled finite element method},
+year = {2006},
+}
+
+% FE SW unstructured meshes
+@article{Danilov_2013,
+title = "Ocean modeling on unstructured meshes",
+journal = "Ocean Modelling",
+volume = "69",
+number = "Supplement C",
+pages = "195 - 210",
+year = "2013",
+issn = "1463-5003",
+doi = "https://doi.org/10.1016/j.ocemod.2013.05.005",
+url = "http://www.sciencedirect.com/science/article/pii/S1463500313000905",
+author = "S. Danilov",
+keywords = "Unstructured meshes, Finite-volume and finite-element methods, Large-scale ocean circulation modeling"
+}
+
+% First SW model
+@article{LynchGray1979,
+title = "A wave equation model for finite element tidal computations",
+author = "Lynch, {Daniel R.} and Gray, {William G.}",
+year = "1979",
+doi = "10.1016/0045-7930(79)90037-9",
+volume = "7",
+pages = "207--228",
+journal = "Computers and Fluids",
+issn = "0045-7930",
+number = "3",
+}
+
+% 2D AdH SWr model
+@article{savantSW2D_2011,
+author = {Gaurav Savant  and Charlie Berger  and Tate O. McAlpin  and Jennifer N. Tate },
+title = {Efficient Implicit Finite-Element Hydrodynamic Model for Dam and Levee Breach},
+journal = {Journal of Hydraulic Engineering},
+volume = {137},
+number = {9},
+pages = {1005-1018},
+year = {2011},
+doi = {10.1061/(ASCE)HY.1943-7900.0000372},
+abstract = { This technical paper presents the development and application of a pseudo-transient continuation (PTC)– inspired flow model for the simulation of dam and levee failure. The unstructured, implicit, Petrov-Galerkin finite-element model relies on computed residuals to automatically adjust the time-step size. The implicit time integration, together with the automatic time-step size selection through PTC, makes the model computationally efficient. The model is verified and applied to several analytic and real-world test cases that exercise model behavior and accuracy for several critical, transcritical, and subcritical flows. The result is an efficient and accurate prediction of both the speed and depth of shock waves as the dam-break flow passes over initially dry and wet land. }
+}
+
+
+%% 3D %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% SELFE
+@article{SELFE2008,
+title = "SELFE: A semi-implicit Eulerian–Lagrangian finite-element model for cross-scale ocean circulation ",
+journal = "Ocean Modelling ",
+volume = "21",
+number = "3–4",
+pages = "71 - 96",
+year = "2008",
+note = "",
+issn = "1463-5003",
+doi = "http://dx.doi.org/10.1016/j.ocemod.2007.11.005",
+url = "http://www.sciencedirect.com/science/article/pii/S1463500307001436",
+author = "Yinglong Zhang and António M. Baptista",
+keywords = "Cross-scale ocean modeling",
+keywords = "Estuaries",
+keywords = "Plumes",
+keywords = "Finite elements",
+keywords = "Semi-implicit time stepping",
+keywords = "Eulerian–Lagrangian methods ",
+abstract = "Unstructured-grid models grounded on semi-implicit, finite-volume, Eulerian–Lagrangian algorithms, such as UnTRIM and ELCIRC, have enjoyed considerable success recently in simulating 3D estuarine and coastal circulation. However, opportunities for improving the accuracy of this type of models were identified during extensive simulations of a tightly coupled estuary–plume–shelf system in the Columbia River system. Efforts to improve numerical accuracy resulted in SELFE, a new finite-element model for cross-scale ocean modeling. \{SELFE\} retains key benefits, including computational efficiency of existing semi-implicit Eulerian–Lagrangian finite-volume models, but relaxes restrictions on grids, uses higher-order shape functions for elevation, and enables superior flexibility in representing the bathymetry. Better representation of the bathymetry is enabled by a novel, “localized” vertical grid that resembles unstructured grids. At a particular horizontal location, \{SELFE\} uses either S coordinates or \{SZ\} coordinates, but the equations are consistently solved in Z space. \{SELFE\} also performs well relative to volume conservation and spurious oscillations, two problems that plague some finite-element models. This paper introduces \{SELFE\} as an open-source code available for community use and enhancement. The main focus here is on describing the formulation of the model and on showing results for a range of progressively demanding benchmark tests. While leaving details to separate publications, we also briefly illustrate the superior performance of \{SELFE\} over \{ELCIRC\} in a field application to the Columbia River estuary and plume. "
+}
+
+% SLIM
+@phdthesis{SLIM_2007,
+    title    = {Accuracy and consistency in finite element ocean modeling.},
+    school   = {Universit� Catholique de Louvain},
+    author   = {White, Laurent},
+    year     = {2007}
+}
+
+@article{WhiteSW3D_2008,
+author = { Laurent  White  and  Vincent  Legat  and  Eric  Deleersnijder },
+title = {Tracer Conservation for Three-Dimensional, Finite-Element, Free-Surface, Ocean Modeling on Moving Prismatic Meshes},
+journal = {Monthly Weather Review},
+volume = {136},
+number = {2},
+pages = {420-442},
+year = {2008},
+doi = {10.1175/2007MWR2137.1},
+
+URL = { 
+        https://doi.org/10.1175/2007MWR2137.1
+    
+},
+eprint = { 
+        https://doi.org/10.1175/2007MWR2137.1
+    
+}
+,
+    abstract = { Abstract Large-scale free-surface ocean models designed to run over climatic time scales are required to globally conserve the volume and any tracer up to machine precision. In addition, local consistency is critical and requires that the discrete tracer equation preserve constants in a closed domain and if there is no tracer source or sink. Local consistency, together with monotonicity, will ensure that no spurious tracer extrema occur. A three-dimensional, finite-element, shallow-water model is presented. The mesh is unstructured in the horizontal, extruded in the third dimension, and made up of multiple layers of prisms. In addition, the mesh is allowed to move in the vertical and adapts itself to the free-surface motions. It is shown that achieving consistency requires a discrete compatibility between the tracer and continuity equations. In addition, to ensure global tracer conservation in a consistent way, a discrete compatibility between the tracer, continuity, and free-surface elevation equations must be fulfilled. It is suggested that this compatibility constraint, together with the use of a numerically stable scheme, severely restricts the choice of usable finite-element spatial discretizations. A consistent and conservative time-stepping algorithm is described for which a unique time step is used. It is suggested that future research is needed in order to design a consistent and conservative split-explicit algorithm. Some illustrative test cases are presented in which the method is shown to satisfy all conservation properties. A few experiments in which consistency breaks down are carried out, and the consequences of this breakdown process are investigated. }
+}
+@article{HANERT200317,
+title = "A comparison of three finite elements to solve the linear shallow water equations",
+journal = "Ocean Modelling",
+volume = "5",
+number = "1",
+pages = "17 - 35",
+year = "2003",
+issn = "1463-5003",
+doi = "https://doi.org/10.1016/S1463-5003(02)00012-4",
+url = "http://www.sciencedirect.com/science/article/pii/S1463500302000124",
+author = "E. Hanert and V. Legat and E. Deleersnijder",
+keywords = "Ocean modelling, Unstructured grids, Finite elements, Spurious computational modes"
+}
+@article{Roux2005,
+author = {Daniel Y. Le Roux},
+title = {Dispersion Relation Analysis of the $P^NC_1 - P_1$ Finite-Element Pair in Shallow-Water Models},
+journal = {SIAM Journal on Scientific Computing},
+volume = {27},
+number = {2},
+pages = {394-414},
+year = {2005},
+doi = {10.1137/030602435},
+URL = {https://doi.org/10.1137/030602435},
+eprint = {https://doi.org/10.1137/030602435}
+}
+@article{Roux&Carey,
+author = {Daniel Y. Le Roux and G. F. Carey},
+title = {Stability/dispersion analysis of the discontinuous Galerkin linearized shallow ��water system},
+journal = {International Journal for Numerical Methods in Fluids},
+volume = {48},
+number = {3},
+pages = {325-347},
+year = {2005},
+keywords = {discontinuous Galerkin, finite elements, shallow‐water equations, gravity waves},
+doi = {10.1002/fld.893},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/fld.893},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/fld.893},
+abstract = {Abstract The frequency or dispersion relation for the discontinuous Galerkin mixed formulation of the 1‐D linearized shallow ��water equations is analysed, using several basic DG mixed schemes. The dispersion properties are compared analytically and graphically with those of the mixed continuous Galerkin formulation for piecewise ��linear bases on co‐located grids. Unlike the Galerkin case, the DG scheme does not exhibit spurious stationary pressure modes. However, spurious propagating modes have been identified in all the present discontinuous Galerkin formulations. Numerical solutions of a test problem to simulate fast gravity modes illustrate the theoretical results and confirm the presence of spurious propagating modes in the DG schemes. Copyright © 2005 John Wiley & Sons, Ltd.}
+}
+
+
+
+% ADCIRC 3D
+@article{Adcirc_3D,
+author = {Luettich, R.A. and Westerink, J.J.  and Scheffner, N.W. },
+title = {ADCIRC: an advanced three-dimensional circulation model for shelves coasts and estuaries, report 1: theory and methodology of ADCIRC-2DDI and ADCIRC-3DL},
+journal = {Dredging Research Program Technical Report DRP-92-6},
+publisher = {U.S. Army Engineers Waterways Experiment Station, Vicksburg, MS},
+year = {2016}
+}
+
+% Delft3D
+@book{Delft_3D,
+  author     =  {DELTARES},
+  title          =  {Delft3D-FLOW User Manual},
+  publisher = {Delft, the Netherlands},
+  year         = {2011}
+}
+
+% Charlie's first 3D tech report
+@article{AdH3DTR,
+author = "Berger, R. C.",
+title = "Adaptive Hydraulics: 3D Shallow Water Model, Equation Development",
+journal = "ERDC/CHL TR-00-12",
+year = "2014"
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALE METHOD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Great full derivation
+@inproceedings{ALE,
+  title={Arbitrary Lagrangian-Eulerian Methods},
+  booktitle={Arbitrary Lagrangian-Eulerian Methods},
+  chapter={14},
+  author={J Donea and Antonio Huerta and J.-Ph Ponthot and A Rodr{\'i}guez-Ferran},
+  pages={1-25},
+  year={2004}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% RADIATION STRESSES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% origin paper
+@article{LonguetHiggins1964,
+    title = "Radiation stresses in water waves; a physical discussion, with applications ",
+    journal = "Deep Sea Research and Oceanographic Abstracts ",
+    volume = "11",
+    number = "4",
+    pages = "529 - 562",
+    year = "1964",
+    note = "",
+    issn = "0011-7471",
+    doi = "http://dx.doi.org/10.1016/0011-7471(64)90001-4",
+    url = "http://www.sciencedirect.com/science/article/pii/0011747164900014",
+    author = "M.S. Longuet-Higgins and R.w. Stewart",
+    abstract = "The radiation stresses in water waves play an important role in a variety of oceanographic phenomena, for example in the change in mean sea level due to storm waves (wave “set-up”); the generation of “surf-beats”; the interaction of waves with steady currents; and the steepening of short gravity waves on the crests of longer waves. In previous papers these effects have been discussed rigorously by detailed perturbation analysis. In the present paper a simplified exposition is given of the radiation stresses and some of their consequencies. Physical reasoning, though less rigorous, is used wherever possible. The influence of capillarity on the radiation stresses is fully described for the first time. "
+}
+
+% origin paper
+@article{Battjes1972,
+    author = {Battjes, J. A.},
+    citeulike-article-id = {5673858},
+    journal = {J. Mar. Res.},
+    keywords = {wise-bib-09-08-29},
+    pages = {56--64},
+    posted-at = {2009-08-29 17:16:48},
+    priority = {0},
+    title = {Radiation stresses in short-crested gravity waves},
+    volume = {30},
+    year = {1972}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SW3 VERIFICATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 3d shallow water V&V book
+@book{asce_3d_sw,
+  author     =  {Wang, Sam S. Y. and Roche, Patrick J. and Schmalz, Richard A. and Jia, Yafei and Smith, Peter E.},
+  title          =  {Verification and Validation of 3D Free-Surface Flow Models},
+  publisher = {the American Society of Civil Engineers (ASCE)},
+  year         = {2008}
+}
+
+% 3d shallow water wind analytic solution
+@article{Koutitas1980,
+   author     = {Koutitas, C. and O'Connor, B.},
+   title          = {Modelling three-dimensional wind-induced flows.},
+   journal    = {Journal of the Hydraulics Division},
+   volume    = {106},
+   pages      = {1843-1865},
+   year         = {1980},
+ }
+      
+% 3d shallow water wind analytic solution
+ @book{Haung1993,
+   author     = {Huang, W.},
+   title          = {Three-dimensional numerical modeling of circulation and water quality induced by combined sewage overflow discharge},
+   publisher = {Ph.D. dissertation, Department of Ocean Engineering, Univ. of Rhode Island},
+   year         = {1993},
+ }
+ 
+ % 3d shallow water wind analytic solution
+@article{Haung&Spaulding1995,
+   author   = {Huang, W. and Spaulding, M.},
+   title       = {3D Model of Estuarine Circulation and Water Quality Induced by Surface Discharges},
+   journal  = {Journal of Hydraulic Engineering},
+   volume = {121},
+   number = {4},
+   pages   = {300-311},
+   year      = {1995},
+   doi        = {10.1061/(ASCE)0733-9429(1995)121:4(300)},
+   URL      = { http://dx.doi.org/10.1061/(ASCE)0733-9429(1995)121:4(300)},
+   eprint    = { http://dx.doi.org/10.1061/(ASCE)0733-9429(1995)121:4(300)}
+}
+
+% 3d  SW tides
+@article{chenTides,
+   author = {Ching L. Chen },
+   title = {Analytic Solutions for Tidal Model Testing},
+   journal = {Journal of Hydraulic Engineering},
+   volume = {115},
+   number = {12},
+   pages = {1707-1714},
+   year = {1989},
+   doi = {10.1061/(ASCE)0733-9429(1989)115:12(1707)}
+}
+
+% Ekman currents
+@article{price,
+author = {Price, J.F. and Weller, R.A. and Schudlich, R.R.},
+title = {Wind-driven ocean currents and Ekman transport},
+journal = {science},
+volume = {238},
+year = {1987},
+pages = {1534-1538},
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SW3 VALIDATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Galveston Bay
+@article {Galveston_1986,
+author = {Cochrane, J. D. and Kelly, F. J.},
+title = {Low-frequency circulation on the Texas-Louisiana continental shelf},
+journal = {Journal of Geophysical Research: Oceans},
+volume = {91},
+number = {C9},
+issn = {2156-2202},
+url = {http://dx.doi.org/10.1029/JC091iC09p10645},
+doi = {10.1029/JC091iC09p10645},
+pages = {10645--10659},
+keywords = {Continental shelf and slope processes, Descriptive and regional oceanography, Diurnal, seasonal, and annual cycles, Currents},
+year = {1986},
+}
+
+% fagerburg
+@article{fagerburg,
+author = {Fagerburg, T. L. and Fisackerly, G. M. and Parman, J. W. and Coleman, C. J. },
+title = {Houston-Galveston navigation channels, Texas project, report 1, Galveston Bay field investigation},
+journal = {Technical Report HL-92-7.  Vicksburg, MS: U.S. Army Corps of Engineers, Waterways Experiment Station},
+year = {1994},
+}
+
+% Willmott measure for estuary 1 
+@article{willmott_1982,
+author = { Cort J.  Willmott },
+title = {Some Comments on the Evaluation of Model Performance},
+journal = {Bulletin of the American Meteorological Society},
+volume = {63},
+number = {11},
+pages = {1309-1313},
+year = {1982},
+doi = {10.1175/1520-0477(1982)063<1309:SCOTEO>2.0.CO;2},
+
+URL = { 
+        https://doi.org/10.1175/1520-0477(1982)063<1309:SCOTEO>2.0.CO;2
+    
+},
+eprint = { 
+        https://doi.org/10.1175/1520-0477(1982)063<1309:SCOTEO>2.0.CO;2
+    
+}
+,
+    abstract = { Abstract Quantitative approaches to the evaluation of model performance were recently examined by Fox (1981). His recommendations are briefly reviewed and a revised set of performance statistics is proposed. It is suggested that the correlation between model-predicted and observed data, commonly described by Pearson's product-moment correlation coefficient, is an insufficient and often misleading measure of accuracy. A complement of differenec and summary univariate indices is presented as the nucleus of a more informative, albeit fundamentally descriptive, approach to model evaluation. Two models that estimate monthly evapotranspiration are comparatively evaluated in order illustrate how the recommended method(s) can be applied. }
+}
+
+% Willmott measure for estuary 2
+@article {willmott_1985,
+author = {Willmott, Cort J. and Ackleson, Steven G. and Davis, Robert E. and Feddema, Johannes J. and Klink, Katherine M. and Legates, David R. and O'Donnell, James and Rowe, Clinton M.},
+title = {Statistics for the evaluation and comparison of models},
+journal = {Journal of Geophysical Research: Oceans},
+volume = {90},
+number = {C5},
+issn = {2156-2202},
+url = {http://dx.doi.org/10.1029/JC090iC05p08995},
+doi = {10.1029/JC090iC05p08995},
+pages = {8995--9005},
+keywords = {Numerical modeling, Instruments and techniques},
+year = {1985},
+abstract = {Procedures that may be used to evaluate the operational performance of a wide spectrum of geophysical models are introduced. Primarily using a complementary set of difference measures, both model accuracy and precision can be meaningfully estimated, regardless of whether the model predictions are manifested as scalars, directions, or vectors. It is additionally suggested that the reliability of the accuracy and precision measures can be determined from bootstrap estimates of confidence and significance. Recommended procedures are illustrated with a comparative evaluation of two models that estimate wind velocity over the South Atlantic Bight.},
+}
+
+% Gaurav and Charlie's Galveston Bay Report
+@techreport{adh3DGalvestonBay,
+  author = {Savant, Gaurav and Berger, R. C.},
+  title = {Three-Dimensional Shallow Water Adaptive Hydraulics (ADH-SW3) Validation: Galveston Bay Hydrodynamics and Salinity Transport},
+  institution = {Coastal and Hydraulics Laboratory (U.S.) - Engineer Research and Development Center (U.S.)},
+  volume = {15-3},
+  year = {2015},
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SUPG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% first SUPG paper
+@article {Christie_SUPG_1976,
+author = {Christie, I. and Griffiths, D. F. and Mitchell, A. R. and Zienkiewicz, O. C.},
+title = {Finite element methods for second order differential equations with significant first derivatives},
+journal = {International Journal for Numerical Methods in Engineering},
+volume = {10},
+number = {6},
+publisher = {John Wiley & Sons, Ltd},
+issn = {1097-0207},
+url = {http://dx.doi.org/10.1002/nme.1620100617},
+doi = {10.1002/nme.1620100617},
+pages = {1389--1396},
+year = {1976},
+}
+
+% nice paper on Charlie's spectral radius choice of tau scalar
+@article{Hughes1984217,
+title = "Finite element methods for first-order hyperbolic systems with particular emphasis on the compressible euler equations ",
+journal = "Computer Methods in Applied Mechanics and Engineering ",
+volume = "45",
+number = "1–3",
+pages = "217 - 284",
+year = "1984",
+note = "",
+issn = "0045-7825",
+doi = "http://dx.doi.org/10.1016/0045-7825(84)90157-9",
+url = "http://www.sciencedirect.com/science/article/pii/0045782584901579",
+author = "T.J.R. Hughes and T.E. Tezduyar",
+abstract = "A Petrov-Galerkin finite element formulation is presented for first-order hyperbolic systems of conservation laws with particular emphasis on the compressible Euler equations. Applications of the methodology are made to one- and two-dimensional steady and unsteady flows with shocks. Results obtained suggest the potential of the type of methods developed. "
+}
+
+% supg element length review
+@article{Mittal2000269,
+title = "On the performance of high aspect ratio elements for incompressible flows ",
+journal = "Computer Methods in Applied Mechanics and Engineering ",
+volume = "188",
+number = "1–3",
+pages = "269 - 287",
+year = "2000",
+note = "",
+issn = "0045-7825",
+doi = "http://dx.doi.org/10.1016/S0045-7825(99)00152-8",
+url = "http://www.sciencedirect.com/science/article/pii/S0045782599001528",
+author = "S. Mittal",
+abstract = "A systematic study of the effect of high aspect ratio elements using equal-order-interpolation velocity–pressure elements for computation of incompressible flows is conducted. Both, quadrilateral and triangular elements utilizing, bilinear (Q1Q1) and linear (P1P1) interpolation functions, respectively, are considered. Stabilized finite-element formulations are employed to solve the incompressible Navier–Stokes equations in the primitive variables. The element length, h, plays an important role in the calculation of stabilizing coefficients in the formulation. Three definitions of h are utilized. These are based on the maximum edge length, minimum edge length of an element and the element length along the streamwise direction. Performance of the implementations is evaluated for both, steady and unsteady flows. Numerical experiments are conducted for flow past a circular cylinder at Reynolds numbers 10 and 100. While in the former case the flow is steady, the latter one is associated with temporally periodic vortex shedding. It is observed that for the Re=10 flow all definitions of h produce acceptable solutions even with elements that have very high aspect ratios. In the case of Re=100 flow, again, all definitions of h work well for elements with reasonable/low aspect ratios. However, for large aspect ratio elements it is only the definition based on the minimum edge length of an element that results in acceptable solution. It is also observed that the effect of high aspect ratio is felt more by the \{P1P1\} element as compared to the \{Q1Q1\} element. "
+}
+
+% another supg review
+@article{2003AkinSUPGLe,
+author = "Akin, J.~E. and Tezduyar, T. and Ungor, M. and Mittal, S.",
+title = "Stabilization Parameters and Smagorinsky Turbulence Model",
+journal = "Journal of Applied Mechanics",
+year = "2003",
+volume = "70",
+pages = "2",
+doi = "10.1115/1.1526569"
+}
+
+% another
+@article{2003AkinSUPGLe2,
+author = "Akin, J.~E. and Tezduyar, T. and Ungor, M. and Mittal, S.",
+title = "Stabilization Parameters and Smagorinsky Turbulence Model for Incompressible flows",
+journal = "Fifth World Congress on Computational Mechanics",
+year = "2002"
+}
+
+% Hyperbolic equations and wiggles
+@book{hyperbolicPDEs,
+title = {Hyperbolic Partial Differential Equations: Theory, Numerics and Applications},
+author = {Andreas Meister and Jens Struckmeier},
+year = {2002},
+isbn = {978-3-528-03188-6},
+publisher = {Vieweg+Teubner Verlag}
+}
+
+% First SUPG paper
+@incollection{Hughes&Brooks1982,
+author = {Hughes, T. J. R. and Brooks, A. N.}, 
+title = {A theoretical framework for Petrov-Galerkin methods with discontinuous weighting functions: application to the streamline-upwind procedure"},
+booktitle = {Finite elements in fluids},
+publisher = {John Wiley And Sons, Ltd},
+year = {1982},
+pages = {46-65}
+}
+
+% SW SUPG paper
+@article {SWSUPG1,
+author = {Takase, Shinsuke and Kashiyama, Kazuo and Tanaka, Seizo and Tezduyar, Tayfun E.},
+title = {Space-time SUPG formulation of the shallow-water equations},
+journal = {International Journal for Numerical Methods in Fluids},
+volume = {64},
+number = {10-12},
+publisher = {John Wiley & Sons, Ltd.},
+issn = {1097-0363},
+url = {http://dx.doi.org/10.1002/fld.2464},
+doi = {10.1002/fld.2464},
+pages = {1379--1394},
+keywords = {shallow-water equations, finite element method, space?time method, SUPG formulation, shock-capturing parameter},
+year = {2010},
+}
+
+@article{CARBONEL2000,
+title = {{Numerical study of Petrov-Galerkin formulations for the shallow water wave equations}},
+journal = {{Journal of the Brazilian Society of Mechanical Sciences}},
+author={Carbonel H., Carlos A. A. AND Gale A, Augusto Cesar AND Loula, Abimael Dourado},
+ISSN = {0100-7386},
+language = {en},
+URL = {http://www.scielo.br/scielo.php?script=sci_arttext&pid=S0100-73862000000200008&nrm=iso},
+volume = {22},
+year = {2000},
+month = {00},
+pages = {231 - 247},
+publisher = {scielo}
+}
+   
+@article{BOVA1996123,
+title = "A symmetric formulation and SUPG scheme for the shallow-water equations",
+journal = "Advances in Water Resources",
+volume = "19",
+number = "3",
+pages = "123 - 131",
+year = "1996",
+issn = "0309-1708",
+doi = "https://doi.org/10.1016/0309-1708(95)00040-2",
+url = "http://www.sciencedirect.com/science/article/pii/0309170895000402",
+author = "S.W. Bova and G.F. Carey",
+keywords = "shallow-water equations, finite elements, Petrov-Galerkin, entropy variables, hyperbolic systems"
+}
+
+@article{DAWSON20131,
+title = "A streamline diffusion finite element method for the viscous shallow water equations",
+journal = "Journal of Computational and Applied Mathematics",
+volume = "251",
+pages = "1 - 7",
+year = "2013",
+issn = "0377-0427",
+doi = "https://doi.org/10.1016/j.cam.2013.03.015",
+url = "http://www.sciencedirect.com/science/article/pii/S0377042713001234",
+author = "Clint Dawson and Juha H. Videman",
+keywords = "Shallow-water equations, Finite element method, Streamline diffusion method, A priori estimates"
+}
+
+% Basis SUPG Paper
+@article{TezduyarPark1986,
+title = "Discontinuity-capturing finite element formulations for nonlinear convection-diffusion-reaction equations ",
+journal = "Computer Methods in Applied Mechanics and Engineering ",
+volume = "59",
+number = "3",
+pages = "307 - 325",
+year = "1986",
+note = "",
+issn = "0045-7825",
+doi = "http://dx.doi.org/10.1016/0045-7825(86)90003-4",
+url = "http://www.sciencedirect.com/science/article/pii/0045782586900034",
+author = "T.E. Tezduyar and Y.J. Park",
+abstract = "Formulations which complement the streamline-upwind/Petrov-Galerkin procedure are presented. These formulations minimize the oscillations about sharp internal and boundary layers in convection-dominated and reaction-dominated flows. The proposed methods are tested on various single- and multi-component transport problems. "
+}
+
+% AdH related --------------------------------------------
+
+% Charlie's first SUPG tech report
+@article{Berger1993,
+author = "Berger, R. C.",
+title = "A Finite Element Scheme for Shock Capturing",
+journal = "ERDC/CHL HL-93-12",
+year = "1993"
+}
+
+% Charlie's SUPG paper
+@article{berger1995finite,
+  title={Finite-element model for high-velocity channels},
+  author={Berger, RC and Stockstill, RL},
+  journal={Journal of Hydraulic Engineering},
+  volume={121},
+  number={10},
+  pages={710--716},
+  year={1995},
+  publisher={American Society of Civil Engineers}
+}
+
+% Charlie's original SUPG paper
+@article {Berger1998,
+author = {Berger, R. C. and Carey, G. F.},
+title = {Free-surface flow over curved surfaces: Part II: Computational model},
+journal = {International Journal for Numerical Methods in Fluids},
+volume = {28},
+number = {2},
+publisher = {John Wiley & Sons, Ltd},
+issn = {1097-0363},
+url = {http://dx.doi.org/10.1002/(SICI)1097-0363(19980815)28:2<201::AID-FLD706>3.0.CO;2-Q},
+doi = {10.1002/(SICI)1097-0363(19980815)28:2<201::AID-FLD706>3.0.CO;2-Q},
+pages = {201--213},
+keywords = {curved surface, shallow water, non-hydrostatic, spillway, finite element},
+year = {1998},
+}
+
+ % Charlie's last SUPG tech report
+@article{BergerLee2004,
+author = "Berger, R. C. and Lee, L. M.",
+title = "Multidimensional numerical modeling of surges over initially dry land",
+journal = "ERDC/CHL TR-04-10",
+year = "2004"
+}
+
+% First time SUPG was applied to AdH
+@article{Savant11,
+ author={Savant, G. and Berger, C. and McAlpin, T.O. and Tate, J.N.},
+ title= {Efficient Implicit Finite-Element Hydrodynamic Model for Dam and Levee Breach},
+ journal={ASCE Journal of Hydraulic Engineering},
+ year = {2011},
+ volume = {137},
+ number = {9},
+ pages={1005--1018}
+ }
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SW GWCE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% GWCE formulation1
+@PROCEEDINGS{gwce1,
+title = {Evolution of two-dimensional FE wave equation models.},
+author = {Gray, {W. G.} and Kinnmark, {I. P E}},
+year = {1986},
+isbn = {090545152X},
+booktitle = {Proceedings of the 4th International Conference on Finite Element in Water Resources},
+pages = {29-47},
+publisher = {Springer-Verlag}
+}
+
+% GWCE formulation2
+@article{gwce2,
+  title={Aspects of nonlinear simulations using shallow-water models based on the wave continuity equation},
+  author={Kolar, RL and Westerink, JJ and Cantekin, ME and Blain, CA},
+  journal={Computers \& fluids},
+  volume={23},
+  number={3},
+  pages={523--538},
+  year={1994},
+  publisher={Elsevier}
+}
+
+% GWCE mass imbalance
+@article {Dawson2006,
+author = {Dawson, Clint and Westerink, Joannes J. and Feyen, Jesse C. and Pothina, Dharhas},
+title = {Continuous, discontinuous and coupled discontinuous/continuous Galerkin finite element methods for the shallow water equations},
+journal = {International Journal for Numerical Methods in Fluids},
+volume = {52},
+number = {1},
+publisher = {John Wiley & Sons, Ltd.},
+issn = {1097-0363},
+url = {http://dx.doi.org/10.1002/fld.1156},
+doi = {10.1002/fld.1156},
+pages = {63--88},
+keywords = {shallow water equations, Galerkin finite element method, discontinuous Galerkin method, coupled finite element method},
+year = {2006},
+}
+
+% GWCE mass imbalance
+@article{Massey2006,
+title = "In search of a consistent and conservative mass flux for the \{GWCE\} ",
+journal = "Computer Methods in Applied Mechanics and Engineering ",
+volume = "195",
+number = "7–8",
+pages = "571 - 587",
+year = "2006",
+note = "",
+issn = "0045-7825",
+doi = "http://dx.doi.org/10.1016/j.cma.2005.02.013",
+url = "http://www.sciencedirect.com/science/article/pii/S0045782505001192",
+author = "T.C. Massey and C.A. Blain",
+keywords = "Galerkin finite element",
+keywords = "GWCE",
+keywords = "Local conservation",
+keywords = "Local mass flux ",
+abstract = "Two methods for computing local mass flux for a continuous Galerkin finite element formulation of the Generalized Wave Continuity Equation (GWCE) are derived and a third method is discussed in light of the first two. The \{GWCE\} is shown to not conserve mass locally, while it can be shown to conserve a certain quantity locally. The two derived methods are demonstrated for a realistic tidal flow problem in the Bight of Abaco, Bahamas. "
+}
+
+% Failure of wave continuity
+@phdthesis{Kolar1992Thesis,
+  author       = {Kolar, R.. L.},
+  title        = {Environmental conservation laws : formulation, numerical solution, and application},
+  school       = {University of Notre Dame},
+  year         = 1992,
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SW DG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% DG methods for hyperbolic laws
+@article{Flaherty2002,
+   author = {Flaherty, Joseph E. and Krivodonova, Lilia and Remacle, Jean-Francois and Shephard, Mark S.},
+   title = {Aspects of Discontinuous Galerkin Methods for Hyperbolic Conservation Laws},
+   journal = {Finite Elem. Anal. Des.},
+   issue_date = {August 2002},
+   volume = {38},
+   number = {10},
+   month = aug,
+   year = {2002},
+   issn = {0168-874X},
+   pages = {889--908},
+   numpages = {20},
+   url = {http://dx.doi.org/10.1016/S0168-874X(02)00083-5},
+   doi = {10.1016/S0168-874X(02)00083-5},
+   acmid = {608375},
+   publisher = {Elsevier Science Publishers B. V.},
+   address = {Amsterdam, The Netherlands, The Netherlands},
+} 
+
+% DG method for SW
+@ARTICLE{Kubatko2006,
+   author = {{Kubatko}, E.~J. and {Westerink}, J.~J. and {Dawson}, C.},
+    title = "{An unstructured grid morphodynamic model with a discontinuous Galerkin method for bed evolution}",
+    journal = {Ocean Modelling},
+    year = 2006,
+    volume = 15,
+    pages = {71-89},
+    doi = {10.1016/j.ocemod.2005.05.005},
+    adsurl = {http://adsabs.harvard.edu/abs/2006OcMod..15...71K},
+    adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+% DG SW
+@article{Dawson20111165,
+   title = "Discontinuous Galerkin methods for modeling Hurricane storm surge ",
+   journal = "Advances in Water Resources ",
+   volume = "34",
+   number = "9",
+   pages = "1165 - 1176",
+   year = "2011",
+   note = "New Computational Methods and Software Tools ",
+   issn = "0309-1708",
+   author = "Clint Dawson and Ethan J. Kubatko and Joannes J. Westerink and Corey Trahan and Christopher Mirabito and Craig Michoski and Nishant Panda",
+   keywords = "Discontinuous Galerkin methods",
+   keywords = "Hurricane storm surge",
+   keywords = "Shallow water equations ",
+   abstract = "Storm surge due to hurricanes and tropical storms can result in significant loss of life, property damage, and long-term damage to coastal ecosystems and landscapes. Computer modeling of storm surge can be used for two primary purposes: forecasting of surge as storms approach land for emergency planning and evacuation of coastal populations, and hindcasting of storms for determining risk, development of mitigation strategies, coastal restoration and sustainability. Storm surge is modeled using the shallow water equations, coupled with wind forcing and in some events, models of wave energy. In this paper, we will describe a depth-averaged (2D) model of circulation in spherical coordinates. Tides, riverine forcing, atmospheric pressure, bottom friction, the Coriolis effect and wind stress are all important for characterizing the inundation due to surge. The problem is inherently multi-scale, both in space and time. To model these problems accurately requires significant investments in acquiring high-fidelity input (bathymetry, bottom friction characteristics, land cover data, river flow rates, levees, raised roads and railways, etc.), accurate discretization of the computational domain using unstructured finite element meshes, and numerical methods capable of capturing highly advective flows, wetting and drying, and multi-scale features of the solution. The discontinuous Galerkin (DG) method appears to allow for many of the features necessary to accurately capture storm surge physics. The \{DG\} method was developed for modeling shocks and advection-dominated flows on unstructured finite element meshes. It easily allows for adaptivity in both mesh (h) and polynomial order (p) for capturing multi-scale spatial events. Mass conservative wetting and drying algorithms can be formulated within the \{DG\} method. In this paper, we will describe the application of the \{DG\} method to hurricane storm surge. We discuss the general formulation, and new features which have been added to the model to better capture surge in complex coastal environments. These features include modifications to the method to handle spherical coordinates and maintain still flows, improvements in the stability post-processing (i.e. slope-limiting), and the modeling of internal barriers for capturing overtopping of levees and other structures. We will focus on applications of the model to recent events in the Gulf of Mexico, including Hurricane Ike. "
+}
+
+% DG performance test
+@article{Kubatko:2009,
+   author = {Kubatko, Ethan J. and Bunya, Shintaro and Dawson, Clint and Westerink, Joannes J. and Mirabito, Chris},
+   title = {A Performance Comparison of Continuous and Discontinuous Finite Element Shallow Water Models},
+   journal = {J. Sci. Comput.},
+   issue_date = {July      2009},
+   volume = {40},
+   number = {1-3},
+   month = jul,
+   year = {2009},
+   issn = {0885-7474},
+   pages = {315--339},
+   numpages = {25},
+   url = {http://dx.doi.org/10.1007/s10915-009-9268-2},
+   doi = {10.1007/s10915-009-9268-2},
+   acmid = {1553291},
+   publisher = {Plenum Press},
+   address = {New York, NY, USA},
+   keywords = {Discontinuous Galerkin, Finite elements, Generalized wave continuity equation, Shallow water equations},
+} 
+
+% mixed-interpolation stabilization of the SW equation
+@article{mixedSW1,
+author = { Daniel Y.  Le Roux  and  Andrew  Staniforth  and  Charles A.  Lin },
+title = {Finite Elements for Shallow-Water Equation Ocean Models},
+journal = {Monthly Weather Review},
+volume = {126},
+number = {7},
+pages = {1931-1951},
+year = {1998},
+doi = {10.1175/1520-0493(1998)126<1931:FEFSWE>2.0.CO;2},
+URL = {https://doi.org/10.1175/1520-0493(1998)126<1931:FEFSWE>2.0.CO;2},
+eprint = { https://doi.org/10.1175/1520-0493(1998)126<1931:FEFSWE>2.0.CO;2},
+abstract = { Abstract The finite-element spatial discretization of the linear shallow-water equations on unstructured triangular meshes is examined in the context of a semi-implicit temporal discretization. Triangular finite elements are attractive for ocean modeling because of their flexibility for representing irregular boundaries and for local mesh refinement. The semi-implicit scheme is beneficial because it slows the propagation of the high-frequency small-amplitude surface gravity waves, thereby circumventing a severe time step restriction. High-order computationally expensive finite elements are, however, of little benefit for the discretization of the terms responsible for rapidly propagating gravity waves in a semi-implicit formulation. Low-order velocity/surface-elevation finite-element combinations are therefore examined here. Ideally, the finite-element basis-function pair should adequately represent approximate geostrophic balance, avoid generating spurious computational modes, and give a consistent discretization of the governing equations. Existing finite-element combinations fail to simultaneously satisfy all of these requirements and consequently suffer to a greater or lesser extent from noise problems. An unconventional and largely unknown finite-element pair, based on a modified combination of linear and constant basis functions, is shown to be a good compromise and to give good results for gravity-wave propagation. }
+}
+
+
+@article{mixedSW2,
+title = "A finite element solution of the shallow-water wave equations",
+journal = "Applied Mathematical Modelling",
+volume = "14",
+number = "1",
+pages = "20 - 29",
+year = "1990",
+issn = "0307-904X",
+doi = "https://doi.org/10.1016/0307-904X(90)90159-3",
+url = "http://www.sciencedirect.com/science/article/pii/0307904X90901593",
+author = "Torbjørn Utnes",
+keywords = "finite elements, decoupling algorithm, shallow-water equations",
+abstract = "A finite element method is presented for the solution of the shallow-water wave equations. The method is characterized by a semi-implicit decoupling algorithm; the grid is composed of isoparametric, biquadratic elements; and the interpolation is mixed, with biquadratic velocity and bilinear elevation. Several test cases are presented to demonstrate the ability of the method, including a simulation of internal waves in Lake Mjøsa."
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Adaption papers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@book{Oden_Adaption,
+title = "Advances in adaptive improvements: Survey of adaptive finite element methods in computational mechanics",
+author = "Oden, {J. Tinsley} and L. Demkowicz",
+year = "1989",
+isbn = "0791803031",
+publisher = "Publ by American Soc of Mechanical Engineers (ASME)",
+}
+
+@article{Fortunato1999639,
+title = "An adaptive grid technique for the vertical structure of shallow water models ",
+journal = "Applied Mathematical Modelling ",
+volume = "23",
+number = "8",
+pages = "639 - 650",
+year = "1999",
+note = "",
+issn = "0307-904X",
+doi = "http://dx.doi.org/10.1016/S0307-904X(98)10101-4",
+url = "http://www.sciencedirect.com/science/article/pii/S0307904X98101014",
+author = "A.B. Fortunato and A. Oliveira",
+keywords = "Adaptive grid",
+keywords = "Shallow water model",
+keywords = "Three-dimensional",
+keywords = "Vertical discretization ",
+abstract = "The efficient resolution of the boundary layers occurring in geophysical flows has motivated the search for criteria to optimize the vertical nodal placement in three-dimensional (3D) shallow water models. This paper describes the implementation and testing of an adaptive grid technique for the internal mode of shallow water models. The technique uses an r-method in which the nodes are moved vertically based on the velocity gradients between consecutive nodes. One-dimensional (1D) tests show that the method behaves well in tidal- and wind-driven flows, both in well-mixed and stratified conditions. Average accuracy improvements of 50\% were obtained relative to uniform grids, with a 15\% \{CPU\} time increase. The adaptive technique accounts accurately for the space and time variability of the flow, thus being attractive for any type of problem. Furthermore, the technique does not require an a priori knowledge of the flow conditions, thus simplifying greatly the modeling procedure. "
+}
+
+@article{Tate2006,
+title = "Refinement Indicator for Mesh Adaption in Shallow-Water Modeling",
+journal = "Journal of Hydraulic Engineering ",
+volume = "132",
+number = "8",
+year = "2006",
+doi = "http://dx.doi.org/10.1061/(ASCE)0733-9429(2006)132:8(854)",
+author = "J. N. Tate and R. C. Berger and R. L. Stockstill",
+}
+
+@article{savantTrahan3DadaptAdH,
+author = {Gaurav Savant  and Corey J. Trahan  and Charlie Berger  and Jennifer T. McAlpin  and Tate O. McAlpin },
+title = {Refinement Indicator for Dynamic-Mesh Adaption in Three-Dimensional Shallow-Water Equation Modeling},
+journal = {Journal of Hydraulic Engineering},
+volume = {144},
+number = {2},
+pages = {06017026},
+year = {2018},
+doi = {10.1061/(ASCE)HY.1943-7900.0001394},
+abstract = { One of the basic articles of discretization-based numerical modeling of three-dimensional shallow water equations is the spatial convergence of the mesh utilized. The process of creating a spatially converged mesh involves refining the mesh until the solution for the quantity of interest does not change within some user-defined tolerance. This process is cumbersome in three-dimensions, and in the absence of a spatially converged mesh, the numerical results may be erroneous. This technical note introduces a norm of the three-dimensional continuity equation residual-based refinement indicator to flag regions of the mesh requiring refinement. The method is implemented through h-adaption in a finite-element method–based code and results of this implementation are presented. }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SEDLIB %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@PROCEEDINGS{brownSedLib2012a,
+  title = {A Quasi-3D Suspended Sediment Model Using a Set of Correction Factors Applied to a Depth Averaged Advection Diffusion Equation},
+  author = {G. Brown},
+  organization = {IIHR 3rd International Shallow Flows Symposium},
+  publisher = {University of Iowa},
+  year = {2012}
+}
+
+@PROCEEDINGS{brownSedLib2012b,
+  title = {Modification of the bed sediment equations of Spasojevic and Holly (1993) to account for variable porosity, variable grain specific gravity, and nonerodable boundaries},
+  author = {G. Brown},
+  organization = {IIHR 3rd International Shallow Flows Symposium},
+  publisher = {University of Iowa},
+  year = {2012}
+}
+
+@article{gBrown2008,
+author = {Gary L. Brown },
+title = {Approximate Profile for Nonequilibrium Suspended Sediment},
+journal = {Journal of Hydraulic Engineering},
+volume = {134},
+number = {7},
+pages = {1010-1014},
+year = {2008},
+doi = {10.1061/(ASCE)0733-9429(2008)134:7(1010)},
+URL = {https://ascelibrary.org/doi/abs/10.1061/\%28ASCE\%290733-9429\%282008\%29134\%3A7\%281010\%29},
+eprint = {https://ascelibrary.org/doi/pdf/10.1061/\%28ASCE\%290733-9429\%282008\%29134\%3A7\%281010\%29},
+abstract = { The ability to accurately simulate sediment transport processes in natural and engineered systems is crucial to both engineers and scientists. Many researchers have worked on the development of methods that yield reliable predictions of both sediment transport and morphological change with a minimum of computational burden, so that the long prototype time scales necessary to appropriately investigate these processes can be simulated within a reasonable amount of time. This includes the development of tools for approximating the complex behavior of the sediment concentration in the water column. In this technical note, the classic equilibrium sediment profile first introduced by Rouse is revisited. Following the development of the Rouse profile introduced by Einstein, a generalized nonequilibrium sediment concentration profile is generated. The principal assumption is that the convective term of the nonequilibrium vertical sediment flux can be approximated with the relationship that arises from purely convective transport. The method is compared to numerical solutions for depositional profiles, and appears to yield promising results. }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Turbulence %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@book{savant_turbulence,
+  author     =  {Savant, G.},
+  title          =  {Three-Dimensional shallow water adaptive hydraulics (AdH-SW3):Turbulence Closure},
+  publisher = {U.S. Army Corps of Engineers, CR-15-1},
+  year         = {2015}
+}
+
+@article{jones1972,
+title = "The prediction of laminarization with a two-equation model of turbulence",
+journal = "International Journal of Heat and Mass Transfer",
+volume = "15",
+number = "2",
+pages = "301 - 314",
+year = "1972",
+note = "",
+issn = "0017-9310",
+doi = "http://dx.doi.org/10.1016/0017-9310(72)90076-2",
+url = "http://www.sciencedirect.com/science/article/pii/0017931072900762",
+author = "W.P Jones and B.E Launder",
+}
+
+@book{munk1948,
+  title={Notes on a Theory of the Thermocline},
+  author={Munk, W. H.},
+  url={https://books.google.com/books?id=nq9-nQEACAAJ},
+  year={1948},
+  publisher={Sears Foundation for Marine Research}
+}
+
+@article {henderson1982,
+author = {Henderson-Sellers, B.},
+title = {A simple formula for vertical eddy diffusion coefficients under conditions of nonneutral stability},
+journal = {Journal of Geophysical Research: Oceans},
+volume = {87},
+number = {C8},
+issn = {2156-2202},
+url = {http://dx.doi.org/10.1029/JC087iC08p05860},
+doi = {10.1029/JC087iC08p05860},
+pages = {5860--5864},
+keywords = {Oceanography: Turbulence and diffusion},
+year = {1982},
+}
+
+@article{smagorinsky1963,
+author = { J.  Smagorinsky },
+title = {General Circulation Experiments with the Primitive Equations},
+journal = {Monthly Weather Review},
+volume = {91},
+number = {3},
+pages = {99-164},
+year = {1963},
+doi = {10.1175/1520-0493(1963)091<0099:GCEWTP>2.3.CO;2},
+
+URL = { 
+        http://dx.doi.org/10.1175/1520-0493(1963)091<0099:GCEWTP>2.3.CO;2
+    
+},
+eprint = { 
+        http://dx.doi.org/10.1175/1520-0493(1963)091<0099:GCEWTP>2.3.CO;2
+    
+}
+,
+    abstract = { Abstract An extended period numerical integration of a baroclinic primitive equation model has been made for the simulation and the study of the dynamics of the atmosphere's general circulation. The solution corresponding to external gravitational propagation is filtered by requiring the vertically integrated divergence to vanish identically. The vertical structure permits as dependent variables the horizontal wind at two internal levels and a single temperature, with the static stability entering as a parameter. The incoming radiation is a function of latitude only corresponding to the annual mean, and the outgoing radiation is taken to be a function of the local temperature. With the requirement for thermal equilibrium, the domain mean temperature is specified as a parameter. The role of condensation is taken into account only as it effectively reduces the static stability. All other external sources and sinks of heat are assumed to balance each other locally, and are thus omitted. The kinematics are that of a fluid on a sphere bounded by smooth zonal walls at the equator and at approximately 64° latitude. The dissipative sinks are provided by: (a) surface stresses proportional through a drag coefficient to the square of the surface wind which is suitably extrapolated from above, (b) internal convective stresses proportional to the vertical wind shear, and (c) lateral diffusion of momentum and heat through an exchange coefficient which depends on the local horizontal rate of strain—a horizontal length scale entering as the governing parameter. For a given specification of the parameters, an integration for 60 days has been made from initial conditions where random temperature disturbances have been superimposed on a zonally symmetric regime which is baroclinically unstable according to linear theory. This experiment not only displays the scale selective character of baroclinic instability, yielding zonal wave number 5 to 6, but also predicts an index or energy cycle. The period of this cycle is 11 to 12 days for the first 40 days of the experiment, then lengthening to 17 days while diminishing in amplitude during the latter part. The resulting mean zonal velocity profile is in good qualitative agreement with observation, but too intense, presumably because the effective static stability parameter is taken too large. Furthermore this profile is found to be no more than 5 percent super-geostrophic poleward of the angular momentum maximum and no more than 2 percent sub-geostrophic equatorward. The total zonal angular momentum remains constant to within 2 percent irrespective of the phase of the index cycle. This balance is controlled by the surface wind distribution which agrees quite well with observation. The poleward transport is mainly accomplished by the large-scale eddies, whereas the internal vertical flux is predominantly a transfer of the earth's angular momentum by the meridional circulation. The poleward heat transport is primarily accomplished by a Hadley circulation at low latitudes but by the large-scale horizontal eddies in mid-latitudes, where a Ferrel circulation tends to compensate through an equatorward flux. This compensation at mid-latitudes by an indirect meridional circulation is also quite evident, in the potential-kinetic energy transformations. Comparison of the momentum and heat transfer with observed data when available shows reasonably good quantitative agreement. The lateral transfer of momentum and heat by the non-linear diffusion, which parametrically is supposed to simulate the action of motions of sub-grid scale, accounts for a significant portion of the total eddy transfer. Although no direct comparison with the corresponding transfer in the real atmosphere is available, intuitively our small-scale diffusion appears to play too large a role. A diagnosis is made of the transformations among the baratropic and baroclinic parts of the kinetic energy as well as the zonal mean and zonal perturbation parts of the available potential and kinetic energy. This reveals the dominant paths that the energy passes through from source to ultimate sinks and the processes responsible for these transformations. It is found that the partitioning of dissipation by the energy components may differ considerably from estimates made from observation. }
+}
+
+@PROCEEDINGS{pritchard1960,
+  title = {The Movement and Mixing of Contaminants in Tidal Estuaries},
+  author = {Pritchard, D. W.},
+  organization = {Proceedings of the Fifth International Conference on Waste Disposal in the Marine Environment},
+  publisher = {University of California, Berkeley},
+  year = {1960}
+}
+
+@article {MellorYamada1982,
+author = {Mellor, George L. and Yamada, Tetsuji},
+title = {Development of a turbulence closure model for geophysical fluid problems},
+journal = {Reviews of Geophysics},
+volume = {20},
+number = {4},
+issn = {1944-9208},
+url = {http://dx.doi.org/10.1029/RG020i004p00851},
+doi = {10.1029/RG020i004p00851},
+pages = {851--875},
+keywords = {Boundary layer processes, Analytical modeling and laboratory experiments, 4268},
+year = {1982},
+}
+
+@article {Kent&Pritchard1957,
+author = {Kent, R.E. and Pritchard, D.W. },
+title = {A Test of Mixing Length Theories in a Coastal Plain Estuary},
+journal = {Journal of Marine Research},
+volume = {18},
+number = {1},
+pages = {62-72},
+year = {1957},
+}
+
+@article{French1983,
+author = {{French}, R.~R. and {McCutcheon}, S.~C.},
+title = "{Turbulent vertical momentum transfer in stratified environments}",
+journal = {NASA STI/Recon Technical Report N},
+keywords = {Momentum Transfer, Stratified Flow, Turbulent Flow, Boundary Layers, Coefficients, Computational Fluid Dynamics, Density Distribution, Error Analysis, Pollution Transport, Shear Stress, Water Pollution},
+year = 1983,
+month = mar,
+volume = 83,
+adsurl = {http://adsabs.harvard.edu/abs/1983STIN...8336432F},
+adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% AdH Friction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@article{adhWaterQuality,
+author = {Gaurav Savant  and R. C. Berger },
+title = {Adaptive Time Stepping\&\#x2013;Operator Splitting Strategy to Couple Implicit Numerical Hydrodynamic and Water Quality Codes},
+journal = {Journal of Environmental Engineering},
+volume = {138},
+number = {9},
+pages = {979-984},
+year = {2012},
+doi = {10.1061/(ASCE)EE.1943-7870.0000547},
+URL = {https://ascelibrary.org/doi/abs/10.1061/\%28ASCE\%29EE.1943-7870.0000547},
+eprint = {https://ascelibrary.org/doi/pdf/10.1061/\%28ASCE\%29EE.1943-7870.0000547},
+abstract = { Hydrodynamic and water quality codes have been frequently linked. These have typically been linked with both the hydrodynamic and water quality models using similar explicit time steps, but for long-term simulations implicit models are required. The water quality codes linked to these hydrodynamic codes are forced to perform their computations using the hydrodynamic time step even though utilizing the same might result in drifting of the water quality solution. This technical note presents the development and testing of an operator splitting–derived method for linking hydrodynamic and water quality codes with adaptive time stepping. The resulting method provides high-fidelity solutions that compare well with analytic solutions and lends itself for extension to various other transported quantities. }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% AdH Friction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@incollection{christensen1972,
+  author      = {Christensen, B.A.},
+  title       = {Incipient Motion on Cohesionless Channel Banks},
+  booktitle   = {Sedimentation Symposium to Honor Professor H. A. Einstein},
+  publisher   = {H. W. Shen Publisher},
+  address     = {Fort Collins, CO},
+  pages     = {1-22},
+  year        = 1972,
+  chapter     = 4,
+}
+
+@incollection{christensen1985,
+  author      = {Christensen, B.A.},
+  title       = { Open channel and sheet flow over flexible roughness},
+  editor      = {H.W. Shen},
+  booktitle   = {Proceedings of XXI IAHR Congress},
+  publisher   = {Miadna Pty, Ltd},
+  address     = {New South Wales, Australia},
+  year        = 1985,
+  pages    = {462-467},
+}
+
+@article{jacobs&Wang2003,
+author = {Jacobs, J.M. and Wang, M-H },
+title = {Atmospheric Momentum Roughness Applied to Stage-Discharge Relationships in Flood Plains},
+journal = {Journal of Hydrologic Engineering},
+volume = {8},
+number = {2},
+pages = {99-104},
+year = {2003},
+doi = {10.1061/(ASCE)1084-0699(2003)8:2(99)}
+}
+
+@article{walton1980,
+author = {Walton, R. and Christensen, B. A.},
+title = {Friction factors in storm surges over inland areas},
+journal = {Journal of Waterway, Port, Coastal, and Ocean Engineering},
+volume = {106},
+number = {2},
+pages = {261-271},
+year = {1980},
+doi = {10.1061/(ASCE)WW.1943-5460.0000382}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% StWave        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@techreport{stwaveManual,
+  author = {Massey, Chris and Anderson, Mary E. and Smith, Jane and Gomez, Julieta M. and Rusty, Jones},
+  title = {STWAVE : Steady-state spectral wave model user's manual for STWAVE, version 6.0},
+  institution = {Coastal and Hydraulics Laboratory (U.S.) - Engineer Research and Development Center (U.S.)},
+  volume = {11-1},
+  year = {2011},
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% AdH Applications %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% SW 2D -------------------------------------------------------------------------------------------------------
+@article{adhAppNola2012,
+author = {S. Keith Martin  and Gaurav Savant  and Darla C. McVan },
+title = {Two-Dimensional Numerical Model of the Gulf Intracoastal Waterway near New Orleans},
+journal = {Journal of Waterway, Port, Coastal, and Ocean Engineering},
+volume = {138},
+number = {3},
+pages = {236-245},
+year = {2012},
+doi = {10.1061/(ASCE)WW.1943-5460.0000119},
+URL = {https://ascelibrary.org/doi/abs/10.1061/\%28ASCE\%29WW.1943-5460.0000119},
+eprint = {https://ascelibrary.org/doi/pdf/10.1061/\%28ASCE\%29WW.1943-5460.0000119},
+abstract = { Two-dimensional tidal flows within the Lake Pontchartrain–Lake Borgne area (Louisiana) are simulated to assess the effects of the surge protection structure on the Gulf Intracoastal Waterway (GIWW) on navigation conditions. The region of interest is modeled with a shallow-water, depth-averaged, finite-element model. The water levels and discharge are analyzed at a location in the GIWW to ascertain model behavior. It is shown that the presence of the structure produces infrequent increases in velocities in the GIWW, which can be mitigated by a proposed structure near Lake Pontchartrain. }
+}
+
+@article{adhAppPakistan2010,
+author = {Jennifer N. Tate  and Gaurav Savant  and Darla C. McVan },
+title = {Rapid Response Numerical Modeling of the 2010 Pakistan Flooding},
+journal = {Leadership and Management in Engineering},
+volume = {12},
+number = {4},
+pages = {315-323},
+year = {2012},
+doi = {10.1061/(ASCE)LM.1943-5630.0000197},
+URL = {https://ascelibrary.org/doi/abs/10.1061/\%28ASCE\%29LM.1943-5630.0000197},
+eprint = {https://ascelibrary.org/doi/pdf/10.1061/\%28ASCE\%29LM.1943-5630.0000197},
+abstract = { Late summer 2010 saw record flooding of the Indus River in Pakistan. In response to requests by the U.S. Army, the writers provided flood extents to aid humanitarian assistance in the affected areas. Numerical modeling provided the best way to compute the flooding in this situation, but with limited bathymetric, topographic, and inflow information, assumptions had to be made; timelines were of significantly higher importance than complete accuracy. The writers developed an adaptive hydraulics (AdH) model of the Indus River from Sukkur to the Arabian Sea covering approximately 180,000 km2 of Pakistan. Based on aerial images taken during the flood, the writers later compared the model results to the flood extents to determine the level of accuracy of the model. The AdH model results approximately reproduced the area of flooding for initial emergency operations, even with little knowledge of the area and the inflow conditions. The results of this exercise show that rapid modeling of large-scale flooding is possible in emergency situations. This paper describes lessons learned and provides recommendations for similar future efforts. }
+}
+
+@article{adhAppHorizon,
+author = {Danchuk, Samantha and Willson, Clinton},
+year = {2009},
+month = {07},
+pages = {331-40},
+title = {Effects of shoreline sensitivity on oil spill trajectory modeling of the Lower Mississippi River},
+volume = {17},
+journal = {Environmental science and pollution research international}
+}
+
+@PROCEEDINGS{adhAppStructures,
+author = {Stockstill, Richard and Berger, R.C. and Hite, J.E.},
+year = {2005},
+month = {01},
+pages = {31-36},
+title = {Application of computational hydraulics for the evaluation of navigation structures[J]},
+volume = {119},
+booktitle = {Bulletin-International Navigation Association}
+}
+
+% Sediment
+@PROCEEDINGS{adhAppSediment2011,
+author = {Karadogan, Erol and Willson, Clinton},
+year = {2011},
+month = {04},
+pages = {2226-2238},
+title = {SEDIMENT TRANSPORT MODELING IN THE LOWER MISSISSIPPI RIVER DELTA},
+isbn = {978-981-4355-52-0}
+}
+

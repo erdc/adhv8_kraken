@@ -1,0 +1,51 @@
+# Explicit is better than implicit. Be explicit in mentioning files/filetypes.
+
+# Ignore build files
+build/CMakeCache.txt
+build/CTestCustom.cmake
+build/Makefile
+build/cmake_install.cmake
+
+# Ignore build folders
+build/CMakeFiles/
+build/STAND_ALONE_UTILITIES/
+build/bin/
+build/columns/
+build/debug/
+build/elem/
+build/fe/
+build/friction/
+build/grid/
+build/initio/
+build/lib/
+build/main/
+build/messg/
+build/meteor/
+build/node/
+build/solver/
+build/structs/
+build/tools/
+build/turbulence/
+build/comm/
+build/mesh/
+
+#Folder for storing externally compiled, linked libraries such as UMFPACK.
+src/lib/
+
+# Things to skip
+*.o
+*.swp # VIM swap files
+.DS_Store
+
+# Particle tracking build & testing/verification files
+# Note: The double asterisk (**) ensures that the file types are recursively ignored in every subdirectory of src/pt/test/verification/.
+src/pt/build/*
+src/pt/test/verification/**/*.bin
+src/pt/test/verification/**/*.csv
+src/pt/test/verification/**/*.h5
+src/pt/test/verification/**/*.h5_back
+src/pt/test/verification/**/*.xmf
+src/pt/test/verification/**/*.xmf_back
+
+src/NEW_ADH/doxygen/latex
+src/NEW_ADH/doxygen/html

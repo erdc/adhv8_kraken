@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <umfpack.h>
 
 #ifdef _MPI
 #include <mpi.h>

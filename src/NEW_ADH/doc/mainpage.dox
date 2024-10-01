@@ -1,0 +1,77 @@
+/*! \mainpage Adaptive Hydraulics Kraken
+ *
+ * \section intro_sec Introduction
+ *
+ * Adaptive Hydraulics (AdH) Kraken is the next generation of AdH that has emphasis on performant multiphysics modeling for coastal modeling. AdH Kraken can be thought of as an FE engine with specific support for solving and coupling the following sets of equations:
+    1. Shallow Water Equations (2D or 3D)
+    2. Diffusive Wave Equation (2D)
+    3. Transport Equation including Sediment Transport (2D or 3D)
+    4. Richards Equation (3D)
+ 
+ AdH Kraken allows the construction of mixed dimensional unstructured meshes (3D-2D-1D) with support for tetrahedral and triangular prism elements in 3D, and triangle or quadrilateral elements in 2D. The underlying finite element solver utilizes P1 Lagrange basis functions and SUPG-based stabilization when necessary. The time step method is fully implicit using an adaptive BDF2 finite-difference scheme. The nonlinear solver utilizes a quasi-Newton method, replacing the exact Jacobian calculation with a central finite difference approximation. The framework for the coupling is set up in the following way. A single simulation in Kraken is comprised of a single object called a design model which is defined on a single unstructured mesh (potentially mixed dimensional). The design model maybe comprised of 1 or more objects called super models. A super model is no more than a set of monolithically coupled models (defined through physics materials) that leads to a single linear system of equations as the super model marches through its nonlinear iterations. If multiple super models are defined, then these are coupled via time lagging (maybe more sophisticated methods such as Strang splitting in the future). 
+ *
+ * \section install_sec Installation
+ *
+ * \subsection step1 Step 1: Opening the box
+ *
+ * \section features Key Features
+    1. For 1 simulation, reads in a single mesh that can be unstructured and mixed dimensional
+    2. Different sets of physics can change elementwise based on material definitions
+        - We restrict physics material definitons so that for a given supermodel, the solution variables for two physics materials must be a subsets of eachother (no disjoint subsets)
+        - We restrict physics material defintiions so that every element on the grid must have a physics assigned to it within a given supermodel
+        - we expect that # physics materials << # of elements on the grid
+        -Every supermodel must have physics defined on the entrire mesh
+    3. Other model based parameters (i.e. friction) will be allowed to be defined via another material definition as in previous versions of AdH OR nodal
+    4. 
+
+
+ \section worksummary Work Summary
+
+Completed:
+    1. mesh file enabling arbitrarily mixed dimensional unstructured grids (1D-2D-3D)
+    2. mesh i/o and i/o support for vectors,scalars read/write to single file in parallel (hdf5+xmf)
+    3. FE assembly algorithm utilizing physics material overlays
+    4. Linear algebra backend now uses a single data structure (split csr format) that doesn't require
+    copy/pasting of data for EITHER PETSc OR UMFPACK/BICGSTAB solver
+    5. Degree of freedom mapping for new physics overlays
+
+
+Task List:
+    1. Multiple Material Overlays (NEW FEATURE) --- MARK/COREY
+    2. Merge all branches** ---- COREY/MARK
+    3. Auto physics change (NEW FEATURE)** ---- MARK (WORK IN PROGRESS)
+    4. Generalized Coupling Framework (NEW FEATURE)** ---- MARK/COREY
+    (WORK IN PROGRESS)
+    5. Flux-coupling (NEW FEATURE)** - maybe just for overlay coupling now ---- COREY
+    6. How to create/import complex multi-physics geometry setups (SMS??)
+    ---- GAURAV/MARK/COREY
+    7. Extrusion for GW too (not just SW3D) (NEW FEATURE) ---- ANYONE
+    8. Re-frame sediment transport as just another model ----
+    GARY/MARK/COREY -- Happens during merge to Master
+    9. Get rid of weird numeric card tokens - just do string comparisons
+    --- MARK
+    10. Normalized residuals --- MARK 
+    11. Add heat transport (NEW FEATURE) --- MARK/COREY
+    12. Test other elements - quads/etc (NEW FEATURE) ---- MARK/COREY
+    13. Scotch Domain Decomp  --- PET 
+    14. Get rid of packing/unpacking --- PET/COREY/MARK
+    15. Inclusion of DG engine from Younghun
+    16. Multiple design models (models on different grids maybe with shared interfaces) coupled through CSTORM, PRECICE
+
+** time-consuming
+
+
+Would be nice:
+    - General operator splitting framework (Strang Splitting, for example)
+    ---- MARK/COREY
+    - Add a surface wind-wave model** ---- MARK
+
+
+
+Notes:
+- 
+
+
+
+
+ */

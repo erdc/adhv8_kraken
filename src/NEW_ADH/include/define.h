@@ -321,7 +321,8 @@ typedef enum
 #define DPT 10
 #define SS  11
 #define SAT 12
-#define K   13
+//Mark Causes issues with petsc? changing from K to K1
+#define K1   13
 #define KR  14
 #define POR 15
 #define TOR 16
@@ -622,3 +623,7 @@ typedef enum
 #define SCALAR_DATA 0
 #define VECTOR2D_DATA 1
 #define VECTOR3D_DATA 2
+
+//Mark adding max Nodal NVAR allowed, used to create sparsity
+#define MAX_NVAR 10
+#define MAX_NNODE 6

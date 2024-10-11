@@ -17,7 +17,7 @@ static int DEBUG = OFF;
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-void smat_trn_alloc_init(SMAT_SMAT_TRN **mat_trn) {
+void smat_trn_alloc_init(SMAT_TRN **mat_trn) {
     
     (*mat_trn) = (SMAT_TRN *) tl_alloc(sizeof(SMAT_TRN), 1);
     SMAT_TRN *mat = *mat_trn; // alias

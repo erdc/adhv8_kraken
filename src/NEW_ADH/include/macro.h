@@ -841,9 +841,11 @@
 
 #define IS_ABOUT(a,b,c) (a<(1.+c/100.)*b && a>(1.-c/100.)*b ? 1 : 0)
 
-#define MIN(a,b) (a < b ? a : b)
-
-#define MAX(a,b) (a > b ? a : b)
+//#define MIN(a,b) (a < b ? a : b)
+ #define MAX(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
 
 #define IS_OVER_UPPER_BOUND(a,b) (a >= b ? 1 : 0)
 

@@ -36,20 +36,20 @@ void smat_sw_alloc_init(SMAT_SW **mat_sw) {
     mat->turbulence_model_xy = UNSET_INT;
     mat->turbulence_model_z = UNSET_INT;
     mat->coriolis = 0.0;
-    bed_disp_flag = 0;
-    vor_flag = 0;
-    eev_coef = 0;
-    d_flag = 0;
-    wind_flag = 0;
-    smag_coeff = 0.0;
-    supression_func = UNSET_INT;
-    wall_func = UNSET_INT;
-    min_tke = 0.0;
-    min_tds = 0.0;
-    len_max = 0.0;
-    hyd_conductivity = 0.0;
-    psi = 0.0;
-    rooting_depth = 0.0;
+    int bed_disp_flag = 0;
+    int vor_flag = 0;
+    int eev_coef = 0;
+    int d_flag = 0;
+    int wind_flag = 0;
+    double smag_coeff = 0.0;
+    int supression_func = UNSET_INT;
+    int wall_func = UNSET_INT;
+    double min_tke = 0.0;
+    double min_tds = 0.0;
+    double len_max = 0.0;
+    double hyd_conductivity = 0.0;
+    double psi = 0.0;
+    double rooting_depth = 0.0;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

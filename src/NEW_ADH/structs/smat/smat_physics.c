@@ -1,13 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <assert.h>
-#include "smat_physics.h"
-#include "debug.h"
-#include "header_tl_alloc.h"
-#include "define.h"
-#include "tokens.h"
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#include <stdbool.h>
+//#include <assert.h>
+//#include "smat_physics.h"
+//#include "debug.h"
+//#include "header_tl_alloc.h"
+//#include "define.h"
+//#include "tokens.h"
+//#include "sgrid.h"
+
+#include "adh.h"
 
 static int DEBUG = OFF;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -128,6 +131,8 @@ void smat_physics_allocate_read(SMAT_PHYSICS **mat, SGRID *grid) {
         return;
     }
     
+    //Mark, weird build error
+
     // read through the element list first for counting materials
     nmat = 0;
     while ((read = getline(&line, &len, fp)) != -1) {
@@ -314,7 +319,6 @@ void smat_physics_allocate_read(SMAT_PHYSICS **mat, SGRID *grid) {
         }
     }
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 
 }
 

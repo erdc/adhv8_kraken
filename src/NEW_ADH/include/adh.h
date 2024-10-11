@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <stdbool.h>
+//Mark added
 #include <umfpack.h>
 
 #ifdef _MPI
@@ -22,7 +23,9 @@
 #include "macro.h"
 
 #ifdef _PETSC
-#include <petscksp.h>
+//Mark changed
+#include <petsc.h>
+//#include <petscksp.h>
 //#include <petscts.h>
 #endif
 
@@ -49,15 +52,32 @@
 #include "sstr_value.h"
 #include "sgrid.h"
 #include "sarray.h"
+
+//Mark adding
+#include "tokens.h"
+#include "smat_grid.h"
+#include "smat_sw.h"
+#include "smat_gw.h"
+#include "smat_transport.h"
+#include "smat_physics.h"
+#include "dofmaps.h"
+#include "testla.h"
+
+//
 #include "sio.h"
 #include "sseries.h"
 #include "smodel_super.h"
 #include "smodel_design.h"
 
+//Mark added
+#include "la.h"
+#include "testla.h"
+
 // FOLDERS
 #include "tools.h"
 #include "fnctn_xdmf.h"
 #include "fr_defs.h"
+
 
 
 //#endif

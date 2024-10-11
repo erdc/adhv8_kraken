@@ -18,6 +18,8 @@ typedef struct {
     bool GW_FLOW;   // 9
     bool *TRANSPORT; // ntrans
     
+    //convenitent to have total nvar to solve
+    int nvar;
 //    bool VORTICITY;
 //    bool SEDIMENT;
 //    bool SEDLIB;

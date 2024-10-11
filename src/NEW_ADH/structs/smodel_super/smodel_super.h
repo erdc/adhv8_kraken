@@ -25,30 +25,62 @@ typedef struct {
 
 
     //FE_MATRIX *matrix;  // stores matrix
+//#ifdef _PETSC
+//        Mat         A;
+//        Mat         P;                      // Preallocator matrix for A
+//        int         PREALLOC_FLAG;          // Determines whether or not we preallocate space for the matrix
+//        int         Istart;                 // Start of PETSc matrix rows on pe
+//        int         Iend;                   // End of PETSc matrix rows on pe
+//        const int   *ownership_range;       // Gives the range of rows owned by each pe
+//        Vec         residual;
+//        Vec         sol;
+//        KSP         ksp;
+//        int         *bc_mask;
+//        int         old_bc_mask_size;
+//        double      *scale_vect; // Can I remove this too? - SAM
+//        // TODO: Remove two members below - SAM
+//        double *diagonal;
+//#else
+//        int    *bc_mask;
+//        double *residual;
+//        double *sol;
+//        double *scale_vect;
+//        double *diagonal;
+//        //SPARSE_VECT *matrix;
+//#endif
+
+    //Mark making changes, the structures should all be the same now
 #ifdef _PETSC
-        Mat         A;
-        Mat         P;                      // Preallocator matrix for A
-        int         PREALLOC_FLAG;          // Determines whether or not we preallocate space for the matrix
-        int         Istart;                 // Start of PETSc matrix rows on pe
-        int         Iend;                   // End of PETSc matrix rows on pe
-        const int   *ownership_range;       // Gives the range of rows owned by each pe
-        Vec         residual;
-        Vec         sol;
-        KSP         ksp;
-        int         *bc_mask;
-        int         old_bc_mask_size;
-        double      *scale_vect; // Can I remove this too? - SAM
-        // TODO: Remove two members below - SAM
-        double *diagonal;
-        SPARSE_VECT *matrix;
-#else
-        int    *bc_mask;
-        double *residual;
-        double *sol;
-        double *scale_vect;
-        double *diagonal;
-        //SPARSE_VECT *matrix;
+    Mat A;
+    KSP ksp;
+    Vec B; //Petsc residual
+    Vec X; //Persc solution
 #endif
+    //Split CSR format
+    //diagonal is locally owned dofs to process
+    int *indptr_diag; //pointers to number of nnz each row
+    int *cols_diag; //column addresses of all nonzero entries (local to process)
+    double *vals_diag; //actual matrix values
+
+    //this actually will be empty if serial run
+    int *indptr_off_diag; //pointers to number of nnz each row
+    int *cols_off_diag; //column addresses of all nonzero entries (global)
+    double *vals_off_diag; //actual matrix values
+
+    //vectors
+    double *residual;
+    double *sol;
+    double *scale_vect;
+
+
+
+    //things that are important to transforming local to global
+    int *ghosts;
+    int nghost;
+    int local_size;
+    int size_with_ghosts;
+    int local_range[2];
+    int local_range_old[2];
 
 
     int *physics_mat_code; // an code for each physics material that
@@ -64,6 +96,10 @@ typedef struct {
     int meshcode; //need a way if supermodel is defined on entire mesh (0), surface(1), or floor(2)
 
 
+    //Mark, this is gonna change? need to discuss
+    //SMAT_PHYSICS *elem1d_physics_mat;
+    //SMAT_PHYSICS *elem2d_physics_mat;
+    //SMAT_PHYSICS *elem3d_physics_mat;
 
     int *nSubMods1d;                // [nelems1d] the total number of physics modules on each 1D element
     int *nSubMods2d;                // [nelems2d] the total number of physics modules on each 2D element
@@ -72,9 +108,13 @@ typedef struct {
     SELEM_PHYSICS **elem2d_physics;  // [nelems2d][nsubmods_2d] the fe routines for each type of physics on each 2D element
     SELEM_PHYSICS **elem3d_physics;  // [nelems3d][nsubmods_3d] the fe routines for each type of physics on each 3D element
 
-    
+    //Mark added local to process, this should be same as local_range[1]-local_range[0]
+    int my_ndofs;
+    int my_ndofs_old;
     int ndofs; // local number of degrees of freedom
-    int dofs_old; //local numer of solution variables the processor is in charge of
+    int ndofs_old; //local numer of solution variables the processor is in charge of
+    int macro_ndofs;
+    int macro_ndofs_old;
 
     int **elem_nvars;
     int ***elem_vars;

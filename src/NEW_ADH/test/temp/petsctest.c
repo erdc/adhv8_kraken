@@ -1,48 +1,24 @@
-/* This is a biconjugate gradient squared stabilized matrix solver. 
- It is a Krylov-based iterative method used to solve nonsymmetric
- linear systems.  
- 
- Ref:  H. A. vanderVorst, "Bi-CGStab:  A fast and smoothly converging 
- variant to Bi-CG for the solution of nonsymmetric systems",
- SIAM J. Sci. Statist. Comput., 13 (1992), pp. 631-644.
- 
- or       C. T. Kelley, "Iterative Methods for Linear and Nonlinear
- Equations", SIAM, Philadelphia, PA, 1995.
- 
- In general, the Bi-CGStab solver constructs bases for the Krylov 
- subspaces (A,b) and (A^T,c), where b is the right-hand-side vector
- and c is usually chosen so that c=b.  The method may break down, 
- although this does not seem to happen often in practice.
- 
- Return: Linear Solver Failure?
- NO or YES
- */
+#include <petsc.h>
 
-//#include <mpi.h>
-//#include <stdio.h>
-//#include <math.h>
-//#include <stdbool.h>
-//#include <umfpack.h>
-#include "adh.h"
-#define SOLV_TOL 1e-5
-#define MAX_NODAL_DOF 4
-
-
-
-
-int inhouse_test(int argc, char **argv) {
-
-  int status;
+int main(int argc, char **argv) {
+  PetscMPIInt    rank;
+  PetscInt       i;
+  int k;
+  int ierr;
   int nghost = 0;
   int m=0;
   int n=0;
-  int nnode=0;
   int nnz_diag=0;
   int nnz_off_diag=0;
-  int rank;
-  int npe;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &npe);
+  int M,N;
+  PetscReal      localval, globalsum;
+  Mat A;
+  Vec b,x;
+  KSP       ksp;
+
+  PetscCall(PetscInitialize(&argc,&argv,NULL,
+      "Compute e in parallel with PETSc.\n\n"));
+  PetscCall(MPI_Comm_rank(PETSC_COMM_WORLD,&rank));
 
 
   //  Memory allocates dynamically using malloc() 
@@ -56,21 +32,18 @@ int inhouse_test(int argc, char **argv) {
     nnz_diag = 6;
     nnz_off_diag = 6;
     nghost = 4;
-    nnode = 1;
   }else if(rank==1){
     m = 3;
     n = 3;
     nnz_diag = 9;
     nnz_off_diag = 4;
     nghost = 4;
-    nnode = 2;
   }else if(rank == 2){
     m = 2;
     n = 2;
     nnz_diag = 2;
     nnz_off_diag = 8;
     nghost = 6;
-    nnode = 1;
   }
   //allocate arrays
   int indptr_diag[m+1];
@@ -82,8 +55,7 @@ int inhouse_test(int argc, char **argv) {
   int ghosts[nghost];
   double sol[n+nghost];
   double resid[n+nghost];
-  double scale_vect[n+nghost];
-  int ndof_node[nnode];
+  //set values
   //set values
   if(rank==0){
     indptr_diag[0] = 0; indptr_diag[1] =2; indptr_diag[2] = 4; indptr_diag[3] = 6;
@@ -104,11 +76,7 @@ int inhouse_test(int argc, char **argv) {
     //set initial guess
     sol[0] = 0; sol[1] = 0; sol[2] = 0; sol[3] = 0; sol[4] = 0;
     sol[5] = 0; sol[6] = 0;
-    //scale vector
-    scale_vect[0] = 0; scale_vect[1] = 0; scale_vect[2] = 0; scale_vect[3] = 0; scale_vect[4] = 0;
-    scale_vect[5] = 0; scale_vect[6] = 0;
-    //for block size on preconditioner
-    ndof_node[0] = 3;
+
   }else if (rank==1){
     indptr_diag[0] = 0; indptr_diag[1] = 3; indptr_diag[2] = 6; indptr_diag[3] = 9;
     cols_diag[0] = 0; cols_diag[1] = 1; cols_diag[2] =2; cols_diag[3] =0;
@@ -128,10 +96,6 @@ int inhouse_test(int argc, char **argv) {
     //set initial guess
     sol[0] = 0; sol[1] = 0; sol[2] = 0; sol[3] = 0; sol[4] = 0;
     sol[5] = 0; sol[6] = 0;
-    //scale vector
-    scale_vect[0] = 0; scale_vect[1] = 0; scale_vect[2] = 0; scale_vect[3] = 0; scale_vect[4] = 0;
-    scale_vect[5] = 0; scale_vect[6] = 0;
-    ndof_node[0] = 1; ndof_node[1] = 2;
   }else if (rank==2){
     indptr_diag[0] = 0; indptr_diag[1] = 1; indptr_diag[2] = 2;
     cols_diag[0] = 0; cols_diag[1] =1;
@@ -150,17 +114,12 @@ int inhouse_test(int argc, char **argv) {
     //set initial guess
     sol[0] = 0; sol[1] = 0; sol[2] = 0; sol[3] = 0; sol[4] = 0;
     sol[5] = 0; sol[6] = 0; sol[7] = 0;
-    //scale vector
-    scale_vect[0] = 0; scale_vect[1] = 0; scale_vect[2] = 0; scale_vect[3] = 0; scale_vect[4] = 0;
-    scale_vect[5] = 0; scale_vect[6] = 0; scale_vect[7] = 0;
-    ndof_node[0] = 2;
+
   }
 
-  //update residual
-  comm_update_double(resid,m,3,rank);
   //Global sizes
-  //M = 8;
-  //N = 8;
+  M = 8;
+  N = 8;
 
   //create this array directly with split arrays
   /*
@@ -176,43 +135,51 @@ int inhouse_test(int argc, char **argv) {
            30  0  0  | 31 32 33  |  0 34
 
   */
-  
-//  for(k=0;k<nnz_off_diag;k++){
-//    printf("Rank %d, unscaled vals_off_diag[%d] = %f\n",rank,k,vals_off_diag[k]);
-//  }
+  //ierr = MatCreateAIJ(PETSC_COMM_WORLD, m, n, M, N, d_nz, NULL, o_nz, NULL, &(A));
 
-  //now create routine that does the preconcitioning and then solve
-  //scales matrix, rhs(residual), solution, and sets scale_vec
-  scale_linear_system(indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
-     vals_off_diag, resid, sol, scale_vect, m, n+nghost,rank, ghosts, nghost);
+  //try setting directly with split arrays
+  ierr = MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, m, n, M, N, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag, &(A));
 
-  //factor the matrix preconditioner
-  status = prep_umfpack(indptr_diag,cols_diag,vals_diag, sol, resid, m);
-  //and factors with umfpack
-  //for(k=0;k<nnz_diag;k++){
-  //  printf("Rank %d, vals_diag[%d] = %f\n",rank,k,vals_diag[k]);
+  //and then print out array on each process
+  ierr = MatView(A, PETSC_VIEWER_STDOUT_WORLD);
+
+  //edit values and see what happens. Appears to work just fine
+  //vals_diag[0]=999;
+  //ierr = MatView(A, PETSC_VIEWER_STDOUT_WORLD);
+
+  //lets see how a solve will work. and need to figure out ghost vals n stuff
+  //VecCreate(PETSC_COMM_WORLD,&x);
+  ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, n, N, nghost, ghosts, resid, &(b));
+
+  ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, n, N, nghost, ghosts, sol, &(x));
+
+  ierr = VecView(b, PETSC_VIEWER_STDOUT_WORLD);
+
+  //verify same thing works for vectors, it appears to do just that
+  //resid[1] = 5;
+  //ierr = VecView(b, PETSC_VIEWER_STDOUT_WORLD);
+
+
+  //create solver and solve Ax=b
+  ierr = KSPCreate(PETSC_COMM_WORLD, &ksp);
+  ierr = KSPSetOperators(ksp,A,A);
+  ierr = KSPSetUp(ksp);
+  ierr = KSPSolve(ksp,b,x);
+  //scatter forward appears to update array as we need
+  VecGhostUpdateBegin(x,INSERT_VALUES,SCATTER_FORWARD);
+  VecGhostUpdateEnd(x,INSERT_VALUES,SCATTER_FORWARD);
+  //view local solution
+  ierr = VecView(x, PETSC_VIEWER_STDOUT_WORLD);
+
+  //also look at ghosts, looks like it works
+  //for (k=0;k<n+nghost;k++){
+  //  printf("rank %d sol [%d] = %f\n",rank,k,sol[k]);
   //}
 
-  //for(k=0;k<nnz_off_diag;k++){
-  //  printf("Rank %d, vals_off_diag[%d] = %f\n",rank,k,vals_off_diag[k]);
-  //}
+  // sum the contributions over all processes
+  //PetscCall(MPI_Allreduce(&localval,&globalsum,1,MPIU_REAL,MPIU_SUM,
+  //    PETSC_COMM_WORLD));
 
-  //actually solve matrix
-  status = solve_linear_sys_bcgstab(sol, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
-     vals_off_diag, resid, scale_vect, m, n+nghost,rank, ghosts, nghost);
-
-  //print scale vec to see
-  //for(k=0;k<m+nghost;k++){
-  //  printf("Rank %d, scale_vec[%d] = %f\n",rank,k,scale_vect[k]);
-  //}
-  ////print out scaled matrix to see what happened
-  //for(k=0;k<nnz_diag;k++){
-  //  printf("Rank %d, scaled nnz_diag[%d] = %f\n",rank,k,vals_diag[k]);
-  //}
-
-
-  return 0;
+  PetscCall(PetscFinalize());
+  return ierr;
 }
-
-
-

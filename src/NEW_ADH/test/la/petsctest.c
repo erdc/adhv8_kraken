@@ -1,6 +1,6 @@
-#include <petsc.h>
+#include "adh.h"
 
-int main(int argc, char **argv) {
+int petsc_test(int argc, char **argv) {
   PetscMPIInt    rank;
   PetscInt       i;
   int k;
@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
   double sol[n+nghost];
   double resid[n+nghost];
   //set values
+    //set values
   if(rank==0){
     indptr_diag[0] = 0; indptr_diag[1] =2; indptr_diag[2] = 4; indptr_diag[3] = 6;
     cols_diag[0] = 0; cols_diag[1] = 1; cols_diag[2] = 1; cols_diag[3] = 2;
@@ -70,7 +71,7 @@ int main(int argc, char **argv) {
     //for now have them ordred, but need to try out of order too
     ghosts[0] = 3; ghosts[1] = 4; ghosts[2] = 6; ghosts[3] = 7;
     //set rhs which is resid
-    resid[0] = 1; resid[1] = 1; resid[2] = 1; resid[3] = 1; resid[4] = 1;
+    resid[0] = 1; resid[1] = 1.5; resid[2] = .1; resid[3] = 1; resid[4] = 1;
     resid[5] = 1; resid[6] = 1;
     //set initial guess
     sol[0] = 0; sol[1] = 0; sol[2] = 0; sol[3] = 0; sol[4] = 0;
@@ -89,7 +90,7 @@ int main(int argc, char **argv) {
     vals_off_diag[0] = 13; vals_off_diag[1] = 14;
     vals_off_diag[2] = 18; vals_off_diag[3] = 24;
     ghosts[0] = 0; ghosts[1] = 1; ghosts[2] = 2; ghosts[3] = 6;
-    resid[0] = 1; resid[1] = 1; resid[2] = 1; resid[3] = 1; resid[4] = 1;
+    resid[0] = 0.5; resid[1] = 0.2; resid[2] = 3.0; resid[3] = 1; resid[4] = 1;
     resid[5] = 1; resid[6] = 1;
     //set initial guess
     sol[0] = 0; sol[1] = 0; sol[2] = 0; sol[3] = 0; sol[4] = 0;
@@ -107,7 +108,7 @@ int main(int argc, char **argv) {
     vals_off_diag[6] = 32; vals_off_diag[7] =33;
     ghosts[0] = 0; ghosts[1] = 1; ghosts[2] = 2; ghosts[3] = 3;
     ghosts[4] = 4; ghosts[5] = 5;
-    resid[0] = 1; resid[1] = 1; resid[2] = 1; resid[3] = 1; resid[4] = 1;
+    resid[0] = 1.5; resid[1] = 10; resid[2] = 1; resid[3] = 1; resid[4] = 1;
     resid[5] = 1; resid[6] = 1; resid[7] = 1;
     //set initial guess
     sol[0] = 0; sol[1] = 0; sol[2] = 0; sol[3] = 0; sol[4] = 0;

@@ -1,30 +1,4 @@
 #include "adh.h" 
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
- *  \brief     This function initalizes a SuperModel Newton Jacobian matrix
- *  \author    Count Corey J. Trahan
- *  \author    Mark Loveland
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct
- * \note
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void fe_allocate_initialize_linear_system(SMODEL_SUPER *sm) {
-
-    if (sm->ndofs > sm->ndofs_old){    
-        allocate_adh_system(sm);
-#ifdef _PETSC
-        allocate_petsc_objects(sm);
-#endif
-            }
-}
-
-
-
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -40,57 +14,7 @@ void fe_allocate_initialize_linear_system(SMODEL_SUPER *sm) {
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
- void allocate_adh_system(SMODEL_SUPER *sm){   
-    // For now, we pre-allocate assuming that all nodes have the max number of equations attached.
-    // This is not optimal, although the AdH storage is dumped to CCS and all extra zeros are removed before actually solving.
-    // ndofs = nnodes * max_nsys (over-allocated for mixed dof systems)
-    sm->residual = (double *) tl_realloc(sizeof(double), sm->ndofs, sm->ndofs_old, sm->residual);
-    sm->sol =      (double *) tl_realloc(sizeof(double), sm->ndofs, sm->ndofs_old, sm->sol);
-    sarray_init_dbl(sm->residual, sm->ndofs);
-    sarray_init_dbl(sm->sol, sm->ndofs);
-    
-    // proprietary AdH matrix allocation
-    // standard CSR format
-    // indptr points to where column indeces for each row starts (length of nrows+1)
-    // indices array of integers that contains column position of each nonzero
-    // vals array of doubles containing matrix entries (same length as indices)
-    
-    //call routine to determine nnz? and where should we determine cols?
-    //should we also keep nnz_row array for petsc? maybe not necessary
-
-    //where does local_range get determined?
-    //we now number of rows is sum(my_nnode*nodal_nvars)
-    sm->diag_indptr= (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->diag_indptr);
-    //if we split we have two structures
-    sm->off_diag_indptr = (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->off_diag_indptr);
-    
-    //find nnz and store in indices
-    //this does a single CSR format
-    //create_sparsity_CSR(sm, grid);
-    //this does a split CSR format, plan on doing this
-    create_sparsity_split_CSR(sm, grid);
-    //do we want to stor nnz? it is stored in sm->indptr[nrows]
-    //do we want to store local_size = local_range[1]-local_range[0]
-    sarray_init_dbl(sm->diag_vals, sm->diag_nnz);
-    sarray_init_dbl(sm->off_diag_vals, sm->off_diag_nnz);
-}
-
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
- *  \brief     This function initalizes a SuperModel Newton Jacobian matrix for suitesparse
- *  \author    Count Corey J. Trahan
- *  \author    Mark Loveland
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct
- * \note
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void create_sparsity_split_CSR(sm, grid){
+void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     //
     // We know that each row contains at least one non-zero entry, and the number of rows is known upfront. 
     // Thus, (i,j)-pairs can be represented as a vector of vectors
@@ -102,19 +26,19 @@ void create_sparsity_split_CSR(sm, grid){
     int nCon2d = 7*3*MAX_NVAR;
     int nCon3d = 16*4*MAX_NVAR;
 
-    int nrows = sm->local_range[1]-sm->local_range[0]
+    int nrows = sm->local_range[1]-sm->local_range[0];
 
     // preallocate upfront with these dimensions. work out syntax later
     //my best idea for now, maybe way to avoid these but cant think of another way for now
 
     //temporarily stores column positions of diagonal and off diagonal blocks
     //diagonal blocks are local column numbers, off-diagonal are global
-    int temp_cols_diag[nrows,nCon3d];
-    int temp_cols_off_diag[nrows,nCon3d];
+    int temp_cols_diag[nrows][nCon3d];
+    int temp_cols_off_diag[nrows][nCon3d];
     int nnz_rows_diag[nrows];
     int nnz_rows_off_diag[nrows];
-    sarray_init_dbl(nnz_rows_diag, nrows);
-    sarray_init_dbl(nnz_rows_off_diag, nrows);
+    sarray_init_int(nnz_rows_diag, nrows);
+    sarray_init_int(nnz_rows_off_diag, nrows);
 
     //loop through all nelem3d to mark sparsity
     int row;
@@ -123,12 +47,17 @@ void create_sparsity_split_CSR(sm, grid){
     int nnodes;
     int nvars_elem;
     int ndofs_ele;
+    int j, matid;
+
+    //comment out for now until frontend is fixed
+    /*
 
     //loop thorugh each element and find sparsity
-    for (j=0;j<grid->nelem3d;j++){
+    for (j=0;j<grid->nelems3d;j++){
         nnodes = grid->elem3d[j].nnodes;
-        //maybe this just comes from mat instead
-        nvars_elem = sm->elem3d_nvars[j];
+        //This comes from physics mat?
+        matid = grid->elem3d[j].mat;
+        nvars_elem = sm->elem3d_physics[matid].ndof;
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -166,9 +95,9 @@ void create_sparsity_split_CSR(sm, grid){
     }
 
     //do 2d elements and then 1d
-    for (j=0;j<grid->nelem2d;j++){
+    for (j=0;j<grid->nelems2d;j++){
         nnodes = grid->elem2d[j].nnodes;
-        //maybe this just comes from mat instead
+        //This comes from physics mat
         nvars_elem = sm->elem2d_nvars[j];
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
@@ -206,7 +135,7 @@ void create_sparsity_split_CSR(sm, grid){
         }
     }
     //now 1d
-    for (j=0;j<grid->nelem1d;j++){
+    for (j=0;j<grid->nelems1d;j++){
         nnodes = grid->elem1d[j].nnodes;
         //maybe this just comes from mat instead
         nvars_elem = sm->elem1d_nvars[j];
@@ -270,58 +199,95 @@ void create_sparsity_split_CSR(sm, grid){
     sm->diag_nnz = NNZ; sm->off_diag_nnz= NNZ_off_diag;
     
     // resize as needed
-    sm->diag_indices = (int *) tl_realloc(sizeof(int), sm->nnz_diag, sm->nnz_diag_old, sm->diag_indices);
-    sm->diag_vals = (double *) tl_realloc(sizeof(double), sm->nnz_diag, sm->nnz_diag_old, sm->diag_vals);
-    sm->global_off_diag_indices = (int *) tl_realloc(sizeof(int), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->global_off_diag_indices);
-    sm->off_diag_vals = (double *) tl_realloc(sizeof(double), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->off_diag_vals);
+    sm->cols_diag = (int *) tl_realloc(sizeof(int), sm->nnz_diag, sm->nnz_diag_old, sm->cols_diag);
+    sm->vals_diag = (double *) tl_realloc(sizeof(double), sm->nnz_diag, sm->nnz_diag_old, sm->vals_diag);
+    sm->cols_off_diag = (int *) tl_realloc(sizeof(int), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->cols_off_diag);
+    sm->vals_off_diag = (double *) tl_realloc(sizeof(double), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->vals_off_diag);
     
     // enumerate the sorted indices to populate COL_INDEX and ROW_INDEX for diag and off diag
     int count_diag=0;
     int count_off_diag = 0;
     for(i=0;i<nrows;i++){
-        sm->diag_indptr[i] = count_diag;
-        sm->off_diag_indptr[i] = count_off_diag;
+        sm->indptr_diag[i] = count_diag;
+        sm->indptr_off_diag[i] = count_off_diag;
         //ask corey about syntax
         &rn_diag = *temp_cols_diag[i];
         &rn_off_diag = *temp_cols_diag[i];
         //think about how to do this since each temp_rows may be different size
         for(j=0;j<sizeof(rn_diag)/sizeof(int),j++){
-            sm->diag_indices[count] = rn_diag[j];
+            sm->cols_diag[count] = rn_diag[j];
             count_diag++;
         }
         for(j=0;j<sizeof(rn_off_diag)/sizeof(int),j++){
-            sm->global_off_diag_indices[count] = rn_off_diag[j];
+            sm->cols_off_diag[count] = rn_off_diag[j];
             count_off_diag++;
         }
     }
     //also last sm->indptr  needs to be the last entry
-    sm->diag_indptr[nrows] = count_diag;
-    sm->off_diag_indptr[nrows] = count_off_diag;
+    sm->indptr_diag[nrows] = count_diag;
+    sm->indptr_off_diag[nrows] = count_off_diag;
     //destroy temp_rows?
+    
     free(temp_cols_diag);
     free(temp_cols_off_diag);
-    free(nnz_rows);
     free(nnz_rows_diag);
+    free(nnz_rows_off_diag);
+    */
 }
 
 
-int* unique (int* first, int* last)
-{
-  if (first==last) return last;
 
-  int* result = first;
-  while (++first != last)
-  {
-    if (!(*result == *first)) 
-      *(++result)=*first;
-  }
-  return ++result;
+
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function initalizes a SuperModel Newton Jacobian matrix for suitesparse
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+ void allocate_adh_system(SMODEL_SUPER *sm){   
+    // For now, we pre-allocate assuming that all nodes have the max number of equations attached.
+    // This is not optimal, although the AdH storage is dumped to CCS and all extra zeros are removed before actually solving.
+    // ndofs = nnodes * max_nsys (over-allocated for mixed dof systems)
+    sm->residual = (double *) tl_realloc(sizeof(double), sm->ndofs, sm->ndofs_old, sm->residual);
+    sm->sol =      (double *) tl_realloc(sizeof(double), sm->ndofs, sm->ndofs_old, sm->sol);
+    sarray_init_dbl(sm->residual, sm->ndofs);
+    sarray_init_dbl(sm->sol, sm->ndofs);
+    
+    // proprietary AdH matrix allocation
+    // standard CSR format
+    // indptr points to where column indeces for each row starts (length of nrows+1)
+    // indices array of integers that contains column position of each nonzero
+    // vals array of doubles containing matrix entries (same length as indices)
+    
+    //call routine to determine nnz? and where should we determine cols?
+    //should we also keep nnz_row array for petsc? maybe not necessary
+
+    //where does local_range get determined?
+    //we now number of rows is sum(my_nnode*nodal_nvars)
+    sm->indptr_diag= (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->indptr_diag);
+    //if we split we have two structures
+    sm->indptr_off_diag = (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->indptr_off_diag);
+    
+    //find nnz and store in indices
+    //this does a single CSR format
+    //create_sparsity_CSR(sm, grid);
+    //this does a split CSR format, plan on doing this
+    create_sparsity_split_CSR(sm, sm->grid);
+    //do we want to stor nnz? it is stored in sm->indptr[nrows]
+    //do we want to store local_size = local_range[1]-local_range[0]
+    sarray_init_dbl(sm->vals_diag, sm->indptr_diag[sm->my_ndofs-1]);
+    sarray_init_dbl(sm->vals_off_diag, sm->indptr_off_diag[sm->my_ndofs-1]);
 }
-
-int compare_ints(const void *a, const void *b) {
-    return (*(int*)a - *(int*)b); // Ascending order
-}
-
 
 
 
@@ -346,33 +312,33 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
     
     //PETSc solver will be stord in ksp object
     //ksp only will exist if PETSc is active
-    if(sm->ksp == PETSC_NULL){
+    if(sm->ksp == PETSC_NULLPTR){
         ierr = KSPCreate(PETSC_COMM_WORLD, &(sm->ksp));
         ierr = KSPSetFromOptions(sm->ksp);
     }
     // Check if Jacobian, sol, and residual have already been created.
     // If so, destroy each of them before creating new PETSc objects.
-    if(sm->A != PETSC_NULL){
+    if(sm->A != PETSC_NULLPTR){
         printf("\n\nDestroying old matrix\n\n");
         ierr = MatDestroy(&(sm->A));
         ierr = KSPReset(sm->ksp);
         ierr = KSPSetFromOptions(sm->ksp);
     }
     //dont think we need preallocator matrix
-    //if(sm->P != PETSC_NULL){
+    //if(sm->P != PETSC_NULLPTR){
     //    ierr = MatDestroy(&(sm->P));
     //}
-    if(sm->X != PETSC_NULL){
+    if(sm->X != PETSC_NULLPTR){
         ierr = VecDestroy(&(sm->X));
     }
-    if(sm->B != PETSC_NULL){
+    if(sm->B != PETSC_NULLPTR){
             ierr = VecDestroy(&(sm->B));
     }
 
     // Create Jacobian matrix from CSR format
     //don't know if i need to do this or just call after load anyway
     //vals should update by reference
-    MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->macro_ndofs, sm->macro_ndofs, sm->diag_indptr, sm->diag_indices, sm->diag_vals, sm->off_diag_indptr, sm->global_off_diag_indices, sm->off_diag_vals, &(sm->A));
+    MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->macro_ndofs, sm->macro_ndofs, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag, sm->vals_off_diag, &(sm->A));
     //ierr = MatCreateMPIAIJWithArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->macro_ndofs, sm->macro_ndofs, sm->indptr, sm->indices, sm->vals, &(sm->A))
     //ierr = MatCreate(PETSC_COMM_WORLD, &(sm->A));
     //ierr = MatSetSizes(sm->A,n,n,PETSC_DETERMINE,PETSC_DETERMINE);
@@ -412,8 +378,8 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
     //ierr = VecSetSizes(sm->X, sm->my_ndofs, PETSC_DETERMINE);
     //ierr = VecSetFromOptions(sm->sol);
     //ierr = VecSetUp(sm->sol);
-    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, sm->local_size, sm->global_size, nghost, sm->ghosts, sm->residual, &(sm->B));
-    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, sm->local_size, sm->global_size, nghost, sm->ghosts, sm->sol, &(sm->X));
+    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, sm->my_ndofs, sm->macro_ndofs, sm->nghost, sm->ghosts, sm->residual, &(sm->B));
+    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, sm->my_ndofs, sm->macro_ndofs, sm->nghost, sm->ghosts, sm->sol, &(sm->X));
 
 
     /*Maybe need to revisit for ghosts but skip for now
@@ -483,6 +449,64 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
 }
   
 
+
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function initalizes a SuperModel Newton Jacobian matrix
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void fe_allocate_initialize_linear_system(SMODEL_SUPER *sm) {
+
+    if (sm->ndofs > sm->ndofs_old){    
+        allocate_adh_system(sm);
+#ifdef _PETSC
+        allocate_petsc_objects(sm);
+#endif
+            }
+}
+
+
+
+
+
+
+
+
+
+
+int* unique (int* first, int* last)
+{
+  if (first==last) return last;
+
+  int* result = first;
+  while (++first != last)
+  {
+    if (!(*result == *first)) 
+      *(++result)=*first;
+  }
+  return ++result;
+}
+
+int compare_ints(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b); // Ascending order
+}
+
+
+
+
+
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -497,7 +521,7 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void create_sparsity_CSR(sm, grid){
+void create_sparsity_CSR(SMODEL_SUPER *sm, SGRID *grid){
     //
     // We know that each row contains at least one non-zero entry, and the number of rows is known upfront. 
     // Thus, (i,j)-pairs can be represented as a vector of vectors
@@ -509,14 +533,18 @@ void create_sparsity_CSR(sm, grid){
     int nCon2d = 7*3*MAX_NVAR;
     int nCon3d = 16*4*MAX_NVAR;
 
-    int nrows = sm->local_range[1]-sm->local_range[0]
+    int nrows = sm->local_range[1]-sm->local_range[0];
 
     // preallocate upfront with these dimensions. work out syntax later
-    int temp_rows[nrows,nCon3d];
+    int temp_rows[nrows][nCon3d];
     int nnz_rows[nrows];
     sarray_init_dbl(nnz_rows, nrows);
 
 
+    //comment out until frontend is figured out
+
+
+    /*
     //loop through all nelem3d to mark sparsity
 
     int global_row;
@@ -643,6 +671,7 @@ void create_sparsity_CSR(sm, grid){
     //also last sm->indptr  needs to be the last entry
     sm->indptr[nrows] = count;
     //destroy temp_rows?
+    */
 }
 
 

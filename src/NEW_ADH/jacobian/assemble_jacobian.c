@@ -36,7 +36,7 @@ void assemble_matrix(SMODEL_SUPER *sm, SGRID *grid, SMAT *mat) {
     for (j=0;j<grid->nelem3d;j++){
 
             //pull all global information to local memory
-            mat_id = sm->physics_mat_3d[j];
+            mat_id = sm->elem3d_physics[j];
             //Get this from mat instead!!
             nvar_ele = sm->elem3d_nvars[mat_id];
             //allows for mixed geometry quad/tri mesh

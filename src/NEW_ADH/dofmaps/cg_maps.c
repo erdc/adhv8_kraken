@@ -1,3 +1,4 @@
+#include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -19,32 +20,33 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
 
     int i,j,k,save_k,index,temp,ctr;
     int current_var;
+    bool notFound;
     ctr =0;
 
+// Need to fix this after frontend
 
-
-    for (i=0; i<nnodes; i++){
-        //on this node get nodal vars
-        //need to iron this out, this is an array of ints
-        current_nodal_vars = nodal_vars[local_node_ids[i]];
-        temp = fmaplocal[local_node_ids[i]];
-        for (j=0; j<elem_nvars; j++){
-            //map the current var from the residual to the correct var number in global residual
-            k=0;
-            notFound=TRUE;
-            current_var = elem_vars[j];
-            while (notFound){
-                //note current_nodal_vars depends on i
-                if(current_var == current_nodal_vars[k]){
-                    notFound=FALSE;
-                    save_k = k;
-                }
-                k+=1;
-            }
-            local_dofs[ctr] =  temp + save_k;
-            ctr+=1
-        }
-    }
+//    for (i=0; i<nnodes; i++){
+//        //on this node get nodal vars
+//        //need to iron this out, this is an array of ints
+//        int current_nodal_vars = *nodal_vars[local_node_ids[i]];
+//        temp = fmaplocal[local_node_ids[i]];
+//        for (j=0; j<elem_nvars; j++){
+//            //map the current var from the residual to the correct var number in global residual
+//            k=0;
+//            notFound=TRUE;
+//            current_var = elem_vars[j];
+//            while (notFound){
+//                //note current_nodal_vars depends on i
+//                if(current_var == current_nodal_vars[k]){
+//                    notFound=FALSE;
+//                    save_k = k;
+//                }
+//                k+=1;
+//            }
+//            local_dofs[ctr] =  temp + save_k;
+//            ctr+=1;
+//        }
+//    }
 
 }
 

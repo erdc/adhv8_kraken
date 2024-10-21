@@ -20,7 +20,7 @@
         - We restrict physics material definitons so that for a given supermodel, the solution variables for two physics materials must be a subsets of eachother (no disjoint subsets)
         - We restrict physics material defintiions so that every element on the grid must have a physics assigned to it within a given supermodel
         - we expect that # physics materials << # of elements on the grid
-        -Every supermodel must have physics defined on the entrire mesh
+        - Every supermodel must have physics defined on the entrire mesh
     3. Other model based parameters (i.e. friction) will be allowed to be defined via another material definition as in previous versions of AdH OR nodal
     4. 
 

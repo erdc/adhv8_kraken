@@ -47,6 +47,9 @@ void print_header_sediment(SMODEL_SUPER *mod, FILE *fp_out,  int ps_flag, int in
 void print_header_gw(SMODEL_SUPER *mod, FILE * fp_out, int ps_flag);
 #endif
 void print_header(SMODEL_SUPER *mod, FILE * fp_out, int ps_flag);
+SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax, int npx, int npy,
+ double theta, int dz, double a0, double ax, double ax2, double ay, double ay2, double axy,
+ double ax2y, double axy2, double ax2y2, int flag3d );
 
 
 

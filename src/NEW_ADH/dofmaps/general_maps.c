@@ -31,6 +31,7 @@ void local_dofs_to_global_dofs(int *global_dofs,int ndofs_on_ele,int *dofs,int *
             //residential dof
             global_dofs[i] = dofs[i] + local_range[0];
         }else{
+            //ghost dof (not owned by process)
             global_dofs[i] = ghosts[dofs[i]-local_size];
         }
     }

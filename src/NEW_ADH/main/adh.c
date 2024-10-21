@@ -10,6 +10,9 @@ int main(int argc, char **argv) {
     MPI_Finalize();
 #endif
 
-    //not returning 0 will result in error
+    residual_test(argc,argv);
+
+    
+    //not returning 0 will result in MPI error
     return 0;
 }

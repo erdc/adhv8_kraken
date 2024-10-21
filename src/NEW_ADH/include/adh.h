@@ -61,7 +61,7 @@
 #include "smat_transport.h"
 #include "smat_physics.h"
 #include "dofmaps.h"
-#include "testla.h"
+
 
 //
 #include "sio.h"
@@ -71,13 +71,15 @@
 
 //Mark added
 #include "la.h"
-#include "testla.h"
+
 
 // FOLDERS
 #include "tools.h"
 #include "fnctn_xdmf.h"
 #include "fr_defs.h"
 
-
+//Mark added
+#include "testla.h"
+#include "testresidual.h"
 
 //#endif

@@ -85,7 +85,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
     SVECT temp_node[nnodes_on_elem];
     svect_init_array(temp_node, nnodes_on_elem);
 
-	printf("len is %d\n", (npx*npy));
+	//printf("len is %d\n", (npx*npy));
 
 	int i, j, k=1;
 	double x = xmin, xr, zr;

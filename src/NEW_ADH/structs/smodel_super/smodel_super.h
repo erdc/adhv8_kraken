@@ -9,7 +9,7 @@ typedef struct {
     SIO *io;  /* file names associated with this model application */
     SFLAGS flag;
     int o_flag;
-    SGRID *grid; // just a copy of the grid 
+    SGRID *grid; // just a copy of the grid, do we want this or will it be confusing?
 
     double dt, old_dt, dt_err;
     double dt_prev;
@@ -89,6 +89,7 @@ typedef struct {
     int *dof_map_local;    // a local map from the local node ID to the
                            // local equation number for building the
                            // FE residual and matrix 
+
     int *dof_map_global;   // for ghost nodes - a map from the local
                            // node ID to the global equation number
                            // for building the FE matrix 
@@ -96,19 +97,32 @@ typedef struct {
     int meshcode; //need a way if supermodel is defined on entire mesh (0), surface(1), or floor(2)
 
 
-    //Mark, this is gonna change? need to discuss
-    //SMAT_PHYSICS *elem1d_physics_mat;
-    //SMAT_PHYSICS *elem2d_physics_mat;
-    //SMAT_PHYSICS *elem3d_physics_mat;
+    //Mark adding sizes for convenience
+    int nphysics_mat_1d;
+    int nphysics_mat_2d;
+    int nphysics_mat_3d;
 
-    int *nSubMods1d;                // [nelems1d] the total number of physics modules on each 1D element
-    int *nSubMods2d;                // [nelems2d] the total number of physics modules on each 2D element
-    int *nSubMods3d;                // [nelems3d] the total number of physics modules on each 3D element
-    SELEM_PHYSICS **elem1d_physics;  // [nelems1d][nsubmods_1d] the fe routines for each type of physics on each 1D element
-    SELEM_PHYSICS **elem2d_physics;  // [nelems2d][nsubmods_2d] the fe routines for each type of physics on each 2D element
-    SELEM_PHYSICS **elem3d_physics;  // [nelems3d][nsubmods_3d] the fe routines for each type of physics on each 3D element
+    SMAT_PHYSICS *elem1d_physics_mat;
+    SMAT_PHYSICS *elem2d_physics_mat;
+    SMAT_PHYSICS *elem3d_physics_mat;
+
+    //Mark, elements need integer to store the physics mat id
+    int *elem1d_physics_mat_id; //[nelem1d]
+    int *elem2d_physics_mat_id; //[nelem2d]
+    int *elem3d_physics_mat_id; //[nelem3d]
+
+    //Mark, this is gonna change? need to discuss
+    //this should be based on number of physics materials, no longer numbr of elements
+    int *nSubMods1d;                // [nphysics_mat_1d] the total number of physics modules on each 1D element
+    int *nSubMods2d;                // [nphysics_mat_2d] the total number of physics modules on each 2D element
+    int *nSubMods3d;                // [nphysics_mat_3d] the total number of physics modules on each 3D element
+    
+    SELEM_PHYSICS **elem1d_physics;  // [nphysics_mat_1d][nsubmods_1d] the fe routines for each type of physics on each 1D element
+    SELEM_PHYSICS **elem2d_physics;  // [nphysics_mat_2d][nsubmods_2d] the fe routines for each type of physics on each 2D element
+    SELEM_PHYSICS **elem3d_physics;  // [nphysics_mat_3d][nsubmods_3d] the fe routines for each type of physics on each 3D element
 
     //Mark added local to process, this should be same as local_range[1]-local_range[0]
+    //are these redundant in any way?
     int my_ndofs;
     int my_ndofs_old;
     int ndofs; // local number of degrees of freedom
@@ -116,14 +130,17 @@ typedef struct {
     int macro_ndofs;
     int macro_ndofs_old;
 
+    //Corey using for initialization, should be able to eliminate elemental vars at the least
+    //should be able to create nodal material as well but would be more complex
     int **elem_nvars;
     int ***elem_vars;
     int *node_nvars;
     int **node_vars;
 
     /* boundary conditions mask */
+    //maybe we can get rid of this through weak enforcement
     //bcmask *bc_mask;
-
+    //Mark, havent looked into this yet. Maybe weak 
     STR_VALUE *str_values;    /* strings */
     SSERIES *series_head;
     SSERIES *series_curr;
@@ -217,6 +234,10 @@ void smodel_super_alloc_init(SMODEL_SUPER **smod, int nSuperModels);
 void smodel_super_free(SMODEL_SUPER *smod, int nSuperModels);
 void smodel_super_read(SMODEL_SUPER *smod, FILE *fp);
 void smodel_super_printScreen(SMODEL_SUPER *smod);
+
+//Mark added for testing
+void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, double t_final,
+    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4] );
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

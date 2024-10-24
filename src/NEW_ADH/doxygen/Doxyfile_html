@@ -706,8 +706,6 @@ LAYOUT_FILE            =
 
 CITE_BIB_FILES         = "bibliography_new.bib"
 
-
-#FORMULA_MACROFILE = "latex_macros_new.tex"
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
 #---------------------------------------------------------------------------
@@ -1491,8 +1489,8 @@ FORMULA_TRANSPARENT    = YES
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-USE_MATHJAX            = YES
-FORMULA_MACROFILE = "mathjax_macros.tex"
+USE_MATHJAX            = NO
+
 
 # When MathJax is enabled you can set the default output format to be used for
 # the MathJax output. See the MathJax site (see:
@@ -1531,6 +1529,9 @@ MATHJAX_EXTENSIONS     =
 # This tag requires that the tag USE_MATHJAX is set to YES.
 
 MATHJAX_CODEFILE       = 
+
+
+HTML_FORMULA_FORMAT = 
 
 # When the SEARCHENGINE tag is enabled doxygen will generate a search box for
 # the HTML output. The underlying search engine uses javascript and DHTML and
@@ -1625,7 +1626,7 @@ EXTRA_SEARCH_MAPPINGS  =
 # If the GENERATE_LATEX tag is set to YES, doxygen will generate LaTeX output.
 # The default value is: YES.
 
-GENERATE_LATEX         = NO
+GENERATE_LATEX         = YES
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
@@ -1679,9 +1680,9 @@ PAPER_TYPE             = a4
 # EXTRA_PACKAGES=[intlimits]{amsmath}
 # If left blank no extra packages will be included.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
-
+#MUST BE ABSOLUTE PATH IF NOT IN INCLUDE
 EXTRA_PACKAGES         = amsmath \
-                         latex_macros_new
+                         /Users/markloveland/Kraken/adhv8_kraken/src/NEW_ADH/doxygen/latex_macros_new
 
 # The LATEX_HEADER tag can be used to specify a personal LaTeX header for the
 # generated LaTeX document. The header should contain everything until the first

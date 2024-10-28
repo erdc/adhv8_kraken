@@ -111,6 +111,8 @@ typedef struct {
     int *elem2d_physics_mat_id; //[nelem2d]
     int *elem3d_physics_mat_id; //[nelem3d]
 
+    //Mark, maybe just role this into SMAT_PHYSICS object????
+    
     //Mark, this is gonna change? need to discuss
     //this should be based on number of physics materials, no longer numbr of elements
     int *nSubMods1d;                // [nphysics_mat_1d] the total number of physics modules on each 1D element

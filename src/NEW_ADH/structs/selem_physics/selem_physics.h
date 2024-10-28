@@ -10,7 +10,7 @@ typedef struct {
     void *fe_init;
     void *fe_update;
     void *fe_solve;
-    void *fe_resid; // this could be body or boundary, depending on what element
+    int (*fe_resid)(); // this could be body or boundary, depending on what element
     //void *fe_boundary_resid;
     //void *fe_body_resid;
     void *fe_load;
@@ -21,7 +21,7 @@ typedef struct {
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
-void selem_physics_alloc_init(SELEM_PHYSICS **elemPhys,int nelems,int *nSubMods);
+void selem_physics_alloc_init(SELEM_PHYSICS ***elemPhys,int nelems,int *nSubMods);
 void selem_physics_free(SELEM_PHYSICS **elemPhys,int nelems,int *nSubMods);
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

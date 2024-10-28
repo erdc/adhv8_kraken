@@ -31,7 +31,7 @@ int residual_test(int argc, char **argv) {
 
 	//print coordinates
   for(int local_index =0; local_index<grid.nnodes; local_index++){
-		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].id,grid.node[local_index].x,grid.node[local_index].y);
+		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
 	}
 //	//print connectivity
 //	for(int local_index =0; local_index<grid.nelems2d; local_index++){
@@ -53,10 +53,17 @@ int residual_test(int argc, char **argv) {
 	strcpy(&elemVarCode[1],"0"); //GW
 	strcpy(&elemVarCode[2],"0"); //Transport
 
-	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode );
+	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 
 	//assemble a residual and check correctness
-
+	//plot grid in h5?
+    strcpy(sm.grid->filename, "residtest");
+    init_hdf5_file(sm.grid);
+    printf("hdf5 initialized\n");
+    sgrid_write_hdf5(sm.grid);
+    printf("hdf5 written\n");
+    sgrid_write_xdmf(sm.grid);
+    printf("xmf written\n");
 	
 
 	return 0;

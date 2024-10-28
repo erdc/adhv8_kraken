@@ -102,20 +102,25 @@ void sgrid_write_hdf5(SGRID *g){
     int i,j,k=0,l=0;
     for (i=0; i<g->nnodes; i++){
         //temporarily store xyz if it is a residential node
-        if(g->node[i].resident_pe == g->smpi->myid){
+#ifdef _MESSG
+        if(g->node[i].resident_pe == g->smpi->myid)
+#endif
+        {
             xyz[l][0] = g->node[i].x; 
             xyz[l][1] = g->node[i].y;
             xyz[l][2] = g->node[i].z;
             l+=1;
 
-        for(j=0;j<SPATIAL_DIM;j++) {
-            coord1[k] = g->node[i].gid;
-            coord1[k+1] = j;
-            k += MATRIX_RANK;
-        }
+            for(j=0;j<SPATIAL_DIM;j++) {
+                coord1[k] = g->node[i].gid;
+                coord1[k+1] = j;
+                k += MATRIX_RANK;
+                
+            }
 
+        }
     }
-    }
+    
 
     assert(l==g->my_nnodes);
     H5Sselect_elements(filespace, H5S_SELECT_SET,g->my_nnodes * SPATIAL_DIM,(const hsize_t *)&coord1);
@@ -124,9 +129,9 @@ void sgrid_write_hdf5(SGRID *g){
     // declare collextive data file writing
 
     plist_id = H5Pcreate(H5P_DATASET_XFER);
-    #ifdef _MESSG
+#ifdef _MESSG
         H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
-    #endif
+#endif
     //collective write
     status = H5Dwrite(dset_id, H5T_NATIVE_DOUBLE, memspace, filespace, plist_id, xyz);
     free(xyz);
@@ -135,7 +140,6 @@ void sgrid_write_hdf5(SGRID *g){
     H5Sclose(memspace);
     H5Pclose(plist_id);
     H5Gclose(grp1);
-    
     // +++++++++++++++++++++++++++++++++++++++
     // Nodal write complete
     // +++++++++++++++++++++++++++++++++++++++
@@ -163,7 +167,10 @@ void sgrid_write_hdf5(SGRID *g){
     int ie;
     k = 0;
     for (ie=0; ie<g->nelems3d; ie++) {
-        if (g->elem3d[ie].resident_pe == g->smpi->myid) {
+#ifdef _MESSG
+        if (g->elem3d[ie].resident_pe == g->smpi->myid) 
+#endif
+        {
 
             if      (g->elem3d[ie].nnodes == 4) {connectivity[k] = 6;} // XDMF CODE
             else if (g->elem3d[ie].nnodes == 6) {connectivity[k] = 7;} // XDMF CODE
@@ -179,7 +186,10 @@ void sgrid_write_hdf5(SGRID *g){
 
     for (ie=0; ie<g->nelems2d; ie++) {
         //if (g->elem2d[ie].bflag == BODY) { // only body elements??  // MAKE SURE THEY ARE RESIDENTIAL!!!
-        if (g->elem2d[ie].resident_pe == g->smpi->myid) {
+#ifdef _MESSG
+        if (g->elem2d[ie].resident_pe == g->smpi->myid)
+#endif
+         {
             if      (g->elem2d[ie].nnodes == 3) {connectivity[k] = 4;} // XDMF CODE
             else if (g->elem2d[ie].nnodes == 4) {connectivity[k] = 5;} // XDMF CODE
             k += 1;
@@ -269,7 +279,10 @@ void sgrid_write_hdf5(SGRID *g){
         gid = g->elem2d[ie].gid;
         nnodes = g->elem2d[ie].nnodes;
         //use gid to calculate global coord numbers
-        if (g->elem2d[ie].resident_pe == g->smpi->myid) {
+#ifdef _MESSG
+        if (g->elem2d[ie].resident_pe == g->smpi->myid)
+#endif
+        {
         //Quads first
         if(nnodes == 4) {
             for(j=0;j<nnodes+1;j++){
@@ -327,7 +340,6 @@ void sgrid_write_hdf5(SGRID *g){
     H5Sclose(memspace);
     H5Pclose(plist_id);
     H5Gclose(grp2);
-
     ////////////////////////////////////
     ///Elemental connections complete///
 

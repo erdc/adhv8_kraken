@@ -19,20 +19,23 @@
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void selem_physics_alloc_init(SELEM_PHYSICS **elemPhys,int nelems,int *nSubMods) { // triple pointer?
+void selem_physics_alloc_init(SELEM_PHYSICS ***elemPhys,int nelems,int *nSubMods) { // triple pointer?
     int ie, ifun;
     
-    elemPhys = (SELEM_PHYSICS **) tl_alloc(sizeof(SELEM_PHYSICS *), nelems);
+    (*elemPhys) = (SELEM_PHYSICS **) tl_alloc(sizeof(SELEM_PHYSICS *), nelems);
+
+    SELEM_PHYSICS *physics; // for alias
     for (ie=0; ie<nelems; ie++) {
         assert(nSubMods[ie] > 0);
-        elemPhys[ie] = (SELEM_PHYSICS *) tl_alloc(sizeof(SELEM_PHYSICS), nSubMods[ie]);
+        (*elemPhys[ie]) = (SELEM_PHYSICS *) tl_alloc(sizeof(SELEM_PHYSICS), nSubMods[ie]);
         for (ifun=0; ifun<nSubMods[ie]; ifun++) {
-            elemPhys[ie][ifun].fe_inc = NULL;
-            elemPhys[ie][ifun].fe_init = NULL;
-            elemPhys[ie][ifun].fe_update = NULL;
-            elemPhys[ie][ifun].fe_solve = NULL;
-            elemPhys[ie][ifun].fe_resid = NULL;
-            elemPhys[ie][ifun].fe_load = NULL;
+            physics = &(*elemPhys)[ie][ifun]; // alias
+            physics->fe_inc = NULL;
+            physics->fe_init = NULL;
+            physics->fe_update = NULL;
+            physics->fe_solve = NULL;
+            physics->fe_resid = NULL;
+            physics->fe_load = NULL;
         }
     }
 }

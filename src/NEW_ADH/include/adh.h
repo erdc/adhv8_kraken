@@ -15,6 +15,10 @@
 //Mark added
 #include <umfpack.h>
 
+#ifdef _ADH_HDF5
+#include <hdf5.h>
+#endif
+
 #ifdef _MPI
 #include <mpi.h>
 #endif
@@ -71,6 +75,9 @@
 
 //Mark added
 #include "la.h"
+//Mark added physics module
+#include "fe.h"
+#include "sw2.h"
 
 
 // FOLDERS

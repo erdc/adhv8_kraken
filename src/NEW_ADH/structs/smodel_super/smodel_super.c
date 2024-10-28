@@ -113,6 +113,8 @@ void smodel_super_printScreen(SMODEL_SUPER *smod) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, double t_final,
     int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4] ) {
+
+    printf("Initializing smodel super without file read\n");
     // assign scalars
     sm->dt = dt_in;
     sm->old_dt = dt_in;
@@ -129,15 +131,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
 
     //start building up materials
 
-    //this is how many different unique physics materials in each dimension there are
-    sm->nphysics_mat_1d = nphysics_mat_1d;
-    sm->nphysics_mat_2d = nphysics_mat_2d;
-    sm->nphysics_mat_3d = nphysics_mat_3d;
 
-    //now we allocate the physics_mat arrays
-    smat_physics_alloc_init(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, NULL);
-    smat_physics_alloc_init(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, NULL);
-    smat_physics_alloc_init(&sm->elem3d_physics_mat, sm->nphysics_mat_3d, NULL);
 
     //now we fill in the physics mat objects with the provided codes to specify the equations to be solved
     //for now we just assume the elemVarCode is for all the elements, either 1,2, or 3d
@@ -147,7 +141,30 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     assert( nphysics_mat_2d == 0 || nphysics_mat_3d == 0);
     assert( nphysics_mat_1d == 1 || nphysics_mat_2d == 1 || nphysics_mat_3d == 1);
 
+    //this is how many different unique physics materials in each dimension there are
+    sm->nphysics_mat_1d = nphysics_mat_1d;
+    sm->nphysics_mat_2d = nphysics_mat_2d;
+    sm->nphysics_mat_3d = nphysics_mat_3d;
+
+    //now we allocate the physics_mat arrays
+    printf("Number of physics mats in each dimension (1d,2d,3d): (%d,%d,%d)\n",sm->nphysics_mat_1d,sm->nphysics_mat_2d,sm->nphysics_mat_3d);
+    int ntrns[1];
+    int nSubModels[1];
+    nSubModels[0] = 1;
+    ntrns[0] = 0;
+    if (sm->nphysics_mat_1d > 0){
+        smat_physics_alloc_init(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, ntrns);
+    }else if (sm->nphysics_mat_2d > 0){
+        smat_physics_alloc_init(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, ntrns);
+    }else if (sm->nphysics_mat_3d >0){
+        smat_physics_alloc_init(&sm->elem3d_physics_mat, sm->nphysics_mat_3d, ntrns);
+    }
+    printf("Initialized phyisics materials\n");
+
+
     //fill in elemVarCode for the physics mat that is nonempty
+
+    printf("Number of 2d phyics mats %d\n",nphysics_mat_2d);
     int i,j;
     for(i=0;i<nphysics_mat_1d;i++){
         for(j=0;j<4;j++){
@@ -165,6 +182,89 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
         }
     }
 
+    //now fill in the number of physics modules on each physics material
+    //given the elemVarCode
+    //must be single quotes
+    //Maybe store these in global variable instead of hardcoded comparison on LHS
+
+
+    for(i=0;i<nphysics_mat_1d;i++){
+
+        if (sm->elem1d_physics_mat[i].elemVarCode[0] == '1'){
+            printf("SW1 Activated for 1d physics mat id %d\n",i);
+        }
+        if (sm->elem1d_physics_mat[i].elemVarCode[1] == '0'){
+            printf("GW NOT ACTIVATED for 1d physics mat id %d\n",i);
+        }
+        if (sm->elem1d_physics_mat[i].elemVarCode[2] == '0'){
+            printf("Transport NOT ACTIVATED for 1d physics mat id %d\n",i);   
+        }
+    }
+
+    for(i=0;i<nphysics_mat_2d;i++){
+        printf("Testing!\n");
+        printf("%d %d\n",sm->elem2d_physics_mat[i].elemVarCode[0],'2');
+        printf("%d\n",sm->elem2d_physics_mat[i].elemVarCode[0] == '2');
+
+        if (sm->elem2d_physics_mat[i].elemVarCode[0] == '2'){
+            printf("SW2 Activated for 2d physics mat id %d\n",i);
+        }else if(sm->elem2d_physics_mat[i].elemVarCode[0] == '6'){
+            printf("DW Activated for 2d physics mat id %d\n",i);
+        }
+
+        if (sm->elem2d_physics_mat[i].elemVarCode[1] == '0'){
+            printf("GW NOT ACTIVATED for 2d physics mat id %d\n",i);
+        }
+        if (sm->elem2d_physics_mat[i].elemVarCode[2] == '0'){
+            printf("Transport NOT ACTIVATED for 2d physics mat id %d\n",i);   
+        }
+
+    }
+
+    for(i=0;i<nphysics_mat_3d;i++){
+
+        if (sm->elem3d_physics_mat[i].elemVarCode[0] == '3'){
+            printf("SW3 Activated for 3d physics mat id %d\n",i);
+        }else if(sm->elem2d_physics_mat[i].elemVarCode[0] == '4'){
+            printf("NS Activated for 3d physics mat id %d\n",i);
+        }
+
+        if (sm->elem3d_physics_mat[i].elemVarCode[1] == '0'){
+            printf("GW NOT ACTIVATED for 3d physics mat id %d\n",i);
+        }else if(sm->elem3d_physics_mat[i].elemVarCode[1] == '1'){
+            printf("GW ACTIVATED for 3d physics mat id %d\n",i);
+        }
+
+        if (sm->elem3d_physics_mat[i].elemVarCode[2] == '0'){
+            printf("Transport NOT ACTIVATED for 3d physics mat id %d\n",i);   
+        }
+    }
+
+    
+    printf("Initializing elem physics routines\n");
+    if (sm->nphysics_mat_1d > 0){
+        selem_physics_alloc_init(&sm->elem1d_physics, sm->nphysics_mat_1d, nSubModels);
+    }else if (sm->nphysics_mat_2d > 0){
+        selem_physics_alloc_init(&sm->elem2d_physics, sm->nphysics_mat_2d, nSubModels);
+    }else if (sm->nphysics_mat_3d >0){
+        selem_physics_alloc_init(&sm->elem3d_physics, sm->nphysics_mat_3d, nSubModels);
+    }
+    printf("Initialized elem physics routines\n");
+    //now use elemVarCode info to pick out the correct pointers to routines
+    //maybe store this in some sort of dictionary sort of thing?
+
+    //for now just hard code this one example, will go back and fix later once
+    //we have the structs and methods figured out
+    //how does this work?
+    sm->elem2d_physics[0][0].fe_resid = fe_sw2_body_resid;
+
+    printf("Assigned sw2 to residual structure\n");
+
+    //call residual
+    double elemrhs[3]; 
+    elemrhs[0] = 0.0; elemrhs[1] = 0.0; elemrhs[2] = 0.0;
+    sm->elem2d_physics[0][0].fe_resid(sm, elemrhs, 0, 0.0,0,0,0, 0);
+    printf("Elemental resid: {%f,%f,%f}\n",elemrhs[0],elemrhs[1],elemrhs[2]);
 
 
 }

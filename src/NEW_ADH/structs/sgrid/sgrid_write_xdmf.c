@@ -2,10 +2,14 @@
 static int DEBUG = OFF;
 static int DEBUG_WITH_PICKETS = OFF;
 #define SPATIAL_DIM 3
-
+#define MATRIX_RANK 2
+#define VECTOR_RANK 1
 void sgrid_write_xdmf(SGRID *g){
 
-    if(g->smpi->myid==0){
+#ifdef _MESSG
+    if(g->smpi->myid==0)
+#endif
+    {
         FILE *xmf = 0;
         char fname[50];
         float t=0;

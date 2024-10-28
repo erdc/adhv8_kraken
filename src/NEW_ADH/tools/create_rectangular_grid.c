@@ -62,6 +62,10 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 
 	//create a grid to return
 	SGRID grid;
+
+	//for now serial only, maybe add scotch in later
+
+
 	//set some parameters, hard coded for triangles for now
 	grid.nnodes = npx*npy;
 	grid.nelems3d = 0;
@@ -71,6 +75,37 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 	grid.nPrisms=0;
 	grid.nTris= grid.nelems2d;
 	grid.nQuads=0;
+	grid.nnodes_sur = grid.nnodes;      // number of ghost + residential surface nodes
+    grid.nnodes_bed = 0;      // number of ghost + residential bed nodes
+
+	// HPC totals, serial only for now
+    grid.macro_nnodes = grid.nnodes;          // total # of nodes in the global mesh
+    grid.macro_nnodes_sur = grid.nnodes;      // total # of surface nodes
+    grid.macro_nnodes_bed = 0;      // total # of bed nodes
+    grid.macro_nelems3d = grid.nelems3d;        // total # of 3d elements in the global mesh
+    grid.macro_nelems2d = grid.nelems2d;        // total # of 2d elements in the global mesh
+    grid.macro_nelems1d = grid.nelems1d;        // total # of 1d elements in the global mesh
+    grid.macro_nelems2d_bed = 0;    // total # of 2d bed/surface elements across all PEs on the global mesh
+    grid.macro_nTets = grid.nTets;           // total # of tetrahedron elements in global mesh
+    grid.macro_nPrisms = grid.nPrisms;         // total # of prism elements in global mesh
+    grid.macro_nQuads = grid.nQuads;          // total # of quadrilateral elements in global mesh
+    grid.macro_nTris = grid.nTris;           // total # of triangle elements in global mesh
+    grid.orig_macro_nnodes = grid.nnodes;     // total number of original nodes in the global mesh
+    grid.orig_macro_nnodes_sur = grid.nnodes; // total number of original surface nodes in the global mesh
+    grid.orig_macro_nnodes_bed = 0; // total number of original bed nodes in the global mesh
+    grid.orig_macro_nelems1d = grid.macro_nelems1d;   // total number of original elements in the global mesh
+    grid.orig_macro_nelems2d = grid.macro_nelems2d;   // total number of original elements in the global mesh
+    grid.orig_macro_nelems3d = grid.macro_nelems3d;   // total number of original elements in the global mesh
+    grid.my_nnodes = grid.nnodes;          // total # of residential only nodes in the global mesh
+    grid.my_nnodes_sur = grid.nnodes_sur;      // total # of residential only surface nodes in the global mesh
+    grid.my_nnodes_bed = grid.nnodes_bed;      // total # of residential only bed nodes in the global mesh
+    grid.my_nelems3d = grid.nelems3d;        // total # of residential only 3d elements in the global mesh
+    grid.my_nelems2d = grid.nelems2d;        // total # of residential only 2d elements in the global mesh
+    grid.my_nelems1d = grid.nelems1d;        // total # of residential only 1d elements in the global mesh
+    grid.my_nTets = grid.nTets;           // total # of residential only tetrahedron elements in global mesh
+    grid.my_nPrisms = grid.nPrisms;         // total # of residential only prism elements in global mesh
+    grid.my_nQuads = grid.nQuads;          // total # of residential only quadrilateral elements in global mesh
+    grid.my_nTris = grid.nTris;           // total # of residential only triangle elements in global mesh
 
 	if (grid.nelems1d > 0) {selem1d_init_alloc_array(&(grid.elem1d), grid.nelems1d);}
     if (grid.nelems2d > 0) {selem2d_init_alloc_array(&(grid.elem2d), grid.nelems2d);}
@@ -102,6 +137,8 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 			zr = a0 + ax*x + ax2*x*x + ay*y + ay2*y*y + axy*x*y + ax2y*x*x*y + axy2*x*y*y + ax2y2*x*x*y*y;
 			//fprintf(fp,"ND %d %20.10f %20.10f %20.10f\n", k, xr, yr, zr);
 			grid.node[npoints].id = npoints;
+			//serial for now
+			grid.node[npoints].gid = grid.node[npoints].id;
 			grid.node[npoints].x = xr;
 			grid.node[npoints].y = yr;
 			grid.node[npoints].z = zr;

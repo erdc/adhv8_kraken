@@ -51,6 +51,7 @@ $(wildcard $(MASTER_SRC_DIR)../structs/sio) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sseries) \
 $(wildcard $(MASTER_SRC_DIR)../structs/smodel_super) \
 $(wildcard $(MASTER_SRC_DIR).../structs/smodel_design) \
+$(wildcard $(MASTER_SRC_DIR)../residual) \
 $(wildcard $(MASTER_SRC_DIR)../la) \
 $(wildcard $(MASTER_SRC_DIR)../fe) \
 $(wildcard $(MASTER_SRC_DIR)../sw2) \
@@ -83,6 +84,7 @@ $(MASTER_SRC_DIR)../structs/sio \
 $(MASTER_SRC_DIR)../structs/sseries \
 $(MASTER_SRC_DIR)../structs/smodel_super \
 $(MASTER_SRC_DIR)../structs/smodel_design \
+$(MASTER_SRC_DIR)../residual \
 $(MASTER_SRC_DIR)../la \
 $(MASTER_SRC_DIR)../fe \
 $(MASTER_SRC_DIR)../sw2 \

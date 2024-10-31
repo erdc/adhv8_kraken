@@ -74,6 +74,7 @@
 #include "smodel_design.h"
 
 //Mark added
+#include "residual.h"
 #include "la.h"
 //Mark added physics module
 #include "fe.h"

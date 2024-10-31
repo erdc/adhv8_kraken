@@ -7,11 +7,11 @@ int residual_test(int argc, char **argv) {
 	//let's just do something simple
 	//3x3 triangular element grid
 	double xmin = 0.0;
-	double xmax = 3.0;
+	double xmax = 2.0;
 	double ymin = 0.0;
-	double ymax = 3.0;
-	int npx = 4;
-	int npy = 4;
+	double ymax = 2.0;
+	int npx = 3;
+	int npy = 3;
 	double theta = 0.0;
 	double dz = 1.0;
 	double a0 = -5.0;
@@ -54,8 +54,17 @@ int residual_test(int argc, char **argv) {
 	strcpy(&elemVarCode[2],"0"); //Transport
 
 	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
+	printf("Supermodel read complete\n");
 
 	//assemble a residual and check correctness
+	assemble_residual(&sm, sm.grid);
+
+	//print final residual
+	for(int local_index=0;local_index<grid.nnodes;local_index++){
+		printf("Node %d: (x,y) = {%f,%f}, Residual = {%f,%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y,sm.residual[local_index*3],sm.residual[local_index*3+1],sm.residual[local_index*3+2]);
+	}
+
+
 	//plot grid in h5?
     strcpy(sm.grid->filename, "residtest");
     init_hdf5_file(sm.grid);

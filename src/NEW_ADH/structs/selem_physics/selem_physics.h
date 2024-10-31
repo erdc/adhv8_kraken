@@ -14,7 +14,10 @@ typedef struct {
     //void *fe_boundary_resid;
     //void *fe_body_resid;
     void *fe_load;
+    
     int ndof;
+    //also needs physics vars
+    int* physics_vars;//int physics_vars[ndof];
     
 } SELEM_PHYSICS;
 

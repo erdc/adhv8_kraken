@@ -257,6 +257,59 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     //we have the structs and methods figured out
     //how does this work?
     sm->elem2d_physics[0][0].fe_resid = fe_sw2_body_resid;
+    sm->elem2d_physics[0][0].ndof = 1;
+    
+    sm->elem2d_physics[0][0].physics_vars = (int*) tl_alloc(sizeof(int), sm->elem2d_physics[0][0].ndof);
+    sm->elem2d_physics[0][0].physics_vars[0] = PERTURB_H;
+    //sm->elem2d_physics[0][0].physics_vars[1] = PERTURB_U;
+    //sm->elem2d_physics[0][0].physics_vars[2] = PERTURB_V;
+
+    sm->elem2d_physics_mat_id = (int*) tl_alloc(sizeof(int), sm->grid->nelems2d);
+    for(i=0;i<sm->grid->nnodes;i++){
+        sm->elem2d_physics_mat_id[i] = 0;
+    }
+
+
+    //hard code nodal vars too and dof_map_local, easy because it is all same
+    sm->nphysics_mat_node = 1;
+    sm->node_physics_mat_id = (int*) tl_alloc(sizeof(int), sm->grid->nnodes);
+    for(i=0;i<sm->grid->nnodes;i++){
+        sm->node_physics_mat_id[i] = 0;
+    }
+    smat_physics_alloc_init(&sm->node_physics_mat, sm->nphysics_mat_node, ntrns);
+    //node code is same as elemVarCode
+    for(i=0;i<sm->nphysics_mat_node;i++){
+        for(j=0;j<4;j++){
+            strcpy(&sm->node_physics_mat[i].elemVarCode[j],&elemVarCode[j]);
+        }
+    }
+
+
+
+    //also need to set the variables, not just equations
+    //elemental materials first
+    sm->elem2d_physics_mat[0].nvar=3;
+    sm->elem2d_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->elem2d_physics_mat->nvar);
+    sm->elem2d_physics_mat[0].vars[0] = PERTURB_H;
+    sm->elem2d_physics_mat[0].vars[1] = PERTURB_U;
+    sm->elem2d_physics_mat[0].vars[2] = PERTURB_V;
+    sm->elem2d_physics_mat[0].nSubmodels = 1;
+    //same for nodes
+    sm->node_physics_mat[0].nvar=3;
+    sm->node_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->node_physics_mat->nvar);
+    sm->node_physics_mat[0].vars[0] = PERTURB_H;
+    sm->node_physics_mat[0].vars[1] = PERTURB_U;
+    sm->node_physics_mat[0].vars[2] = PERTURB_V;
+
+    //initalize residual vector
+    sm->ndofs = sm->grid->nnodes*3;
+    sm->residual = (double*) tl_alloc(sizeof(double), sm->ndofs);
+    
+    //make a trivial fmap_local
+    sm->dof_map_local = (int*) tl_alloc(sizeof(int), sm->grid->nnodes);
+    for(i=0;i<sm->grid->nnodes;i++){
+        sm->dof_map_local[i] = i*3;
+    }
 
     printf("Assigned sw2 to residual structure\n");
 

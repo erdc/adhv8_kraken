@@ -3,7 +3,7 @@
 
 typedef struct {
     int ntrns; // the number of transport constituents on this material
-    char elemVarCode[4];
+    char elemVarCode[4]; //codes read in by mesh, point to physics routines not var codes per say
 
     bool SW_FLOW;   // 1, 2, 3
     bool SW1_FLOW;  // 1
@@ -20,6 +20,14 @@ typedef struct {
     
     //convenitent to have total nvar to solve
     int nvar;
+    //similarly, how many physics routines to call
+    int nSubmodels;
+
+    //needs var codes
+    int *vars;//int elem_vars[nvar];
+
+
+
 //    bool VORTICITY;
 //    bool SEDIMENT;
 //    bool SEDLIB;

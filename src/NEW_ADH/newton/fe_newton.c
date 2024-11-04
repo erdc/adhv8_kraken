@@ -317,7 +317,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
-        assemble_matrix(sm,grid,mat);
+        assemble_jacobian(sm,grid,mat);
         
         /* Set initial guess */
         solv_init_dbl(ndof, sm->sol);

@@ -10,8 +10,10 @@ int main(int argc, char **argv) {
     MPI_Finalize();
 #endif
 
-    residual_test(argc,argv);
 
+    residual_test(argc,argv);
+    //try an assembly
+    //assmbly_test(argc,argv);
     
     //not returning 0 will result in MPI error
     return 0;

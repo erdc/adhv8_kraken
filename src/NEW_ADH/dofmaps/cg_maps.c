@@ -23,7 +23,7 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
     bool isFound;
     ctr =0;
 
-// Need to fix this after frontend
+    //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
 
     for (i=0; i<nnodes; i++){
         //on this node get nodal vars

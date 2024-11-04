@@ -32,43 +32,49 @@ static int DEBUG = OFF;
 
 void smat_physics_alloc_init(SMAT_PHYSICS **mat_physics, int nmat, int *ntrns) {
     
-    (*mat_physics) = (SMAT_PHYSICS *) tl_alloc(sizeof(SMAT_PHYSICS), nmat);
+    assert(nmat>=0);
+    if (nmat == 0){
+        mat_physics = NULL;
+        return;
+    }
+    else{
+        (*mat_physics) = (SMAT_PHYSICS *) tl_alloc(sizeof(SMAT_PHYSICS), nmat);
+        int imat;
+        SMAT_PHYSICS *mat; // for alias
     
-    int imat;
-    SMAT_PHYSICS *mat; // for alias
-    
-    for (imat=0; imat<nmat; imat++) {
-        mat = &(*mat_physics)[imat]; // alias
-        mat->ntrns = ntrns[imat];
-        mat->SW_FLOW = OFF;
-        mat->SW1_FLOW = OFF;
-        mat->SW2_FLOW = OFF;
-        mat->SW3_FLOW = OFF;
-        mat->NS_FLOW = OFF;
-        mat->NS3_FLOW = OFF;
-        mat->NS3_SPLIT = OFF;
-        mat->GW_FLOW = OFF;
-        mat->DW_FLOW = OFF;
-        mat->WVEL_SPLIT = OFF;
-        mat->PRESSURE = OFF;
+        for (imat=0; imat<nmat; imat++) {
+            mat = &(*mat_physics)[imat]; // alias
+            mat->ntrns = ntrns[imat];
+            mat->SW_FLOW = OFF;
+            mat->SW1_FLOW = OFF;
+            mat->SW2_FLOW = OFF;
+            mat->SW3_FLOW = OFF;
+            mat->NS_FLOW = OFF;
+            mat->NS3_FLOW = OFF;
+            mat->NS3_SPLIT = OFF;
+            mat->GW_FLOW = OFF;
+            mat->DW_FLOW = OFF;
+            mat->WVEL_SPLIT = OFF;
+            mat->PRESSURE = OFF;
         
-        if (ntrns[imat] > 0) {
-            int itrns;
-            mat->TRANSPORT = (bool *) tl_alloc(sizeof(bool), ntrns[imat]);
-            for (itrns=0; itrns>ntrns[imat]; itrns++) {
-                mat->TRANSPORT[itrns] = false;
+            if (ntrns[imat] > 0) {
+                int itrns;
+                mat->TRANSPORT = (bool *) tl_alloc(sizeof(bool), ntrns[imat]);
+                for (itrns=0; itrns>ntrns[imat]; itrns++) {
+                    mat->TRANSPORT[itrns] = false;
+                }
             }
+            //        mat->VORTICITY = OFF;
+            //        mat->SEDIMENT = OFF;
+            //        mat->SEDLIB = OFF;
+            //        mat->ICM = OFF;
+            //        mat->NSM = OFF;
+            //        mat->WAVE = OFF;
+            //        mat->WIND = OFF;
         }
-        //        mat->VORTICITY = OFF;
-        //        mat->SEDIMENT = OFF;
-        //        mat->SEDLIB = OFF;
-        //        mat->ICM = OFF;
-        //        mat->NSM = OFF;
-        //        mat->WAVE = OFF;
-        //        mat->WIND = OFF;
+        return;
     }
 }
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

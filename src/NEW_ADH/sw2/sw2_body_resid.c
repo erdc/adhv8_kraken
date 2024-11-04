@@ -45,11 +45,11 @@
 
 int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbation, int perturb_node, int perturb_var, int perturb_sign, int DEBUG) {
     
-    printf("Seeing residual %f %f %f\n",elem_rhs[0],elem_rhs[1],elem_rhs[2]);
-    printf("The elemental djac = %f\n", mod->grid->elem2d[ie].djac);
+    //printf("Seeing residual %f %f %f\n",elem_rhs[0],elem_rhs[1],elem_rhs[2]);
+    //printf("The elemental djac = %f\n", mod->grid->elem2d[ie].djac);
     //call a simple integral
     int nnodes = mod->grid->elem2d[ie].nnodes;
-    printf("Nnodes %d\n",nnodes);
+    //printf("Nnodes %d\n",nnodes);
     double f[nnodes];
     for (int i =0;i<nnodes;i++){
         f[i] = 2.0;

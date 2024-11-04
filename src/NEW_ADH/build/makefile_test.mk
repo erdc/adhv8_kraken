@@ -58,6 +58,12 @@ $(wildcard $(MASTER_SRC_DIR)../sw2) \
 $(wildcard $(MASTER_SRC_DIR)../test/la) \
 $(wildcard $(MASTER_SRC_DIR)../test/residual) \
 $(wildcard $(MASTER_SRC_DIR)../main)
+#$(wildcard $(MASTER_SRC_DIR)../jacobian)#
+#$(wildcard $(MASTER_SRC_DIR)../test/jacobian)
+
+
+
+
 
 INCLUDE_DIR = $(MASTER_SRC_DIR)../include \
 $(MASTER_SRC_DIR)../debug/include \
@@ -90,6 +96,8 @@ $(MASTER_SRC_DIR)../fe \
 $(MASTER_SRC_DIR)../sw2 \
 $(MASTER_SRC_DIR)../test/la \
 $(MASTER_SRC_DIR)../test/residual
+#$(MASTER_SRC_DIR)../jacobian #
+#$(MASTER_SRC_DIR)../test/jacobian
 #/opt/homebrew/include/suitesparse
 #/opt/homebrew/include
 
@@ -111,7 +119,7 @@ DEPS                = $(foreach dir,    $(INCLUDE_DIR), $(wildcard  $(dir)/*.h))
 OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              += 
-CFLAGS              += -D_PETSC -O3 -D_ADH_HDF5#-D_MPI #-Wall
+CFLAGS              += -D_PETSC -O3 -D_ADH_HDF5 #-D_MPI #-Wall
 CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/opt/petsc/include -lhdf5 -I/opt/homebrew/include#-L/opt/homebrew/lib
 FLAGS               = $(OPT) $(IFLAGS) $(LFLAGS) $(CFLAGS) $(LDLIBS) 
 #----------------------------

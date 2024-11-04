@@ -15,7 +15,7 @@ typedef struct {
     //void *fe_body_resid;
     void *fe_load;
     
-    int ndof;
+    int nvar;
     //also needs physics vars
     int* physics_vars;//int physics_vars[ndof];
     

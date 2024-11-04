@@ -1,3 +1,4 @@
+#include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -14,9 +15,9 @@
  * \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void assemble_matrix(SMODEL_SUPER *sm, SGRID *grid, SMAT *mat) {
+void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
     int j,k;
-    double fmap = sm->fmap;
+    int* fmap = sm->dof_map_local;
     int nsubMods;
     int ndofs_ele;
     int nvar_ele,nodes_on_ele, var_code;
@@ -27,25 +28,44 @@ void assemble_matrix(SMODEL_SUPER *sm, SGRID *grid, SMAT *mat) {
     int dofs[max_elem_dofs],global_dofs[max_elem_dofs];
 
     //zero out stuff
-    sarray_init_dbl(sm->vals, sm->nnz);
-    int local_range[2] = sm->local_range
-    int mat_id;
+    sarray_init_dbl(sm->vals_diag, sm->nnz_diag);
+    //#ifdef? or avoid maybe
+    sarray_init_dbl(sm->vals_off_diag, sm->nnz_off_diag);
+
+
+    int local_range[2];
+    local_range[0]= sm->local_range[0];
+    local_range[1]= sm->local_range[1];
+    int mat_id, nvars_elem, nphysics_models;
     //need sm->local_range whih is array of integers giving range (if process owned rows 0,1,2,3) then 
     // local range would be 0,4
     //loop through all nelem3d
     for (j=0;j<grid->nelem3d;j++){
 
             //pull all global information to local memory
-            mat_id = sm->elem3d_physics[j];
-            //Get this from mat instead!!
-            nvar_ele = sm->elem3d_nvars[mat_id];
+            mat_id = sm->elem3d_physics_mat_id[j];
+            //Get stuff from physics mat
+            nvars_elem = sm->elem3d_physics_mat[mat_id].nvar;
+            //get array of variables specified on element
+            sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem);
+            //number of phyics routines on element
+            nphysics_models = sm->elem3d_physics_mat[mat_id].nSubmodels;
             //allows for mixed geometry quad/tri mesh
             nodes_on_ele = grid->elem3d[j].nnodes;
             ndofs_ele = nvar_ele*nodes_on_ele;
-            nsubmods = sm->nSubMods3d[mat_id];
             //needs to be for 2d matrix
             sarray_init_mat(max_elem_dofs, max_elem_dofs,elem_mat);
-            //maybe pull local nodal nvars and vars here too
+            //maybe pull local nodal nvars and vars here too:
+            //only necessary for CG i believe (or not idk)
+            //if generalizing to higher dimension, this would be dof on basis functions
+            for (l=0;l<nnodes;l++){
+                node_id = grid->elem3d[j].nodes[l];
+                node_mat_id = sm->node_physics_mat_id[node_id];
+                nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+                for(m=0;m<nvar_node[l];m++){
+                    vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+                }
+            }
             //need to loop over each variable and perturb it
             for (k=0;k<nvar_ele;k++){
 
@@ -55,7 +75,7 @@ void assemble_matrix(SMODEL_SUPER *sm, SGRID *grid, SMAT *mat) {
                 //want to loop over variables not necessarily submodels right?
                 //need to think about this more
                 //like sw2 is vector equation so that we would need 3 perturbations
-                perturb_var(elem_mat, sm, grid, mat, sm->elem3d_physics[mat_id], j, nodes_on_ele, nvar_ele, sm->elem3d_vars[mat_id],var_code, nsubMods, k, grid->elem3d[j].nodes, DEBUG);
+                perturb_var(elem_mat, sm, grid, mat, sm->elem3d_physics[mat_id], j, nodes_on_ele, nvar_ele, sm->elem3d_vars[mat_id],var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
             }
             //store in global using 2 mappings
             //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -305,7 +325,7 @@ int binary_search_part(int *arr, int start, int end, int target) {
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SGRID *grid, SMAT *mat, SELEM_PHYSICS *elem_physics, 
+void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physics, 
     int ie, int nodes_on_element, int nvar_ele, int *elem_vars ,int perturb_var_code, int nsubModels, int ele_var_no, int *NodeIDs, int DEBUG) {
     
     
@@ -355,7 +375,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SGRID *grid, SMAT *mat, SE
 #endif
 
             //this will give a local residual, in temp and will give code for model vars
-            eq_var_code = elem_physics[j]->fe_resid(sm,temp_P,grid,mat,ie, epsilon,i, perturb_var_code, +1, DEBUG);
+            eq_var_code = elem_physics[j]->fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
             add_replace_elem_rhs(elem_rhs_P,temp_P,elem_vars,nvar_ele,eq_var_code,nodes_on_element);
             
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -365,7 +385,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SGRID *grid, SMAT *mat, SE
 #endif
             //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
             //should always be same as var_code
-            eq_var_code2 = elem_physics[j]->fe_resid(sm,temp_M,grid,mat,ie, epsilon,i, perturb_var_code, -1, DEBUG);
+            eq_var_code2 = elem_physics[j]->fe_resid(sm,temp_M,ie, epsilon,i, perturb_var_code, -1, DEBUG);
             add_replace_elem_rhs(elem_rhs_M,temp_M,elem_vars,nvar_ele,eq_var_code2,nodes_on_element);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

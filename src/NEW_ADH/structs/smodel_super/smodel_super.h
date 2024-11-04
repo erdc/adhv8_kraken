@@ -67,6 +67,9 @@ typedef struct {
     int *cols_off_diag; //column addresses of all nonzero entries (global)
     double *vals_off_diag; //actual matrix values
 
+    //Also needs nnz for allocation purposes
+    int nnz_diag, nnz_off_diag;
+
     //vectors
     double *residual;
     double *sol;

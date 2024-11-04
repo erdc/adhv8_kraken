@@ -101,7 +101,9 @@ void smodel_super_printScreen(SMODEL_SUPER *smod) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
  *  \brief     Initialize super model without reading a file for testing
+ *             Only designed to take one material for an entire mesh
  *  \author    Corey Trahan, Ph.D.
+ *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
@@ -113,7 +115,7 @@ void smodel_super_printScreen(SMODEL_SUPER *smod) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, double t_final,
     int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4] ) {
-
+    int i,j;
     printf("Initializing smodel super without file read\n");
     // assign scalars
     sm->dt = dt_in;
@@ -142,30 +144,53 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     assert( nphysics_mat_1d == 1 || nphysics_mat_2d == 1 || nphysics_mat_3d == 1);
 
     //this is how many different unique physics materials in each dimension there are
+    // all but one are 0 and the other one is 1
     sm->nphysics_mat_1d = nphysics_mat_1d;
     sm->nphysics_mat_2d = nphysics_mat_2d;
     sm->nphysics_mat_3d = nphysics_mat_3d;
+
+
+    //use this simple set up to mark each cell with a single 0
+    //this should be easy to determine from grid read
+    //we need go put this in other routine maybe?
+    if (sm->grid->nelems3d >0){
+        sm->elem3d_physics_mat_id = (int*) tl_alloc(sizeof(int), sm->grid->nelems3d);
+    }
+    if(sm->grid->nelems2d>0){
+        sm->elem2d_physics_mat_id = (int*) tl_alloc(sizeof(int), sm->grid->nelems2d);
+    }
+    if(sm->grid->nelems1d>0){
+        sm->elem1d_physics_mat_id = (int*) tl_alloc(sizeof(int), sm->grid->nelems1d);
+    }
+
+    //now assign the physics single mat id for this simple set up
+    //in general this would come from some sort of grid read
+    for(i=0;i<sm->grid->nelems3d;i++){
+        sm->elem3d_physics_mat_id[i] = 0;
+    }
+    for(i=0;i<sm->grid->nelems2d;i++){
+        sm->elem2d_physics_mat_id[i] = 0;
+    }
+    for(i=0;i<sm->grid->nelems1d;i++){
+        sm->elem1d_physics_mat_id[i] = 0;
+    }
 
     //now we allocate the physics_mat arrays
     printf("Number of physics mats in each dimension (1d,2d,3d): (%d,%d,%d)\n",sm->nphysics_mat_1d,sm->nphysics_mat_2d,sm->nphysics_mat_3d);
     int ntrns[1];
     int nSubModels[1];
+    //utilize fact only one of these models has a physics material defined
     nSubModels[0] = 1;
     ntrns[0] = 0;
-    if (sm->nphysics_mat_1d > 0){
-        smat_physics_alloc_init(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, ntrns);
-    }else if (sm->nphysics_mat_2d > 0){
-        smat_physics_alloc_init(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, ntrns);
-    }else if (sm->nphysics_mat_3d >0){
-        smat_physics_alloc_init(&sm->elem3d_physics_mat, sm->nphysics_mat_3d, ntrns);
-    }
+    //initialize pointers and allocate memory for physics materials
+    smat_physics_alloc_init(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, ntrns);
+    smat_physics_alloc_init(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, ntrns);
+    smat_physics_alloc_init(&sm->elem3d_physics_mat, sm->nphysics_mat_3d, ntrns);
     printf("Initialized phyisics materials\n");
 
 
     //fill in elemVarCode for the physics mat that is nonempty
-
-    printf("Number of 2d phyics mats %d\n",nphysics_mat_2d);
-    int i,j;
+    //this assumes only one elemVarCode was given, need to generalize and put in a routine
     for(i=0;i<nphysics_mat_1d;i++){
         for(j=0;j<4;j++){
             strcpy(&sm->elem1d_physics_mat[i].elemVarCode[j],&elemVarCode[j]);
@@ -184,10 +209,10 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
 
     //now fill in the number of physics modules on each physics material
     //given the elemVarCode
-    //must be single quotes
+    //must be single quotes!!!
     //Maybe store these in global variable instead of hardcoded comparison on LHS
-
-
+    //replace this with a call to routine which uses elemVarCode and establises
+    // physics routines
     for(i=0;i<nphysics_mat_1d;i++){
 
         if (sm->elem1d_physics_mat[i].elemVarCode[0] == '1'){
@@ -200,12 +225,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
             printf("Transport NOT ACTIVATED for 1d physics mat id %d\n",i);   
         }
     }
-
     for(i=0;i<nphysics_mat_2d;i++){
-        printf("Testing!\n");
-        printf("%d %d\n",sm->elem2d_physics_mat[i].elemVarCode[0],'2');
-        printf("%d\n",sm->elem2d_physics_mat[i].elemVarCode[0] == '2');
-
         if (sm->elem2d_physics_mat[i].elemVarCode[0] == '2'){
             printf("SW2 Activated for 2d physics mat id %d\n",i);
         }else if(sm->elem2d_physics_mat[i].elemVarCode[0] == '6'){
@@ -220,9 +240,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
         }
 
     }
-
     for(i=0;i<nphysics_mat_3d;i++){
-
         if (sm->elem3d_physics_mat[i].elemVarCode[0] == '3'){
             printf("SW3 Activated for 3d physics mat id %d\n",i);
         }else if(sm->elem2d_physics_mat[i].elemVarCode[0] == '4'){
@@ -240,37 +258,37 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
         }
     }
 
-    
+
+
+
+
+    //Use infor in physics_mat to establish correct pointers to residual routines
+    //i think it may make sense to include the elem_physics structure as
+    //part of the physics mat
     printf("Initializing elem physics routines\n");
-    if (sm->nphysics_mat_1d > 0){
-        selem_physics_alloc_init(&sm->elem1d_physics, sm->nphysics_mat_1d, nSubModels);
-    }else if (sm->nphysics_mat_2d > 0){
-        selem_physics_alloc_init(&sm->elem2d_physics, sm->nphysics_mat_2d, nSubModels);
-    }else if (sm->nphysics_mat_3d >0){
-        selem_physics_alloc_init(&sm->elem3d_physics, sm->nphysics_mat_3d, nSubModels);
-    }
+    selem_physics_alloc_init(&sm->elem1d_physics, sm->nphysics_mat_1d, nSubModels);
+    selem_physics_alloc_init(&sm->elem2d_physics, sm->nphysics_mat_2d, nSubModels);
+    selem_physics_alloc_init(&sm->elem3d_physics, sm->nphysics_mat_3d, nSubModels);
     printf("Initialized elem physics routines\n");
+    
     //now use elemVarCode info to pick out the correct pointers to routines
     //maybe store this in some sort of dictionary sort of thing?
-
     //for now just hard code this one example, will go back and fix later once
     //we have the structs and methods figured out
     //how does this work?
     sm->elem2d_physics[0][0].fe_resid = fe_sw2_body_resid;
-    sm->elem2d_physics[0][0].ndof = 1;
-    
-    sm->elem2d_physics[0][0].physics_vars = (int*) tl_alloc(sizeof(int), sm->elem2d_physics[0][0].ndof);
+    sm->elem2d_physics[0][0].nvar = 1;
+    sm->elem2d_physics[0][0].physics_vars = (int*) tl_alloc(sizeof(int), sm->elem2d_physics[0][0].nvar);
     sm->elem2d_physics[0][0].physics_vars[0] = PERTURB_H;
     //sm->elem2d_physics[0][0].physics_vars[1] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[2] = PERTURB_V;
 
-    sm->elem2d_physics_mat_id = (int*) tl_alloc(sizeof(int), sm->grid->nelems2d);
-    for(i=0;i<sm->grid->nnodes;i++){
-        sm->elem2d_physics_mat_id[i] = 0;
-    }
+
 
 
     //hard code nodal vars too and dof_map_local, easy because it is all same
+    //need to form routines to form correct nodal mats
+    //this will give us proper mappings
     sm->nphysics_mat_node = 1;
     sm->node_physics_mat_id = (int*) tl_alloc(sizeof(int), sm->grid->nnodes);
     for(i=0;i<sm->grid->nnodes;i++){
@@ -285,27 +303,32 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     }
 
 
-
     //also need to set the variables, not just equations
     //elemental materials first
     sm->elem2d_physics_mat[0].nvar=3;
     sm->elem2d_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->elem2d_physics_mat->nvar);
-    sm->elem2d_physics_mat[0].vars[0] = PERTURB_H;
+    sm->elem2d_physics_mat[0].vars[0] = PERTURB_V;
     sm->elem2d_physics_mat[0].vars[1] = PERTURB_U;
-    sm->elem2d_physics_mat[0].vars[2] = PERTURB_V;
+    sm->elem2d_physics_mat[0].vars[2] = PERTURB_H;
     sm->elem2d_physics_mat[0].nSubmodels = 1;
     //same for nodes
     sm->node_physics_mat[0].nvar=3;
     sm->node_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->node_physics_mat->nvar);
-    sm->node_physics_mat[0].vars[0] = PERTURB_H;
+    sm->node_physics_mat[0].vars[0] = PERTURB_V;
     sm->node_physics_mat[0].vars[1] = PERTURB_U;
-    sm->node_physics_mat[0].vars[2] = PERTURB_V;
+    sm->node_physics_mat[0].vars[2] = PERTURB_H;
 
     //initalize residual vector
+    //need a routine to get ndofs for all of this
+    //hard coded for now
     sm->ndofs = sm->grid->nnodes*3;
     sm->residual = (double*) tl_alloc(sizeof(double), sm->ndofs);
     
     //make a trivial fmap_local
+    //maybe have special case when nmat is 1 to avoid storing this and use special case mapping
+
+    //in practice this fmap will be built element by element, not nodally
+    //for CG only nodal is OK
     sm->dof_map_local = (int*) tl_alloc(sizeof(int), sm->grid->nnodes);
     for(i=0;i<sm->grid->nnodes;i++){
         sm->dof_map_local[i] = i*3;

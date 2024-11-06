@@ -52,14 +52,16 @@ $(wildcard $(MASTER_SRC_DIR)../structs/sseries) \
 $(wildcard $(MASTER_SRC_DIR)../structs/smodel_super) \
 $(wildcard $(MASTER_SRC_DIR).../structs/smodel_design) \
 $(wildcard $(MASTER_SRC_DIR)../residual) \
+$(wildcard $(MASTER_SRC_DIR)../jacobian)\
 $(wildcard $(MASTER_SRC_DIR)../la) \
 $(wildcard $(MASTER_SRC_DIR)../fe) \
 $(wildcard $(MASTER_SRC_DIR)../sw2) \
 $(wildcard $(MASTER_SRC_DIR)../test/la) \
 $(wildcard $(MASTER_SRC_DIR)../test/residual) \
+$(wildcard $(MASTER_SRC_DIR)../test/jacobian) \
 $(wildcard $(MASTER_SRC_DIR)../main)
-#$(wildcard $(MASTER_SRC_DIR)../jacobian)#
-#$(wildcard $(MASTER_SRC_DIR)../test/jacobian)
+
+
 
 
 
@@ -91,13 +93,17 @@ $(MASTER_SRC_DIR)../structs/sseries \
 $(MASTER_SRC_DIR)../structs/smodel_super \
 $(MASTER_SRC_DIR)../structs/smodel_design \
 $(MASTER_SRC_DIR)../residual \
+$(MASTER_SRC_DIR)../jacobian \
 $(MASTER_SRC_DIR)../la \
 $(MASTER_SRC_DIR)../fe \
 $(MASTER_SRC_DIR)../sw2 \
 $(MASTER_SRC_DIR)../test/la \
-$(MASTER_SRC_DIR)../test/residual
-#$(MASTER_SRC_DIR)../jacobian #
-#$(MASTER_SRC_DIR)../test/jacobian
+$(MASTER_SRC_DIR)../test/residual \
+$(MASTER_SRC_DIR)../test/jacobian
+
+
+
+
 #/opt/homebrew/include/suitesparse
 #/opt/homebrew/include
 

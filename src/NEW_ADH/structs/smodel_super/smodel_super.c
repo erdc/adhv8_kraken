@@ -279,7 +279,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     sm->elem2d_physics[0][0].fe_resid = fe_sw2_body_resid;
     sm->elem2d_physics[0][0].nvar = 1;
     sm->elem2d_physics[0][0].physics_vars = (int*) tl_alloc(sizeof(int), sm->elem2d_physics[0][0].nvar);
-    sm->elem2d_physics[0][0].physics_vars[0] = PERTURB_H;
+    sm->elem2d_physics[0][0].physics_vars[0] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[1] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[2] = PERTURB_V;
 

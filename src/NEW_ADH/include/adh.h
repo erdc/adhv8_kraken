@@ -75,7 +75,7 @@
 
 //Mark added
 #include "residual.h"
-//#include "jacobian.h"
+#include "jacobian.h"
 #include "la.h"
 //Mark added physics module
 #include "fe.h"
@@ -90,5 +90,5 @@
 //Mark added
 #include "testla.h"
 #include "testresidual.h"
-//#include "testjacobian.h"
+#include "testjacobian.h"
 //#endif

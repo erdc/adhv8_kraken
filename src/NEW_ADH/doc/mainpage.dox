@@ -70,8 +70,67 @@ Would be nice:
 
 Notes:
 - 
+On generation of d.o.f mappings:
 
+For CG, we adopt the convention that the global d.o.f. ordering will coincide with the global "nodal" ordering. If in parallel we assume the global nodal ordering is contiguous on local nodes for each process. Note for order 1 Lagrange, this means that this coincides with grid nodes but this can also generalize to higher orders given a global nodal basis ordering. In AdH Kraken, for a single super model we are given a list of cells each with a physics material ID number. For each unique physics material ID number, the user will specify which set of physics equations they want to solve on cells marked with that ID. The physics equation selections will then allow us to establish what the active variables are on each cell in the mesh. (We will restrict users so that for a physics material, you may only define one physics equation for a specific variable. For example, one would not be able to define both diffusive wave and shallow water equations on the same cell since they both have water depth as a solution variable).  The global ordering of d.o.f.s then will look something like:
 
+node1var1,node1var2,node1var3,..,node2var1,node2var2,node2var3,....
 
+A difficulty arises due to the fact that the number of variables from node to node can vary in an arbitrary way based on where IDs are defined (ONLY IF THERE ARE MULTIPLE IDS DEFINED). Changing nodal variables can occur on interfaces between 2 unique IDs or for separate regions with different physics IDs. To be able to go from cell # to dof numbering, we propose the following ideas.
+
+We assume we have read the mesh and that we know the physics mat ID for each cell, and we also have an array of the active variables on each physics mat. To build up the global degree of freedom ordering we could create a temporary arrays which will store: (1) the number of unique variables at each node and (2) the set of unique variables at each node. We then loop through each cell in the following fashion:
+
+for i=0:n_cells
+    nodes_on_cell <-- cell[i].nnodes
+    physicsMatID <-- physics_ID[i]
+    cell_nvars <-- physics_mat[physicsMatID].nvars
+    cell_vars[] <-- physics_mat[physicsMatID].vars
+
+    for j=0:nodes_on_cell
+        nodeID <--cell[i].nodes[j]
+        nodal_vars[]<--all_nodal_vars[nodeID]
+        unique_vars <-- intersection(cell_vars,nodal_vars)
+        n_unique_vars <-- len(unique_vars)
+        nodal_nvars[nodeID] += n_unique_vars
+        nodal_vars[].append(unique_vars)
+        all_nodal_vars[nodeID]<--nodal_vars[]
+
+Then after this is established, we can condense this information into "nodal" physics mats. We can do this by sweeping through node by node and find only the unique combos of nodal_vars and nodal_nvars. The nodal arrays can then be deleted. Another idea, instead of forming these temporary nodal arrays maybe we could create a set of nodal material physics materials as we go. We would know how many physics mats we have in advance so maybe we could generate all possible nodal materials before hand and then search cell by cell until we have the nodal material IDs. For example if we at just 2 unique mat IDs, then at most we could have 3 nodal mat IDs. We could then loop element by element and find which node ends up with which elemental material ID and store that, if a node is looped over and a second ID is found then the nodal ID can be changed since this is now obviously at an interface. The tough question is, for a general setup of n physics material IDs, how many possible nodal material IDs could there be? Number of intersections depend on element types, so would it be essentially the cardinality of the power set of the set (1,2,..,n)? Maybe we could figure this out but the above approach should cover any case. Maybe we dont need to know this though. Maybe we can just store the element mat IDs encountered node by node and then figure out that after the fact. This could look something like:
+for i=0:n_cells
+    nodes_on_cell <-- cell[i].nnodes
+    physicsMatID <-- physics_ID[i]
+    cell_nvars <-- physics_mat[physicsMatID].nvars
+    cell_vars[] <-- physics_mat[physicsMatID].vars
+
+    for j=0:nodes_on_cell
+        nodeID <--cell[i].nodes[j]
+        if (physicsMatID is not member of nodal_mat_IDs[nodeID]):
+            nodal_mat_IDs[nodeID].append(physicsMatID)
+            nodal_nmat_IDs+=1
+
+I like this idea, this would be more efficient and we could use this information to form the nodal physics after this cell loop. Another alternative would be to loop node by node, find all cells associated with that node and then take union of all those variables. This approach seems the most straightforward but finding the connection between a node and its cells is not stored explicitly and so it may be highly expensive I would expect (but maybe not with graph based algorithms maybe?).
+
+Now that we hace nodal physics mat IDs for every node in our global set of basis functions, we then can construct the mappings we need. The most commonly used one we will use is get the global dof #s associated with a particular cell. Meaning, if we have a cell with 3 nodes and the variables we want on those 3 nodes then we should be able to find where that lies in the global system of equations. There are several options we can do to make this. 
+
+(1) A first approach that would be simple but highly memory intensive is to explicitly store the global dofs on each cell, so when a cell number is given it is as simple as retrieving the numbers from an array.
+
+Another approach would be to use some sort of implicit calculations to find the dofs given a cell number. One way we could do that is the following:
+
+(2) take in as input, the cell and the variables of the dofs we want on that cell, as well as the nodal materials. If we have this information then we could find global dofs by the folllowing summation:
+
+global dof # (nodeID,variable) = sum_(i=0:nodeID-1) nodal_physics_mat[nodal_physics_mat_ID[i]].nvars
++ the var # of the variable of interest at node=nodeID
+
+(3) A middle of the road approach could use a stored array that keeps the summations
+fmap[j] = sum_(i=0:j) nodal_physics_mat[nodal_physics_mat_ID[i]].nvars
+
+and then the global dof # could be extracted simply as:
+global dof # (nodeID,variable) = fmap[nodeID]
++ the nodal physics mat var index of the variable of interest at node=nodeID
+
+Strategy(2) is implemented in dofmaps/cg_maps.c in routine get_cell_dofs_2
+Strategy(3) is implemented in dofmaps/cg_maps.c in routine get_cell_dofs
+
+Another point of interest will be to extract local values to a cell given a global array. This can easily be achieved by finding the global dof# associated with nodeID and variable and using that as the index for a vector.
 
  */

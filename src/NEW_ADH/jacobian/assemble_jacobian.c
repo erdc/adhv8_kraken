@@ -1,4 +1,5 @@
 #include "adh.h"
+static int DEBUG = OFF;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -16,16 +17,36 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
-    int j,k;
+    int j,k,l,m;
     int* fmap = sm->dof_map_local;
+    int* ghosts = sm->ghosts;
     int nsubMods;
     int ndofs_ele;
-    int nvar_ele,nodes_on_ele, var_code;
+    int nvar_ele,nnodes, var_code;
+    int node_id, node_mat_id;
+    int nvar_node[MAX_NNODE];
 
     //maybe change this from 3 to 2 to 1
     int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
-    double elem_mat[max_elem_dofs][max_elem_dofs];
+    double **elem_mat;
+    elem_mat = (double**) tl_alloc(sizeof(double*), max_elem_dofs);
+    for(j=0;j<max_elem_dofs;j++){
+        elem_mat[j] = (double*) tl_alloc(sizeof(double), max_elem_dofs);
+    }
     int dofs[max_elem_dofs],global_dofs[max_elem_dofs];
+
+
+    //allocate 2d array, more memory than necessary
+    //int vars_node[MAX_NNODE][MAX_NVAR];
+    int **vars_node;
+    vars_node = (int**) tl_alloc(sizeof(int*), MAX_NNODE);
+    for(j=0;j<MAX_NNODE;j++){
+        vars_node[j] = (int*) tl_alloc(sizeof(int), MAX_NVAR);
+        for(k=0;k<MAX_NVAR;k++){
+            vars_node[j][k]=0;
+        }
+    }
+
 
     //zero out stuff
     sarray_init_dbl(sm->vals_diag, sm->nnz_diag);
@@ -37,114 +58,159 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
     local_range[0]= sm->local_range[0];
     local_range[1]= sm->local_range[1];
     int mat_id, nvars_elem, nphysics_models;
+    int elem_vars[MAX_NVAR];
     //need sm->local_range whih is array of integers giving range (if process owned rows 0,1,2,3) then 
     // local range would be 0,4
     //loop through all nelem3d
-    for (j=0;j<grid->nelem3d;j++){
+    for (j=0;j<grid->nelems3d;j++){
 
-            //pull all global information to local memory
-            mat_id = sm->elem3d_physics_mat_id[j];
-            //Get stuff from physics mat
-            nvars_elem = sm->elem3d_physics_mat[mat_id].nvar;
-            //get array of variables specified on element
-            sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem);
-            //number of phyics routines on element
-            nphysics_models = sm->elem3d_physics_mat[mat_id].nSubmodels;
-            //allows for mixed geometry quad/tri mesh
-            nodes_on_ele = grid->elem3d[j].nnodes;
-            ndofs_ele = nvar_ele*nodes_on_ele;
-            //needs to be for 2d matrix
-            sarray_init_mat(max_elem_dofs, max_elem_dofs,elem_mat);
-            //maybe pull local nodal nvars and vars here too:
-            //only necessary for CG i believe (or not idk)
-            //if generalizing to higher dimension, this would be dof on basis functions
-            for (l=0;l<nnodes;l++){
-                node_id = grid->elem3d[j].nodes[l];
-                node_mat_id = sm->node_physics_mat_id[node_id];
-                nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
-                for(m=0;m<nvar_node[l];m++){
-                    vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
-                }
+        //pull all global information to local memory
+        mat_id = sm->elem3d_physics_mat_id[j];
+        //Get stuff from physics mat
+        nvars_elem = sm->elem3d_physics_mat[mat_id].nvar;
+        //get array of variables specified on element
+        sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem);
+        //number of phyics routines on element
+        nphysics_models = sm->elem3d_physics_mat[mat_id].nSubmodels;
+        //allows for mixed geometry quad/tri mesh
+        nnodes = grid->elem3d[j].nnodes;
+        ndofs_ele = nvar_ele*nnodes;
+        //needs to be for 2d matrix
+        sarray_init_double_2d(elem_mat,max_elem_dofs, max_elem_dofs);
+        //maybe pull local nodal nvars and vars here too:
+        //only necessary for CG i believe (or not idk)
+        //if generalizing to higher dimension, this would be dof on basis functions
+        for (l=0;l<nnodes;l++){
+            node_id = grid->elem3d[j].nodes[l];
+            node_mat_id = sm->node_physics_mat_id[node_id];
+            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+            for(m=0;m<nvar_node[l];m++){
+                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
             }
-            //need to loop over each variable and perturb it
-            for (k=0;k<nvar_ele;k++){
-
-                //use var code like PERTURB_H ,. ...
-                //maybe get this from mat instead too!
-                var_code = sm->elem3d_vars[mat_id][k];
-                //want to loop over variables not necessarily submodels right?
-                //need to think about this more
-                //like sw2 is vector equation so that we would need 3 perturbations
-                perturb_var(elem_mat, sm, grid, mat, sm->elem3d_physics[mat_id], j, nodes_on_ele, nvar_ele, sm->elem3d_vars[mat_id],var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
-            }
-            //store in global using 2 mappings
-            //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
-            //this gets dofs local to process
-            get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[mat_id],sm->nodal_nvars, sm->nodal_vars);
-            //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-            local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
-            //temp has local elemental matrix 
-            //single CSR, we will keep for now but want to use split insted      
-            //load_global_mat_CSR(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
-            //split CSR
-            load_global_mat_split_CSR(sm->diag_vals, sm->diag_indptr, sm->diag_indices, sm->off_diag_vals, sm->off_diag_indptr, sm->global_off_diag_indices, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
+        }
+        //need to loop over each variable and perturb it
+        for (k=0;k<nvars_elem;k++){
+            //use var code like PERTURB_H ,. ...
+            //maybe get this from mat instead too!
+            var_code = elem_vars[k];
+            //want to loop over variables not necessarily submodels right?
+            //need to think about this more
+            //like sw2 is vector equation so that we would need 3 perturbations
+            perturb_var(elem_mat, sm, sm->elem3d_physics[mat_id], j, nnodes, nvar_ele, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
+        }
+        //store in global using 2 mappings
+        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+        //this gets dofs local to process
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
+        //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
+        //temp has local elemental matrix 
+        //single CSR, we will keep for now but want to use split insted      
+        //load_global_mat_CSR(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
+        //split CSR
+        load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
     }
 
     //maybe change max_elem_dofs from element to element?
 
+    //2d loop
+    for (j=0;j<grid->nelems2d;j++){
 
-    //loop through all nelem2d
-    for (j=0;j<grid->nelem2d;j++){
-        nvar_ele = sm->elem2d_nvars[j];
-        nodes_on_ele = grid->elem2d[j].nnodes;
-        ndofs_ele = nvar_ele*nodes_on_ele;
-        nsubMods = sm->nSubMods2d[j];
+        //pull all global information to local memory
+        mat_id = sm->elem2d_physics_mat_id[j];
+        //Get stuff from physics mat
+        nvars_elem = sm->elem2d_physics_mat[mat_id].nvar;
+        //get array of variables specified on element
+        sarray_copy_int(elem_vars, sm->elem2d_physics_mat[mat_id].vars, nvars_elem);
+        //number of phyics routines on element
+        nphysics_models = sm->elem2d_physics_mat[mat_id].nSubmodels;
+        //allows for mixed geometry quad/tri mesh
+        nnodes = grid->elem2d[j].nnodes;
+        ndofs_ele = nvar_ele*nnodes;
         //needs to be for 2d matrix
-        sarray_init_dbl(elem_mat,maxe_elem_dofs*max_elem_dofs);
-        for (k=0;k<nvar_ele;k++){
+        sarray_init_double_2d(elem_mat,max_elem_dofs, max_elem_dofs);
+        //maybe pull local nodal nvars and vars here too:
+        //only necessary for CG i believe (or not idk)
+        //if generalizing to higher dimension, this would be dof on basis functions
+        for (l=0;l<nnodes;l++){
+            node_id = grid->elem2d[j].nodes[l];
+            node_mat_id = sm->node_physics_mat_id[node_id];
+            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+            for(m=0;m<nvar_node[l];m++){
+                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+            }
+        }
+        //need to loop over each variable and perturb it
+        for (k=0;k<nvars_elem;k++){
             //use var code like PERTURB_H ,. ...
-            var_code = sm->elem2d_vars[j][k];
+            //maybe get this from mat instead too!
+            var_code = elem_vars[k];
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, grid, mat, sm->elem2d_physics, j, nodes_on_ele, nvar_ele, sm->elem2d_vars[mat_id],var_code, nsubMods, k, grid->elem2d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem3d_physics[mat_id], j, nnodes, nvar_ele, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,sm->elem2d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
-        //temp has local elemental matrix       
-        //load_global_mat(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
-        load_global_mat_split_CSR(sm->diag_vals, sm->diag_indptr, sm->diag_indices, sm->off_diag_vals, sm->off_diag_indptr, sm->global_off_diag_indices, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
+        //temp has local elemental matrix 
+        //single CSR, we will keep for now but want to use split insted      
+        //load_global_mat_CSR(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
+        //split CSR
+        load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
     }
     //loop through all nelem1d
-    for (j=0;j<grid->nelem1d;j++){
-        nvar_ele = sm->elem1d_nvars[j];
-        nodes_on_ele = grid->elem1d[j].nnodes;
-        ndofs_ele = nvar_ele*nodes_on_ele;
-        nsubMods = sm->nSubMods1d[j];
+    for (j=0;j<grid->nelems1d;j++){
+
+        //pull all global information to local memory
+        mat_id = sm->elem1d_physics_mat_id[j];
+        //Get stuff from physics mat
+        nvars_elem = sm->elem1d_physics_mat[mat_id].nvar;
+        //get array of variables specified on element
+        sarray_copy_int(elem_vars, sm->elem1d_physics_mat[mat_id].vars, nvars_elem);
+        //number of phyics routines on element
+        nphysics_models = sm->elem1d_physics_mat[mat_id].nSubmodels;
+        //allows for mixed geometry quad/tri mesh
+        nnodes = grid->elem1d[j].nnodes;
+        ndofs_ele = nvar_ele*nnodes;
         //needs to be for 2d matrix
-        sarray_init_dbl(elem_mat,maxe_elem_dofs*max_elem_dofs);
-        for (k=0;k<nvar_ele;k++){
+        sarray_init_double_2d(elem_mat,max_elem_dofs, max_elem_dofs);
+        //maybe pull local nodal nvars and vars here too:
+        //only necessary for CG i believe (or not idk)
+        //if generalizing to higher dimension, this would be dof on basis functions
+        for (l=0;l<nnodes;l++){
+            node_id = grid->elem1d[j].nodes[l];
+            node_mat_id = sm->node_physics_mat_id[node_id];
+            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+            for(m=0;m<nvar_node[l];m++){
+                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+            }
+        }
+        //need to loop over each variable and perturb it
+        for (k=0;k<nvars_elem;k++){
             //use var code like PERTURB_H ,. ...
-            var_code = sm->elem1d_vars[j][k];
+            //maybe get this from mat instead too!
+            var_code = elem_vars[k];
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, grid, mat, sm->elem1d_physics, j, nodes_on_ele, nvar_ele, sm->elem1d_vars[j],var_code, nsubMods, k, grid->elem1d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem1d_physics[mat_id], j, nnodes, nvar_ele, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
-        //temp has local elemental matrix       
-        //load_global_mat(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
-        load_global_mat_split_CSR(sm->diag_vals, sm->diag_indptr, sm->diag_indices, sm->off_diag_vals, sm->off_diag_indptr, sm->global_off_diag_indices, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
-    }    
+        //temp has local elemental matrix 
+        //single CSR, we will keep for now but want to use split insted      
+        //load_global_mat_CSR(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
+        //split CSR
+        load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
+    } 
 }
 
 
@@ -176,8 +242,9 @@ void load_global_mat_split_CSR(double *vals, int *indptr, int *indices, double *
     //need local to global mapping stores in global_dofs
     //assume we have at least global row start that this PE owns
     int col_start_ind,col_end_ind,col_index;
-    int global_row,row,col;
+    int global_row,row,col, global_col;
     int nrows = local_range[1]-local_range[0];
+
 
     /// assembles global residual
     // i and j are the row number and col number in elemental matrix
@@ -201,7 +268,7 @@ void load_global_mat_split_CSR(double *vals, int *indptr, int *indices, double *
                     //get offset of where to place value by binary search through part of the indices array
                     col_index = binary_search_part(indices, col_start_ind, col_end_ind, col);
                     //now that we have the index, add to values
-                    vals[col_index] +=elem_mat[i,j];
+                    vals[col_index] += elem_mat[i][j];
                 }
                 else{
                     //otherwise we are on off-diagonal part
@@ -214,7 +281,7 @@ void load_global_mat_split_CSR(double *vals, int *indptr, int *indices, double *
                     //get offset of where to place value by binary search through part of the indices array
                     col_index = binary_search_part(off_diag_indices, col_start_ind, col_end_ind, global_col);
                     //now that we have the index, add to values
-                    off_diag_vals[col_index] +=elem_mat[i,j];
+                    off_diag_vals[col_index] +=elem_mat[i][j];
 
                 }
             }
@@ -250,7 +317,7 @@ void load_global_mat_CSR(double *vals, int *indptr, int *indices, double **elem_
     //need local to global mapping stores in global_dofs
     //assume we have at least global row start that this PE owns
     int col_start_ind,col_end_ind,col_index;
-    int global_row,row;
+    int global_row,row, global_col;
 
     /// assembles global residual
     // i and j are the row number and col number in elemental matrix
@@ -263,7 +330,7 @@ void load_global_mat_CSR(double *vals, int *indptr, int *indices, double **elem_
         //we only need to fill in columns if the current row is local to process
         if(global_row>=local_range[0] && global_row < local_range[1]){
             //get row local to process
-            row = global_row-local_range[0]
+            row = global_row-local_range[0];
             //get column indices for this specific row
             col_start_ind = indptr[row];
             col_end_ind = indptr[row+1];
@@ -273,7 +340,7 @@ void load_global_mat_CSR(double *vals, int *indptr, int *indices, double **elem_
                 //get offset of where to place value by binary search through part of the indices array
                 col_index = binary_search_part(indices, col_start_ind, col_end_ind, global_col);
                 //now that we have the index, add to values
-                vals[col_index] +=elem_mat[i,j];
+                vals[col_index] += elem_mat[i][j];
             }
         }
     }
@@ -341,25 +408,30 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
     double temp_M[MAX_NVAR*MAX_NNODE];
     double elem_rhs_P[MAX_NVAR*MAX_NNODE];    // +head perturbation initialized by elem_resid
     double elem_rhs_M[MAX_NVAR*MAX_NNODE];    // -head perturbation initialized by elem_resid
-    int eq_var_code,eq_var_code2;
+    int eq_var_code,eq_var_code2,nvar_pde;
+    int physics_vars[MAX_NVAR];
 
         
 
     //Mark add switch cases for all sol_var
     //switch case for which sm->sol_var
-    double temp_sol[nnode];
-    if (perturb_var_code == PERTURB_H){
-        temp_sol = sm->head;
-    }else if (perturb_var_code == PERTURB_U){
-        temp_sol = sm->vel2d.x;
-    }else if (perturb_var_code == PERTURB_V){
-        temp_sol = sm->vel2d.y
-    }
+    double temp_sol;
+//    if (perturb_var_code == PERTURB_H){
+//        temp_sol = sm->head;
+//    }else if (perturb_var_code == PERTURB_U){
+//        temp_sol = sm->vel2d->x;
+//    }else if (perturb_var_code == PERTURB_V){
+//        temp_sol = sm->vel2d->y
+//    }
 
     
     for (i=0; i<nodes_on_element; i++) {
         NodeID = NodeIDs[i];
-        NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol[NodeID], perturbation);    // calculates epsilon and 2*epsilon
+        //pull dof # to get info
+        //for now use CG map in here
+
+        temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->node_physics_mat, sm->node_physics_mat_id)];
+        NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol, perturbation);    // calculates epsilon and 2*epsilon
         sarray_init_dbl(elem_rhs_P,MAX_NVAR*MAX_NNODE);
         sarray_init_dbl(elem_rhs_M,MAX_NVAR*MAX_NNODE);
 
@@ -375,8 +447,11 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
 #endif
 
             //this will give a local residual, in temp and will give code for model vars
-            eq_var_code = elem_physics[j]->fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
-            add_replace_elem_rhs(elem_rhs_P,temp_P,elem_vars,nvar_ele,eq_var_code,nodes_on_element);
+            nvar_pde = elem_physics[j].nvar;
+            sarray_init_int(physics_vars, nvar_pde);
+            sarray_copy_int(physics_vars, elem_physics[j].physics_vars,nvar_pde);
+            eq_var_code = elem_physics[j].fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
+            add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element);
             
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
@@ -385,8 +460,8 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
 #endif
             //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
             //should always be same as var_code
-            eq_var_code2 = elem_physics[j]->fe_resid(sm,temp_M,ie, epsilon,i, perturb_var_code, -1, DEBUG);
-            add_replace_elem_rhs(elem_rhs_M,temp_M,elem_vars,nvar_ele,eq_var_code2,nodes_on_element);
+            eq_var_code2 = elem_physics[j].fe_resid(sm,temp_M,ie, epsilon,i, perturb_var_code, -1, DEBUG);
+            add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         }
@@ -421,7 +496,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-inline void elem_matrix_deriv(int node_no, int dof_no, int nnodes, int elem_nvars, double *local1, double *local2, double *mat, double diff_ep) {
+inline void elem_matrix_deriv(int node_no, int dof_no, int nnodes, int elem_nvars, double *local1, double *local2, double **mat, double diff_ep) {
     int inode,jvar, col_no, indx;
     col_no = node_no*elem_nvars + dof_no;
 

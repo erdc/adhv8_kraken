@@ -69,6 +69,26 @@ void sarray_copy_int(int *to, int *from, int nsize) {
     }
 }
 //----------------------------------------------------//
+//*****************************************************//
+void sarray_init_int_2d(int **to, int nrows, int ncols) {
+    int i,j;
+    for (i=0; i<nrows; i++) {
+        for (j=0; j<ncols; j++) {
+            to[i][j] = 0;
+        }
+    }
+}
+//----------------------------------------------------//
+//*****************************************************//
+void sarray_init_double_2d(double **to, int nrows, int ncols) {
+    int i,j;
+    for (i=0; i<nrows; i++) {
+        for (j=0; j<ncols; j++) {
+            to[i][j] = 0.0;
+        }
+    }
+}
+//----------------------------------------------------//
 void sarray_copy_dbl(double *to, double *from, int nsize) {
     int i;
     for (i=0; i<nsize; i++) {

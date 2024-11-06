@@ -70,4 +70,7 @@ void sarray_matrix_matrix_multiply(double **matrix1, double **matrix2, double **
 int sarray_max_int(int a[], int num_elements);
 double sarray_max_dbl(double a[], int num_elements);
 
+void sarray_init_int_2d(int **to, int nrows, int ncols);
+void sarray_init_double_2d(double **to, int nrows, int ncols);
+
 #endif

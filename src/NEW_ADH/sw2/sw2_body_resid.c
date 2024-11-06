@@ -52,7 +52,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     //printf("Nnodes %d\n",nnodes);
     double f[nnodes];
     for (int i =0;i<nnodes;i++){
-        f[i] = 2.0;
+        f[i] = mod->grid->elem2d[ie].nodes[i];
     }
     integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, f, elem_rhs);
 

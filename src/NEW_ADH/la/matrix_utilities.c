@@ -26,8 +26,9 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     int nCon2d = 7*3*MAX_NVAR;
     int nCon3d = 16*4*MAX_NVAR;
 
-    int nrows = sm->local_range[1]-sm->local_range[0];
 
+    int *local_range = sm->local_range;
+    int nrows = local_range[1]-local_range[0];
     // preallocate upfront with these dimensions. work out syntax later
     //my best idea for now, maybe way to avoid these but cant think of another way for now
 
@@ -37,36 +38,49 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     int temp_cols_off_diag[nrows][nCon3d];
     int nnz_rows_diag[nrows];
     int nnz_rows_off_diag[nrows];
-    sarray_init_int(nnz_rows_diag, nrows);
-    sarray_init_int(nnz_rows_off_diag, nrows);
+
+
 
     //loop through all nelem3d to mark sparsity
-    int row;
+    int row,col;
     int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
     int dofs[max_elem_dofs],global_dofs[max_elem_dofs];
     int nnodes;
     int nvars_elem;
     int ndofs_ele;
-    int j, matid;
+    int i,j,k,l, mat_id;
+    int elem_vars[MAX_NVAR];
 
-    //comment out for now until frontend is fixed
-    /*
+    sarray_init_int(nnz_rows_diag, nrows);
+    sarray_init_int(nnz_rows_off_diag, nrows);
+    //also initialize cols
+    for (i=0;i<nrows;i++){
+        for(l=0;l<nCon3d;l++){
+            temp_cols_diag[i][l] = INT_MAX;
+            temp_cols_off_diag[i][l] = INT_MAX;
+
+        }
+    }
 
     //loop thorugh each element and find sparsity
     for (j=0;j<grid->nelems3d;j++){
         nnodes = grid->elem3d[j].nnodes;
-        //This comes from physics mat?
-        matid = grid->elem3d[j].mat;
-        nvars_elem = sm->elem3d_physics[matid].ndof;
+        //pull all global information to local memory
+        mat_id = sm->elem3d_physics_mat_id[j];
+        //Get stuff from physics mat
+        nvars_elem = sm->elem3d_physics_mat[mat_id].nvar;
+        //get array of variables specified on element
+        sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem);
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,sm->elem3d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
+        get_cell_dofs_2(dofs, nnodes, grid->elem3d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,sm->ghosts);
         
         //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
         for (k=0;k<ndofs_ele;k++){
@@ -76,16 +90,17 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
             //we only need to fill in columns if the current row is local to process
             if(row<nrows){
                 for (l=0;l<ndofs_ele;l++){
-                    //differentiate  between diag and off diag blocks
-                    if (row<nrows){
+                    //differentiate  between diag and off diag blocks by column number (local to process)
+                    col = dofs[l];
+                    if (col<nrows){
                         //then this is on diagonal block and we want column numbers local to proces
-                        temp_cols_diag[row,nnz_rows_diag[k]]=dofs[l];
-                        nnz_rows_diag[k]+=1;
+                        temp_cols_diag[row][nnz_rows_diag[row]]=col;
+                        nnz_rows_diag[row]+=1;
                     }
                     else{
                         //otherwise we are on off-diagonal and need global dof
-                        temp_cols_off_diag[row,nnz_rows_off_diag[k]]=global_dofs[l];
-                        nnz_rows_off_diag[k]+=1;
+                        temp_cols_off_diag[row][nnz_rows_off_diag[row]]=global_dofs[l];
+                        nnz_rows_off_diag[row]+=1;
 
                     }
                 }
@@ -95,19 +110,26 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     }
 
     //do 2d elements and then 1d
+    //loop thorugh each element and find sparsity
     for (j=0;j<grid->nelems2d;j++){
         nnodes = grid->elem2d[j].nnodes;
-        //This comes from physics mat
-        nvars_elem = sm->elem2d_nvars[j];
+        //pull all global information to local memory
+        mat_id = sm->elem2d_physics_mat_id[j];
+        //Get stuff from physics mat
+        nvars_elem = sm->elem2d_physics_mat[mat_id].nvar;
+        //get array of variables specified on element
+        sarray_copy_int(elem_vars, sm->elem2d_physics_mat[mat_id].vars, nvars_elem);
+        //printf("elemental variables copied\n");
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,sm->elem2d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
+        get_cell_dofs_2(dofs, nnodes, grid->elem2d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,sm->ghosts);
         
         //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
         for (k=0;k<ndofs_ele;k++){
@@ -117,16 +139,17 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
             //we only need to fill in columns if the current row is local to process
             if(row<nrows){
                 for (l=0;l<ndofs_ele;l++){
+                    col = dofs[l];
                     //differentiate  between diag and off diag blocks
-                    if (row<nrows){
+                    if (col<nrows){
                         //then this is on diagonal block and we want column numbers local to proces
-                        temp_cols_diag[row,nnz_rows_diag[k]]=dofs[l];
-                        nnz_rows_diag[k]+=1;
+                        temp_cols_diag[row][nnz_rows_diag[row]]=col;
+                        nnz_rows_diag[row]+=1;
                     }
                     else{
                         //otherwise we are on off-diagonal and need global dof
-                        temp_cols_off_diag[row,nnz_rows_off_diag[k]]=global_dofs[l];
-                        nnz_rows_off_diag[k]+=1;
+                        temp_cols_off_diag[row][nnz_rows_off_diag[row]]=global_dofs[l];
+                        nnz_rows_off_diag[row]+=1;
 
                     }
                 }
@@ -134,20 +157,31 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
 
         }
     }
+    //printf("Creating sparsity completed 2d elem loop\n");
+    //printf("NNZ rows off diag%d\n",nnz_rows_off_diag[0]);
+    //for (j=0;j<nrows;j++){
+    //    printf("NNZ rows diag[%d]: %d,\n",j,nnz_rows_diag[j]);
+    //}
     //now 1d
+    //loop thorugh each element and find sparsity
     for (j=0;j<grid->nelems1d;j++){
         nnodes = grid->elem1d[j].nnodes;
-        //maybe this just comes from mat instead
-        nvars_elem = sm->elem1d_nvars[j];
+        //pull all global information to local memory
+        mat_id = sm->elem1d_physics_mat_id[j];
+        //Get stuff from physics mat
+        nvars_elem = sm->elem1d_physics_mat[mat_id].nvar;
+        //get array of variables specified on element
+        sarray_copy_int(elem_vars, sm->elem1d_physics_mat[mat_id].vars, nvars_elem);
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,sm->elem1d_vars[j],sm->nodal_nvars, sm->nodal_vars);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
+        get_cell_dofs_2(dofs, nnodes, grid->elem1d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,sm->ghosts);
         
         //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
         for (k=0;k<ndofs_ele;k++){
@@ -157,16 +191,17 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
             //we only need to fill in columns if the current row is local to process
             if(row<nrows){
                 for (l=0;l<ndofs_ele;l++){
+                    col = dofs[l];
                     //differentiate  between diag and off diag blocks
-                    if (row<nrows){
+                    if (col<nrows){
                         //then this is on diagonal block and we want column numbers local to proces
-                        temp_cols_diag[row,nnz_rows_diag[k]]=dofs[l];
-                        nnz_rows_diag[k]+=1;
+                        temp_cols_diag[row][nnz_rows_diag[row]]=col;
+                        nnz_rows_diag[row]+=1;
                     }
                     else{
                         //otherwise we are on off-diagonal and need global dof
-                        temp_cols_off_diag[row,nnz_rows_off_diag[k]]=global_dofs[l];
-                        nnz_rows_off_diag[k]+=1;
+                        temp_cols_off_diag[row][nnz_rows_off_diag[row]]=global_dofs[l];
+                        nnz_rows_off_diag[row]+=1;
 
                     }
                 }
@@ -178,10 +213,18 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     //now that all nnz_cols* and nnz* are filled, we need to sort and remove duplicates
     // counter for the total number of non-zero entries
     int NNZ_diag = 0, NNZ_off_diag=0;
-    int *nnz_row_diag,*nnz_row_off_diag;
+    int nnz_row_diag,nnz_row_off_diag;
     //note nnz-rows is not actually nnz per row, includes duplicates
     //could be done with hybrid omp too?
-
+    for (j=0;j<nrows;j++){
+        printf("NNZ rows diag[%d]: %d,\n",j,nnz_rows_diag[j]);
+        printf("Some of the columns:\n");
+        for(l=0;l<nnz_rows_diag[j];l++){
+            printf("%d ",temp_cols_diag[j][l]);
+        }
+        printf("\n");
+    }
+    printf("Consoldiating info now\n");
     //do for diagonal and off diagonal blocks
     for (i=0;i<nrows;i++){
         // sort the column indices (j-entries)
@@ -189,37 +232,55 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         qsort(temp_cols_diag[i], nnz_rows_diag[i], sizeof(int), compare_ints);
         qsort(temp_cols_off_diag[i], nnz_rows_off_diag[i], sizeof(int), compare_ints);
         //this should hopefully remove duplicates?
-        nnz_row_diag = unique(temp_cols_diag[i], temp_cols_diag[i] + (sizeof(temp_cols_diag[i])/ sizeof(int)));
-        nnz_row_off_diag = unique(temp_cols_off_diag[i], temp_cols_off_diag[i] + (sizeof(temp_cols_off_diag[i])/ sizeof(int)));
+        nnz_row_diag = unique(temp_cols_diag[i], nnz_rows_diag[i]);
+        nnz_row_off_diag = unique(temp_cols_off_diag[i], nnz_rows_off_diag[i]);
+
+        //overwrite nnz row with unique?
+        nnz_rows_diag[i] = nnz_row_diag;
+        nnz_rows_off_diag[i] = nnz_row_off_diag;
         //add nnz in a row to the NNZ
         //maybe overwrire nnz_rows[i] instead if we want this stored, and then sum it
-        NNZ_diag+=*nnz_row_diag;
-        NNZ_off_diag+=*nnz_row_off_diag;
+        NNZ_diag+=nnz_row_diag;
+        NNZ_off_diag+=nnz_row_off_diag;
     }
-    sm->diag_nnz = NNZ; sm->off_diag_nnz= NNZ_off_diag;
+    sm->nnz_diag = NNZ_diag; sm->nnz_off_diag = NNZ_off_diag;
     
+    printf("NNZ DIAG = %d\n",sm->nnz_diag );
+
+    for (j=0;j<nrows;j++){
+        printf("UNIQUE NNZ rows diag[%d]: %d,\n",j,nnz_rows_diag[j]);
+        printf("UNIQUE columns:\n");
+        for(l=0;l<nnz_rows_diag[j];l++){
+            printf("%d ",temp_cols_diag[j][l]);
+        }
+        printf("\n");
+    }
     // resize as needed
     sm->cols_diag = (int *) tl_realloc(sizeof(int), sm->nnz_diag, sm->nnz_diag_old, sm->cols_diag);
     sm->vals_diag = (double *) tl_realloc(sizeof(double), sm->nnz_diag, sm->nnz_diag_old, sm->vals_diag);
     sm->cols_off_diag = (int *) tl_realloc(sizeof(int), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->cols_off_diag);
     sm->vals_off_diag = (double *) tl_realloc(sizeof(double), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->vals_off_diag);
     
+    printf("Reallocated vals and cols\n");
     // enumerate the sorted indices to populate COL_INDEX and ROW_INDEX for diag and off diag
     int count_diag=0;
     int count_off_diag = 0;
+    int *rn_diag, *rn_off_diag;
     for(i=0;i<nrows;i++){
+        printf("filling in index ptr and column entries, row %d\n",i);
         sm->indptr_diag[i] = count_diag;
         sm->indptr_off_diag[i] = count_off_diag;
-        //ask corey about syntax
-        &rn_diag = *temp_cols_diag[i];
-        &rn_off_diag = *temp_cols_diag[i];
+        printf("filling in index ptr and column entries, row %d\n",i);
+        //ask corey about syntax?
+        rn_diag = temp_cols_diag[i];
+        rn_off_diag = temp_cols_off_diag[i];
         //think about how to do this since each temp_rows may be different size
-        for(j=0;j<sizeof(rn_diag)/sizeof(int),j++){
-            sm->cols_diag[count] = rn_diag[j];
+        for(j=0;j<nnz_rows_diag[i];j++){
+            sm->cols_diag[count_diag] = rn_diag[j];
             count_diag++;
         }
-        for(j=0;j<sizeof(rn_off_diag)/sizeof(int),j++){
-            sm->cols_off_diag[count] = rn_off_diag[j];
+        for(j=0;j<nnz_rows_off_diag[i];j++){
+            sm->cols_off_diag[count_off_diag] = rn_off_diag[j];
             count_off_diag++;
         }
     }
@@ -227,12 +288,17 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     sm->indptr_diag[nrows] = count_diag;
     sm->indptr_off_diag[nrows] = count_off_diag;
     //destroy temp_rows?
-    
-    free(temp_cols_diag);
-    free(temp_cols_off_diag);
-    free(nnz_rows_diag);
-    free(nnz_rows_off_diag);
-    */
+    //not malloced so not necessary??
+    //printf("Loop complete\n");
+    //free(nnz_rows_diag);
+    //free(nnz_rows_off_diag);
+    //printf("Freed arrays");
+    //for(i=0;i<nrows;i++){
+    //    free(temp_cols_diag[i]);
+    //    free(temp_cols_off_diag[i]);
+    //}
+    printf("CSR sparsity completed\n");
+
 }
 
 
@@ -258,6 +324,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     // For now, we pre-allocate assuming that all nodes have the max number of equations attached.
     // This is not optimal, although the AdH storage is dumped to CCS and all extra zeros are removed before actually solving.
     // ndofs = nnodes * max_nsys (over-allocated for mixed dof systems)
+    printf("allocating solution\n");
     sm->residual = (double *) tl_realloc(sizeof(double), sm->ndofs, sm->ndofs_old, sm->residual);
     sm->sol =      (double *) tl_realloc(sizeof(double), sm->ndofs, sm->ndofs_old, sm->sol);
     sarray_init_dbl(sm->residual, sm->ndofs);
@@ -271,13 +338,15 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     
     //call routine to determine nnz? and where should we determine cols?
     //should we also keep nnz_row array for petsc? maybe not necessary
-
+    printf("Made residual and solution\n");
     //where does local_range get determined?
     //we now number of rows is sum(my_nnode*nodal_nvars)
     sm->indptr_diag= (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->indptr_diag);
     //if we split we have two structures
+    //if it is not parallel this should be zero!
+    //create conditional here
     sm->indptr_off_diag = (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->indptr_off_diag);
-    
+    printf("Made indptr\n");
     //find nnz and store in indices
     //this does a single CSR format
     //create_sparsity_CSR(sm, grid);
@@ -485,18 +554,18 @@ void fe_allocate_initialize_linear_system(SMODEL_SUPER *sm) {
 
 
 
-int* unique (int* first, int* last)
-{
-  if (first==last) return last;
+//int* unique (int* first, int* last)
+//{
+//  if (first==last) return last;//
 
-  int* result = first;
-  while (++first != last)
-  {
-    if (!(*result == *first)) 
-      *(++result)=*first;
-  }
-  return ++result;
-}
+//  int* result = first;
+//  while (++first != last)
+//  {
+//    if (!(*result == *first)) 
+//      *(++result)=*first;
+//  }
+//  return ++result;
+//}//
 
 int compare_ints(const void *a, const void *b) {
     return (*(int*)a - *(int*)b); // Ascending order
@@ -504,7 +573,23 @@ int compare_ints(const void *a, const void *b) {
 
 
 
-
+int unique(int *arr, int size){
+    int unique_size = 1; // We'll start with the assumption that the first element is unique
+    for (int i = 1; i < size; i++) {
+        int is_unique = 1;
+        for (int j = 0; j < unique_size; j++) {
+            if (arr[i] == arr[j]) {
+                is_unique = 0; // We found a duplicate
+                break;
+            }
+        }
+        if (is_unique) {
+            arr[unique_size] = arr[i];
+            unique_size++;
+        }
+    }
+    return unique_size;
+}
 
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

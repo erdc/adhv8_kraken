@@ -56,13 +56,24 @@ int jacobian_test(int argc, char **argv) {
 	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 	printf("Supermodel read complete\n");
 
+
+	//allocate linear system
+	//fe_allocate_initialize_linear_system(&sm);
+	create_sparsity_split_CSR(&sm, sm.grid);
+	//do we want to stor nnz? it is stored in sm->indptr[nrows]
+    //do we want to store local_size = local_range[1]-local_range[0]
+    sarray_init_dbl(sm.vals_diag, sm.indptr_diag[sm.my_ndofs-1]);
+    sarray_init_dbl(sm.vals_off_diag, sm.indptr_off_diag[sm.my_ndofs-1]);
 	//assemble a residual and check correctness
 	assemble_residual(&sm, sm.grid);
-
 	//print final residual
 	for(int local_index=0;local_index<grid.nnodes;local_index++){
 		printf("Node %d: (x,y) = {%f,%f}, Residual = {%f,%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y,sm.residual[local_index*3],sm.residual[local_index*3+1],sm.residual[local_index*3+2]);
 	}
+	//assemble a jacobian and check correcntess
+	assemble_jacobian(&sm, sm.grid);
+
+
 
 
 	//plot grid in h5?

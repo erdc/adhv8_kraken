@@ -68,7 +68,7 @@ typedef struct {
     double *vals_off_diag; //actual matrix values
 
     //Also needs nnz for allocation purposes
-    int nnz_diag, nnz_off_diag;
+    int nnz_diag, nnz_off_diag, nnz_diag_old, nnz_off_diag_old;
 
     //vectors
     double *residual;
@@ -80,7 +80,7 @@ typedef struct {
     //things that are important to transforming local to global
     int *ghosts;
     int nghost;
-    int local_size;
+    int local_size; //same as my_ndofs?
     int size_with_ghosts;
     int local_range[2];
     int local_range_old[2];

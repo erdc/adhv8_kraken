@@ -321,8 +321,21 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     //initalize residual vector
     //need a routine to get ndofs for all of this
     //hard coded for now
+    sm->ndofs_old = 0;
     sm->ndofs = sm->grid->nnodes*3;
+    sm->my_ndofs = sm->grid->nnodes*3;
+    sm->local_range[1] = sm->grid->nnodes*3;
+    sm->local_range[0] = 0;
+    sm->local_range_old[1] = 0;
+    sm->local_range_old[0] = 0;
+    sm->residual=NULL;
+    sm->sol=NULL;
+    sm->indptr_diag=NULL;
+    sm->indptr_off_diag=NULL;
     sm->residual = (double*) tl_alloc(sizeof(double), sm->ndofs);
+    sm->sol = (double*) tl_alloc(sizeof(double), sm->ndofs);
+    sm->indptr_diag = (double*) tl_alloc(sizeof(double), sm->my_ndofs+1);
+    sm->indptr_off_diag = (double*) tl_alloc(sizeof(double), sm->my_ndofs+1);
     
     //make a trivial fmap_local
     //maybe have special case when nmat is 1 to avoid storing this and use special case mapping
@@ -333,6 +346,8 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     for(i=0;i<sm->grid->nnodes;i++){
         sm->dof_map_local[i] = i*3;
     }
+
+    //allocate_adh_system(sm);
 
     printf("Assigned sw2 to residual structure\n");
 

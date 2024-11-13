@@ -74,7 +74,7 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         nphysics_models = sm->elem3d_physics_mat[mat_id].nSubmodels;
         //allows for mixed geometry quad/tri mesh
         nnodes = grid->elem3d[j].nnodes;
-        ndofs_ele = nvar_ele*nnodes;
+        ndofs_ele = nvars_elem*nnodes;
         //needs to be for 2d matrix
         sarray_init_double_2d(elem_mat,max_elem_dofs, max_elem_dofs);
         //maybe pull local nodal nvars and vars here too:
@@ -96,7 +96,7 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem3d_physics[mat_id], j, nnodes, nvar_ele, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem3d_physics[mat_id], j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -112,10 +112,11 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
     }
 
     //maybe change max_elem_dofs from element to element?
+    //printf("Assembling jacobian\n");
 
     //2d loop
     for (j=0;j<grid->nelems2d;j++){
-
+        //printf("Assembling element %d\n",j);
         //pull all global information to local memory
         mat_id = sm->elem2d_physics_mat_id[j];
         //Get stuff from physics mat
@@ -126,29 +127,37 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         nphysics_models = sm->elem2d_physics_mat[mat_id].nSubmodels;
         //allows for mixed geometry quad/tri mesh
         nnodes = grid->elem2d[j].nnodes;
-        ndofs_ele = nvar_ele*nnodes;
+        ndofs_ele = nvars_elem*nnodes;
         //needs to be for 2d matrix
         sarray_init_double_2d(elem_mat,max_elem_dofs, max_elem_dofs);
         //maybe pull local nodal nvars and vars here too:
         //only necessary for CG i believe (or not idk)
         //if generalizing to higher dimension, this would be dof on basis functions
         for (l=0;l<nnodes;l++){
+            //printf("calling vars_node for node %d\n",l);
             node_id = grid->elem2d[j].nodes[l];
             node_mat_id = sm->node_physics_mat_id[node_id];
             nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+            //printf("node mat id: %d, Nvar on this node%d\n",node_mat_id, nvar_node[l]);
             for(m=0;m<nvar_node[l];m++){
+
                 vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+                //printf("Node physics var assigned for node %d node var %d = %d\n",l,m,vars_node[l][m]);
             }
+        //printf("Looping through eac variable on the elemnt\n");
         }
         //need to loop over each variable and perturb it
+        //printf("completed loop\n");
         for (k=0;k<nvars_elem;k++){
             //use var code like PERTURB_H ,. ...
             //maybe get this from mat instead too!
             var_code = elem_vars[k];
+            //printf("elem vars [%d] = %d\n",k,var_code);
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem3d_physics[mat_id], j, nnodes, nvar_ele, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem2d_physics[mat_id], j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
+            //printf("perturb var called\n");
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -175,7 +184,7 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         nphysics_models = sm->elem1d_physics_mat[mat_id].nSubmodels;
         //allows for mixed geometry quad/tri mesh
         nnodes = grid->elem1d[j].nnodes;
-        ndofs_ele = nvar_ele*nnodes;
+        ndofs_ele = nvars_elem*nnodes;
         //needs to be for 2d matrix
         sarray_init_double_2d(elem_mat,max_elem_dofs, max_elem_dofs);
         //maybe pull local nodal nvars and vars here too:
@@ -197,7 +206,7 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem1d_physics[mat_id], j, nnodes, nvar_ele, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem1d_physics[mat_id], j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -210,7 +219,8 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         //load_global_mat_CSR(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
         //split CSR
         load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
-    } 
+    }
+    free(vars_node);
 }
 
 
@@ -422,9 +432,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
 //        temp_sol = sm->vel2d->x;
 //    }else if (perturb_var_code == PERTURB_V){
 //        temp_sol = sm->vel2d->y
-//    }
-
-    
+//    }   
     for (i=0; i<nodes_on_element; i++) {
         NodeID = NodeIDs[i];
         //pull dof # to get info
@@ -434,12 +442,10 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
         NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol, perturbation);    // calculates epsilon and 2*epsilon
         sarray_init_dbl(elem_rhs_P,MAX_NVAR*MAX_NNODE);
         sarray_init_dbl(elem_rhs_M,MAX_NVAR*MAX_NNODE);
-
         //safe assumption that all submodels on an element depend on all of the variables?
         for (j=0;j<nsubModels;j++){ 
             sarray_init_dbl(temp_P,MAX_NVAR*MAX_NNODE);
             sarray_init_dbl(temp_M,MAX_NVAR*MAX_NNODE);        
-
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (+) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _DEBUG
@@ -452,7 +458,6 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
             sarray_copy_int(physics_vars, elem_physics[j].physics_vars,nvar_pde);
             eq_var_code = elem_physics[j].fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
             add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element);
-            
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _DEBUG

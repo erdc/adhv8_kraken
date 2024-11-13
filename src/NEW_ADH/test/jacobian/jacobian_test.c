@@ -72,8 +72,7 @@ int jacobian_test(int argc, char **argv) {
 	}
 	//assemble a jacobian and check correcntess
 	assemble_jacobian(&sm, sm.grid);
-
-
+	Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 
 
 	//plot grid in h5?

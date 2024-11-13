@@ -7,6 +7,7 @@ void fe_allocate_initialize_linear_system(SMODEL_SUPER *sm);
 void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid);
 int unique(int *arr, int size);
 int compare_ints(const void *a, const void *b);
+void Screen_print_CSR(int *indptr, int *cols, double *vals, int nrow);
 
 // bcgstab solver
 double find_max_in_row(int *indptr, double *vals,int row_num);

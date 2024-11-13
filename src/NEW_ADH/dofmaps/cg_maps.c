@@ -175,3 +175,31 @@ int get_cg_dof(int var, int NodeID, SMAT_PHYSICS *node_physics_mat, int *nodal_p
 }
 
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     stores local double values from the global arrays
+ *  \author    Corey Trahan, Ph.D.
+ *  \author    Mark Loveland, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ *  @param[out] the local/elemental values
+ *  @param[in] global the global values
+ *  @param[in] nodes an array if integer global node IDs
+ *  @param[in] nnodes the number of nodes on the element
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void global_to_local_dbl_cg(double *global, double *local, int *nodes, int nnodes, int var, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id) {
+    int i=0;
+    int temp;
+    for (i=0; i<nnodes; i++) {
+        temp = get_cg_dof(var, nodes[i], node_physics_mat, nodal_physics_mat_id);
+        local[i] = global[temp];
+    }
+}
+
+

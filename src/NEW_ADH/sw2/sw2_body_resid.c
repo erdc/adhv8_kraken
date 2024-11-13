@@ -44,17 +44,25 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbation, int perturb_node, int perturb_var, int perturb_sign, int DEBUG) {
-    
     //printf("Seeing residual %f %f %f\n",elem_rhs[0],elem_rhs[1],elem_rhs[2]);
     //printf("The elemental djac = %f\n", mod->grid->elem2d[ie].djac);
+    SELEM_2D *elem2d = &(mod->grid->elem2d[ie]); // be careful not to shallow copy here
     //call a simple integral
     int nnodes = mod->grid->elem2d[ie].nnodes;
+    //get the solution on this element, for now just use U
+    double elem_head[nnodes];
+    global_to_local_dbl_cg(mod->sol, elem_head, elem2d->nodes, nnodes, PERTURB_U, mod->node_physics_mat, mod->node_physics_mat_id);
     //printf("Nnodes %d\n",nnodes);
     double f[nnodes];
     for (int i =0;i<nnodes;i++){
         f[i] = mod->grid->elem2d[ie].nodes[i];
     }
-    integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, f, elem_rhs);
+    //perturb solution variable only
+    if (perturb_var == PERTURB_U){
+        elem_head[perturb_node] += perturb_sign * perturbation;
+    }
+    integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, elem_head, elem_rhs);
+    integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, -1, f, elem_rhs);
 
     return 0;
     //int DEBUG_LOCAL = OFF;

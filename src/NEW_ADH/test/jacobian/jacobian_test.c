@@ -54,16 +54,17 @@ int jacobian_test(int argc, char **argv) {
 	strcpy(&elemVarCode[2],"0"); //Transport
 
 	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	printf("Supermodel read complete\n");
+	printf("Supermodel no read complete\n");
 
 
 	//allocate linear system
+	//doesn't currently work, need to go back and fix
 	//fe_allocate_initialize_linear_system(&sm);
 	create_sparsity_split_CSR(&sm, sm.grid);
 	//do we want to stor nnz? it is stored in sm->indptr[nrows]
     //do we want to store local_size = local_range[1]-local_range[0]
     sarray_init_dbl(sm.vals_diag, sm.indptr_diag[sm.my_ndofs-1]);
-    sarray_init_dbl(sm.vals_off_diag, sm.indptr_off_diag[sm.my_ndofs-1]);
+    //sarray_init_dbl(sm.vals_off_diag, sm.indptr_off_diag[sm.my_ndofs-1]);
 	//assemble a residual and check correctness
 	assemble_residual(&sm, sm.grid);
 	//print final residual

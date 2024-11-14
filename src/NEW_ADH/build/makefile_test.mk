@@ -56,6 +56,7 @@ $(wildcard $(MASTER_SRC_DIR)../jacobian)\
 $(wildcard $(MASTER_SRC_DIR)../la) \
 $(wildcard $(MASTER_SRC_DIR)../fe) \
 $(wildcard $(MASTER_SRC_DIR)../sw2) \
+$(wildcard $(MASTER_SRC_DIR)../poisson) \
 $(wildcard $(MASTER_SRC_DIR)../test/la) \
 $(wildcard $(MASTER_SRC_DIR)../test/residual) \
 $(wildcard $(MASTER_SRC_DIR)../test/jacobian) \
@@ -97,6 +98,7 @@ $(MASTER_SRC_DIR)../jacobian \
 $(MASTER_SRC_DIR)../la \
 $(MASTER_SRC_DIR)../fe \
 $(MASTER_SRC_DIR)../sw2 \
+$(MASTER_SRC_DIR)../poisson \
 $(MASTER_SRC_DIR)../test/la \
 $(MASTER_SRC_DIR)../test/residual \
 $(MASTER_SRC_DIR)../test/jacobian

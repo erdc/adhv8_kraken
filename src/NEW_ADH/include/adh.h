@@ -80,6 +80,7 @@
 //Mark added physics module
 #include "fe.h"
 #include "sw2.h"
+#include "poisson.h"
 
 
 // FOLDERS

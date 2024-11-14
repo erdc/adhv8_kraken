@@ -51,7 +51,9 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
     //zero out stuff
     sarray_init_dbl(sm->vals_diag, sm->nnz_diag);
     //#ifdef? or avoid maybe
-    sarray_init_dbl(sm->vals_off_diag, sm->nnz_off_diag);
+    if (sm->indptr_off_diag !=NULL){
+     sarray_init_dbl(sm->vals_off_diag, sm->nnz_off_diag);
+    }
 
 
     int local_range[2];

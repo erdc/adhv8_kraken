@@ -276,7 +276,9 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     //for now just hard code this one example, will go back and fix later once
     //we have the structs and methods figured out
     //how does this work?
-    sm->elem2d_physics[0][0].fe_resid = fe_sw2_body_resid;
+    //sm->elem2d_physics[0][0].fe_resid = fe_sw2_body_resid;
+    //hard code to poisson routine for now
+    sm->elem2d_physics[0][0].fe_resid =poisson_residual;
     sm->elem2d_physics[0][0].nvar = 1;
     sm->elem2d_physics[0][0].physics_vars = (int*) tl_alloc(sizeof(int), sm->elem2d_physics[0][0].nvar);
     sm->elem2d_physics[0][0].physics_vars[0] = PERTURB_U;
@@ -335,7 +337,8 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     sm->residual = (double*) tl_alloc(sizeof(double), sm->ndofs);
     sm->sol = (double*) tl_alloc(sizeof(double), sm->ndofs);
     sm->indptr_diag = (double*) tl_alloc(sizeof(double), sm->my_ndofs+1);
-    sm->indptr_off_diag = (double*) tl_alloc(sizeof(double), sm->my_ndofs+1);
+    //when in init need to change this to check if we have more than one processor or not
+    sm->indptr_off_diag = NULL;
     
     //make a trivial fmap_local
     //maybe have special case when nmat is 1 to avoid storing this and use special case mapping

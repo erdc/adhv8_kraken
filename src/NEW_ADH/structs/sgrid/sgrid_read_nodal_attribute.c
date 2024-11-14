@@ -1,6 +1,8 @@
 #include "adh.h"
 static int DEBUG = OFF;
 static int DEBUG_WITH_PICKETS = OFF;
+#define MATRIX_RANK 2
+#define VECTOR_RANK 1
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -22,7 +24,7 @@ void sgrid_read_nodal_attribute(SGRID *g){
 
 
 
-    #ifdef _ADH_HDF5
+#ifdef _ADH_HDF5
 
     int i,j=0;
     int nsurf=0;
@@ -65,6 +67,7 @@ void sgrid_read_nodal_attribute(SGRID *g){
     hid_t     file_id, plist_id, filespace, dset_id, memspace;
     hid_t     grp1,grp2;
     char      fname[50];
+
     hsize_t   dims[MATRIX_RANK];
     herr_t    status;
     hsize_t   count[MATRIX_RANK],offset[MATRIX_RANK];
@@ -170,7 +173,7 @@ void sgrid_read_nodal_attribute(SGRID *g){
     }
     free(scalardata);
 
-    #endif
+#endif
 
 }
 

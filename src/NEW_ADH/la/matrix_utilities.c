@@ -35,12 +35,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     //temporarily stores column positions of diagonal and off diagonal blocks
     //diagonal blocks are local column numbers, off-diagonal are global
     int temp_cols_diag[nrows][nCon3d];
-    int temp_cols_off_diag[nrows][nCon3d];
     int nnz_rows_diag[nrows];
-    int nnz_rows_off_diag[nrows];
-
-
-
     //loop through all nelem3d to mark sparsity
     int row,col;
     int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
@@ -50,15 +45,33 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     int ndofs_ele;
     int i,j,k,l, mat_id;
     int elem_vars[MAX_NVAR];
-
+    int dum1,dum2;
     sarray_init_int(nnz_rows_diag, nrows);
-    sarray_init_int(nnz_rows_off_diag, nrows);
+
+    if (sm->indptr_off_diag!=NULL){
+        dum1 = nrows;
+        dum2= nCon3d;
+    }else{
+        //still need to allocate even though may be unused
+        dum1=1;
+        dum2=1;
+
+    }
+    int temp_cols_off_diag[dum1][dum2];
+    int nnz_rows_off_diag[dum1];
+    sarray_init_int(nnz_rows_off_diag, dum1);
     //also initialize cols
     for (i=0;i<nrows;i++){
         for(l=0;l<nCon3d;l++){
             temp_cols_diag[i][l] = INT_MAX;
-            temp_cols_off_diag[i][l] = INT_MAX;
+        }
+    }
 
+    if (sm->indptr_off_diag!=NULL){
+        for (i=0;i<nrows;i++){
+            for(l=0;l<nCon3d;l++){
+                temp_cols_off_diag[i][l] = INT_MAX;
+            }
         }
     }
 
@@ -212,8 +225,9 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
 
     //now that all nnz_cols* and nnz* are filled, we need to sort and remove duplicates
     // counter for the total number of non-zero entries
-    int NNZ_diag = 0, NNZ_off_diag=0;
-    int nnz_row_diag,nnz_row_off_diag;
+    int NNZ_diag = 0;
+    int nnz_row_diag;
+
     //note nnz-rows is not actually nnz per row, includes duplicates
     //could be done with hybrid omp too?
 //    for (j=0;j<nrows;j++){
@@ -230,63 +244,84 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         // sort the column indices (j-entries)
         //use stdlib.h qsort
         qsort(temp_cols_diag[i], nnz_rows_diag[i], sizeof(int), compare_ints);
-        qsort(temp_cols_off_diag[i], nnz_rows_off_diag[i], sizeof(int), compare_ints);
         //this should hopefully remove duplicates?
         nnz_row_diag = unique(temp_cols_diag[i], nnz_rows_diag[i]);
-        nnz_row_off_diag = unique(temp_cols_off_diag[i], nnz_rows_off_diag[i]);
-
         //overwrite nnz row with unique?
         nnz_rows_diag[i] = nnz_row_diag;
-        nnz_rows_off_diag[i] = nnz_row_off_diag;
         //add nnz in a row to the NNZ
         //maybe overwrire nnz_rows[i] instead if we want this stored, and then sum it
         NNZ_diag+=nnz_row_diag;
-        NNZ_off_diag+=nnz_row_off_diag;
     }
-    sm->nnz_diag = NNZ_diag; sm->nnz_off_diag = NNZ_off_diag;
-    
-    //printf("NNZ DIAG = %d\n",sm->nnz_diag );
 
-//    for (j=0;j<nrows;j++){
-//        printf("UNIQUE NNZ rows diag[%d]: %d,\n",j,nnz_rows_diag[j]);
-//        printf("UNIQUE columns:\n");
-//        for(l=0;l<nnz_rows_diag[j];l++){
-//            printf("%d ",temp_cols_diag[j][l]);
-//        }
-//        printf("\n");
-//    }
+
+
+    sm->nnz_diag = NNZ_diag; 
+
+
+    if (sm->indptr_off_diag!=NULL){
+        int NNZ_off_diag=0;
+        int nnz_row_off_diag;
+        for (i=0;i<nrows;i++){
+            // sort the column indices (j-entries)
+            //use stdlib.h qsort
+            qsort(temp_cols_off_diag[i], nnz_rows_off_diag[i], sizeof(int), compare_ints);
+            //this should hopefully remove duplicates?
+            nnz_row_off_diag = unique(temp_cols_off_diag[i], nnz_rows_off_diag[i]);
+            //overwrite nnz row with unique?
+            nnz_rows_off_diag[i] = nnz_row_off_diag;
+            //add nnz in a row to the NNZ
+            //maybe overwrire nnz_rows[i] instead if we want this stored, and then sum it
+            NNZ_off_diag+=nnz_row_off_diag;
+        }
+
+        sm->nnz_off_diag = NNZ_off_diag;
+    }
+
+    
     // resize as needed
     sm->cols_diag = (int *) tl_realloc(sizeof(int), sm->nnz_diag, sm->nnz_diag_old, sm->cols_diag);
     sm->vals_diag = (double *) tl_realloc(sizeof(double), sm->nnz_diag, sm->nnz_diag_old, sm->vals_diag);
-    sm->cols_off_diag = (int *) tl_realloc(sizeof(int), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->cols_off_diag);
-    sm->vals_off_diag = (double *) tl_realloc(sizeof(double), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->vals_off_diag);
-    
+
+    if (sm->indptr_off_diag!=NULL){
+        sm->cols_off_diag = (int *) tl_realloc(sizeof(int), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->cols_off_diag);
+        sm->vals_off_diag = (double *) tl_realloc(sizeof(double), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->vals_off_diag);
+    }
     //printf("Reallocated vals and cols\n");
     // enumerate the sorted indices to populate COL_INDEX and ROW_INDEX for diag and off diag
     int count_diag=0;
-    int count_off_diag = 0;
-    int *rn_diag, *rn_off_diag;
+    int *rn_diag;
     for(i=0;i<nrows;i++){
         //printf("filling in index ptr and column entries, row %d\n",i);
         sm->indptr_diag[i] = count_diag;
-        sm->indptr_off_diag[i] = count_off_diag;
         //printf("filling in index ptr and column entries, row %d\n",i);
-        //ask corey about syntax?
         rn_diag = temp_cols_diag[i];
-        rn_off_diag = temp_cols_off_diag[i];
         //think about how to do this since each temp_rows may be different size
         for(j=0;j<nnz_rows_diag[i];j++){
             sm->cols_diag[count_diag] = rn_diag[j];
             count_diag++;
         }
-        for(j=0;j<nnz_rows_off_diag[i];j++){
-            sm->cols_off_diag[count_off_diag] = rn_off_diag[j];
-            count_off_diag++;
-        }
     }
     //also last sm->indptr  needs to be the last entry
     sm->indptr_diag[nrows] = count_diag;
-    sm->indptr_off_diag[nrows] = count_off_diag;
+
+    
+    if (sm->indptr_off_diag!=NULL){
+        int count_off_diag = 0;
+        int *rn_off_diag;
+        for(i=0;i<nrows;i++){
+            //printf("filling in index ptr and column entries, row %d\n",i);
+            sm->indptr_off_diag[i] = count_off_diag;
+            //printf("filling in index ptr and column entries, row %d\n",i);
+            rn_off_diag = temp_cols_off_diag[i];
+            //think about how to do this since each temp_rows may be different size
+            for(j=0;j<nnz_rows_off_diag[i];j++){
+                sm->cols_off_diag[count_off_diag] = rn_off_diag[j];
+                count_off_diag++;
+            }
+        }
+        sm->indptr_off_diag[nrows] = count_off_diag;
+    }
+
     //destroy temp_rows?
     //not malloced so not necessary??
     //printf("Loop complete\n");
@@ -343,7 +378,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     //we now number of rows is sum(my_nnode*nodal_nvars)
     sm->indptr_diag= (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->indptr_diag);
     //if we split we have two structures
-    //if it is not parallel this should be zero!
+    //if it is only one process this should be NULL!!!!
     //create conditional here
     sm->indptr_off_diag = (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->indptr_off_diag);
     printf("Made indptr\n");
@@ -352,7 +387,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     //create_sparsity_CSR(sm, grid);
     //this does a split CSR format, plan on doing this
     create_sparsity_split_CSR(sm, sm->grid);
-    //do we want to stor nnz? it is stored in sm->indptr[nrows]
+    //do we want to store nnz? it is stored in sm->indptr[nrows]
     //do we want to store local_size = local_range[1]-local_range[0]
     sarray_init_dbl(sm->vals_diag, sm->indptr_diag[sm->my_ndofs-1]);
     sarray_init_dbl(sm->vals_off_diag, sm->indptr_off_diag[sm->my_ndofs-1]);

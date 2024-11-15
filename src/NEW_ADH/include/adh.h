@@ -68,6 +68,9 @@
 
 
 //
+//Mark, not sure if this goes here?
+#include "messg.h"
+
 #include "sio.h"
 #include "sseries.h"
 #include "smodel_super.h"
@@ -77,6 +80,7 @@
 #include "residual.h"
 #include "jacobian.h"
 #include "la.h"
+#include "newton.h"
 //Mark added physics module
 #include "fe.h"
 #include "sw2.h"
@@ -84,6 +88,8 @@
 
 
 // FOLDERS
+
+//Mark, does test need to be moved up?
 #include "tools.h"
 #include "fnctn_xdmf.h"
 #include "fr_defs.h"
@@ -92,4 +98,5 @@
 #include "testla.h"
 #include "testresidual.h"
 #include "testjacobian.h"
+#include "testnewton.h"
 //#endif

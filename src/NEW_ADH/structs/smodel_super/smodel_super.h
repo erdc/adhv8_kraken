@@ -23,6 +23,14 @@ typedef struct {
     int nseries;              // the number of series in this model 
     int itrns;
 
+    //Mark adding other things that used to be part of solver
+    int max_nonlin_linesearch_cuts;
+    int max_nonlin_it;
+    int it_count_nonlin;
+    int force_nonlin_it;
+    int nonlinear_it_total;
+    int LINEAR_PROBLEM;
+    int it_count_nonlin_failed;
 
     //FE_MATRIX *matrix;  // stores matrix
 //#ifdef _PETSC
@@ -75,7 +83,11 @@ typedef struct {
     double *sol;
     double *scale_vect;
 
-
+    //mark, proposes using unified solution variable
+    double *sol_old;
+    double *sol_older;
+    //actual solution of linear system is an increment within Newton iteration
+    double *dsol;
 
     //things that are important to transforming local to global
     int *ghosts;

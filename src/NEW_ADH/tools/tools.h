@@ -51,6 +51,8 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
  double theta, int dz, double a0, double ax, double ax2, double ay, double ay2, double axy,
  double ax2y, double axy2, double ax2y2, int flag3d );
 
-
+//random routine
+int solv_isnan(double value);
+int solv_isinf(double value);
 
 #endif

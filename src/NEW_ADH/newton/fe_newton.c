@@ -5,7 +5,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#include "global_header.h"
+#include "adh.h"
 
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -34,11 +34,12 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
-              int isuperModel,                            /* the supermodel id */
-              SGRID *grid,                                 /* the grid */
-              SMAT *mat                
+              int isuperModel                            /* the supermodel id */                                /* the grid */             
 )
 {
+
+    //pointer to the grid
+    SGRID *grid = sm->grid;
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // DEBUG OPTIONS
     int DEBUG_FULL = OFF;       // prints everything but matrix
@@ -53,6 +54,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+//figure out MPI later
 #ifdef _MESSG
         MPI *smpi = grid->smpi
 #endif
@@ -69,13 +71,14 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     double ratio = 0;           /* STEADY STATE VARIABLES */
     int i, j, k;                /* loop counter */
     int idof;                   /* location of the maximum residual */
-    int imax_node = 0;          /* location of the maximum residual */
-    int iinc_node = 0;          /* location of the maximum ..increment? */
+    int imax_dof = 0;          /* location of the maximum residual */
+    int iinc_dof = 0;          /* location of the maximum ..increment? */
     int it;                     /* the nonlinear iteration counter */
     int linesearch_cuts;        /* the number of line searches */
     int solv_flag;              /* flag that tells if the linear solver converged */
     int iend;                   /* loop limit */
     int my_ndof;                /* the number of degrees of freedom I am responsible for */
+    int ndof = sm->ndofs;
     double resid_max_norm = 0.0;    /* the max norm of the residual */
     double resid_l2_norm = 0.0; /* the l2 norm of the residual */
     double old_resid_norm;      /* the previous norm of the residual - used for the line search */
@@ -136,16 +139,17 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     // this array determines what nodes will be including in the norm calculations
     //is it better to allocate this and store or just compute on fly?
     //why do we include ghost nodes??
-    int *include_node_norm = NULL;
+    int *include_dof = NULL;
     //if (init_fnctn != fe_sw_hybrid_wvel_init) {
-    include_node_norm = (int *) tl_alloc(sizeof(int), nnodes);
-    sarray_init_value_int(include_node_norm, nnodes, YES);
+    //include_node_norm = (int *) tl_alloc(sizeof(int), nnodes);
+    //sarray_init_value_int(include_node_norm, nnodes, YES);
     //}
     
 
-
-    Solver_Info *solver = &(sm->solver_info);
-    solver->UMFail = NO;
+    //Mark, currently ignore
+    //not part of super model
+    //Solver_Info *solver = &(sm->solver_info);
+    //solver->UMFail = NO;
     
     // aliases
 
@@ -210,28 +214,29 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     //split up into 2 steps
     initialize_system(sm);
     //need to think about this bit
-    initialize_dirichlet_bc(sm, grid)
+    initialize_dirichlet_bc(sm);
 
 
     //it = 0;
     //(*update_fnctn) (sm,isuperModel);
     it=0;
-    //updates any other quantities not in solution or for MPI
-    update_function(sm,grid,mat);
+    //updates any other quantities NOT in solution? Needed for solution with MPI too?
+    update_function(sm);
     //*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // get initial residual
     //(*residual_fnctn) (sm,isuperModel);
     //elemental loops are now part of call
-    assemble_residual(sm,grid, mat);
+    assemble_residual(sm,grid);
     
     // Should we keep as is or calculate on fly?
     // this is for surface water calculations to ignore dry nodes
 
     // this is only on 2d top surface
-    if (is_2d_hydro == TRUE && include_node_norm != NULL) {
-        //Mark to do, clean up once structs are more clear
-        include_node_in_residual(grid->nnodes, mod->sw->d2->head, mod->sw->d2->old_head, mod->fmap, include_node_norm);
-    }
+    //Mark, ignore for now, need to reincorporate later
+//    if (is_2d_hydro == TRUE && include_node_norm != NULL) {
+//        //Mark to do, clean up once structs are more clear
+//        include_node_in_residual(grid->nnodes, mod->sw->d2->head, mod->sw->d2->old_head, mod->fmap, include_node_norm);
+//    }
 
 
 
@@ -247,11 +252,11 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
                        );
     */
-    //New call
+    //New call, returns dof # instead of node #. Can back out nodes later if desired
     get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
-         &imax_node, &iinc_node, include_node,
-         my_nnodes, nnodes, macro_nnodes, sm->residual, sm->sol
-        ,sm->nodal_var);
+        &imax_dof, &iinc_dof, include_dof,
+        sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol
+        );
 
 #ifdef _MESSG
     resid_max_norm = messg_dmax(resid_max_norm, smpi->ADH_COMM);
@@ -277,16 +282,18 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
     
     //printf("\n **Initial resid_max_norm = %18.9e \n", resid_max_norm);
+    char prn_head[14][5] = { "HYD", "TRN", "BLT", "SLT", "GRD", "HVEL", "WVEL", "SALT", "CLAY", "SAND", "TEMP", "DIFF", "NS", "GW" };
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // loops over the nonlinear iterations
     do {
-        if (sm->solver_info.LINEAR_PROBLEM ==YES) {
-            if(myid==0)printf("\n%s_%d TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[solver->PRN_NEWTON - 1],index, sm->submodel[0].t_prev, sm->dt, (100.0 * (sm->submodel[0].t_prev - sm->submodel[0].t_init) / (sm->submodel[0].t_final - sm->submodel[0].t_init)), it + 1);} /* gkc warning come back later and fix use of submodel[0]. */
-        else{
-            if(myid==0)printf("\n%s TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[solver->PRN_NEWTON - 1], sm->submodel[0].t_prev, sm->dt, (100.0 * (sm->submodel[0].t_prev - sm->submodel[0].t_init) / (sm->submodel[0].t_final - sm->submodel[0].t_init)), it + 1);
-        }
+        //Mark, talk with Corey about this solver info stuff, for now just say it is false?
+        //if (sm->solver_info.LINEAR_PROBLEM ==YES) {
+        //    if(myid==0)printf("\n%s_%d TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0],index, sm->t_prev, sm->dt, (100.0 * (sm->t_prev - sm->t_init) / (sm->t_final - sm->t_init)), it + 1);} /* gkc warning come back later and fix use of submodel[0]. */
+        //else{
+            if(myid==0)printf("\n%s TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0], sm->t_prev, sm->dt, (100.0 * (sm->t_prev - sm->t_init) / (sm->t_final - sm->t_init)), it + 1);
+        //}
         
         
         sm->nonlinear_it_total++;
@@ -317,10 +324,11 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
-        assemble_jacobian(sm,grid,mat);
+        assemble_jacobian(sm,grid);
         
         /* Set initial guess */
-        solv_init_dbl(ndof, sm->sol);
+        //maybe redundant?
+        sarray_init_dbl(sm->dsol,ndof);
 
 #ifdef _DEBUG
         if (DEBUG_FULL) {
@@ -363,6 +371,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 
         KSPSolve(sm->ksp,sm->B,sm->X);
         //scatter forward appears to update array as we need
+        //forward sends owned dofs -> ghosts
         VecGhostUpdateBegin(sm->X,INSERT_VALUES,SCATTER_FORWARD);
         VecGhostUpdateEnd(sm->X,INSERT_VALUES,SCATTER_FORWARD);
         KSPGetIterationNumber(sm->ksp, &its);
@@ -409,11 +418,11 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //actually solve linear system, returns solution
         status = solve_linear_sys_bcgstab(sm->sol, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag,
         sm->vals_off_diag, sm->residual, sm->scale_vect, sm->local_size, sm->size,rank, sm->ghosts, sm->nghost);
-        
+#endif        
         
         /* adds the increment to the solution */
         //(*inc_fnctn) (sm,isuperModel);
-        increment_function(sm,grid,mat);
+        increment_function(sm);
         //somehow be able to call these?
 #ifdef _DEBUG
         if(init_fnctn == fe_transport_init){
@@ -430,17 +439,20 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
             print_dw_file(sm,isuperModel,myid,npes);
         }
 #endif
-        
-        if (sm.flag.STEADY_STATE == OFF) {
-            for (i = 0, iend = ndof; i < iend; i++)
-                sm->sol[i] = -sm->sol[i];
+        //Mark needs to check, why is this
+        //flip sign after update?
+        //while not steady state??
+//        if (sm.flag.STEADY_STATE == OFF) {
+            for (i = 0, iend = ndof; i < iend; i++){
+                sm->dsol[i] = -sm->dsol[i];
+            }
 
-        }
+//        }
         
-        /* calculates the residual */
+        /* calculates the residual after the increment?*/
         old_resid_norm = resid_l2_norm;
-        update_function(sm,grid,mat);
-        assemble_residual(sm,grid, mat);
+        update_function(sm);
+        assemble_residual(sm,grid);
         //(*update_fnctn) (sm,isuperModel);
         //(*residual_fnctn) (sm,isuperModel);
         
@@ -467,10 +479,11 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
         
         /* calculates the norms of the residual */
-        if (is_2d_hydro && include_node_norm != NULL) {
-            //Mark todo
-            include_node_in_residual(mod->grid->nnodes, mod->sw->d2->head, mod->sw->d2->old_head, mod->fmap, include_node_norm);
-        }
+        //ignore for now
+//        if (is_2d_hydro && include_node_norm != NULL) {
+//            //Mark todo
+//            include_node_in_residual(mod->grid->nnodes, mod->sw->d2->head, mod->sw->d2->old_head, mod->fmap, include_node_norm);
+//        }
         //old call
 //        get_residual_norms(my_nnodes, nnodes, macro_nnodes, sm->residual, sm->sol,
 //#ifdef _PETSC
@@ -483,9 +496,9 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 //                              );
         //new call
         get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
-         &imax_node, &iinc_node, include_node,
-         my_nnodes, nnodes, macro_nnodes, sm->residual, sm->sol
-        ,sm->nodal_var);
+        &imax_dof, &iinc_dof, include_dof,
+        sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol
+        );
 
 #ifdef _DEBUG
         if (DEBUG_FULL) {
@@ -503,12 +516,14 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 //                }
 //            }
         }
-        
+
+
+//Mark, do we really need UMFAIL too? Commenting out for now       
 #ifdef _MESSG
-        UMFail_max = messg_imax(solver->UMFail, supersmpi->ADH_COMM);
+        //UMFail_max = messg_imax(solver->UMFail, supersmpi->ADH_COMM);
         solv_flag_min = messg_imin(solv_flag, supersmpi->ADH_COMM);
 #else
-        UMFail_max = messg_imax(solver->UMFail);
+        //UMFail_max = messg_imax(solver->UMFail);
         solv_flag_min = messg_imin(solv_flag);
 #endif
         
@@ -549,7 +564,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         /* (2) No Simple Decrease in l2 norm of Residual */
         /* (3) Not Enough Line Search Cuts Yet */
         linesearch_cuts = 0;
-        while ((resid_max_norm > sm->tol_nonlin) && (resid_l2_norm > old_resid_norm) && (linesearch_cuts < solver->max_nonlin_linesearch_cuts)) {
+        while ((resid_max_norm > sm->tol_nonlin) && (resid_l2_norm > old_resid_norm) && (linesearch_cuts < sm->max_nonlin_linesearch_cuts)) {
             
 #ifdef _DEBUG
             if (DEBUG_FULL) {
@@ -560,23 +575,23 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
             
             /* reduces the increment */
-            for (i = 0, iend = nnodes * nsys; i < iend; i++)
-                sm->sol[i] *= 0.5;
+            for (i = 0, iend = sm->ndofs; i < iend; i++)
+                sm->dsol[i] *= 0.5;
 
             /* calculates the residual */
-            increment_function(sm,grid,mat);
-            update_function(sm,grid,mat);
-            assemble_residual(sm,grid, mat);
+            increment_function(sm);
+            update_function(sm);
+            assemble_residual(sm,grid);
 
             //(*inc_fnctn) (sm,isuperModel);
             //(*update_fnctn) (sm,isuperModel);
             //(*residual_fnctn) (sm,isuperModel);
             
             /* calculates the norms of the residual */
-            if (is_2d_hydro && include_node_norm != NULL) {
-                //Mark, need to fix this once structs are finalized
-                include_node_in_residual(mod->grid->nnodes, mod->sw->d2->head, mod->sw->d2->old_head, mod->fmap, include_node_norm);
-            }
+//            if (is_2d_hydro && include_node_norm != NULL) {
+//                //Mark, need to fix this once structs are finalized
+//                include_node_in_residual(mod->grid->nnodes, mod->sw->d2->head, mod->sw->d2->old_head, mod->fmap, include_node_norm);
+//            }
             //old call
 //            get_residual_norms(my_nnodes, nnodes, macro_nnodes, sm->residual, sm->sol,
 //#ifdef _PETSC
@@ -589,9 +604,9 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 //                               );
             //new call
             get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
-            &imax_node, &iinc_node, include_node,
-            my_nnodes, nnodes, macro_nnodes, sm->residual, sm->sol
-            ,sm->nodal_var);
+            &imax_dof, &iinc_dof, include_dof,
+            sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol
+            );
             
 #ifdef _MESSG
             resid_max_norm = messg_dmax(resid_max_norm, supersmpi->ADH_COMM);
@@ -610,20 +625,21 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         
         if(myid==0) {
-            if (screen_output.residuals) {
+            //Mark, need to figure out screen outpu later
+            //if (screen_output.residuals) {
                 printf(" MAX_NL: %6.4e MAX_INC: %6.4e",resid_max_norm,inc_max_norm);
-            }
-            if (screen_output.worse_node_nonlinear) {
-                printf(" NTL_NODE: %d %8.6e %8.6e %8.4e", mn_node + 1, mn_coord.x, mn_coord.y, mn_coord.z);
-            }
-            if (screen_output.worse_node_linear) {
-                printf(" ITL_NODE: %d %8.6e %8.6e %8.4e", im_node + 1, im_coord.x, im_coord.y, im_coord.z);
+            //}
+            //if (screen_output.worse_node_nonlinear) {
+                //printf(" NTL_NODE: %d %8.6e %8.6e %8.4e", mn_node + 1, mn_coord.x, mn_coord.y, mn_coord.z);
+            //}
+            //if (screen_output.worse_node_linear) {
+                //printf(" ITL_NODE: %d %8.6e %8.6e %8.4e", im_node + 1, im_coord.x, im_coord.y, im_coord.z);
 #ifdef _ADH_GROUNDWATER
                 /*mwf debug */
                 //printf(" --- inc[%d]= %g val= %g val prev= %g --- \n",im_node+1,-sm->sol[im_node],
                 //       sm->submodel[0].sgw->gw_phead[im_node],sm->submodel[0].sgw->gw_phead[im_node]+sm->sol[im_node]);
 #endif
-            }
+            //}
             printf(" NNODES: %2d",tot_nnode);
             if (linesearch_cuts > 0)  printf(" LS");
         }
@@ -675,15 +691,16 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 	  */
 	  check = OFF;
         }
-        if (solver->LINEAR_PROBLEM == YES) {
-            if (sm->tol_nonlin > SMALL && resid_max_norm > sm->tol_nonlin) {
-                check *= YES;
-            } else check = OFF;
-        } else {
+        //Mark, need to figure this out
+        //if (solver->LINEAR_PROBLEM == YES) {
+        //    if (sm->tol_nonlin > SMALL && resid_max_norm > sm->tol_nonlin) {
+        //        check *= YES;
+        //    } else check = OFF;
+        //} else {
             if (resid_max_norm > sm->tol_nonlin && inc_max_norm > sm->inc_nonlin) {
                 check *= YES;
             } else check = OFF;
-        }
+        //}
         
 #ifdef _MESSG  // make sure that if one subdomain fails, they all do (cjt)
         MPI_Allreduce(&check, &keep_chugging, 1, MPI_INT, MPI_MAX, supersmpi->ADH_COMM);
@@ -702,31 +719,33 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
 #endif
     
-    if (include_node_norm != NULL) include_node_norm = (int *) tl_free(sizeof(int), nnodes, include_node_norm);
+    if (include_dof!= NULL) include_dof = (int *) tl_free(sizeof(int), ndof, include_dof);
     
     //this will need to change, ask corey
-    for (i=0;i<sm->nsubmodels; i++){
-        if(sm->submodel[i].proc_flag==1){
-            sm->submodel[i].flag.SOLVE_ATF = NO;
-        }
-    }
-    solver->it_count_nonlin += it;
+    //for (i=0;i<sm->nsubmodels; i++){
+//        if(sm->submodel[i].proc_flag==1){
+//            sm->submodel[i].flag.SOLVE_ATF = NO;
+//        }
+//    }
+    sm->it_count_nonlin += it;
     
     /* checks the residual - if failure then reduce the time step and try again */
     if (solv_flag_min == NO || UMFail_max == YES
-        || ((solver->LINEAR_PROBLEM == YES && (sm->tol_nonlin > SMALL && resid_max_norm > sm->tol_nonlin))
-            || (solver->LINEAR_PROBLEM == NO && ((resid_max_norm > sm->tol_nonlin) && (inc_max_norm > sm->inc_nonlin))))
+        || ((sm->LINEAR_PROBLEM == YES && (sm->tol_nonlin > SMALL && resid_max_norm > sm->tol_nonlin))
+            || (sm->LINEAR_PROBLEM == NO && ((resid_max_norm > sm->tol_nonlin) && (inc_max_norm > sm->inc_nonlin))))
         || (resid_max_norm >= 1.0E+20)) {
         
-        for (i=0;i<sm->nsubmodels; i++){
-            if(sm->submodel[i].proc_flag==1){
-                sm->submodel[i].flag.SOLVE_ATF = NO;
-                sm->submodel[i].flag.UMFPACK_FAIL = NO;
-            }
-        }
+        //Mark commenting this for now
+        //how should we handle this?
+//        for (i=0;i<sm->nsubmodels; i++){
+//            if(sm->submodel[i].proc_flag==1){
+//                sm->submodel[i].flag.SOLVE_ATF = NO;
+//                sm->submodel[i].flag.UMFPACK_FAIL = NO;
+//          }
+//        }
         
         /* we are forcing it to accept the result at the max nonlinear iteration */
-        if (solver->force_nonlin_it == YES) return (YES);
+        if (sm->force_nonlin_it == YES) return (YES);
         
         tc_scale(&sm->dt
 #ifdef _MESSG
@@ -734,12 +753,12 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
                  );
         //i dont think this exists anymore, check with Corey
-        for (i=0;i<sm->nsubmodels; i++){
-            sm->submodel[i].dt=sm->dt;
-            if(sm->submodel[i].proc_flag==1){
-                sm->submodel[i].flag.TIME_ADAPT_FAIL = YES;
-            }
-        }
+//        for (i=0;i<sm->nsubmodels; i++){
+//            sm->submodel[i].dt=sm->dt;
+//            if(sm->submodel[i].proc_flag==1){
+//                sm->submodel[i].flag.TIME_ADAPT_FAIL = YES;
+//            }
+//        }
         
         /* if failed to converge, then reset to old values */
         initialize_system(sm);
@@ -751,16 +770,18 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #else
         printf(" #");
 #endif
-        solver->it_count_nonlin_failed += it;
+        sm->it_count_nonlin_failed += it;
         return (NO);
     }
+
+    //Ask Corey what this is for
     
     /* if it makes it to here then the calculations were good */
-    for (i=0;i<sm->nsubmodels; i++){
-        if(sm->submodel[i].proc_flag==1){
-            sm->submodel[i].flag.SOLVE_ATF = YES;
-        }
-    }
+//    for (i=0;i<sm->nsubmodels; i++){
+//        if(sm->submodel[i].proc_flag==1){
+//            sm->submodel[i].flag.SOLVE_ATF = YES;
+//        }
+//    }
     return (YES);
 }
 

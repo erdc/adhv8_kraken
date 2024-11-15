@@ -1,6 +1,6 @@
 #include "adh.h"
 
-int jacobian_test(int argc, char **argv) {
+int newton_test(int argc, char **argv) {
 
 	//create a grid
 	SGRID grid;
@@ -60,8 +60,6 @@ int jacobian_test(int argc, char **argv) {
 	//allocate linear system
 	//doesn't currently work, need to go back and fix
 	//fe_allocate_initialize_linear_system(&sm);
-	sm.cols_diag = NULL;
-	sm.vals_diag = NULL;
 	create_sparsity_split_CSR(&sm, sm.grid);
 	//do we want to stor nnz? it is stored in sm->indptr[nrows]
     //do we want to store local_size = local_range[1]-local_range[0]

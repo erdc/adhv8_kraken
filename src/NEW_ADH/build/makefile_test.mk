@@ -29,6 +29,7 @@ OBJECTS_DIR = ./obj
 SOURCE_DIR = \
 $(wildcard $(MASTER_SRC_DIR)../debug) \
 $(wildcard $(MASTER_SRC_DIR)../tools) \
+$(wildcard $(MASTER_SRC_DIR)../messg) \
 $(wildcard $(MASTER_SRC_DIR)../friction) \
 $(wildcard $(MASTER_SRC_DIR)../xdmf) \
 $(wildcard $(MASTER_SRC_DIR)../dofmaps) \
@@ -54,12 +55,14 @@ $(wildcard $(MASTER_SRC_DIR).../structs/smodel_design) \
 $(wildcard $(MASTER_SRC_DIR)../residual) \
 $(wildcard $(MASTER_SRC_DIR)../jacobian)\
 $(wildcard $(MASTER_SRC_DIR)../la) \
+$(wildcard $(MASTER_SRC_DIR)../newton) \
 $(wildcard $(MASTER_SRC_DIR)../fe) \
 $(wildcard $(MASTER_SRC_DIR)../sw2) \
 $(wildcard $(MASTER_SRC_DIR)../poisson) \
 $(wildcard $(MASTER_SRC_DIR)../test/la) \
 $(wildcard $(MASTER_SRC_DIR)../test/residual) \
 $(wildcard $(MASTER_SRC_DIR)../test/jacobian) \
+$(wildcard $(MASTER_SRC_DIR)../test/newton) \
 $(wildcard $(MASTER_SRC_DIR)../main)
 
 
@@ -71,6 +74,7 @@ $(wildcard $(MASTER_SRC_DIR)../main)
 INCLUDE_DIR = $(MASTER_SRC_DIR)../include \
 $(MASTER_SRC_DIR)../debug/include \
 $(MASTER_SRC_DIR)../tools \
+$(MASTER_SRC_DIR)../messg \
 $(MASTER_SRC_DIR)../friction \
 $(MASTER_SRC_DIR)../xdmf \
 $(MASTER_SRC_DIR)../dofmaps \
@@ -96,12 +100,14 @@ $(MASTER_SRC_DIR)../structs/smodel_design \
 $(MASTER_SRC_DIR)../residual \
 $(MASTER_SRC_DIR)../jacobian \
 $(MASTER_SRC_DIR)../la \
+$(MASTER_SRC_DIR)../newton \
 $(MASTER_SRC_DIR)../fe \
 $(MASTER_SRC_DIR)../sw2 \
 $(MASTER_SRC_DIR)../poisson \
 $(MASTER_SRC_DIR)../test/la \
 $(MASTER_SRC_DIR)../test/residual \
-$(MASTER_SRC_DIR)../test/jacobian
+$(MASTER_SRC_DIR)../test/jacobian \
+$(MASTER_SRC_DIR)../test/newton
 
 
 

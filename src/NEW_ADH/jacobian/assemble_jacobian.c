@@ -459,7 +459,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
             sarray_init_int(physics_vars, nvar_pde);
             sarray_copy_int(physics_vars, elem_physics[j].physics_vars,nvar_pde);
             eq_var_code = elem_physics[j].fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
-            add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element);
+            add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element, 1);
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _DEBUG
@@ -468,7 +468,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
             //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
             //should always be same as var_code
             eq_var_code2 = elem_physics[j].fe_resid(sm,temp_M,ie, epsilon,i, perturb_var_code, -1, DEBUG);
-            add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element);
+            add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element, 1);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         }

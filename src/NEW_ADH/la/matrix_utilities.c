@@ -413,7 +413,7 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
     int ierr;
     //set up anything PETSc after allocation but before load
 
-    
+ #ifdef _PETSC   
     //PETSc solver will be stord in ksp object
     //ksp only will exist if PETSc is active
     if(sm->ksp == PETSC_NULLPTR){
@@ -550,6 +550,7 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
     // Could get rid of this line.
     sm->total_nnodes_matrix = sm->total_my_nnodes;
       */
+#endif
 }
   
 
@@ -585,7 +586,60 @@ void fe_allocate_initialize_linear_system(SMODEL_SUPER *sm) {
 
 
 
+void apply_Dirichlet_BC(SMODEL_SUPER *sm){
+    //could illuciadate arguments, but will look at this later
+    //modify linear system to have dirichlet conditions at
+    //entries where bc_mask=YES
 
+    //brute force for now, can find better way later
+    int my_ndof = sm->my_ndofs;
+    int row, row_start, row_end, row_entry,local_col_no;
+    double temp;
+    for (row=0;row<my_ndof;row++){
+        row_start = sm->indptr_diag[row];
+        row_end = sm->indptr_diag[row+1];
+        //for every row, look for columns and subtract to RHS
+        for(row_entry=row_start; row_entry<row_end; row_entry++){
+            local_col_no = sm->cols_diag[row_entry];
+            if(sm->bc_mask[local_col_no] == YES){
+                temp = sm->vals_diag[row_entry];
+                //adjust RHS
+                sm->residual[row] -= temp*(sm->dirichlet_data[local_col_no] - sm->sol[local_col_no]);
+                //clear entry after moving
+                sm->vals_diag[row_entry] = 0.0;
+            }
+
+        }
+
+    }
+
+    //go back through rows and clear rows that are no longer in equations
+    //if it is dirichlet dof, wipe out row
+    for (row=0;row<my_ndof;row++){
+        if(sm->bc_mask[row] == YES){
+            row_start = sm->indptr_diag[row];
+            row_end = sm->indptr_diag[row+1];
+            //assign dirichlet data to residual
+            //method 1 appears to work
+            sm->residual[row] = sm->dirichlet_data[row] - sm->sol[row];
+            //method 2, require sol to have bc already  there
+            //sm->residual[row] = 0.0;
+            //wipe out row and set diagonal to 1 (rescaling diagonal shouldn't matter in method 2)
+            for(row_entry=row_start; row_entry<row_end; row_entry++){
+                local_col_no = sm->cols_diag[row_entry];
+                //if non-diagonal set to 0, otherwise set diagonal to 1
+                if(local_col_no == row){
+                    sm->vals_diag[row_entry]=1;
+                }else{
+                    sm->vals_diag[row_entry] = 0;
+                }
+
+            }
+
+        }
+    }
+
+}
 
 
 

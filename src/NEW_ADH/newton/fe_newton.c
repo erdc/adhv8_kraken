@@ -64,7 +64,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 
     
     //uses elem_physics to access all elemental routines and builds/solves linear systems
-    
+    int status;
     int check = NO;		/* newton solver check */
     int keep_chugging = NO;     /* newton solver check */
     double next_dt = 0;         /* temp variable for the time step for STEADY STATE */
@@ -212,6 +212,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     /* initial setup */
     //(*init_fnctn) (sm,isuperModel);
     //split up into 2 steps
+    //printf("attempting initial\n");
     initialize_system(sm);
     //need to think about this bit
     initialize_dirichlet_bc(sm);
@@ -222,12 +223,15 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     it=0;
     //updates any other quantities NOT in solution? Needed for solution with MPI too?
     update_function(sm);
+    //printf("attempting update\n");
     //*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // get initial residual
     //(*residual_fnctn) (sm,isuperModel);
     //elemental loops are now part of call
-    assemble_residual(sm,grid);
-    
+    assemble_residual(sm,sm->grid);
+//    for (int i=0;i<sm->ndofs;i++){
+//        printf("resid before assembly[%d] = %f\n",i,sm->residual[i]);
+//    }
     // Should we keep as is or calculate on fly?
     // this is for surface water calculations to ignore dry nodes
 
@@ -257,6 +261,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         &imax_dof, &iinc_dof, include_dof,
         sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol
         );
+    //printf("residual norms computed: %f, %f, %f\n",resid_max_norm,resid_l2_norm,inc_max_norm);
 
 #ifdef _MESSG
     resid_max_norm = messg_dmax(resid_max_norm, smpi->ADH_COMM);
@@ -292,11 +297,14 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //if (sm->solver_info.LINEAR_PROBLEM ==YES) {
         //    if(myid==0)printf("\n%s_%d TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0],index, sm->t_prev, sm->dt, (100.0 * (sm->t_prev - sm->t_init) / (sm->t_final - sm->t_init)), it + 1);} /* gkc warning come back later and fix use of submodel[0]. */
         //else{
-            if(myid==0)printf("\n%s TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0], sm->t_prev, sm->dt, (100.0 * (sm->t_prev - sm->t_init) / (sm->t_final - sm->t_init)), it + 1);
+            if(myid==0){
+                printf("\n%s TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0], sm->t_prev, sm->dt, (100.0 * (sm->t_prev - sm->t_init) / (sm->t_final - sm->t_init)), it + 1);
+            }
         //}
         
         
         sm->nonlinear_it_total++;
+        printf("nonlinear it: %d\n",sm->nonlinear_it_total);
 
         //Old code. dont think  this applies anymore
         /*
@@ -325,10 +333,19 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
         assemble_jacobian(sm,grid);
+        //printf("Assembled\n");
         
+        //Screen_print_CSR(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->ndofs);
+        
+        apply_Dirichlet_BC(sm);
+        //printf("RHS\n");
+        //for (int i=0;i<sm->ndofs;i++){
+//        printf("Before solve resid[%d] = %f\n",i,sm->residual[i]);
+//        }
         /* Set initial guess */
         //maybe redundant?
         sarray_init_dbl(sm->dsol,ndof);
+        
 
 #ifdef _DEBUG
         if (DEBUG_FULL) {
@@ -357,6 +374,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 
         //PETSC option
 #ifdef _PETSC
+        printf("PETSC??\n");
         // Solver
         //be sure values get updated since we used set with split arrays ...
         KSPSetOperators(sm->ksp,sm->A,sm->A);
@@ -405,24 +423,32 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
             PetscViewerPopFormat(viewer);
         }
 #endif
-#else
+#else        
+        //Screen_print_CSR(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->ndofs);
         //Non-PETSc option
         //does a scaling 
         scale_linear_system(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag,
-        sm->vals_off_diag, sm->residual, sm->sol, sm->scale_vect, sm->local_size, sm->size, rank, sm->ghosts, sm->nghost);
-
+        sm->vals_off_diag, sm->residual, sm->dsol, sm->scale_vect, sm->local_size, sm->ndofs + sm->nghost, myid, sm->ghosts, sm->nghost);
+        //printf("linear system scaled\n");
         //factor the matrix preconditioner
-        status = prep_umfpack(sm->indptr_diag,sm->cols_diag,sm->vals_diag, sm->sol, sm->residual, m);
-        
+        status = prep_umfpack(sm->indptr_diag,sm->cols_diag,sm->vals_diag, sm->dsol, sm->residual, sm->local_size);
+        //printf("umfpack prep\n");
         
         //actually solve linear system, returns solution
-        status = solve_linear_sys_bcgstab(sm->sol, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag,
-        sm->vals_off_diag, sm->residual, sm->scale_vect, sm->local_size, sm->size,rank, sm->ghosts, sm->nghost);
+        status = solve_linear_sys_bcgstab(sm->dsol, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag,
+        sm->vals_off_diag, sm->residual, sm->scale_vect, sm->local_size, sm->ndofs + sm->nghost ,myid, sm->ghosts, sm->nghost);
+        //printf("BCGSTAB completed\n");
+//        for (int i=0;i<sm->ndofs;i++){
+//        printf("Dsol increment[%d] = %f\n",i,sm->dsol[i]);
+//        }
 #endif        
         
         /* adds the increment to the solution */
         //(*inc_fnctn) (sm,isuperModel);
         increment_function(sm);
+        for (int i=0;i<sm->ndofs;i++){
+        printf("solution after increment[%d] = %f\n",i,sm->sol[i]);
+        }
         //somehow be able to call these?
 #ifdef _DEBUG
         if(init_fnctn == fe_transport_init){
@@ -640,7 +666,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
                 //       sm->submodel[0].sgw->gw_phead[im_node],sm->submodel[0].sgw->gw_phead[im_node]+sm->sol[im_node]);
 #endif
             //}
-            printf(" NNODES: %2d",tot_nnode);
+            printf(" NNODES: %2d",grid->nnodes);
             if (linesearch_cuts > 0)  printf(" LS");
         }
         

@@ -101,7 +101,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
-            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes);
+            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes,-1);
         }
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -159,7 +159,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
             //printf("Element: %d, Physics module: %d, Physics Residual = {%f,%f,%f,%f,%f,%f,%f,%f,%f}\n",j,k,eq_rhs[0],eq_rhs[1],eq_rhs[2],eq_rhs[3],eq_rhs[4],eq_rhs[5],eq_rhs[6],eq_rhs[7],eq_rhs[8]);
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
-            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes);
+            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes,-1);
             //printf("Element: %d, Physics module: %d, Elemental Residual = {%f,%f,%f,%f,%f,%f,%f,%f,%f}\n",j,k,elem_rhs[0],elem_rhs[1],elem_rhs[2],elem_rhs[3],elem_rhs[4],elem_rhs[5],elem_rhs[6],elem_rhs[7],elem_rhs[8]);
         }
         //for residual we only need dof numbers local to process (including ghost nodes)
@@ -210,7 +210,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
-            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes);
+            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes,-1);
         }
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -246,7 +246,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
  *  \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int elem_nvars, int *elem_vars, int eq_nvars, int *eq_vars, int nnodes){
+void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int elem_nvars, int *elem_vars, int eq_nvars, int *eq_vars, int nnodes, double scale){
 
     //for each node, place the rhs entries of a specific pde residual routine in the correct slots of an elemental rhs
 
@@ -277,7 +277,7 @@ void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int elem_nvars, int 
             }
 
             //now we know what the current_var is in the whole element, put those entries into the elem_rhs
-            elem_rhs[inode*elem_nvars + save_k] += eq_rhs[inode*eq_nvars+eq_var];
+            elem_rhs[inode*elem_nvars + save_k] += scale*eq_rhs[inode*eq_nvars+eq_var];
 
         }
     
@@ -347,7 +347,7 @@ void load_global_resid(double *residual, double *elem_rhs, int nnodes, int elem_
 
             index = local_dofs[i];
             //does minus convention hold for all residuals?
-            residual[index]     -= elem_rhs[i];
+            residual[index]     += elem_rhs[i];
                     
         }
 

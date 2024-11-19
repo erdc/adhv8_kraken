@@ -36,6 +36,8 @@ void comm_update_double(double *vec,  /* the vector to be updated */
                         int rank //number of processors
   )
 {
+#ifdef _MESSG
+
   //double *bpntr = NULL;         /* pointer to allow for de-referencing */
   int i_processor = 0, j_processor = 0, ii=0;  /* loop counter */
 
@@ -96,7 +98,7 @@ void comm_update_double(double *vec,  /* the vector to be updated */
   }
 
 
-
+#endif
   return;
 }
 
@@ -111,17 +113,26 @@ void scale_linear_system(int *indptr_diag, int *cols_diag, double *vals_diag,
   double max_val_diag, max_val_off_diag;
 
   //first step is find max(abs(row)) and store in scale_vect, includes ghosts using MPI
-  for (i=0;i<local_size;i++){
-    max_val_diag = find_max_in_row(indptr_diag,vals_diag,i);
-    max_val_off_diag = find_max_in_row(indptr_off_diag,vals_off_diag,i);
+  if(indptr_off_diag!=NULL){
+    for (i=0;i<local_size;i++){
+      max_val_diag = find_max_in_row(indptr_diag,vals_diag,i);
+      max_val_off_diag = find_max_in_row(indptr_off_diag,vals_off_diag,i);
     
-    if (max_val_diag > max_val_off_diag){
+      if (max_val_diag > max_val_off_diag){
+        scale_vect[i] = max_val_diag;
+      }else{
+        scale_vect[i] = max_val_off_diag;
+      }
+
+    }
+  }else{
+    for (i=0;i<local_size;i++){
+      max_val_diag = find_max_in_row(indptr_diag,vals_diag,i);
       scale_vect[i] = max_val_diag;
-    }else{
-      scale_vect[i] = max_val_off_diag;
     }
 
   }
+
 
   //ghosts of scale vect probably needed to be communicated
   //previously used comm_update_double
@@ -164,18 +175,20 @@ void scale_linear_system(int *indptr_diag, int *cols_diag, double *vals_diag,
   }
   //now off diag
   //remember this gives global column numbers
-  for (i=0;i<local_size;i++){
-    ind_start = indptr_off_diag[i];ind_end = indptr_off_diag[i+1];
-    nentry_row = ind_end-ind_start;
-    for(j=0;j<nentry_row;j++){
-      //this is global column number, need global to local mapping
-      //this is easy with ghost numbers
-      global_col_no = cols_off_diag[ind_start+j];
-      //this is easy with ghost numbers
-      //search ghost no's and find the number then add on local_size
-      col_no = global_to_local(global_col_no,local_size,ghosts,nghost);
-      //printf("Rank %d, local row %d, row entry %d, global col_no %d, col_no %d\n", rank, i, j, global_col_no,col_no);
-      vals_off_diag[ind_start+j]*=scale_vect[i]*scale_vect[col_no];
+  if (indptr_off_diag!=NULL){
+    for (i=0;i<local_size;i++){
+      ind_start = indptr_off_diag[i];ind_end = indptr_off_diag[i+1];
+      nentry_row = ind_end-ind_start;
+      for(j=0;j<nentry_row;j++){
+        //this is global column number, need global to local mapping
+        //this is easy with ghost numbers
+        global_col_no = cols_off_diag[ind_start+j];
+        //this is easy with ghost numbers
+        //search ghost no's and find the number then add on local_size
+        col_no = global_to_local(global_col_no,local_size,ghosts,nghost);
+        //printf("Rank %d, local row %d, row entry %d, global col_no %d, col_no %d\n", rank, i, j, global_col_no,col_no);
+        vals_off_diag[ind_start+j]*=scale_vect[i]*scale_vect[col_no];
+      }
     }
   }
 
@@ -409,10 +422,12 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
 
 
 double get_global_max(double x){
+#ifdef _MESSG
   double x_send = 0.0;        /* the variables for the pass */
   int ierr_code = MPI_ERR_UNKNOWN;  /* the error code from an mpi call */
   x_send = x;
   ierr_code = MPI_Allreduce(&x_send, &x, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+#endif
   return x;
 }
 
@@ -433,21 +448,34 @@ void split_CSR_mat_vec_mult(double *Ax, int *indptr_diag, int *cols_diag, double
   //does mat/vec multiplication between split CSR with vector x and returns Ax
   int i, j, k;
   double Ax_i;
-  //loop over row
-  for(i=0;i<nrows;i++){
-    Ax_i = 0.0;
-    for(j=indptr_diag[i];j<indptr_diag[i+1];j++){
-      //diag blaock cols_diag are local numbers only so no issue here
-      Ax_i += vals_diag[j]*x[cols_diag[j]];
+
+  if(indptr_off_diag!=NULL){
+    //loop over row
+    for(i=0;i<nrows;i++){
+      Ax_i = 0.0;
+      for(j=indptr_diag[i];j<indptr_diag[i+1];j++){
+        //diag blaock cols_diag are local numbers only so no issue here
+        Ax_i += vals_diag[j]*x[cols_diag[j]];
+      }
+      for(k=indptr_off_diag[i];k<indptr_off_diag[i+1];k++){
+        //off diag is a little more complex
+        Ax_i += vals_off_diag[k]*x[global_to_local(cols_off_diag[k], nrows, ghosts, nghost)];
+      }
+      Ax[i] = Ax_i;
+
     }
+  }else{
+    //loop over row
+    for(i=0;i<nrows;i++){
+      Ax_i = 0.0;
+      for(j=indptr_diag[i];j<indptr_diag[i+1];j++){
+        //diag blaock cols_diag are local numbers only so no issue here
+        Ax_i += vals_diag[j]*x[cols_diag[j]];
+      }
+      
+      Ax[i] = Ax_i;
 
-    for(k=indptr_off_diag[i];k<indptr_off_diag[i+1];k++){
-      //off diag is a little more complex
-      Ax_i += vals_off_diag[k]*x[global_to_local(cols_off_diag[k], nrows, ghosts, nghost)];
     }
-
-    Ax[i] = Ax_i;
-
   }
 
 }
@@ -560,11 +588,13 @@ double dot_dbl_array(
 
 double messg_dsum(double x)
 {
+#ifdef _MESSG
   double x_send = 0.0;        /* the variables for the pass */
   int ierr_code = MPI_ERR_UNKNOWN;  /* the error code from an mpi call */
 
   x_send = x;
   ierr_code = MPI_Allreduce(&x_send, &x, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+#endif
   return (x);
 }
 

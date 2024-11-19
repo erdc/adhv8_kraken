@@ -39,11 +39,12 @@ int inhouse_test(int argc, char **argv) {
   int nnode=0;
   int nnz_diag=0;
   int nnz_off_diag=0;
-  int rank;
-  int npe;
+  int rank=0;
+  int npe=1;
+#ifdef _MESSG
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &npe);
-
+#endif
 
   //  Memory allocates dynamically using malloc() 
   //indptr_diag = (int*)malloc(size * sizeof(int)); 

@@ -56,7 +56,7 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
     double f[nnodes];
     int i;
     for (i =0;i<nnodes;i++){
-        f[i] = -2;
+        f[i] = 6;
     }
     //perturb solution variable only, let's say we are using U
     if (perturb_var == PERTURB_U){
@@ -76,10 +76,10 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
         grad_u.y += elem_u[i] * grad_shp[i].y;
     }
     
-    integrate_triangle_gradPhi_dot_vbar(grad_shp, mod->grid->elem2d[ie].djac, -1,  grad_u, elem_rhs);
+    integrate_triangle_gradPhi_dot_vbar(grad_shp, mod->grid->elem2d[ie].djac, 1,  grad_u, elem_rhs);
 
     //rhs of linear system (will be 0 when Jacobian is computed)
-    integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, -1, f, elem_rhs);
+    integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, f, elem_rhs);
 
     return 0;
 }

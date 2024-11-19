@@ -1,10 +1,12 @@
 #include "adh.h"
 
 int petsc_test(int argc, char **argv) {
+int ierr = -1;
+#ifdef _PETSC
   PetscMPIInt    rank;
   PetscInt       i;
   int k;
-  int ierr;
+  
   int nghost = 0;
   int m=0;
   int n=0;
@@ -179,5 +181,6 @@ int petsc_test(int argc, char **argv) {
   //    PETSC_COMM_WORLD));
 
   PetscCall(PetscFinalize());
+#endif
   return ierr;
 }

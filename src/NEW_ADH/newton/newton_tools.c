@@ -265,8 +265,7 @@ void increment_function(SMODEL_SUPER *sm){
 
 void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *inc_max_norm,
          int *imax_dof, int *iinc_dof, int *include_dof,
-         int my_ndofs, int ndofs, int macro_ndofs, double *residual, double *dsol
-        ){
+         int my_ndofs, int ndofs, int macro_ndofs, double *residual, double *dsol, int *bc_mask){
     
     int i, j, include_dof_flag;
     double lolh = 1.0;
@@ -292,7 +291,10 @@ void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *i
         if (include_dof != NULL) {
             if (include_dof[i] != YES) include_dof_flag = 0;
         }
-           
+        //dirichlet bc shouldnt be included either
+        if (bc_mask !=NULL){
+            if (bc_mask[i] == YES) include_dof_flag = 0;
+        }   
 
         // Directly use residual and sol double arrays
         if ( (fabs(dsol[i]) > partial_inc_max_norm) && include_dof_flag == 1) {
@@ -310,8 +312,13 @@ void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *i
             partial_max_norm = fabs(residual[i]);
             *imax_dof = i;
         }
-            
-        partial_l2_norm += residual[i] * residual[i];
+        
+        //Mark added criterion ro include_dof_flag
+        //printf("NODE %d, include dof flag %d bc_mask %d\n",i, include_dof_flag,bc_mask[i]);
+        if (include_dof_flag == 1){
+            //printf("NODE %d INCLUDED\n",i);
+            partial_l2_norm += residual[i] * residual[i];
+        }
     }
     *resid_max_norm = partial_max_norm;
     

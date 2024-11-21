@@ -413,7 +413,8 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
     
 
     //pertrubation may depend on physics?
-    double perturbation = sqrt(SMALL);
+    //mark changed, the sqrt(SMALL) seems to be quite excessive
+    double perturbation = 1e-4;//sqrt(SMALL);
 
 
     double temp_P[MAX_NVAR*MAX_NNODE];
@@ -442,6 +443,9 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
 
         temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->node_physics_mat, sm->node_physics_mat_id)];
         NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol, perturbation);    // calculates epsilon and 2*epsilon
+        
+        //epsilon = 1.0;
+        //epsilon2 = 2.0;
         sarray_init_dbl(elem_rhs_P,MAX_NVAR*MAX_NNODE);
         sarray_init_dbl(elem_rhs_M,MAX_NVAR*MAX_NNODE);
         //safe assumption that all submodels on an element depend on all of the variables?

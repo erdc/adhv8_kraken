@@ -211,7 +211,7 @@ int prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *so
 int solve_umfpack(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, double *b, int nrow){
   int status;
   double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
-  //try this to account for CSR format, use solution as RHS for some reason
+  //try this to account for CSR format, use solution as RHS
   status = umfpack_di_solve (UMFPACK_Aat, indptr_diag, cols_diag, vals_diag, x, b, Numeric, Control, Info);
   return status;
 }
@@ -314,13 +314,14 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   rnorm = get_global_max(rnorm);
   bnorm = get_global_max(bnorm);
 
-
+  printf("RNORM = %6.4e\n",rnorm);
+  printf("BNORM = %6.4e\n",bnorm);
   rhop = 1.0;
   alpha = 1.0;
   omega = 1.0;
   it = 0;
-  min_conv_tol = 1e-10;
-  conv_tol = 1e-5;
+  min_conv_tol = 1e-11;
+  conv_tol = 1e-11;
   rho = dot_dbl_array(local_size, r, q);
   //if in parallel sum among processors
   rho = messg_dsum(rho);
@@ -400,7 +401,7 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     //printf("Rnorm, %f\n",rnorm);
 
   }
-  printf("IT = %d\n\n",it);
+  printf("BCGSTAB # IT = %d\n",it);
 
   //undo scaling (need to add in error checks)
   for (i = 0; i < local_size; i++) {
@@ -411,9 +412,9 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
         x[i] *= scale_vect[i]; /* UNDO SCALING */
     }
   comm_update_double(x, local_size, 3, rank);
-  for (i = 0; i <local_size; i++){
-    printf("Rank %d Final u[%d] = %f\n",rank,i,x[i]);
-  }
+ // for (i = 0; i <local_size; i++){
+//    printf("Rank %d Final u[%d] = %f\n",rank,i,x[i]);
+//  }
 
   //add later to see if converged or not
   int status = 0;

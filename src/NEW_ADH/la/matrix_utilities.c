@@ -279,8 +279,13 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
 
     
     // resize as needed
+    //try the vanilla alloc instead, just to make sure no bugs
     sm->cols_diag = (int *) tl_realloc(sizeof(int), sm->nnz_diag, sm->nnz_diag_old, sm->cols_diag);
     sm->vals_diag = (double *) tl_realloc(sizeof(double), sm->nnz_diag, sm->nnz_diag_old, sm->vals_diag);
+
+    //sm->cols_diag = (int*) tl_alloc(sizeof(int), sm->nnz_diag);
+    //sm->vals_diag = (double*) tl_alloc(sizeof(double), sm->nnz_diag);
+
 
     if (sm->indptr_off_diag!=NULL){
         sm->cols_off_diag = (int *) tl_realloc(sizeof(int), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->cols_off_diag);
@@ -303,6 +308,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     }
     //also last sm->indptr  needs to be the last entry
     sm->indptr_diag[nrows] = count_diag;
+    assert(sm->indptr_diag[nrows] = sm->nnz_diag);
 
     
     if (sm->indptr_off_diag!=NULL){
@@ -604,7 +610,8 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
             if(sm->bc_mask[local_col_no] == YES){
                 temp = sm->vals_diag[row_entry];
                 //adjust RHS
-                sm->residual[row] -= temp*(sm->dirichlet_data[local_col_no] - sm->sol[local_col_no]);
+                //needed for method 1, for method 2 this should be unecceary
+                //sm->residual[row] -= temp*(sm->dirichlet_data[local_col_no] - sm->sol[local_col_no]);
                 //clear entry after moving
                 sm->vals_diag[row_entry] = 0.0;
             }
@@ -621,9 +628,9 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
             row_end = sm->indptr_diag[row+1];
             //assign dirichlet data to residual
             //method 1 appears to work
-            sm->residual[row] = sm->dirichlet_data[row] - sm->sol[row];
+            //sm->residual[row] = sm->dirichlet_data[row] - sm->sol[row];
             //method 2, require sol to have bc already  there
-            //sm->residual[row] = 0.0;
+            sm->residual[row] = 0.0;
             //wipe out row and set diagonal to 1 (rescaling diagonal shouldn't matter in method 2)
             for(row_entry=row_start; row_entry<row_end; row_entry++){
                 local_col_no = sm->cols_diag[row_entry];
@@ -690,7 +697,7 @@ void Screen_print_CSR(int *indptr, int *cols, double *vals, int nrow){
         row_end = indptr[i+1];
         nentry = row_end-row_start;
         for(j=0;j<nentry;j++){
-            printf(" (%d,%f)",cols[row_start+j],vals[row_start+j]);
+            printf(" (%d,%.17e)",cols[row_start+j],vals[row_start+j]);
         }
         printf("\n");
     }

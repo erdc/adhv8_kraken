@@ -165,7 +165,8 @@ typedef struct {
 
     /* boundary conditions mask */
     //maybe we can get rid of this through weak enforcement
-    //bcmask *bc_mask;
+    int *bc_mask;
+    double *dirichlet_data;
     //Mark, havent looked into this yet. Maybe weak 
     STR_VALUE *str_values;    /* strings */
     SSERIES *series_head;

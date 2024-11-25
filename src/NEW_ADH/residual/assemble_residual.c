@@ -75,14 +75,14 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
         //pull out nodal variables
         //only necessary for CG i believe
-        for (l=0;l<nnodes;l++){
-            node_id = grid->elem3d[j].nodes[l];
-            node_mat_id = sm->node_physics_mat_id[node_id];
-            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
-            for(m=0;m<nvar_node[l];m++){
-                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
-            }
-        }
+        //for (l=0;l<nnodes;l++){
+//            node_id = grid->elem3d[j].nodes[l];
+//            node_mat_id = sm->node_physics_mat_id[node_id];
+//            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+//            for(m=0;m<nvar_node[l];m++){
+//                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+//            }
+//        }
 
 
         for (k=0;k<nphysics_models;k++){
@@ -107,7 +107,8 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs_2(dofs,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
@@ -133,15 +134,15 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //pull out nodal variables
         //only necessary for CG i believe
 
-        for (l=0;l<nnodes;l++){
-            node_id = grid->elem2d[j].nodes[l];
-            
-            node_mat_id = sm->node_physics_mat_id[node_id];
-            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
-            for(m=0;m<nvar_node[l];m++){
-                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
-            }
-        }
+//        for (l=0;l<nnodes;l++){
+//            node_id = grid->elem2d[j].nodes[l];
+//            
+//            node_mat_id = sm->node_physics_mat_id[node_id];
+//            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+//            for(m=0;m<nvar_node[l];m++){
+//                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+//            }
+//        }
 
         for (k=0;k<nphysics_models;k++){
             sarray_init_dbl(eq_rhs,nentry);
@@ -166,9 +167,9 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        //get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,nvar_node,vars_node);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //alternative, computes fmaplocal instead of storing
-        get_cell_dofs_2(dofs, nnodes, grid->elem2d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs_2(dofs, nnodes, grid->elem2d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
@@ -185,14 +186,14 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         sarray_copy_int(elem_vars, sm->elem1d_physics_mat[mat_id].vars, nvars_elem);
         //pull out nodal variables
         //only necessary for CG i believe
-        for (l=0;l<nnodes;l++){
-            node_id = grid->elem1d[j].nodes[l];
-            node_mat_id = sm->node_physics_mat_id[node_id];
-            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
-            for(m=0;m<nvar_node[l];m++){
-                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
-            }
-        }
+//        for (l=0;l<nnodes;l++){
+//            node_id = grid->elem1d[j].nodes[l];
+//            node_mat_id = sm->node_physics_mat_id[node_id];
+//            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+//            for(m=0;m<nvar_node[l];m++){
+//                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+//            }
+//        }
 
         for (k=0;k<nphysics_models;k++){
             sarray_init_dbl(eq_rhs,nentry);
@@ -216,13 +217,16 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs_2(dofs,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
 
 
-    //Dirichlet stuff?    
+//    for(j=0;j<MAX_NNODE;j++){
+//        free(vars_node[j]);
+//    } 
 }
 
 

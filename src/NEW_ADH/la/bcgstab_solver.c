@@ -4,6 +4,16 @@
 
 //keep umfpack calls in one script
 static  void *Symbolic, *Numeric;
+static int isize = 0;           /* the size of the arrays */
+static double *r;          /* the linear solver residual */
+static double *p;          /* the search direction */
+static double *Ap;         /* AMp */
+static double *Mp;         /* Mp */
+static double *q;          /* the shadow residual */
+static double *s;          /* the second search direction for bcgstab */
+static double *As;         /* AMs */
+static double *Ms;         /* Ms */
+static double *x0;         /* solution = u+u0 - u0 is the shift */
 
 double find_max_in_row(int *indptr, double *vals,int row_num){
   int ind1 = indptr[row_num];
@@ -237,18 +247,38 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   //double snorm;               /* the norm of s */
   double conv_tol;            /* the convergence tolerance */
   double min_conv_tol;        /* the minimum convergence tolerance */
+  int isize_prev;
+  printf("Shit started\n");
 
   /* allocates memory if needed */
+  if (isize < size_with_ghosts) {
+        isize_prev = isize;
+        isize = size_with_ghosts;
+        r = (double *) tl_realloc(sizeof(double), isize, isize_prev, r);
+        p = (double *) tl_realloc(sizeof(double), isize, isize_prev, p);
+        Ap = (double *) tl_realloc(sizeof(double), isize, isize_prev, Ap);
+        Mp = (double *) tl_realloc(sizeof(double), isize, isize_prev, Mp);
+        q = (double *) tl_realloc(sizeof(double), isize, isize_prev, q);
+        s = (double *) tl_realloc(sizeof(double), isize, isize_prev, s);
+        As = (double *) tl_realloc(sizeof(double), isize, isize_prev, As);
+        Ms = (double *) tl_realloc(sizeof(double), isize, isize_prev, Ms);
+        x0 = (double *) tl_realloc(sizeof(double), isize, isize_prev, x0);
+  }
+  printf("Ndof with ghosts = %d\n",size_with_ghosts);
+  /* allocates memory if needed */
   // need to do different allocation later
-  double r[size_with_ghosts];
-  double p[size_with_ghosts];
-  double Ap[size_with_ghosts];
-  double Mp[size_with_ghosts];
-  double q[size_with_ghosts];
-  double s[size_with_ghosts];
-  double As[size_with_ghosts];
-  double Ms[size_with_ghosts];
-  double x0[size_with_ghosts];
+  //double r[size_with_ghosts];
+  //printf("allocated one doubles\n");
+  //double p[size_with_ghosts];
+  //printf("allocated two doubles\n");
+  //double Ap[size_with_ghosts];
+  //double Mp[size_with_ghosts];
+  //double q[size_with_ghosts];
+  //double s[size_with_ghosts];
+  //double As[size_with_ghosts];
+  //double Ms[size_with_ghosts];
+  //double x0[size_with_ghosts];
+  printf("allocated some doubles\n");
 
 
   /* zeroes the arrays */

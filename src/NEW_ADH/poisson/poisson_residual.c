@@ -50,8 +50,8 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
     //get the solution on this element, for now just use U
     double elem_u[nnodes];
     //this map only works for CG, want to generalize to DG in future
-    global_to_local_dbl_cg(mod->sol, elem_u, elem2d->nodes, nnodes, PERTURB_U, mod->node_physics_mat, mod->node_physics_mat_id);
-
+    //global_to_local_dbl_cg_2(mod->sol, elem_u, elem2d->nodes, nnodes, PERTURB_U, mod->node_physics_mat, mod->node_physics_mat_id);
+    global_to_local_dbl_cg(mod->sol, elem_u, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat, mod->node_physics_mat_id);
     //for now let's let f be a constant so we have analytic solution to compare to
     double f[nnodes];
     int i;

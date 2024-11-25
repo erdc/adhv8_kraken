@@ -38,14 +38,14 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
 
     //allocate 2d array, more memory than necessary
     //int vars_node[MAX_NNODE][MAX_NVAR];
-    int **vars_node;
-    vars_node = (int**) tl_alloc(sizeof(int*), MAX_NNODE);
-    for(j=0;j<MAX_NNODE;j++){
-        vars_node[j] = (int*) tl_alloc(sizeof(int), MAX_NVAR);
-        for(k=0;k<MAX_NVAR;k++){
-            vars_node[j][k]=0;
-        }
-    }
+//    int **vars_node;
+//    vars_node = (int**) tl_alloc(sizeof(int*), MAX_NNODE);
+//    for(j=0;j<MAX_NNODE;j++){
+//        vars_node[j] = (int*) tl_alloc(sizeof(int), MAX_NVAR);
+//        for(k=0;k<MAX_NVAR;k++){
+//            vars_node[j][k]=0;
+//        }
+//    }
 
 
     //zero out stuff
@@ -82,14 +82,14 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         //maybe pull local nodal nvars and vars here too:
         //only necessary for CG i believe (or not idk)
         //if generalizing to higher dimension, this would be dof on basis functions
-        for (l=0;l<nnodes;l++){
-            node_id = grid->elem3d[j].nodes[l];
-            node_mat_id = sm->node_physics_mat_id[node_id];
-            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
-            for(m=0;m<nvar_node[l];m++){
-                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
-            }
-        }
+//        for (l=0;l<nnodes;l++){
+//            node_id = grid->elem3d[j].nodes[l];
+//            node_mat_id = sm->node_physics_mat_id[node_id];
+//            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+//            for(m=0;m<nvar_node[l];m++){
+//                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+//            }
+//        }
         //need to loop over each variable and perturb it
         for (k=0;k<nvars_elem;k++){
             //use var code like PERTURB_H ,. ...
@@ -103,7 +103,8 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs_2(dofs,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
         //temp has local elemental matrix 
@@ -135,19 +136,19 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         //maybe pull local nodal nvars and vars here too:
         //only necessary for CG i believe (or not idk)
         //if generalizing to higher dimension, this would be dof on basis functions
-        for (l=0;l<nnodes;l++){
-            //printf("calling vars_node for node %d\n",l);
-            node_id = grid->elem2d[j].nodes[l];
-            node_mat_id = sm->node_physics_mat_id[node_id];
-            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
-            //printf("node mat id: %d, Nvar on this node%d\n",node_mat_id, nvar_node[l]);
-            for(m=0;m<nvar_node[l];m++){
+//        for (l=0;l<nnodes;l++){
+//            //printf("calling vars_node for node %d\n",l);
+//            node_id = grid->elem2d[j].nodes[l];
+//            node_mat_id = sm->node_physics_mat_id[node_id];
+//            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+//            //printf("node mat id: %d, Nvar on this node%d\n",node_mat_id, nvar_node[l]);
+//            for(m=0;m<nvar_node[l];m++){//
 
-                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
-                //printf("Node physics var assigned for node %d node var %d = %d\n",l,m,vars_node[l][m]);
-            }
-        //printf("Looping through eac variable on the elemnt\n");
-        }
+//                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+//                //printf("Node physics var assigned for node %d node var %d = %d\n",l,m,vars_node[l][m]);
+//            }
+//        //printf("Looping through eac variable on the elemnt\n");
+//        }
         //need to loop over each variable and perturb it
         //printf("completed loop\n");
         for (k=0;k<nvars_elem;k++){
@@ -164,7 +165,8 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs_2(dofs,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
         //temp has local elemental matrix 
@@ -192,14 +194,14 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         //maybe pull local nodal nvars and vars here too:
         //only necessary for CG i believe (or not idk)
         //if generalizing to higher dimension, this would be dof on basis functions
-        for (l=0;l<nnodes;l++){
-            node_id = grid->elem1d[j].nodes[l];
-            node_mat_id = sm->node_physics_mat_id[node_id];
-            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
-            for(m=0;m<nvar_node[l];m++){
-                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
-            }
-        }
+//        for (l=0;l<nnodes;l++){
+//            node_id = grid->elem1d[j].nodes[l];
+//            node_mat_id = sm->node_physics_mat_id[node_id];
+//            nvar_node[l] = sm->node_physics_mat[node_mat_id].nvar;
+//            for(m=0;m<nvar_node[l];m++){
+//                vars_node[l][m] = sm->node_physics_mat[node_mat_id].vars[m];
+//            }
+//        }
         //need to loop over each variable and perturb it
         for (k=0;k<nvars_elem;k++){
             //use var code like PERTURB_H ,. ...
@@ -213,7 +215,8 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,nvar_node, vars_node);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs_2(dofs,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
         //temp has local elemental matrix 
@@ -222,7 +225,17 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         //split CSR
         load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
     }
-    free(vars_node);
+
+//    for(j=0;j<MAX_NNODE;j++){
+//        free(vars_node[j]);
+//    } 
+//    for(j=0;j<max_elem_dofs;j++){
+//        free(elem_mat[j]);
+//    }
+    for(j=0;j<max_elem_dofs;j++){
+        elem_mat[j] = (double *) tl_free(sizeof(double), max_elem_dofs, elem_mat[j]);
+    }
+    elem_mat = (double **) tl_free(sizeof(double *), max_elem_dofs, elem_mat);
 }
 
 
@@ -441,7 +454,8 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
         //pull dof # to get info
         //for now use CG map in here
 
-        temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->node_physics_mat, sm->node_physics_mat_id)];
+        //temp_sol = sm->sol[get_cg_dof_2(perturb_var_code, NodeID, sm->node_physics_mat, sm->node_physics_mat_id)];
+        temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id)];
         NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol, perturbation);    // calculates epsilon and 2*epsilon
         
         //epsilon = 1.0;
@@ -455,7 +469,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (+) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _DEBUG
-            if (DEBUG) printf("\nload :: body pertubing +h for %dd element %d :: perturbation: %20.10e\n",dim,ie,epsilon);
+            if (DEBUG) printf("\nload :: body pertubing +h for element %d :: perturbation: %20.10e\n",ie,epsilon);
 #endif
 
             //this will give a local residual, in temp and will give code for model vars
@@ -467,7 +481,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _DEBUG
-            if (DEBUG) printf("\nload :: body pertubing -h for %dd element %d :: perturbation: %20.10e\n",dim,ie,epsilon);
+            if (DEBUG) printf("\nload :: body pertubing -h for element %d :: perturbation: %20.10e\n",ie,epsilon);
 #endif
             //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
             //should always be same as var_code

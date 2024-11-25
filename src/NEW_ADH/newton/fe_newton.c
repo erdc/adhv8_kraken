@@ -61,6 +61,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     
     int nnodes = grid->nnodes;
     int my_nnodes = grid->my_nnodes;
+    int macro_nnodes = grid->macro_nnodes;
 
     
     //uses elem_physics to access all elemental routines and builds/solves linear systems
@@ -105,14 +106,12 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     
 #ifdef _DEBUG
     if (DEBUG_FULL) {
-        for (i=0; i<sm->nsubmodels; i++){
-            printf("fe_newton :: myid: %d ndim: %d :: grid->my_nnodes: %d :: grid->nnodes: %d  :: macro_nnodes: %d grid->macro_nnodes: %d\n",
+            printf("fe_newton :: myid: %d ndim: %d :: grid->my_nnodes: %d :: grid->nnodes: %d  :: macro_nnodes: %d\n",
                    grid->smpi->myid,
                    grid->ndim,
                    grid->my_nnodes,
                    grid->nnodes,
                    grid->macro_nnodes);
-        }
     }
 #endif
 
@@ -192,12 +191,6 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
     
 #ifdef _DEBUG
-    if (debug.newton == ON) {
-        DEBUG_FULL = ON;
-    }
-    if ((init_fnctn == fe_hvel_init) && (debug.matrix_hvel == ON)) {
-        DEBUG_MATRIX = ON;
-    }
     if (DEBUG_PICKETS == ON) {
         tl_check_all_pickets(__FILE__, __LINE__);
     }
@@ -269,7 +262,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     
 #ifdef _DEBUG
     if (DEBUG_FULL)
-        printScreen_resid("residual before solving", sm->residual, nnodes, nsys, __LINE__, __FILE__);
+        printScreen_dble_array("residual before solving", sm->residual, ndof, __LINE__, __FILE__);
     if (DEBUG_FULL || DEBUG_INIT_RESID || DEBUG_STOP_AFTER_INIT_RESID) {
         printf("\n **Initial resid_max_norm = %18.9e \n", resid_max_norm);
         if (DEBUG_STOP_AFTER_INIT_RESID) tl_error("Stopping after initial residual");
@@ -333,11 +326,12 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
         assemble_jacobian(sm,grid);
-        //printf("Assembled\n");
+        printf("Assembled\n");
         
         //Screen_print_CSR(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->ndofs);
         
         apply_Dirichlet_BC(sm);
+        printf("Dirichlet applied\n");
         //printf("RHS\n");
         //for (int i=0;i<sm->ndofs;i++){
 //        printf("Before solve resid[%d] = %f\n",i,sm->residual[i]);
@@ -356,10 +350,9 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
                     printf("BEFORE SOLVE!\n");
                     printScreen_dble_array("sol before solving", sm->sol, ndof, __LINE__, __FILE__);
-                    printScreen_resid("residual before solving", sm->residual, ndof, __LINE__, __FILE__);
+                    printScreen_dble_array("residual before solving", sm->residual, ndof, __LINE__, __FILE__);
                     //printScreen_int_array("bc_mask before solving",sm->bc_mask, nnodes * nsys, __LINE__, __FILE__);
                     //printScreen_dble_array("scale_vect before solving",sm->scale_vect, nnodes * nsys, __LINE__, __FILE__);
-                    if (DEBUG_MATRIX) printScreen_matrix("matrix before solving", sm->diagonal, sm->matrix, nnodes, sm->max_nsys_sq,__LINE__, __FILE__);
 #ifdef _MESSG
                 }
             }
@@ -432,10 +425,10 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         scale_linear_system(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag,
         sm->vals_off_diag, sm->residual, sm->dsol, sm->scale_vect, sm->local_size, sm->ndofs + sm->nghost, myid, sm->ghosts, sm->nghost);
         
-        //printf("linear system scaled\n");
+        printf("linear system scaled\n");
         //factor the matrix preconditioner
         status = prep_umfpack(sm->indptr_diag,sm->cols_diag,sm->vals_diag, sm->dsol, sm->residual, sm->local_size);
-        //printf("umfpack prep\n");
+        printf("umfpack prep completed\n");
         
         
 
@@ -447,7 +440,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
        //     printf("bc mask [%d] = %d, resid[%d] = %.17e \n",j,sm->bc_mask[j],j,sm->residual[j]);
        // }
         //direct solve, need to turn of scaling if you want to try this by itself
-        //status = solve_umfpack(sm->dsol, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->residual, sm->local_size);
+        status = solve_umfpack(sm->dsol, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->residual, sm->local_size);
         
 
 
@@ -469,22 +462,6 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //(*inc_fnctn) (sm,isuperModel);
         increment_function(sm);
 
-        //somehow be able to call these?
-#ifdef _DEBUG
-        if(init_fnctn == fe_transport_init){
-            print_concentration_file(sm, isuperModel, myid, npes);
-        }
-        if(init_fnctn == fe_sw2_init){
-            print_sw2_file(sm, isuperModel, myid, npes);
-        }
-        if(init_fnctn == fe_wvel_init){
-            print_sw3_file(sm,isuperModel,myid,npes);
-        }
-        if(init_fnctn == fe_diffusive_init){
-            printf("Printing diffusive wave solution to file\n");
-            print_dw_file(sm,isuperModel,myid,npes);
-        }
-#endif
         //Mark needs to check, why is this
         //flip sign after update?
         //while not steady state??
@@ -521,7 +498,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
                     printf("AFTER SOLVE!\n");
                     printScreen_dble_array("sol after solving", sm->sol, ndof, __LINE__, __FILE__);
-                    printScreen_resid("residual after solving", sm->residual, ndof, __LINE__, __FILE__);
+                    printScreen_dble_array("residual before solving", sm->residual, ndof, __LINE__, __FILE__);
                     //printScreen_int_array("bc_mask after solving",sm->bc_mask, nnodes * nsys, __LINE__, __FILE__);
                     //printScreen_dble_array("scale_vect after solving",sm->scale_vect, nnodes * nsys, __LINE__, __FILE__);
                     //if (DEBUG_MATRIX) printScreen_matrix("matrix after solving", sm->diagonal, sm->matrix, nnodes, sm->max_nsys_sq,__LINE__, __FILE__);
@@ -674,7 +651,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
             
 #ifdef _DEBUG
             if (DEBUG_FULL) {
-                printf("pe %d of %d :: new norms :: resid_max_norm: %30.20f \t resid_l2_norm: %30.20f \t old_resid_norm: %30.20f \t linesearch_cuts: %d \t max_nonlin_linesearch_cuts: %d \n",myid,npes,resid_max_norm,resid_l2_norm,old_resid_norm,linesearch_cuts,solver->max_nonlin_linesearch_cuts);
+                printf("pe %d of %d :: new norms :: resid_max_norm: %30.20f \t resid_l2_norm: %30.20f \t old_resid_norm: %30.20f \t linesearch_cuts: %d \t max_nonlin_linesearch_cuts: %d \n",myid,npes,resid_max_norm,resid_l2_norm,old_resid_norm,linesearch_cuts,sm->max_nonlin_linesearch_cuts);
             }
 #endif
         }
@@ -717,7 +694,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
                     printf("resid_max_norm: %30.20f \t tol_nonlin: %30.20f \n",resid_max_norm,sm->tol_nonlin);
                     printf("it: %d \t sm->max_nonlin_it: %d\n",it, sm->max_nonlin_it);
                     printf("solv_flag_min: %d UMFail_max: %d\n",solv_flag_min,UMFail_max);
-                    printf("LINEAR_PROBLEM: %d \n",solver->LINEAR_PROBLEM);
+                    printf("LINEAR_PROBLEM: %d \n",sm->LINEAR_PROBLEM);
                     printf("inc_max_norm: %30.20f \t inc_nonlin: %30.20f \n",inc_max_norm,sm->inc_nonlin);
 #ifdef _MESSG
                 }

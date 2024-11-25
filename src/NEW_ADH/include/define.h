@@ -625,5 +625,5 @@ typedef enum
 #define VECTOR3D_DATA 2
 
 //Mark adding max Nodal NVAR allowed, used to create sparsity
-#define MAX_NVAR 10
+#define MAX_NVAR 5
 #define MAX_NNODE 6

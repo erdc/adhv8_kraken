@@ -1,7 +1,7 @@
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 11;
-static int NEWTON_TEST_NY = 5;
+static int NEWTON_TEST_NX = 100;
+static int NEWTON_TEST_NY = 100;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 
 
@@ -75,7 +75,12 @@ int newton_test(int argc, char **argv) {
 	sm.cols_off_diag=NULL;
 	sm.vals_off_diag=NULL;
 	sm.bc_mask = NULL;
+	sm.nnz_diag_old=0;
+	sm.nnz_off_diag_old=0;
+	printf("Calling sparsity split CSR\n");
 	create_sparsity_split_CSR(&sm, sm.grid);
+	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
+
 	//do we want to stor nnz? it is stored in sm->indptr[nrows]
     //do we want to store local_size = local_range[1]-local_range[0]
     printf("NNZ = %d = %d\n",sm.indptr_diag[sm.my_ndofs], sm.nnz_diag);
@@ -168,8 +173,8 @@ int newton_test(int argc, char **argv) {
 		nodes[i] = i;
 	}
 
-	global_to_local_dbl_cg(sm.sol, uh, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
-	
+	//global_to_local_dbl_cg_2(sm.sol, uh, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
+	global_to_local_dbl_cg(sm.sol, uh, nodes, nnodes, PERTURB_U, sm.dof_map_local, sm.node_physics_mat, sm.node_physics_mat_id);
 
 //	printf("Final solution:\n");
 //	for(int i=0; i<nnodes;i++){

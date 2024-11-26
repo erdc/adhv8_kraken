@@ -516,16 +516,18 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     for (i=0; i<nrows; i++) {
         temp_cols_diag[i] = (int*) tl_free(sizeof(int), nnz_rows_diag[i], temp_cols_diag[i]);
     }
-    nnz_rows_diag= (int *) tl_free(sizeof(double), nrows, nnz_rows_diag);
-    nnz_rows_diag_no_duplicate= (int *) tl_free(sizeof(double), nrows, nnz_rows_diag_no_duplicate);
+    temp_cols_diag = (int **) tl_free(sizeof(int *), nrows, temp_cols_diag);
+    nnz_rows_diag= (int *) tl_free(sizeof(int), nrows, nnz_rows_diag);
+    nnz_rows_diag_no_duplicate= (int *) tl_free(sizeof(int), nrows, nnz_rows_diag_no_duplicate);
     
 
     if (has_off_diag){
         for (i=0; i<nrows; i++) {
             temp_cols_off_diag[i] = (int*) tl_free(sizeof(int), nnz_rows_off_diag[i], temp_cols_off_diag[i]);
         }
-        nnz_rows_off_diag= (int *) tl_free(sizeof(double), nrows, nnz_rows_off_diag);
-        nnz_rows_off_diag_no_duplicate= (int *) tl_free(sizeof(double), nrows, nnz_rows_off_diag_no_duplicate);
+        temp_cols_off_diag = (int **) tl_free(sizeof(int *), nrows, temp_cols_off_diag);
+        nnz_rows_off_diag= (int *) tl_free(sizeof(int), nrows, nnz_rows_off_diag);
+        nnz_rows_off_diag_no_duplicate= (int *) tl_free(sizeof(int), nrows, nnz_rows_off_diag_no_duplicate);
     }
     
 

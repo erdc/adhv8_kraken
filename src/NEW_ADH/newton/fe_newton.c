@@ -254,7 +254,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         &imax_dof, &iinc_dof, include_dof,
         sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol, sm->bc_mask
         );
-    //printf("residual norms computed: %f, %f, %f\n",resid_max_norm,resid_l2_norm,inc_max_norm);
+    //printf("residual norms computed: %.17e, %.17e, %.17e\n",resid_max_norm,resid_l2_norm,inc_max_norm);
 
 #ifdef _MESSG
     resid_max_norm = messg_dmax(resid_max_norm, smpi->ADH_COMM);
@@ -327,11 +327,27 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //(*load_fnctn) (sm,isuperModel);
         assemble_jacobian(sm,grid);
         printf("Assembled\n");
+
         
+//        double temp1 = l_infty_norm(sm->nnz_diag, sm->vals_diag);
+//        double temp2 = l2_norm(sm->vals_diag, sm->nnz_diag);
+//        double temp3 = l2_norm(sm->residual,sm->ndofs);
+//        double temp4 = l_infty_norm(sm->ndofs,sm->residual);
+//        printf("CSR norms: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
         //Screen_print_CSR(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->ndofs);
         
         apply_Dirichlet_BC(sm);
         printf("Dirichlet applied\n");
+//        get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
+//        &imax_dof, &iinc_dof, include_dof,
+//        sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol, sm->bc_mask
+//        );
+//        printf("residual norms computed after Dirichlet: %.17e, %.17e, %.17e\n",resid_max_norm,resid_l2_norm,inc_max_norm);
+//        temp1 = l_infty_norm(sm->nnz_diag, sm->vals_diag);
+//        temp2 = l2_norm(sm->vals_diag, sm->nnz_diag);
+//        temp3 = l2_norm(sm->residual,sm->ndofs);
+//        temp4 = l_infty_norm(sm->ndofs,sm->residual);
+//        printf("CSR norms after Dirichlet: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
         //printf("RHS\n");
         //for (int i=0;i<sm->ndofs;i++){
 //        printf("Before solve resid[%d] = %f\n",i,sm->residual[i]);
@@ -426,6 +442,12 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         sm->vals_off_diag, sm->residual, sm->dsol, sm->scale_vect, sm->local_size, sm->ndofs + sm->nghost, myid, sm->ghosts, sm->nghost);
         
         printf("linear system scaled\n");
+
+//        temp1 = l_infty_norm(sm->nnz_diag, sm->vals_diag);
+//        temp2 = l2_norm(sm->vals_diag, sm->nnz_diag);
+//        temp3 = l2_norm(sm->residual,sm->ndofs);
+//        temp4 = l_infty_norm(sm->ndofs,sm->residual);
+//        printf("CSR norms after scaling: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
         //factor the matrix preconditioner
         status = prep_umfpack(sm->indptr_diag,sm->cols_diag,sm->vals_diag, sm->dsol, sm->residual, sm->local_size);
         printf("umfpack prep completed\n");
@@ -440,7 +462,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
        //     printf("bc mask [%d] = %d, resid[%d] = %.17e \n",j,sm->bc_mask[j],j,sm->residual[j]);
        // }
         //direct solve, need to turn of scaling if you want to try this by itself
-        status = solve_umfpack(sm->dsol, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->residual, sm->local_size);
+        //status = solve_umfpack(sm->dsol, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->residual, sm->local_size);
         
 
 
@@ -531,7 +553,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         &imax_dof, &iinc_dof, include_dof,
         sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol, sm->bc_mask
         );
-
+        //printf("residual norms computed: %.17e, %.17e, %.17e\n",resid_max_norm,resid_l2_norm,inc_max_norm);
 #ifdef _DEBUG
         if (DEBUG_FULL) {
             printf("\n pe: %d resid_max_norm before line search = %18.9e my_nnodes: %d nnodes: %d macro_nnodes: %d \n", myid,resid_max_norm,my_nnodes, nnodes, macro_nnodes);

@@ -210,7 +210,7 @@ int prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *so
   int status;
 
   double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
-
+  umfpack_di_defaults(Control);    /* default control parameters */
   status = umfpack_di_symbolic (nrow, nrow, indptr_diag, cols_diag, vals_diag, &Symbolic, Control, Info);
   status = umfpack_di_numeric (indptr_diag, cols_diag, vals_diag, Symbolic, &Numeric, Control, Info) ;
   //Adh Stops here, how do we want to call other stuff?
@@ -221,6 +221,7 @@ int prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *so
 int solve_umfpack(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, double *b, int nrow){
   int status;
   double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
+  umfpack_di_defaults(Control);    /* default control parameters */
   //try this to account for CSR format, use solution as RHS
   status = umfpack_di_solve (UMFPACK_Aat, indptr_diag, cols_diag, vals_diag, x, b, Numeric, Control, Info);
   return status;
@@ -446,6 +447,9 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
 //    printf("Rank %d Final u[%d] = %f\n",rank,i,x[i]);
 //  }
 
+  //need to free after each solve? or not till end of simulation?
+  umfpack_di_free_symbolic (&Symbolic) ;
+  umfpack_di_free_numeric (&Numeric) ;
   //add later to see if converged or not
   int status = 0;
   return status;

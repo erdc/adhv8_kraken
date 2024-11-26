@@ -46,14 +46,14 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
     //allocate 2d array, more memory than necessary
     //int vars_node[MAX_NNODE][MAX_NVAR];
-    int **vars_node;
-    vars_node = (int**) tl_alloc(sizeof(int*), MAX_NNODE);
-    for(j=0;j<MAX_NNODE;j++){
-        vars_node[j] = (int*) tl_alloc(sizeof(int), MAX_NVAR);
-        for(k=0;k<MAX_NVAR;k++){
-            vars_node[j][k]=0;
-        }
-    }
+//    int **vars_node;
+//    vars_node = (int**) tl_alloc(sizeof(int*), MAX_NNODE);
+//    for(j=0;j<MAX_NNODE;j++){
+//        vars_node[j] = (int*) tl_alloc(sizeof(int), MAX_NVAR);
+//        for(k=0;k<MAX_NVAR;k++){
+//            vars_node[j][k]=0;
+//        }
+//    }
 
     sarray_init_int(elem_vars,MAX_NVAR);
 

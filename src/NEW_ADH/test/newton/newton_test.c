@@ -1,7 +1,7 @@
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 100;
-static int NEWTON_TEST_NY = 100;
+static int NEWTON_TEST_NX = 750;
+static int NEWTON_TEST_NY = 750;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 
 
@@ -113,8 +113,9 @@ int newton_test(int argc, char **argv) {
 	// intialize dirichlet and old sol (initial guess)
 	for (int local_index=0; local_index<sm.ndofs; local_index++){
 		sm.dirichlet_data[local_index] = 0.0;
-		sm.sol_old[local_index] = 20.0;
-		sm.sol[local_index] = 20.0;
+		sm.sol_old[local_index] = 0.0;
+		sm.sol[local_index] = 0.0;
+		sm.dsol[local_index] = 0.0;
 		sm.bc_mask[local_index] = YES;
 	}
 	//overwrite some of the boundary

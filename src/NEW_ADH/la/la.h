@@ -18,6 +18,7 @@ void scale_linear_system(int *indptr_diag, int *cols_diag, double *vals_diag,
 int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *b,
    double *scale_vect, int local_size, int size_with_ghosts, int rank,int *ghosts, int nghost);
+void free_bcgstab(void);
 
 void comm_update_double(double *vec,int size_v, int npe,int rank);
 int prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, double *sol, double *resid, int nrow);

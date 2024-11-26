@@ -249,7 +249,6 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   double conv_tol;            /* the convergence tolerance */
   double min_conv_tol;        /* the minimum convergence tolerance */
   int isize_prev;
-  printf("Shit started\n");
 
   /* allocates memory if needed */
   if (isize < size_with_ghosts) {
@@ -268,6 +267,7 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   printf("Ndof with ghosts = %d\n",size_with_ghosts);
   /* allocates memory if needed */
   // need to do different allocation later
+  //breaks down for larger problems
   //double r[size_with_ghosts];
   //printf("allocated one doubles\n");
   //double p[size_with_ghosts];
@@ -279,7 +279,6 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   //double As[size_with_ghosts];
   //double Ms[size_with_ghosts];
   //double x0[size_with_ghosts];
-  printf("allocated some doubles\n");
 
 
   /* zeroes the arrays */
@@ -632,4 +631,28 @@ double messg_dsum(double x)
 #endif
   return (x);
 }
+
+
+
+void free_bcgstab(void){
+  if (r != NULL)
+        r = (double *) tl_free(sizeof(double), isize, r);
+    if (p != NULL)
+        p = (double *) tl_free(sizeof(double), isize, p);
+    if (Ap != NULL)
+        Ap = (double *) tl_free(sizeof(double), isize, Ap);
+    if (Mp != NULL)
+        Mp = (double *) tl_free(sizeof(double), isize, Mp);
+    if (q != NULL)
+        q = (double *) tl_free(sizeof(double), isize, q);
+    if (s != NULL)
+        s = (double *) tl_free(sizeof(double), isize, s);
+    if (As != NULL)
+        As = (double *) tl_free(sizeof(double), isize, As);
+    if (Ms != NULL)
+        Ms = (double *) tl_free(sizeof(double), isize, Ms);
+    if (x0 != NULL)
+        x0 = (double *) tl_free(sizeof(double), isize, x0);
+}
+
 

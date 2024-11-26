@@ -25,15 +25,17 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
     int nvar_ele,nnodes, var_code;
     int node_id, node_mat_id;
     int nvar_node[MAX_NNODE];
-
-    //maybe change this from 3 to 2 to 1
-    int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
+    //maybe change this from 3d to 2d to 1d
+    //in loop we dont want to have to alloc and free everytime, think about this
     double **elem_mat;
-    elem_mat = (double**) tl_alloc(sizeof(double*), max_elem_dofs);
-    for(j=0;j<max_elem_dofs;j++){
-        elem_mat[j] = (double*) tl_alloc(sizeof(double), max_elem_dofs);
+    elem_mat = (double**) tl_alloc(sizeof(double*), MAX_ELEM_DOF);
+    for(j=0;j<MAX_ELEM_DOF;j++){
+        elem_mat[j] = (double*) tl_alloc(sizeof(double), MAX_ELEM_DOF);
     }
-    int dofs[max_elem_dofs],global_dofs[max_elem_dofs];
+
+    //better to do stack or heap?? 30x30 matrix, will keep on heap for now
+    //double elem_mat[MAX_ELEM_DOF][MAX_ELEM_DOF];
+    int dofs[MAX_ELEM_DOF],global_dofs[MAX_ELEM_DOF];
 
 
     //allocate 2d array, more memory than necessary
@@ -78,7 +80,8 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         nnodes = grid->elem3d[j].nnodes;
         ndofs_ele = nvars_elem*nnodes;
         //needs to be for 2d matrix
-        sarray_init_double_2d(elem_mat,max_elem_dofs, max_elem_dofs);
+        sarray_init_double_2d(elem_mat,MAX_ELEM_DOF, MAX_ELEM_DOF);
+        //sarray_init_double_2d_special(elem_mat);
         //maybe pull local nodal nvars and vars here too:
         //only necessary for CG i believe (or not idk)
         //if generalizing to higher dimension, this would be dof on basis functions
@@ -114,7 +117,7 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
     }
 
-    //maybe change max_elem_dofs from element to element?
+    //maybe change MAX_ELEM_DOF from element to element?
     //printf("Assembling jacobian\n");
 
     //2d loop
@@ -132,7 +135,8 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         nnodes = grid->elem2d[j].nnodes;
         ndofs_ele = nvars_elem*nnodes;
         //needs to be for 2d matrix
-        sarray_init_double_2d(elem_mat,max_elem_dofs, max_elem_dofs);
+        sarray_init_double_2d(elem_mat,MAX_ELEM_DOF, MAX_ELEM_DOF);
+        //sarray_init_double_2d_special(elem_mat);
         //maybe pull local nodal nvars and vars here too:
         //only necessary for CG i believe (or not idk)
         //if generalizing to higher dimension, this would be dof on basis functions
@@ -190,7 +194,8 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         nnodes = grid->elem1d[j].nnodes;
         ndofs_ele = nvars_elem*nnodes;
         //needs to be for 2d matrix
-        sarray_init_double_2d(elem_mat,max_elem_dofs, max_elem_dofs);
+        sarray_init_double_2d(elem_mat,MAX_ELEM_DOF, MAX_ELEM_DOF);
+        //sarray_init_double_2d_special(elem_mat);
         //maybe pull local nodal nvars and vars here too:
         //only necessary for CG i believe (or not idk)
         //if generalizing to higher dimension, this would be dof on basis functions
@@ -229,13 +234,14 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
 //    for(j=0;j<MAX_NNODE;j++){
 //        free(vars_node[j]);
 //    } 
-//    for(j=0;j<max_elem_dofs;j++){
+//    for(j=0;j<MAX_ELEM_DOF;j++){
 //        free(elem_mat[j]);
 //    }
-    for(j=0;j<max_elem_dofs;j++){
-        elem_mat[j] = (double *) tl_free(sizeof(double), max_elem_dofs, elem_mat[j]);
+    //free memory, in time loop need to be smarter about this
+    for(j=0;j<MAX_ELEM_DOF;j++){
+        elem_mat[j] = (double *) tl_free(sizeof(double), MAX_ELEM_DOF, elem_mat[j]);
     }
-    elem_mat = (double **) tl_free(sizeof(double *), max_elem_dofs, elem_mat);
+    elem_mat = (double **) tl_free(sizeof(double *), MAX_ELEM_DOF, elem_mat);
 }
 
 
@@ -430,15 +436,12 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
     double perturbation = 1e-4;//sqrt(SMALL);
 
 
-    double temp_P[MAX_NVAR*MAX_NNODE];
-    double temp_M[MAX_NVAR*MAX_NNODE];
-    double elem_rhs_P[MAX_NVAR*MAX_NNODE];    // +head perturbation initialized by elem_resid
-    double elem_rhs_M[MAX_NVAR*MAX_NNODE];    // -head perturbation initialized by elem_resid
+    double temp_P[MAX_ELEM_DOF];
+    double temp_M[MAX_ELEM_DOF];
+    double elem_rhs_P[MAX_ELEM_DOF];    // +head perturbation initialized by elem_resid
+    double elem_rhs_M[MAX_ELEM_DOF];    // -head perturbation initialized by elem_resid
     int eq_var_code,eq_var_code2,nvar_pde;
     int physics_vars[MAX_NVAR];
-
-        
-
     //Mark add switch cases for all sol_var
     //switch case for which sm->sol_var
     double temp_sol;
@@ -529,6 +532,17 @@ inline void elem_matrix_deriv(int node_no, int dof_no, int nnodes, int elem_nvar
         for (jvar=0; jvar<elem_nvars; jvar++) {
             indx = inode*elem_nvars + jvar;
             mat[indx][col_no]= (local1[indx] - local2[indx])/diff_ep;
+        }
+    }
+}
+
+
+
+void sarray_init_double_2d_special(double to[MAX_ELEM_DOF][MAX_ELEM_DOF]) {
+    int i,j;
+    for (i=0; i<MAX_ELEM_DOF; i++) {
+        for (j=0; j<MAX_ELEM_DOF; j++) {
+            to[i][j] = 0.0;
         }
     }
 }

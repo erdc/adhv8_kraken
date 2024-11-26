@@ -627,3 +627,4 @@ typedef enum
 //Mark adding max Nodal NVAR allowed, used to create sparsity
 #define MAX_NVAR 5
 #define MAX_NNODE 6
+#define MAX_ELEM_DOF 30 

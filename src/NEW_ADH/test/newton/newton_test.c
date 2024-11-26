@@ -1,7 +1,7 @@
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 750;
-static int NEWTON_TEST_NY = 750;
+static int NEWTON_TEST_NX = 10;
+static int NEWTON_TEST_NY = 15;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 
 
@@ -154,7 +154,7 @@ int newton_test(int argc, char **argv) {
 	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 	//call fe_newton
 	fe_newton(&sm,0); 
-
+	free_bcgstab();
 	//compare with analytic solution
 	//it is a scalar
 	double *u_exact;

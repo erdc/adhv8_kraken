@@ -1,6 +1,12 @@
 #include "adh.h" 
-
-
+static int **temp_cols_diag = NULL;
+static int **temp_cols_off_diag = NULL;
+static int isize = 0;  /* the size of the nnz rows arrays */
+static int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
+static int *nnz_rows_diag = NULL;
+static int *nnz_rows_off_diag = NULL;
+static int *nnz_rows_diag_no_duplicate = NULL;
+static int *nnz_rows_off_diag_no_duplicate = NULL;
 /*+++++++++++++++++++++++++++++++
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -21,10 +27,6 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     //diagonal blocks are local column numbers, off-diagonal are global
 
 
-    int **temp_cols_diag = NULL;
-    int **temp_cols_off_diag = NULL;
-    int isize = 0;           /* the size of the nnz rows arrays */
-    int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
     bool has_off_diag = false;
     int row,col;
     int nnodes;
@@ -35,26 +37,20 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     int dofs[max_elem_dofs],global_dofs[max_elem_dofs];
     int dum1,dum2;
     int isize_prev;
+    int NNZ_diag = 0;
+    int nnz_row_diag;
+    int NNZ_off_diag=0;
+    int nnz_row_off_diag;
+    int count_diag=0;
+    int *rn_diag;
+    int count_off_diag = 0;
+    int *rn_off_diag;
     // We know that each row contains at least one non-zero entry, and the number of rows is known upfront. 
     // Thus, (i,j)-pairs can be represented as a vector of vectors
     //first allocate this by guessing a max size of nnz per row
     int* fmap = sm->dof_map_local;
-    //guesses at max number of adjacent nodes in each dimension
-    //multiply by max dof per node
-    //int nCon1d = 2*MAX_NVAR;
-    //int nCon2d = 7*3*MAX_NVAR;
-    
-
-    //int nCon3d = 16*4*MAX_NVAR;
-    //maybe find a better guess, this seems to be problematic!!!
-    //nCon3d = 10*MAX_NVAR;
-
     int *local_range = sm->local_range;
     int nrows = local_range[1]-local_range[0];
-    int *nnz_rows_diag = NULL;
-    int *nnz_rows_off_diag = NULL;
-    int *nnz_rows_diag_no_duplicate = NULL;
-    int *nnz_rows_off_diag_no_duplicate = NULL;
     //int nnz_rows_diag[nrows];
 
     //see if we have off diagonal blocks to handle
@@ -62,18 +58,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         has_off_diag=true;
     }
 
-    //this could get pretty big, maybe dynamically allocate instead? Trying that
-    //
-//    if (sm->indptr_off_diag!=NULL){
-//        dum1 = nrows;
-//        dum2= nCon3d;
-//    }else{
-//        //still need to allocate even though may be unused
-//        dum1=1;
-//        dum2=1;
-//    }
-//    int nnz_rows_off_diag[dum1];
-
+    //reallocate if necessary
     if (isize < nrows){
         isize_prev = isize;
         isize = nrows;
@@ -85,7 +70,8 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         }
     }
 
-    printf("NROWS=%d\n",nrows);
+    //printf("NROWS=%d\n",nrows);
+    //initialize arrays with zeros
     sarray_init_int(nnz_rows_diag, nrows);
     if (has_off_diag){
         sarray_init_int(nnz_rows_off_diag, nrows);
@@ -224,7 +210,6 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
                     else{
                         //otherwise we are on off-diagonal and need global dof
                         nnz_rows_off_diag[row]+=1;
-
                     }
                 }
             }
@@ -236,7 +221,6 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
 //    for (j=0;j<nrows;j++){
 //        printf("NNZ rows diag[%d]: %d,\n",j,nnz_rows_diag[j]);
 //    }
-
     //use nnz_rows to dynamically allocate
     //int temp_cols_diag[nrows][nCon3d];
     temp_cols_diag = (int**) tl_alloc(sizeof(int*), nrows);
@@ -257,7 +241,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         }   
     }
 
-    //redundant but must reuse as indexing
+    //Seems redundant but must reuse as indexing
     sarray_init_int(nnz_rows_diag, nrows);
     if (has_off_diag){
         sarray_init_int(nnz_rows_off_diag, nrows);
@@ -410,10 +394,6 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
 
     //now that all nnz_cols* and nnz* are filled, we need to sort and remove duplicates
     // counter for the total number of non-zero entries
-    int NNZ_diag = 0;
-    int nnz_row_diag;
-    int NNZ_off_diag=0;
-    int nnz_row_off_diag;
     //note nnz-rows is not actually nnz per row, includes duplicates
     //could be done with hybrid omp too?
     //do for diagonal and off diagonal blocks
@@ -460,10 +440,6 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     }
 
     //now use info to fill in indptr and cols
-    int count_diag=0;
-    int *rn_diag;
-    int count_off_diag = 0;
-    int *rn_off_diag;
     for(i=0;i<nrows;i++){
         //printf("filling in index ptr and column entries, row %d\n",i);
         sm->indptr_diag[i] = count_diag;
@@ -507,7 +483,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     //}
 
 
-    printf("About to free\n");
+    printf("About to free memory in create_sparsity_split_CSR\n");
 //    for(j=0;j<nrows;j++){
 //        tl_free(sizeof(int), nnz_temp_cols_diag[j]); 
 //    }
@@ -530,10 +506,6 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         nnz_rows_off_diag_no_duplicate= (int *) tl_free(sizeof(int), nrows, nnz_rows_off_diag_no_duplicate);
     }
     
-
-
-
-
     printf("CSR sparsity completed\n");
 
 }
@@ -789,6 +761,8 @@ void fe_allocate_initialize_linear_system(SMODEL_SUPER *sm) {
 
 
 void apply_Dirichlet_BC(SMODEL_SUPER *sm){
+    //NOTE: THIS WILL BREAK IN PARALLEL, NEED TO ADD GHOSTS LATER
+
     //could illuciadate arguments, but will look at this later
     //modify linear system to have dirichlet conditions at
     //entries where bc_mask=YES
@@ -815,7 +789,6 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
         }
 
     }
-
     //go back through rows and clear rows that are no longer in equations
     //if it is dirichlet dof, wipe out row
     for (row=0;row<my_ndof;row++){
@@ -832,9 +805,9 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
                 local_col_no = sm->cols_diag[row_entry];
                 //if non-diagonal set to 0, otherwise set diagonal to 1
                 if(local_col_no == row){
-                    sm->vals_diag[row_entry]=1;
+                    sm->vals_diag[row_entry]= 1.0;
                 }else{
-                    sm->vals_diag[row_entry] = 0;
+                    sm->vals_diag[row_entry] = 0.0;
                 }
 
             }

@@ -29,13 +29,13 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
     //create array which is the max_nvar in the supermodel
     //and max_nnode of the grid
     //will need to define these properties later
-    int nentry = MAX_NVAR*MAX_NNODE;     
-    double elem_rhs[nentry];
+     
+    double elem_rhs[MAX_ELEM_DOF];
     //also create a temporary variable which will recieve the residuals from individual fe_resid routines
-    double eq_rhs[nentry];
+    double eq_rhs[MAX_ELEM_DOF];
     //dofs means to the process in this case, not cell
     //for a given elemental rhs, this will give index local to process where we should put entries
-    int dofs[nentry];
+    int dofs[MAX_ELEM_DOF];
     int nnodes;
     int node_id, node_mat_id;
 
@@ -64,7 +64,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
     //printf("nelem3d = %d\n",grid->nelems3d);
     //loop through all nelem3d
     for (j=0;j<grid->nelems3d;j++){
-        sarray_init_dbl(elem_rhs,nentry);
+        sarray_init_dbl(elem_rhs,MAX_ELEM_DOF);
         nnodes = grid->elem3d[j].nnodes;
         //maybe this just comes from mat instead
         //nvars_elem = sm->elem3d_nvars[j];
@@ -86,7 +86,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
 
         for (k=0;k<nphysics_models;k++){
-            sarray_init_dbl(eq_rhs,nentry);
+            sarray_init_dbl(eq_rhs,MAX_ELEM_DOF);
             
             nvar_pde = sm->elem3d_physics[mat_id][k].nvar;
             sarray_init_int(physics_vars, nvar_pde);
@@ -118,7 +118,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
     //loop through all nelem2d, same thing but difficult to write one function because elems are different structures
     for (j=0;j<grid->nelems2d;j++){
         //printf("2d element %d\n",j);
-        sarray_init_dbl(elem_rhs,nentry);
+        sarray_init_dbl(elem_rhs,MAX_ELEM_DOF);
         nnodes = grid->elem2d[j].nnodes;
         //printf("2d element nodes = {%d,%d,%d}\n",grid->elem2d[j].nodes[0],grid->elem2d[j].nodes[1],grid->elem2d[j].nodes[2]);
         //maybe this just comes from mat instead
@@ -145,7 +145,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 //        }
 
         for (k=0;k<nphysics_models;k++){
-            sarray_init_dbl(eq_rhs,nentry);
+            sarray_init_dbl(eq_rhs,MAX_ELEM_DOF);
             
             nvar_pde = sm->elem2d_physics[mat_id][k].nvar;
             sarray_init_int(physics_vars, nvar_pde);
@@ -176,7 +176,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
 
     for (j=0;j<grid->nelems1d;j++){
-        sarray_init_dbl(elem_rhs,nentry);
+        sarray_init_dbl(elem_rhs,MAX_ELEM_DOF);
         nnodes = grid->elem1d[j].nnodes;
         //maybe this just comes from mat instead
         //nvars_elem = sm->elem3d_nvars[j];
@@ -196,7 +196,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 //        }
 
         for (k=0;k<nphysics_models;k++){
-            sarray_init_dbl(eq_rhs,nentry);
+            sarray_init_dbl(eq_rhs,MAX_ELEM_DOF);
             
             nvar_pde = sm->elem1d_physics[mat_id][k].nvar;
             sarray_init_int(physics_vars, nvar_pde);

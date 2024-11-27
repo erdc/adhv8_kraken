@@ -1,7 +1,7 @@
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 10;
-static int NEWTON_TEST_NY = 15;
+static int NEWTON_TEST_NX = 700;
+static int NEWTON_TEST_NY = 700;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 
 
@@ -113,8 +113,8 @@ int newton_test(int argc, char **argv) {
 	// intialize dirichlet and old sol (initial guess)
 	for (int local_index=0; local_index<sm.ndofs; local_index++){
 		sm.dirichlet_data[local_index] = 0.0;
-		sm.sol_old[local_index] = 0.0;
-		sm.sol[local_index] = 0.0;
+		sm.sol_old[local_index] = 20.0;
+		sm.sol[local_index] = 20.0;
 		sm.dsol[local_index] = 0.0;
 		sm.bc_mask[local_index] = YES;
 	}
@@ -152,6 +152,17 @@ int newton_test(int argc, char **argv) {
 //	status = solve_umfpack(sm.dsol, sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.residual, sm.local_size);
 //	increment_function(&sm);
 	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
+#ifdef _PETSC
+	sm.A = PETSC_NULLPTR;
+	sm.ksp = PETSC_NULLPTR;
+	sm.B = PETSC_NULLPTR;
+	sm.X = PETSC_NULLPTR;
+	printf("Calling PETSC Initialize\n");
+	PetscCall(PetscInitialize(&argc,&argv,NULL,
+    "Compute e in parallel with PETSc.\n\n"));
+    printf("Called PETSC Initialize\n");
+	allocate_petsc_objects(&sm);
+#endif
 	//call fe_newton
 	fe_newton(&sm,0); 
 	free_bcgstab();

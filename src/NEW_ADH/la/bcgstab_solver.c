@@ -233,7 +233,6 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *b, 
   double *scale_vect, int local_size, int size_with_ghosts, int rank,
   int *ghosts, int nghost){
-
   int it;                     /* loop counter over the cg iterations */
   //int iapprox_update_flag;    /* flag for performing an update of the approximation */
   //int iresid_update_flag;     /* flag for performing an update of the residual */
@@ -249,7 +248,6 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   double conv_tol;            /* the convergence tolerance */
   double min_conv_tol;        /* the minimum convergence tolerance */
   int isize_prev;
-
   /* allocates memory if needed */
   if (isize < size_with_ghosts) {
         isize_prev = isize;

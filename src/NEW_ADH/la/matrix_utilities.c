@@ -586,37 +586,45 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
 void allocate_petsc_objects(SMODEL_SUPER *sm){
     int ierr;
     //set up anything PETSc after allocation but before load
-
  #ifdef _PETSC   
     //PETSc solver will be stord in ksp object
     //ksp only will exist if PETSc is active
+
+    //this is somehow not null 
     if(sm->ksp == PETSC_NULLPTR){
         ierr = KSPCreate(PETSC_COMM_WORLD, &(sm->ksp));
         ierr = KSPSetFromOptions(sm->ksp);
     }
+
     // Check if Jacobian, sol, and residual have already been created.
     // If so, destroy each of them before creating new PETSc objects.
+    //also somehow not null
     if(sm->A != PETSC_NULLPTR){
-        printf("\n\nDestroying old matrix\n\n");
         ierr = MatDestroy(&(sm->A));
         ierr = KSPReset(sm->ksp);
         ierr = KSPSetFromOptions(sm->ksp);
     }
     //dont think we need preallocator matrix
-    //if(sm->P != PETSC_NULLPTR){
-    //    ierr = MatDestroy(&(sm->P));
-    //}
+//    if(sm->P != PETSC_NULLPTR){
+//        ierr = MatDestroy(&(sm->P));
+//    }
     if(sm->X != PETSC_NULLPTR){
         ierr = VecDestroy(&(sm->X));
     }
     if(sm->B != PETSC_NULLPTR){
-            ierr = VecDestroy(&(sm->B));
+        ierr = VecDestroy(&(sm->B));
     }
-
     // Create Jacobian matrix from CSR format
     //don't know if i need to do this or just call after load anyway
     //vals should update by reference
-    MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->macro_ndofs, sm->macro_ndofs, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag, sm->vals_off_diag, &(sm->A));
+    if (sm->indptr_off_diag == NULL){
+        MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->indptr_diag, sm->cols_diag, sm->vals_diag, &(sm->A));
+        printf("PETSC Mat created with sequential array\n");
+    }else{
+        MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->macro_ndofs, sm->macro_ndofs, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag, sm->vals_off_diag, &(sm->A));
+        printf("PETSC Mat created with split arrays\n");
+    }
+    
     //ierr = MatCreateMPIAIJWithArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->macro_ndofs, sm->macro_ndofs, sm->indptr, sm->indices, sm->vals, &(sm->A))
     //ierr = MatCreate(PETSC_COMM_WORLD, &(sm->A));
     //ierr = MatSetSizes(sm->A,n,n,PETSC_DETERMINE,PETSC_DETERMINE);
@@ -657,7 +665,7 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
     //ierr = VecSetFromOptions(sm->sol);
     //ierr = VecSetUp(sm->sol);
     ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, sm->my_ndofs, sm->macro_ndofs, sm->nghost, sm->ghosts, sm->residual, &(sm->B));
-    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, sm->my_ndofs, sm->macro_ndofs, sm->nghost, sm->ghosts, sm->sol, &(sm->X));
+    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, sm->my_ndofs, sm->macro_ndofs, sm->nghost, sm->ghosts, sm->dsol, &(sm->X));
 
 
     /*Maybe need to revisit for ghosts but skip for now

@@ -9,6 +9,7 @@ int unique(int *arr, int size);
 int compare_ints(const void *a, const void *b);
 void Screen_print_CSR(int *indptr, int *cols, double *vals, int nrow);
 void apply_Dirichlet_BC(SMODEL_SUPER *sm);
+void allocate_petsc_objects(SMODEL_SUPER *sm);
 
 // bcgstab solver
 double find_max_in_row(int *indptr, double *vals,int row_num);

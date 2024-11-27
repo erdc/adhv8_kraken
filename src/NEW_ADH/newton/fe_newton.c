@@ -338,6 +338,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         
         apply_Dirichlet_BC(sm);
         printf("Dirichlet applied\n");
+//        Screen_print_CSR(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->ndofs);
 //        get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
 //        &imax_dof, &iinc_dof, include_dof,
 //        sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol, sm->bc_mask
@@ -348,9 +349,9 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 //        temp3 = l2_norm(sm->residual,sm->ndofs);
 //        temp4 = l_infty_norm(sm->ndofs,sm->residual);
 //        printf("CSR norms after Dirichlet: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
-        //printf("RHS\n");
-        //for (int i=0;i<sm->ndofs;i++){
-//        printf("Before solve resid[%d] = %f\n",i,sm->residual[i]);
+//        printf("RHS\n");
+//        for (int i=0;i<sm->ndofs;i++){
+//            printf("Before solve resid[%d] = %f\n",i,sm->residual[i]);
 //        }
         /* Set initial guess */
         //maybe redundant?
@@ -383,27 +384,35 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 
         //PETSC option
 #ifdef _PETSC
-        printf("PETSC??\n");
+        printf("Using PETSC solver\n");
         // Solver
         //be sure values get updated since we used set with split arrays ...
         KSPSetOperators(sm->ksp,sm->A,sm->A);
+        
+
+        //precon and stuff
+        PC          pc;      /* preconditioner context */
+        KSPGetPC(sm->ksp, &pc);
+        PetscCall(PCSetType(pc, PCLU)); //PCLU is direct LU
+        //PetscCall(KSPSetTolerances(sm->ksp, 1.e-11, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT));
         // TODO: can I call this once in fe_main instead?
         // Does the matrix operator need to be specified before SetFromOptions each time?
-        KSPSetFromOptions(sm->ksp);
+        //KSPSetFromOptions(sm->ksp);
         // TODO: I don't think sol needs to be initialized to zero but should double-check
         // set resid and solution into PETSdc objects should be fine on initialization
         // what about ghost values?
         //solution goes in X
-
+        //ierr = MatView(sm->A, PETSC_VIEWER_STDOUT_WORLD);
+        //ierr = VecView(sm->B, PETSC_VIEWER_STDOUT_WORLD);
 
         KSPSolve(sm->ksp,sm->B,sm->X);
         //scatter forward appears to update array as we need
         //forward sends owned dofs -> ghosts
-        VecGhostUpdateBegin(sm->X,INSERT_VALUES,SCATTER_FORWARD);
-        VecGhostUpdateEnd(sm->X,INSERT_VALUES,SCATTER_FORWARD);
+        //VecGhostUpdateBegin(sm->X,INSERT_VALUES,SCATTER_FORWARD);
+        //VecGhostUpdateEnd(sm->X,INSERT_VALUES,SCATTER_FORWARD);
         KSPGetIterationNumber(sm->ksp, &its);
         printf("KSP iterations: %i\n",its);
-        solv_flag = YES; // TODO: Does this need to change - SAM
+        //solv_flag = YES; // TODO: Does this need to change - SAM
        
 #ifdef _DEBUG
         // Viewer stuff
@@ -499,7 +508,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         update_function(sm);
 //        for (int i=0;i<sm->ndofs;i++){
 //        printf("solution after increment, before new residual call[%d] = %f\n",i,sm->sol[i]);
-//        }
+//       }
         assemble_residual(sm,grid);
 //                for (int i=0;i<sm->ndofs;i++){
 //        printf("solution after increment, after new residual call[%d] = %f\n",i,sm->sol[i]);

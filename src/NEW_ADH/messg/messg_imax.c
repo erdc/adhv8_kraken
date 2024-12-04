@@ -1,5 +1,5 @@
+/*! \file  messg_imax.c This file has function that computes max of integer value over all processors*/
 #include "adh.h"
-
 /*!
    \brief Maximizes a single integer value across processors
  */

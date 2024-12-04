@@ -1,23 +1,22 @@
-/* ADH Version 2.0.0 6/04 */
-
-/* This routine calculates a coefficient c_eda, such that the shear stress tau is found as follows:
-   tau = c_eda tau_nbv
-   where tau_nbv is the shear stress as calcuated using near bed velocity.
-   Hence, this routine yields a coefficient that will convert the shear stress found
-   using near bed velocity into an approximate shear stress that would result from using
-   depth averaged valocity.
-   The input required is:
-   double depth
-   double roughness_height
-   The function returns
-   double c_eda
-   The minimum ratio of depth to roughness_height is 1./29.7
-
-   Brown Jul 24 2006
- */
-
+/*! \file  fr_equiv_depavg_shstr_coef.c This file collections functions responsible for computing friction coefficient  */
 #include "fr_defs.h"
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief This routine calculates a coefficient \f$c_{eda}\f$, such that the shear stress \f$tau\f$ is found as follows:
+ *  \f$ \tau = c_{eda} \tau_{nbv}\f$
+ *  where \f$\tau_{nbv}\f$ is the shear stress as calcuated using near bed velocity.
+ *  Hence, this routine yields a coefficient that will convert the shear stress found
+ *  using near bed velocity into an approximate shear stress that would result from using
+ *  depth averaged valocity.
+ *  \param[in] depth (double) - water depth 
+ *  \param[in] roughness_height (double) - roughness height
+ *  \returns c_eda (double) 
+ *  
+ *  \note The minimum ratio of depth to roughness_height is 1./29.7
+ *  \author Brown Jul 24 2006
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 double fr_equiv_depavg_shstr_coef(
   /* equivalent depth averaged shear stress coefficient */
   double depth,			/* local depth, L */

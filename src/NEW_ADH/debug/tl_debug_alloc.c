@@ -110,7 +110,7 @@ void *tl_alloc_debug(size_t obj_size,   /* the size of the object to be allocate
                      int linenumber,    /* line number */
                      char *filename /* Calling routine filename */
 )
-{
+{   
     size_t isize = 0;             /* the size of the space to be allocated */
     size_t picket_size = 0;       /* the size of the picket for memory debugging */
     size_t debug_size = 0;        /* the size of the array for memory debugging */
@@ -146,12 +146,12 @@ void *tl_alloc_debug(size_t obj_size,   /* the size of the object to be allocate
     }
     pntr = mypntr + picket_size + debug_size;
     //tag();
-    
+    //printf("In tl_alloc_debug\n");
     /* Set Pickets */
     //printf("mypntr: %s\n",mypntr);
+    
     tl_set_picket(mypntr + debug_size, isize);
     //tag();
-    
     /* Store Size at very beginning of memory */
     *((unsigned long *) (mypntr)) = (unsigned long) (isize);
     

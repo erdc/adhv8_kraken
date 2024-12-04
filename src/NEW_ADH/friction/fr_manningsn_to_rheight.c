@@ -1,18 +1,17 @@
-/* ADH Version 2.0.0 6/04 */
-
-/* This routine converts a value of Manning's n to a value of the equivalent sand roughness height.
-   The input required is:
-   double n
-   double manning's conversion constant
-   double g
-   The function returns
-   double ks
-
-   Brown Jul 24 2006
- */
-
+/*! \file  fr_manningsn_to_rheight.c This file collections functions responsible for computing friction coefficient  */
 #include "fr_defs.h"
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief This routine converts a value of Manning's n to a value of the equivalent sand roughness height.
+ *  \param[in] n (double) - manning's n L^(1/3) T
+ *  \param[in] kn (double) - Manning's units conversion constant L^(1/6)
+ *  \param[in] g (double) - gravitational constant
+ *  \returns ks (double) - equivalent sand roughness height
+ *  
+ *  \author Brown Jul 24 2006
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 double fr_manningsn_to_rheight(
   /* convert Manning's n to roughness height */
   double n,			/* Manning's n, L^(1/3)T */

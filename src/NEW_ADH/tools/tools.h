@@ -58,6 +58,10 @@ double l2_error(double *v1, double *v2, int n);
 double linf_error(double *v1, double *v2, int n);
 bool is_near(double x, double y);
 double l2_norm(double *v, int size);
+int binary_search_part(int *arr, int start, int end, int target);
+double max_dbl(double a, double b);
+int compare_ints(const void *a, const void *b);
+
 
 void printScreen_dble_array(char * descript, double *array, int size,  int linenumber, char *filename);
 void printScreen_int_array(char * descript, int *array, int size, int linenumber, char *filename);

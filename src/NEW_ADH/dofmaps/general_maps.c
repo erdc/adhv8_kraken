@@ -1,22 +1,20 @@
+/*! \file  general_maps.c This file collections functions responsible for finding order of finite element
+ * degrees of freedom  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function maps a local, dense matrix from an element and put into global sparse matrix
+ *  \brief     This function takes an array of local (to process) degrees of freedom and gives the global d.o.f. numbers
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  double *diagonal pointer to the diagonal  (block) part of the sparse matrix
- *  @param[in,out]  SPARSE_VECT *matrix pointer to the off-diagonal part of the sparse matrix
- *  @param[in] double **elem_mat - the local matrix that contains values we want to add to global sparse system
- *  @param[in] int nodes_on_ele - the number of nodes on element
- *  @param[in] int *fmap - a map from node number to row # in system of equations
- *  @param[in] in elem_nvars - number of distinct variables active on an element e.g. h,u,v would be 3
- *  @param[in] int *elem_vars - an array of length elem_nvars that contains the variable codes
- *  @param[in] in nodal_nvars - array of distinct variables active on each node e.g. h,u,v would be 3
- *  @param[in] int **nodal_nvars - an array of length nodal_nvars*nnodes that contains the variable codes
+ *  @param[in,out] global_dofs (int*) - array of global dofs corresponding to the local dofs
+ *  @param[in] ndofs_on_ele (int) - number of degrees of freedom to be calculated
+ *  @param[in] dofs (int*) - array of dofs local to the process
+ *  @param[in] local_range (int*) -  array of 2 integers, first is global dof start and second is global dof end
+ *  @param[in] ghosts (int*) -  array of global dof numbers for ghost dofs on the process
  * \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -39,7 +37,24 @@ void local_dofs_to_global_dofs(int *global_dofs,int ndofs_on_ele,int *dofs,int *
 
 }
 
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function takes a global degree of freedom and gives the local (to processor) d.o.f. number
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in] global_col_no (int) - global d.o.f. number corresponding to the local dofs
+ *  @param[in] local_size (int) - number of degrees of freedom owned by processor
+ *  @param[in] ghosts (int*) - array of d.o.f. numbers that aren't owned by processor
+ *  @param[in] nghost (int) - number of ghost d.o.f
+ *  \returns (int) - degree of freedom number local to process
+ * \note 
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int global_to_local(int global_col_no,int local_size,int *ghosts, int nghost){
   //searches the array of ghosts and returns the local index
   //assumes on a process, dofs owned by process come first and then ghosts next

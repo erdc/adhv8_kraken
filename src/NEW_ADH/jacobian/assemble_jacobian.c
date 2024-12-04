@@ -1,22 +1,25 @@
+/*! \file  assemble_jacobian.c This file collections functions responsible for assembling the Jacobian matrix based on central finite difference  */
 #include "adh.h"
 static int DEBUG = OFF;
+static void sarray_init_double_2d_special(double to[MAX_ELEM_DOF][MAX_ELEM_DOF]);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function assembles the global FE Jacobian matrix elementwise
+ *  \brief     This function assembles the global FE Jacobian matrix elementwise, using F-D approximation to Jacobian
+ *  designed to work within Newton method: \f$ \frac{\partial R (U^{i})}{\partial U^{i}} \delta U^{i} = -R(U^{i}) \f$
+ *  With update formula: \f$ U^{i+1} = U^{i} + \delta U^{i}\f$.
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct - adjusts the matrix
- *  @param[in] SGRID *grid - the grid
- *  @param[in] SMAT *mat - the set of materials
+ *  @param[in,out]  sm (SMODEL_SUPER*) - pointer to an instant of the SMODEL_SUPER struct - contains pointers to sparse matrix
  * \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
+void assemble_jacobian(SMODEL_SUPER *sm) {
+    SGRID *grid = sm->grid;
     int j,k,l,m;
     int* fmap = sm->dof_map_local;
     int* ghosts = sm->ghosts;
@@ -230,42 +233,35 @@ void assemble_jacobian(SMODEL_SUPER *sm, SGRID *grid) {
         //split CSR
         load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
     }
-
-//    for(j=0;j<MAX_NNODE;j++){
-//        free(vars_node[j]);
-//    } 
-//    for(j=0;j<MAX_ELEM_DOF;j++){
-//        free(elem_mat[j]);
-//    }
     //free memory, in time loop need to be smarter about this
     for(j=0;j<MAX_ELEM_DOF;j++){
         elem_mat[j] = (double *) tl_free(sizeof(double), MAX_ELEM_DOF, elem_mat[j]);
     }
     elem_mat = (double **) tl_free(sizeof(double *), MAX_ELEM_DOF, elem_mat);
 }
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function maps a local, dense matrix from an element and put into global sparse matrix
+ *  \brief     This function takes an elemental stiffness matrix and loads it to the full sparse matrix
+ *  in split CSR format
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  double *diagonal pointer to the diagonal  (block) part of the sparse matrix
- *  @param[in,out]  SPARSE_VECT *matrix pointer to the off-diagonal part of the sparse matrix
- *  @param[in] double **elem_mat - the local matrix that contains values we want to add to global sparse system
- *  @param[in] int nodes_on_ele - the number of nodes on element
- *  @param[in] int *fmap - a map from node number to row # in system of equations
- *  @param[in] in elem_nvars - number of distinct variables active on an element e.g. h,u,v would be 3
- *  @param[in] int *elem_vars - an array of length elem_nvars that contains the variable codes
- *  @param[in] in nodal_nvars - array of distinct variables active on each node e.g. h,u,v would be 3
- *  @param[in] int **nodal_nvars - an array of length nodal_nvars*nnodes that contains the variable codes
- * \note 
+ *  @param[in,out]  vals (double*) - pointer to the double array containing all nonzero values in the diagonal block (local to process) part of the sparse matrix
+ *  @param[in]  indptr (int*) - pointer to the array containing indeces to start/end of each row in the diagonal block (local to process) part of the sparse matrix
+ *  @param[in]  indices (int*) - pointer to the array containing local column numbers of each nonzero entry in the diagonal block (local to process) part of the sparse matrix
+ *  @param[in,out]  off_diag_vals (double*) - pointer to the values of the off-diagonal block (local to process) part of the sparse matrix
+ *  @param[in]  off_diag_indptr (int*) - pointer to the array containing indeces to start/end of each row in the off-diagonal block (local to process) part of the sparse matrix
+ *  @param[in]  off_diag_indices (int*) - pointer to the array containing global column numbers of each nonzero entry in the off-diagonal block (local to process) part of the sparse matrix
+ *  @param[in] elem_mat (double**) - 2D array containing computed values from an elemental stiffness matrix
+ *  @param[in] ndofs_ele (int) - number of degrees of freedom on the element
+ *  @param[in] dofs (int*) - the degrees of freedom present in the element (local to the process)
+ *  @param[in] global_dofs (int*) - the global degrees of freedom present in the element
+ *  @param[in] local_range (int*) - an array of 2 integers that gives global start and end equation number
+ * \note This function does depend on a binary search algorithm
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void load_global_mat_split_CSR(double *vals, int *indptr, int *indices, double *off_diag_vals, int *off_diag_indptr, int *off_diag_indices, double **elem_mat, int ndofs_ele, int *dofs, int *global_dofs, int *local_range){
@@ -320,27 +316,25 @@ void load_global_mat_split_CSR(double *vals, int *indptr, int *indices, double *
     }
 
 }
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function maps a local, dense matrix from an element and put into global sparse matrix
+ *  \brief     This function takes an elemental stiffness matrix and loads it to the full sparse matrix
+ *  in standard CSR format
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  double *diagonal pointer to the diagonal  (block) part of the sparse matrix
- *  @param[in,out]  SPARSE_VECT *matrix pointer to the off-diagonal part of the sparse matrix
- *  @param[in] double **elem_mat - the local matrix that contains values we want to add to global sparse system
- *  @param[in] int nodes_on_ele - the number of nodes on element
- *  @param[in] int *fmap - a map from node number to row # in system of equations
- *  @param[in] in elem_nvars - number of distinct variables active on an element e.g. h,u,v would be 3
- *  @param[in] int *elem_vars - an array of length elem_nvars that contains the variable codes
- *  @param[in] in nodal_nvars - array of distinct variables active on each node e.g. h,u,v would be 3
- *  @param[in] int **nodal_nvars - an array of length nodal_nvars*nnodes that contains the variable codes
- * \note 
+ *  @param[in,out]  vals (double*) - pointer to the double array containing all nonzero values in the diagonal block (local to process) part of the sparse matrix
+ *  @param[in]  indptr (int*) - pointer to the array containing indeces to start/end of each row in the diagonal block (local to process) part of the sparse matrix
+ *  @param[in]  indices (int*) - pointer to the array containing local column numbers of each nonzero entry in the diagonal block (local to process) part of the sparse matrix
+ *  @param[in] elem_mat (double**) - 2D array containing computed values from an elemental stiffness matrix
+ *  @param[in] ndofs_ele (int) - number of degrees of freedom on the element
+ *  @param[in] global_dofs (int*) - the global degrees of freedom present in the element
+ *  @param[in] local_range (int*) - an array of 2 integers that gives global start and end equation number
+ * \note This function does depend on a binary search algorithm
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void load_global_mat_CSR(double *vals, int *indptr, int *indices, double **elem_mat, int ndofs_ele, int *global_dofs, int *local_range){
@@ -377,35 +371,13 @@ void load_global_mat_CSR(double *vals, int *indptr, int *indices, double **elem_
     }
 
 }
-
-
-//a small helper function, move this later
-int binary_search_part(int *arr, int start, int end, int target) {
-    int low = start;
-    int high = end - 1;
-
-    while (low <= high) {
-        int mid = low + (high - low) / 2;
-
-        if (arr[mid] == target) {
-            return mid; // Target found
-        } else if (arr[mid] < target) {
-            low = mid + 1; // Search upper half
-        } else {
-            high = mid - 1; // Search lower half
-        }
-    }
-
-    return -1; // Target not found
-}
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Adds perturbation to a variable for each node in element for Newton Jacobian calculation.
+ *  \brief     Computes elemental Jacobian based on central F-D technique w.r.t one variable 
+ * (thus filling out one column of the elemental Jacobian).
  *  \author    Gaurav Savant, Ph.D.
  *  \author    Corey Trahan, Ph.D.
  *  \author    Mark Loveland, Ph.D.
@@ -413,13 +385,22 @@ int binary_search_part(int *arr, int start, int end, int target) {
  *  \warning   none
  *  \copyright AdH
  *
- *  @param[in,out] elem_mat stores the Jacobian, elemental matrix for the head perturbation
- *  @param[in]  sm a pointer to an AdH supermodel
- *  @param[in] nodes_on_element the number of nodes on the element
- *  @param[in] ie the element
- *  @param[in] dim the dimension of the resid
+ *  @param[in,out] elem_mat (double**) - stores the Jacobian, elemental matrix
+ *  @param[in] sm (SMODEL_SUPER*) - a pointer to the SMODEL_SUPER structure, needed for residual routines
+ *  @param[in] elem_physics (SELEM_PHYSICS*) - an array of SELEM_PHYSICS structures, needed to get proper residual routines
+ *  @param[in] ie (int) - the element number (local to process)
+ *  @param[in] nodes_on_element (int) - the number of nodes on the element
+ *  @param[in] nvar_ele (int) - the total number of variables active on element across all residual routines
+ *  @param[in] elem_vars (int*) - the variable codes, an array of length nvar_ele
+ *  @param[in] perturb_var_code (int) - the variable that is being differentiated
+ *  @param[in] nsubModels (int) - number of residual routines to be called on this element
+ *  @param[in] ele_var_no (int) - the index of the variable that is being differentiated (not the var code)
+ *  @param[in] NodeIDs (int*) - the node numbers within the cell (local to the process)
+ *  @param[in] DEBUG (int) - the debug code for more robust output
  *  @param[in] DEBUG a debug option
- *
+ *  \note The F-D spacing is based on magnitude of solution with lower limit hard coded as 1e-4. Catch is too small
+ *  small of F-D space leads to large truncation error (division by very small number) but higher F-D space incurs
+ *  large truncation error especially the more nonlinear the residual is
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -495,18 +476,13 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
         }
         // calculate local contribution to a local elemental Jacobian matrix++++++++++++++++++++++++++++++
         // fills in one column
-        elem_matrix_deriv(i, ele_var_no, nodes_on_element, nvar_ele, elem_rhs_P, elem_rhs_M, elem_mat, epsilon2); // gradient
+        elem_matrix_deriv(elem_mat,i, ele_var_no, nodes_on_element, nvar_ele, elem_rhs_P, elem_rhs_M, epsilon2); // gradient
     }
-    
-    //DEBUG =  OFF;
 }
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Calculates a scond order finite difference of a Jacobi matrix elemental block
+ *  \brief     Calculates a scond order finite difference of a column within the Jacobian matrix elemental block
  *  \author    Corey Trahan, Ph.D.
  *  \author    Gaurav Savant, Ph.D.
  *  \author    Mark Loveland, Ph.D.
@@ -514,19 +490,21 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
  *  \warning   none
  *  \copyright AdH
  *
- *  @param[out] mat a 3 DOF matrix which stores the gradients
- *  @param[in] indx the block starting position
- *  @param[in] nnodes the total number of nodes on the element
- *  @param[in] local1 a 3 DOF residual with a (+) perturbation
- *  @param[in] local2 a 3 DOF residual with a (-) perturbation
- *  @param[in] diff_ep two times the perturbations size
+ *  @param[in,out] mat (double**) - the 2D array storing the values of the elemental stiffness matrix
+ *  @param[in] node_no (int) - local node number (local to element)
+ *  @param[in] var_no (int) - the solution variable number (local to element)
+ *  @param[in] nnodes (int) - number of nodes on the element
+ *  @param[in] elem_nvars (int) - number of solution variables active on the element
+ *  @param[in] local1 (double*) - elemental residual vector with a (+) perturbation
+ *  @param[in] local2 (double*) - elemental residual vector with a (-) perturbation
+ *  @param[in] diff_ep (double) - two times the perturbations size
  *  \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-inline void elem_matrix_deriv(int node_no, int dof_no, int nnodes, int elem_nvars, double *local1, double *local2, double **mat, double diff_ep) {
+inline void elem_matrix_deriv(double **mat, int node_no, int var_no, int nnodes, int elem_nvars, double *local1, double *local2, double diff_ep) {
     int inode,jvar, col_no, indx;
-    col_no = node_no*elem_nvars + dof_no;
+    col_no = node_no*elem_nvars + var_no;
 
     for (inode=0; inode<nnodes; inode++) {
         for (jvar=0; jvar<elem_nvars; jvar++) {
@@ -535,10 +513,22 @@ inline void elem_matrix_deriv(int node_no, int dof_no, int nnodes, int elem_nvar
         }
     }
 }
-
-
-
-void sarray_init_double_2d_special(double to[MAX_ELEM_DOF][MAX_ELEM_DOF]) {
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Short helper routine, seeing if using small array on stack helps performance, 
+ *  doesnt seem to make difference
+ *  \author    Mark Loveland, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ *  @param[in,out] to (double[MAX_ELEM_DOF][MAX_ELEM_DOF]) - the 2D array storing the values of the elemental stiffness matrix
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+static void sarray_init_double_2d_special(double to[MAX_ELEM_DOF][MAX_ELEM_DOF]) {
     int i,j;
     for (i=0; i<MAX_ELEM_DOF; i++) {
         for (j=0; j<MAX_ELEM_DOF; j++) {

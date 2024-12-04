@@ -89,11 +89,21 @@ void sarray_init_double_2d(double **to, int nrows, int ncols) {
     }
 }
 //----------------------------------------------------//
-void sarray_copy_dbl(double *to, double *from, int nsize) {
-    int i;
-    for (i=0; i<nsize; i++) {
-        to[i] = from[i];
-    }
+//Mark, is memcpy faster??
+//void sarray_copy_dbl(double *to, double *from, int nsize) {
+//    int i;
+//    for (i=0; i<nsize; i++) {
+//        to[i] = from[i];
+//    }
+//}
+void sarray_copy_dbl(double *to, double *from, int nsize){
+#ifdef _BLAS
+    int IONE = 1;
+    dcopy_(&nsize, from, &IONE, to, &IONE);
+#else
+    memcpy(to, from, ((size_t) (nsize)) * sizeof(double));
+#endif
+    return;
 }
 //*****************************************************//
 //*****************************************************//
@@ -114,6 +124,46 @@ double sarray_sum_dbl(double *array, int nsize) {
     }
     return sum;
 }
+/*!
+ \brief Returns the inner product, \f$(x \cdot y)\f$, of two (double) vectors
+ 
+ \param n the length of the vectors (int)
+ \param x pointer to the first vector (double, length \a n)
+ \param y pointer to the second vector (double, length \a n)
+ */
+double sarray_dot_dbl(double *x, double *y,int n)
+{
+    double value = DZERO;       /* the partial sum */
+#ifdef _BLAS
+    int IONE = 1;
+    
+    value = ddot_(&n, x, &IONE, y, &IONE);
+#else
+    int i = 0;          /* loop counter */
+    
+    for(i = 0; i < n; i++)
+        value += x[i] * y[i];
+#endif
+
+    /* returns the sum */
+    return (value);
+}
+
+double sarray_l_infty_norm(double *v1, int n)
+{
+    double value = DZERO;   /* the partial sum */
+    int ii = 0;     /* loop counter */
+    
+    /* computes the value for this processor */
+    for(ii = 0; ii < n; ii++)
+    {
+        value = max_dbl(value, fabs(v1[ii]));
+    }
+    
+    /* returns the maximum */
+    return value;
+}
+
 //*****************************************************//
 //*****************************************************//
 void sarray_add_replace_int(int *array1, int *array2, int nsize) {
@@ -249,12 +299,78 @@ void sarray_scale_replace_int(int *array, int scale, int nsize) {
     }
 }
 //----------------------------------------------------//
-void sarray_scale_replace_dbl(double *array, double scale, int nsize) {
-    int i=0;
-    for (i=0; i<nsize; i++) {
-        array[i] = scale * array[i];
-    }
+//void sarray_scale_replace_dbl(double *array, double scale, int nsize) {
+//    int i=0;
+//    for (i=0; i<nsize; i++) {
+//        array[i] = scale * array[i];
+//    }
+//}
+/*!
+ \brief Multiplies all entries of a (double) vector by a scalar
+ 
+ \param n the length of the vectors (int)
+ \param scale scalar multiplier (double)
+ \param array pointer to the vector (double, length n)
+ */
+void sarray_scale_replace_dbl(double *array, double scale, int nsize)
+{
+#ifdef _BLAS
+    int IONE = 1;
+    
+    dscal_(&nsize, &scale, array, &IONE);
+#else
+    int i = 0;          /* loop counter */
+    
+    /* multiplies by a scalar */
+    for(i = 0; i < nsize; i++)
+        array[i] *= scale;
+#endif
+    return;
 }
+
+/*!
+ \brief Performs daxpy operation for (double) vectors, \f$y = \alpha x  + y\f$
+ 
+ \param n the length of the vectors (int)
+ \param alpha scalar multiplier (double)
+ \param x pointer to the first vector (double, length \a n)
+ \param y pointer to the second vector (double, length \a n), changed on output
+ */
+void sarray_y_plus_ax_dbl(double *y, double alpha, double *x,  int n)
+{
+#ifdef _BLAS
+    int IONE = 1;
+    
+    daxpy_(&n, &alpha, x, &IONE, y, &IONE);
+#else
+    int i = 0;          /* loop counter */
+    
+    /* adds the arrays */
+    for(i = 0; i < n; i++)
+        y[i] += alpha * x[i];
+#endif
+    return;
+}
+
+
+int sarray_unique_int(int *arr, int size){
+    int unique_size = 1; // We'll start with the assumption that the first element is unique
+    for (int i = 1; i < size; i++) {
+        int is_unique = 1;
+        for (int j = 0; j < unique_size; j++) {
+            if (arr[i] == arr[j]) {
+                is_unique = 0; // We found a duplicate
+                break;
+            }
+        }
+        if (is_unique) {
+            arr[unique_size] = arr[i];
+            unique_size++;
+        }
+    }
+    return unique_size;
+}
+
 //*****************************************************//
 //*****************************************************//
 void sarray_integrity_check_int(int *array, int nsize, int linenumber, char *filename) {

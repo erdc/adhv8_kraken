@@ -7,11 +7,11 @@
 //uses array look up
 void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);
 int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);
-void global_to_local_dbl_cg(double *global, double *local, int *nodes, int nnodes, int var, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);
+void global_to_local_dbl_cg(double *local, double *global, int *nodes, int nnodes, int var, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);
 //fully implicit, uses redundant calculations
 void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);
 int get_cg_dof_2(int var, int NodeID, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);
-void global_to_local_dbl_cg_2(double *global, double *local, int *nodes, int nnodes, int var, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);
+void global_to_local_dbl_cg_2(double *local, double *global, int *nodes, int nnodes, int var, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);
 
 //general_maps
 void local_dofs_to_global_dofs(int *global_dofs,int ndofs_on_ele,int *dofs,int *local_range,int *ghosts);

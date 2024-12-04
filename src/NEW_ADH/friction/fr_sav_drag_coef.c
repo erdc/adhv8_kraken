@@ -1,21 +1,18 @@
-/* ADH Version 2.0.0 6/04 */
-
-/* This routine calculates a coefficient c_f, such that the shear stress tau is found as follows:
-   tau = 1/2 rho c_f vel*vel
-   This friction coefficient expresses the friction induced by submerged aquatic vegetation (SAV)
-   This coefficient is for depth integrated model velocity.
-   The input required is:
-   double depth
-   double sav_stem_height
-   The function returns
-   double c_f
-   The minimum ratio of depth to sav_stem_height is 1.
-
-   Brown Jul 24 2006
- */
-
+/*! \file  fr_sav_drag_coef.c This file calculates a coefficient c_f, such that the shear stress may be computed  */
 #include "fr_defs.h"
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief TThis routine calculates a coefficient c_f, such that the shear stress tau is found as follows:
+ *  \f$ \tau = 1/2 \rho c_f vel*vel \f$
+ *  \param[in] depth (double) - water depth
+ *  \param[in] roughness_height (double) - the effective roughness height of the stems, L
+ *  \param[in] sav_stem_height (double) - the undeflected sav stem height, L
+ *  \returns c_f (double) - friction coefficient
+ *  
+ *  \author Brown Jul 24 2006
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 double fr_sav_drag_coef(
   /* submerged aquatic vegetation drag coefficient */
   double depth,			/* local depth, L */

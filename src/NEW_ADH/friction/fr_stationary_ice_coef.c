@@ -1,8 +1,20 @@
-/* ADH Version 2.0.0 6/04 */
-/* stationary ice coefficient of friction */
-
+/*! \file  fr_stationary_ice_coef.c This file calculates a coefficient c_f for stationary ice coefficient of friction, such that the shear stress may be computed  */
 #include "fr_defs.h"
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief This routine calculates a coefficient c_f for stationary ice coefficient, such that the shear stress tau is found as follows:
+ *  \f$ \tau = 1/2 \rho c_f vel*vel \f$
+ *  \param[in] depth (double) - water depth
+ *  \param[in] velocity (double) - velocity magnitude
+ *  \param[in] rheight_bed (double) - bed roughness height
+ *  \param[in] rheight_ice (double) - ice roughness height
+ *  \param[in] rho (double) - density
+ *  \param[in] which (int) - which value to return (1 = bed shear, 2 = ice shear, 3 = total shear)
+ *  \returns c_f (double) - friction coefficient
+ *  \author Brown Jul 24 2006
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 double fr_stationary_ice_coef(
   double depth,			/* local depth */
   double velocity,		/* velocity magnitude */

@@ -1,14 +1,23 @@
+/*! \file  newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
 static int NEWTON_TEST_NX = 700;
 static int NEWTON_TEST_NY = 700;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
-
-
-
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function tests the Newton solvet using a Poisson equation with analytic
+ *  solution
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int newton_test(int argc, char **argv) {
-
 	//create a grid
 	SGRID grid;
 	//let's just do something simple
@@ -31,14 +40,11 @@ int newton_test(int argc, char **argv) {
 	double axy2 = 0.0;
 	double ax2y2 = 0.0;
 	int flag3d =0;
-
     grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
-
     int nnodes;
     nnodes = grid.nnodes;
-
 	//print coordinates
 //  for(int local_index =0; local_index<grid.nnodes; local_index++){
 //		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
@@ -185,8 +191,8 @@ int newton_test(int argc, char **argv) {
 		nodes[i] = i;
 	}
 
-	//global_to_local_dbl_cg_2(sm.sol, uh, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
-	global_to_local_dbl_cg(sm.sol, uh, nodes, nnodes, PERTURB_U, sm.dof_map_local, sm.node_physics_mat, sm.node_physics_mat_id);
+	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
+	global_to_local_dbl_cg(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.dof_map_local, sm.node_physics_mat, sm.node_physics_mat_id);
 
 //	printf("Final solution:\n");
 //	for(int i=0; i<nnodes;i++){
@@ -217,9 +223,19 @@ int newton_test(int argc, char **argv) {
 
 	return err_code;
 }
-
-
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Computes analytic solution used to calculate error
+ *  solution
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid){
 
 	//test case comes from

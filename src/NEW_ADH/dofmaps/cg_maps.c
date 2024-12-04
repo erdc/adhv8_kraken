@@ -1,19 +1,25 @@
+/*! \file  cg_maps.c This file collections functions responsible for finding order of finite element
+ * degrees of freedom for CG elements  */
 #include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Short routine that gives the degrees of freedom local to the current process
- *  \\ sepearated as function so that maybe other functions can be constructed in future
+ *  \brief     Routine that gives an array of degrees of freedom local to the current process for a CG element using fmaplocal array
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out] local_dofs - an array of integers that will give the equation numbers for a
- *  given cell local to the process
- *  @param[in]  int ie - the local (to process) cell number
- *  @param[in]  int * - the map that takes in local node number and produces the start equation number
+ *  @param[in,out] local_dofs (int*) - an array of integers that will give the degree of freedom numbers (equation numbers) for a
+ *  given element local to the process
+ *  @param[in] fmaplocal (int*) - an array of integers that gives the lowest d.o.f at a given node
+ *  @param[in] nnodes (int) - the number of nodes on the element
+ *  @param[in] local_node_ids (int*) - array of length nnodes containing node numbers local to process
+ *  @param[in] elem_nvars (int) - number of solution variables active on the element
+ *  @param[in] elem_vars (int*) - array of length elem_nvars that has the integer code for each variable
+ *  @param[in] node_physics_mat (SMAT_PHYSICS*) - an array of SMAT_PHYSICS structs that contains variable info for each node
+ *  @param[in] nodal_physics_mat_id (int*) - array of integers that gives the nodal physics mat id
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
@@ -70,17 +76,20 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Short routine that gives the degrees of freedom local to the current process
- *  \\ sepearated as function so that maybe other functions can be constructed in future
+ *  \brief     Routine that gives an array of degrees of freedom local to the current process for a CG element fully implicitly (no fmap array) using redundant calculations
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out] local_dofs - an array of integers that will give the equation numbers for a
- *  given cell local to the process
- *  @param[in]  int ie - the local (to process) cell number
- *  @param[in]  int * - the map that takes in local node number and produces the start equation number
+ *  @param[in,out] local_dofs (int*) - an array of integers that will give the degree of freedom numbers (equation numbers) for a
+ *  given element local to the process
+ *  @param[in] nnodes (int) - the number of nodes on the element
+ *  @param[in] local_node_ids (int*) - array of length nnodes containing node numbers local to process
+ *  @param[in] elem_nvars (int) - number of solution variables active on the element
+ *  @param[in] elem_vars (int*) - array of length elem_nvars that has the integer code for each variable
+ *  @param[in] node_physics_mat (SMAT_PHYSICS*) - an array of SMAT_PHYSICS structs that contains variable info for each node
+ *  @param[in] nodal_physics_mat_id (int*) - array of integers that gives the nodal physics mat id
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
@@ -134,17 +143,19 @@ void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Short routine that gives the degrees of freedom local to the current process
- *  \\ sepearated as function so that maybe other functions can be constructed in future
+ *  \brief     Routine that gives returns the degree of freedom local to the current process for a CG element using fmaplocal array
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out] local_dofs - an array of integers that will give the equation numbers for a
- *  given cell local to the process
- *  @param[in]  int ie - the local (to process) cell number
- *  @param[in]  int * - the map that takes in local node number and produces the start equation number
+ *  @param[in] var (int) - variable code
+ *  @param[in] NodeID (int) - node number local to process
+ *  @param[in] fmaplocal (int*) - an array of integers that gives the lowest d.o.f at a given node
+ *  @param[in] node_physics_mat (SMAT_PHYSICS*) - an array of SMAT_PHYSICS structs that contains variable info for each node
+ *  @param[in] nodal_physics_mat_id (int*) - array of integers that gives the nodal physics mat id
+ *  \returns int - an integer that will give the degree of freedom number (equation number) for a
+ *  given node and variable number
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
@@ -176,26 +187,22 @@ int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_m
     //assert(isFound);
     return offset + save_k;
 }
-
-
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Short routine that gives the degrees of freedom local to the current process
- *  \\ sepearated as function so that maybe other functions can be constructed in future
+ *  \brief     Routine that gives returns the degree of freedom local to the current process for a CG element fully implicitly (not using fmaplocal array)
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out] local_dofs - an array of integers that will give the equation numbers for a
- *  given cell local to the process
- *  @param[in]  int ie - the local (to process) cell number
- *  @param[in]  int * - the map that takes in local node number and produces the start equation number
+ *  @param[in] var (int) - variable code
+ *  @param[in] NodeID (int) - node number local to process
+ *  @param[in] node_physics_mat (SMAT_PHYSICS*) - an array of SMAT_PHYSICS structs that contains variable info for each node
+ *  @param[in] nodal_physics_mat_id (int*) - array of integers that gives the nodal physics mat id
+ *  \returns int - an integer that will give the degree of freedom number (equation number) for a
+ *  given node and variable number
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int get_cg_dof_2(int var, int NodeID, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
@@ -230,27 +237,29 @@ int get_cg_dof_2(int var, int NodeID, SMAT_PHYSICS *node_physics_mat, int *nodal
     //assert(isFound);
     return offset + save_k;
 }
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     stores local double values from the global arrays
+ *  \brief     extracts sub-array of solution values for specific variable at a given set of nodes
  *  \author    Corey Trahan, Ph.D.
  *  \author    Mark Loveland, Ph.D.
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
  *
- *  @param[out] the local/elemental values
- *  @param[in] global the global values
- *  @param[in] nodes an array if integer global node IDs
- *  @param[in] nnodes the number of nodes on the element
+ *  @param[in,out] local (double*) - the array containing local (to the element) values of a specific variable
+ *  @param[in] global (double*) - the full array of the solution vector
+ *  @param[in] nodes (int*) - array of node IDs local to process
+ *  @param[in] nnodes (int) - the numer of nodes in the nodes array
+ *  @param[in] var (int) - the variable code to be extracted
+ *  @param[in] fmaplocal (int*) - array containing first dof number (local to process) at each node
+ *  @param[in] node_physics_mat (SMAT_PHYSICS*) - array of SMAT_PHYSICS structs containing variable info at nodes
+ *  @param[in] nodal_physics_mat_id (int*) - array of ints containing the nodal physics mat id at each node
  *  \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void global_to_local_dbl_cg(double *global, double *local, int *nodes, int nnodes, int var, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id) {
+void global_to_local_dbl_cg(double *local, double *global, int *nodes, int nnodes, int var, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id) {
     int i=0;
     int temp;
     for (i=0; i<nnodes; i++) {
@@ -258,26 +267,25 @@ void global_to_local_dbl_cg(double *global, double *local, int *nodes, int nnode
         local[i] = global[temp];
     }
 }
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     stores local double values from the global arrays
+ *  \brief     extracts sub-array of solution values for specific variable at a given set of nodes without fmaplocal
  *  \author    Corey Trahan, Ph.D.
  *  \author    Mark Loveland, Ph.D.
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
  *
- *  @param[out] the local/elemental values
- *  @param[in] global the global values
- *  @param[in] nodes an array if integer global node IDs
- *  @param[in] nnodes the number of nodes on the element
+ *  @param[in,out] local (double*) - the array containing local (to the element) values of a specific variable
+ *  @param[in] global (double*) - the full array of the solution vector
+ *  @param[in] nodes (int*) - array of node IDs local to process
+ *  @param[in] nnodes (int) - the numer of nodes in the nodes array
+ *  @param[in] var (int) - the variable code to be extracted
+ *  @param[in] node_physics_mat (SMAT_PHYSICS*) - array of SMAT_PHYSICS structs containing variable info at nodes
+ *  @param[in] nodal_physics_mat_id (int*) - array of ints containing the nodal physics mat id at each node
  *  \note
  */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void global_to_local_dbl_cg_2(double *global, double *local, int *nodes, int nnodes, int var, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id) {
     int i=0;

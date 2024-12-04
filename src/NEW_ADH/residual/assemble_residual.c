@@ -1,22 +1,22 @@
+/*! \file  assemble_residual.c This file has functions responsible for assembling the global residual vector */
 #include "adh.h"
 static int DEBUG = OFF;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function assembles the global residual
+ *  \brief     This function assembles the global residual vector using elemental resid routines
  *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out] SMODEL_SUPER *sm - the super model where the residual resides
- *  @param[in] SGRID *grid - the grid over which the monolithic residual resides
- *  @param[in] SMAT *mat - the materials structure
+ *  @param[in,out] sm (SMODEL_SUPER*) - the super model where the residual resides
+ *  @param[in] grid (SGRID*) - the grid over which the monolithic residual resides
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
     int j,k,l,m;
-
     //seems like the easiest way?
     //maybe think about this
     //we want/need a local and global mapping (local as in local to PE)
@@ -25,11 +25,9 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
     //zero out stuff
     sarray_init_dbl(sm->residual, sm->ndofs);
     printf("zeroed residual structure\n");
-
     //create array which is the max_nvar in the supermodel
     //and max_nnode of the grid
     //will need to define these properties later
-     
     double elem_rhs[MAX_ELEM_DOF];
     //also create a temporary variable which will recieve the residuals from individual fe_resid routines
     double eq_rhs[MAX_ELEM_DOF];
@@ -38,12 +36,10 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
     int dofs[MAX_ELEM_DOF];
     int nnodes;
     int node_id, node_mat_id;
-
     int elem_vars[MAX_NVAR];
     int physics_vars[MAX_NVAR];
     int var_code;
     int nvar_node[MAX_NNODE];
-
     //allocate 2d array, more memory than necessary
     //int vars_node[MAX_NNODE][MAX_NVAR];
 //    int **vars_node;
@@ -54,13 +50,9 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 //            vars_node[j][k]=0;
 //        }
 //    }
-
     sarray_init_int(elem_vars,MAX_NVAR);
-
     //printf("Beggining 3d,2d,1d loops\n");
-
     int nvars_elem, nphysics_models, mat_id, nvar_pde;
-
     //printf("nelem3d = %d\n",grid->nelems3d);
     //loop through all nelem3d
     for (j=0;j<grid->nelems3d;j++){
@@ -228,8 +220,6 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 //        free(vars_node[j]);
 //    } 
 }
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -240,12 +230,14 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  double *elem_rhs array containing the elemental residual
- *  @param[in]      double *eq_rhs array containg the residual from a single PDE routine
- *  @param[in]      int *elem_vars array containg the unique variables defined on an element
- *  @param[in]      int elem_nvars integer that is the length of *elem_nvars
- *  @param[in]      int eq_vars integer that contains the unique variables defined by an equation on each digit
- *  @param[in]      int nnodes  integer that is the number of nodes on one element
+ *  @param[in,out] elem_rhs (double*) - array containing the elemental residual
+ *  @param[in] eq_rhs (double*) - array containg the residual from a single PDE routine
+ *  @param[in] elem_nvars (int) - integer that is the length of *elem_nvars
+ *  @param[in] elem_vars (int*) - array containg the unique variable codes defined on an element
+ *  @param[in] eq_nvars (int) - integer that is the length of *eq_vars
+ *  @param[in] eq_vars (int*) - array containg the unique variable codes defined by the PDE
+ *  @param[in] nnodes (int) - integer that is the number of nodes on one element
+ *  @param[in] scale (double) - scalar factor to scale the residual
  * 
  *  \note 
  */
@@ -287,58 +279,22 @@ void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int elem_nvars, int 
     
     } 
 
-
 }
-
-
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Short routine that couns the number of digits in a given integer
+ *  \brief     This function takes an elemental residual and loads into the global residual vector
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in] int num - the integer we want to find the number of digits
- *  \returns   int count - the number of digits
- *  \note assumes num > 0
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int count_digits(int num) {
-  int count = 0;
-  while (num != 0) {
-    num /= 10;
-    count++;
-  }
-  return count;
-}
-
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
- *  \brief     This function takes an elemental residual and loads into gloval residual
- *  \author    Count Corey J. Trahan
- *  \author    Mark Loveland
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *  @param[in,out] double *residual - the global residual
- *  @param[in] double *elem_rhs - the local element right-hand-side
- *  @param[in] int nnodes - the number of local nodes on the element
- *  @param[in] int *GnodeIDs - an array of length nnodes with the global node #'s of the local element nodes
- *  @param[in] int *fmap - a map from the specific global node ID to the first supermodel dof on that node
- *  @param[in] int elem_nvars - the number of active variables on the element
- *  @param[in] int *elem_vars - an array of length elem_nvars the codes of the active variable
- *  @param[in] int node_nvars - the number of active variables on the node (must always be >= elem_nvars)
- *  @param[in] int *node_vars - an array of length node_nvars the codes of the active variable on a node
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ *  @param[in,out] residual (double*) - the global residual
+ *  @param[in] elem_rhs (double*) - the local element right-hand-side
+ *  @param[in] nnodes (int) - the number of local nodes on the element
+ *  @param[in] elem_nvars (int) - the number of active variables on the element
+ *  @param[in] local_dofs (int*) - array of the degree of freedom numbers local to the processor
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void load_global_resid(double *residual, double *elem_rhs, int nnodes, int elem_nvars, int *local_dofs) {

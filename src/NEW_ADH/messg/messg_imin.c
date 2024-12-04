@@ -1,5 +1,5 @@
+/*! \file  messg_imin.c This file has function that computes min integer value over all processors*/
 #include "adh.h"
-
 /*!
    \brief Minimizes a single integer value across processors
  */

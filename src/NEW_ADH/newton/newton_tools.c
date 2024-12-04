@@ -1,12 +1,10 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*! \file fe_newton_tools.c This file  contains miscellanious routines used in Newton solve */
+/*! \file newton_tools.c This file  contains miscellanious routines used in Newton solve */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
 #include "adh.h"
 static int FILE_DEBUG = OFF;
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -17,7 +15,7 @@ static int FILE_DEBUG = OFF;
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct - adjusts the residual
+ *  @param[in,out] sm (SMODEL_SUPER*) - pointer to an instant of the SuperModel struct
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void initialize_system(SMODEL_SUPER *sm) {
@@ -80,14 +78,13 @@ void initialize_system(SMODEL_SUPER *sm) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function initializes the SuperModel bc mask for any dirichlet conditions
+ *  \brief     This function initializes the SMODEL_SUPER bc mask for any dirichlet conditions
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct - adjusts the residual
- *  @parma[in] grid (*SGRID) pointer to the grid from a design model
+ *  @param[in,out]  sm (SMODEL_SUPER*) - pointer to an instant of the SuperModel struct - adjusts the residual
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void initialize_dirichlet_bc(SMODEL_SUPER *sm) {
@@ -155,10 +152,7 @@ void initialize_dirichlet_bc(SMODEL_SUPER *sm) {
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct - adjusts the residual
- *  @param[in] SGRID *grid - the grid
- *  @param[in] SMAT *mat - the set of materials
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ *  @param[in,out] sm (SMODEL_SUPER*) - pointer to an instant of the SMODEL_SUPER struct
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void update_function(SMODEL_SUPER *sm){
@@ -205,16 +199,13 @@ void update_function(SMODEL_SUPER *sm){
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Increments any model specific solution-dependent quantities using fe_inc routines
+ *  \brief     Increments any model specific solution-dependent quantities after sucessful Newton iteration
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct - adjusts the residual
- *  @param[in] SGRID *grid - the grid
- *  @param[in] SMAT *mat - the set of materials
- * \note elem_rhs[0] = x_eq, elem_rhs[1] = y_eq, elem_rhs[2] = c_eq,
+ *  @param[in,out] sm (SMODEL_SUPER*) - pointer to an instant of the SMODEL_SUPER struct
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void increment_function(SMODEL_SUPER *sm){
@@ -227,11 +218,6 @@ void increment_function(SMODEL_SUPER *sm){
 
 
 }
-
-
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
@@ -248,15 +234,16 @@ void increment_function(SMODEL_SUPER *sm){
  * @param[out] resid_max_norm (double *) the max (L-infinity) residual error norm for local processor (myid)
  * @param[out] resid_l2_norm  (double *) the l2 residual error norm maxed over all processors
  * @param[out] inc_max_norm   (double *) the incremental max (L-infinity) norm for local processor (myid)
- * @param[out] imax_node      (int *) the node ID at which the residual max occurs
- * @param[out] iinc_node      (int *) the node ID at which the incremental max occurs
- * @param[in]  grid           (SGRID *) a pointer to a grid
+ * @param[out] imax_dof       (int *) the dof at which the residual max occurs
+ * @param[out] iinc_dof       (int *) the dof at which the incremental max occurs
+ * @param[in]  include_dof    (int *) an array of flags to determine whether the dofs are including in the norm calculations
+ * @param[in]  my_ndofs       (int) number of locally owned dof
+ * @param[in]  ndofs          (int) number of locally owned dof + number of ghosts
+ * @param[in]  macro_ndofs    (int) number of all dofs across all processes
  * @param[in]  residual       (double *) the Newton residual
- * @param[in]  sol            (double *) the Newton solution (array of solution increments)
- * @param[in]  nsys           (int) the number of equations in the system
- * @param[in]  include_node   (int *) an array of nodal flags to determine whether the nodes are including in the norm calculations
+ * @param[in]  dsol           (double *) the Newton solution (array of solution increments)
+ * @param[in]  bc_mask        (int*) array of flags determining what dofs are Dirichlet boundary conditions
  *
- * \note CJT\::
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -331,27 +318,6 @@ void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *i
     *inc_max_norm = partial_inc_max_norm;
     if((ierr > 0) && (myid == 0)) printf("\n +++++++ WARNING NaN generated!!! ++++++++ \n");
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//void print_concentration(SMODEL_SUPER *sm, int isuperModel, int myid, int npes);
-//void print_concentration_file(SMODEL_SUPER *sm, int isuperModel, int myid, int npes);
-//void print_sw2_file(SMODEL_SUPER *sm, int isuperModel, int myid, int npes);
-//void print_sw3_file(SMODEL_SUPER *sm, int isuperModel, int myid, int npes);
-//void print_dw_file(SMODEL_SUPER *sm, int isuperModel, int myid, int npes);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -371,21 +337,17 @@ void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *i
  * \note CJT\:: Excludes nodes that are currently dry or were dry last time-step
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void include_node_in_residual(int nnodes, double *head, double *old_head, int *fmap, int *include_node_norm) {
-    int i;
-    sarray_init_value_int(include_node_norm, nnodes, YES);
-    for (i=0; i<nnodes; i++) {
-        if (MIN(head[i],old_head[i]) > 0) {
-            include_node_norm[fmap[i]] = YES;
-        } else {
-            include_node_norm[fmap[i]] = NO;
-        }
-    }
-}
-
-
-
-
+//void include_node_in_residual(int nnodes, double *head, double *old_head, int *fmap, int *include_node_norm) {
+//    int i;
+//    sarray_init_value_int(include_node_norm, nnodes, YES);
+//    for (i=0; i<nnodes; i++) {
+//        if (MIN(head[i],old_head[i]) > 0) {
+//            include_node_norm[fmap[i]] = YES;
+//        } else {
+//            include_node_norm[fmap[i]] = NO;
+//        }
+//    }
+//}
 //void print_concentration(SMODEL_SUPER *sm, int isuperModel, int myid, int npes){
 //    SMODEL *mod;
 //    int i, ierr;

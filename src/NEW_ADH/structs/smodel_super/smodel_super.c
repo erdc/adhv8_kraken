@@ -336,7 +336,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     sm->indptr_off_diag=NULL;
     sm->residual = (double*) tl_alloc(sizeof(double), sm->ndofs);
     sm->sol = (double*) tl_alloc(sizeof(double), sm->ndofs);
-    sm->indptr_diag = (double*) tl_alloc(sizeof(double), sm->my_ndofs+1);
+    sm->indptr_diag = (int*) tl_alloc(sizeof(int), sm->my_ndofs+1);
     //when in init need to change this to check if we have more than one processor or not
     sm->indptr_off_diag = NULL;
     
@@ -355,10 +355,10 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     printf("Assigned sw2 to residual structure\n");
 
     //call residual
-    double elemrhs[3]; 
-    elemrhs[0] = 0.0; elemrhs[1] = 0.0; elemrhs[2] = 0.0;
-    sm->elem2d_physics[0][0].fe_resid(sm, elemrhs, 0, 0.0,0,0,0, 0);
-    printf("Elemental resid: {%f,%f,%f}\n",elemrhs[0],elemrhs[1],elemrhs[2]);
+    //double elemrhs[3]; 
+    //elemrhs[0] = 0.0; elemrhs[1] = 0.0; elemrhs[2] = 0.0;
+    //sm->elem2d_physics[0][0].fe_resid(sm, elemrhs, 0, 0.0,0,0,0, 0);
+    //printf("Elemental resid: {%f,%f,%f}\n",elemrhs[0],elemrhs[1],elemrhs[2]);
 
 
 }

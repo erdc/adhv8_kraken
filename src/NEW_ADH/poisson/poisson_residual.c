@@ -1,19 +1,14 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*! \file  fe_sw2_2d_body_resid.c This file collections functions responsible for
- *          the 2D shallow water body contributions to the elemental residual.              */
+/*! \file  poisson_residual.c This file collections functions responsible for
+ *          the 2D Poisson equation with constant RHS, used for testing             */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-//#include "global_header.h"
 #include "adh.h"
-// prototypes
-//void fe_sw2_temporal(int ie, SELEM_2D *elem2d, int nnodes, SVECT *elem_nds, double djac, double drying_lower_limit, double *elem_head, SVECT2D *elem_vel, double wd_factor, double dt_factor, DOF_3 *elem_rhs, char *string, int DEBUG, int DEBUG_LOCAL, int wd_flag);
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Returns the 2D shallow water elemental residual.
+ *  \brief     Returns the 2D Poisson residual with constant RHS on an element, used for testing.
  *  \author    Charlie Berger, Ph.D.
  *  \author    Gaurav Savant, Ph.D.
  *  \author    Gary Brown
@@ -23,22 +18,20 @@
  *  \warning   none
  *  \copyright AdH
  *
- * @param[out] elem_rhs      the 2D elemental residual array
- * @param[in]  mod           a pointer to the model struct
- * @param[in]  ie            the elemental id
- * @param[in]  pertubation   the Newton pertubation
- * @param[in]  perturb_node  the node to be perturbed
- * @param[in]  perturb_var   the variable to be perturbed
- * @param[in]  perturb_sign  the direction of Newton perturbation
- * @param[in]  DEBUG         a debug flag
- * @param[in]  PRESSURE_FLAG  a flag turning pressure contributions on/off
- *
- *  \details Solves the body integals of the following weak, discrete body terms of the 2D shallow water equation: \n
- *  \f{eqnarray*}{
- *  \weakSWDAcont{e}{i}{h} \\
- *  \weakSWMxDD{e}{i}{h} \\
- *  \weakSWMyDD{e}{i}{h}
- *  \f}
+ * @param[in] mod (SMODEL_SUPER*) - pointer to SMODEL_SUPER struct
+ * @param[in,out] elem_rhs (double*) - array of doubles that will store elemental residual
+ * @param[in] ie (int) - the elemental id
+ * @param[in] pertubation (double) - the Newton pertubation
+ * @param[in] perturb_node (int) - the node to be pertubed
+ * @param[in] perturb_var (int) - the variable code to be perturbed
+ * @param[in] perturb_sign (int) - the direction of Newton perturbation (-1 or +1)
+ * @param[in] DEBUG (int) - a debug flag
+ * \returns integer code
+ *  \details Solves the body integals of the following weak, discrete body terms of the 2D Poisson equation: \n
+ *  \f$
+ *  \int_{\Omega} \nabla u_i \cdot \nabla v_i dx - \int_{\Omega} f dx = 0 \\
+ *  f=6 \\
+ *  \f$
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -50,8 +43,8 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
     //get the solution on this element, for now just use U
     double elem_u[nnodes];
     //this map only works for CG, want to generalize to DG in future
-    //global_to_local_dbl_cg_2(mod->sol, elem_u, elem2d->nodes, nnodes, PERTURB_U, mod->node_physics_mat, mod->node_physics_mat_id);
-    global_to_local_dbl_cg(mod->sol, elem_u, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat, mod->node_physics_mat_id);
+    //global_to_local_dbl_cg_2(elem_u, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->node_physics_mat, mod->node_physics_mat_id);
+    global_to_local_dbl_cg(elem_u, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat, mod->node_physics_mat_id);
     //for now let's let f be a constant so we have analytic solution to compare to
     double f[nnodes];
     int i;

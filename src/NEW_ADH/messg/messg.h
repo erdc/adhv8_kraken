@@ -19,4 +19,11 @@ int messg_imax(int x            /* the value */
                , MPI_Comm ADH_COMM
 #endif
   );
+
+double messg_dsum(double x);
+
+
+void comm_update_double(double *vec, int size_v, int npe, int rank);
+
+
 #endif

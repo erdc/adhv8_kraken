@@ -46,6 +46,7 @@ void tl_set_picket(char *pntr, size_t isize) {
             *(mypntr++) = picket_pointer[jj];
         }
     }
+
     
     /* Fill picket fence in after array */
     mypntr = pntr + isize + sizeof(int) * ((size_t) (BWIDTH));

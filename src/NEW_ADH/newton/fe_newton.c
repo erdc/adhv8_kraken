@@ -1,19 +1,19 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*! This file collections functions responsible for
+/*! \file fe_newton.c This file collections functions responsible for
  *          the Netwon solve.                                                               */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
 #include "adh.h"
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     The FE Newton driver
+ *  \brief     The Newton solver using FE method and central finite difference approximation
+ *  for Jacobian (aka a Secant method). The function takes in a SMODEL_SUPER and solves the
+ *  nonlinear problem, for time dependent problems this effectively marches the solution
+ *  forward one step.
  *  \author    Charlie Berger, Ph.D.
  *  \author    Gaurav Savant, Ph.D.
  *  \author    Gary Brown
@@ -25,10 +25,8 @@
  * 
  * \returns YES for a good calculation and NO for a bad calculation
  *
- * @param[in,out] sm           (SSUPERMODEL *) a pointer to an AdH super model
- * @param[in] isuperModel      int the supermodel index
- * @param[in]  grid            (SGRID *) a pointer to a grid in the AdH design model
- * @param[in]  mat             (SMAT *) a pointer to the material properties in the AdH grid
+ * @param[in,out] sm (SMODEL_SUPER *) - a pointer to an AdH super model
+ * @param[in] isuperModel (int) - the supermodel index
  *
  * \note
  */
@@ -325,7 +323,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
-        assemble_jacobian(sm,grid);
+        assemble_jacobian(sm);
         printf("Assembled\n");
 
         
@@ -458,7 +456,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 //        temp4 = l_infty_norm(sm->ndofs,sm->residual);
 //        printf("CSR norms after scaling: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
         //factor the matrix preconditioner
-        status = prep_umfpack(sm->indptr_diag,sm->cols_diag,sm->vals_diag, sm->dsol, sm->residual, sm->local_size);
+        status = prep_umfpack(sm->indptr_diag,sm->cols_diag,sm->vals_diag, sm->local_size);
         printf("umfpack prep completed\n");
         
         

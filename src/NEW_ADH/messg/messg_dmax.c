@@ -1,10 +1,11 @@
+/*! \file  messg_dmax.c This file has function that computes max value over all processors*/
 #include "adh.h"
 
 /*!
    \brief Maximizes a single double value across processors
 
-   \param x Value in
-   \return Maximum Value Across Processors
+   \param[in,out] x (double) - Value in
+   \returns Maximum Value Across Processors
  */
 double messg_dmax(double x      /* the value */
 #ifdef _MESSG

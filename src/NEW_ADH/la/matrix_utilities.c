@@ -1,3 +1,4 @@
+/*! \file  matrix_utilities.c This file has various functions needed for solving sparse systems in split CSR format */
 #include "adh.h" 
 static int **temp_cols_diag = NULL;
 static int **temp_cols_off_diag = NULL;
@@ -12,14 +13,19 @@ static int *nnz_rows_off_diag_no_duplicate = NULL;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function initalizes a SuperModel Newton Jacobian matrix for suitesparse
+ *  \brief     This function allocates the sparsity pattern of the split CSR structure,
+ *  it allocates and sets the indptr, and cols of diag and off diag given the physics material
+ *  layouts. It also determines number of nonzeros by allocating the vals.
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct
- * \note
+ *  @param[in,out] sm (SMODEL_SUPER*) - pointer to an instant of the SMODEL_SUPER struct,
+ *  this will contain pointer to grid, physics materials, and CSR structure
+ * \note For now, we are doing the most memory safe but computationally redundant way. 
+ * There is some potential to speed up the routine by guessing number of nonzeros per row.
+ * For now there is no guessing.
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
@@ -402,8 +408,8 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         //use stdlib.h qsort
         qsort(temp_cols_diag[i], nnz_rows_diag[i], sizeof(int), compare_ints);
         //this should hopefully remove duplicates?
-        nnz_row_diag = unique(temp_cols_diag[i], nnz_rows_diag[i]);
-        //overwrite nnz row with unique?
+        nnz_row_diag = sarray_unique_int(temp_cols_diag[i], nnz_rows_diag[i]);
+        //overwrite nnz row with sarray_unique_int?
         nnz_rows_diag_no_duplicate[i] = nnz_row_diag;
         //add nnz in a row to the NNZ
         //maybe overwrire nnz_rows[i] instead if we want this stored, and then sum it
@@ -420,8 +426,8 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
             //use stdlib.h qsort
             qsort(temp_cols_off_diag[i], nnz_rows_off_diag[i], sizeof(int), compare_ints);
             //this should hopefully remove duplicates?
-            nnz_row_off_diag = unique(temp_cols_off_diag[i], nnz_rows_off_diag[i]);
-            //overwrite nnz row with unique?
+            nnz_row_off_diag = sarray_unique_int(temp_cols_off_diag[i], nnz_rows_off_diag[i]);
+            //overwrite nnz row with sarray_unique_int?
             nnz_rows_off_diag_no_duplicate[i] = nnz_row_off_diag;
             //add nnz in a row to the NNZ
             //maybe overwrire nnz_rows[i] instead if we want this stored, and then sum it
@@ -509,24 +515,19 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     printf("CSR sparsity completed\n");
 
 }
-
-
-
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function initalizes a SuperModel Newton Jacobian matrix for suitesparse
+ *  \brief     This function initalizes a indptr, residual, and solution vectors for a SMODEL_SUPER
+ *  and calls create sparsity routine
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct
- * \note
+ *  @param[in,out]  sm (SMODEL_SUPER*) - pointer to an instant of the SuperModel struct
+ *  \note should be called if ndofs changes due to new refinement or it is a new run
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
  void allocate_adh_system(SMODEL_SUPER *sm){   
@@ -566,20 +567,18 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     sarray_init_dbl(sm->vals_diag, sm->indptr_diag[sm->my_ndofs-1]);
     sarray_init_dbl(sm->vals_off_diag, sm->indptr_off_diag[sm->my_ndofs-1]);
 }
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function initalizes a SuperModel Newton Jacobian matrix for suitesparse
+ *  \brief     This function initalizes a the PETSc objects, should only be called if PETSC is
+ *  active
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct
+ *  @param[in,out] sm (SMODEL_SUPER*) - pointer to an instant of the SuperModel struct
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -734,22 +733,17 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
       */
 #endif
 }
-  
-
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function initalizes a SuperModel Newton Jacobian matrix
+ *  \brief     Small wrapper to initialize all structs pertaining to linear system
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out]  SMODEL_SUPER *sm pointer to an instant of the SuperModel struct
+ *  @param[in,out] sm (SMODEL_SUPER*) - pointer to an instant of the SuperModel struct
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -762,12 +756,20 @@ void fe_allocate_initialize_linear_system(SMODEL_SUPER *sm) {
 #endif
             }
 }
-
-
-
-
-
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Function to modify linear system to enforce Dirichlet conditions
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] sm (SMODEL_SUPER*) - pointer to an instant of the SuperModel struct
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void apply_Dirichlet_BC(SMODEL_SUPER *sm){
     //NOTE: THIS WILL BREAK IN PARALLEL, NEED TO ADD GHOSTS LATER
 
@@ -824,13 +826,73 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
     }
 
 }
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Performs mat/vec multiplication in split CSR format
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] Ax (double*) - the matrix-vector product Ax
+ *  @param[in] indptr_diag (int*) - the first/last index of each row in CSR format (diagonal block wrt processor)
+ *  @param[in] cols_diag (int*) - local (to process) column locations of each nonzero in CSR format (diagonal block wrt processor)
+ *  @param[in] vals_diag (double*) - nonzero values in CSR matrix (diagonal block wrt processor)
+ *  @param[in] indptr_off_diag (int*) - the first/last index of each row in CSR format (off-diagonal block wrt processor)
+ *  @param[in] cols_off_diag (int*) - global column locations of each nonzero in CSR format (off-diagonal block wrt processor)
+ *  @param[in] vals_off_diag (double*) - nonzero values in CSR matrix (off-diagonal block wrt processor)
+ *  @param[in] x (double*) - the vector of the matrix-vector product
+ *  @param[in] nrows (int) - the number of rows on this process (same as # owned d.o.fs)
+ *  @param[in] ghosts (int*) - array of global dof numbers for ghost dofs
+ *  @param[in] nghost (int) - length of ghosts array
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void split_CSR_mat_vec_mult(double *Ax, int *indptr_diag, int *cols_diag, double *vals_diag, 
+  int *indptr_off_diag, int *cols_off_diag, double *vals_off_diag,
+  double *x, int nrows, int *ghosts, int nghost){
 
+  //consult with ppl to optimize later on
+  //see discussion on https://scicomp.stackexchange.com/questions/27977/how-can-i-speed-up-this-code-for-sparse-matrix-vector-multiplication
+  //does mat/vec multiplication between split CSR with vector x and returns Ax
+  int i, j, k;
+  double Ax_i;
 
+  if(indptr_off_diag!=NULL){
+    //loop over row
+    for(i=0;i<nrows;i++){
+      Ax_i = 0.0;
+      for(j=indptr_diag[i];j<indptr_diag[i+1];j++){
+        //diag blaock cols_diag are local numbers only so no issue here
+        Ax_i += vals_diag[j]*x[cols_diag[j]];
+      }
+      for(k=indptr_off_diag[i];k<indptr_off_diag[i+1];k++){
+        //off diag is a little more complex
+        Ax_i += vals_off_diag[k]*x[global_to_local(cols_off_diag[k], nrows, ghosts, nghost)];
+      }
+      Ax[i] = Ax_i;
 
-//int* unique (int* first, int* last)
+    }
+  }else{
+    //loop over row
+    for(i=0;i<nrows;i++){
+      Ax_i = 0.0;
+      for(j=indptr_diag[i];j<indptr_diag[i+1];j++){
+        //diag blaock cols_diag are local numbers only so no issue here
+        Ax_i += vals_diag[j]*x[cols_diag[j]];
+      }
+      
+      Ax[i] = Ax_i;
+
+    }
+  }
+
+}
+//int* sarray_unique_int (int* first, int* last)
 //{
 //  if (first==last) return last;//
-
 //  int* result = first;
 //  while (++first != last)
 //  {
@@ -839,32 +901,41 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
 //  }
 //  return ++result;
 //}//
-
-int compare_ints(const void *a, const void *b) {
-    return (*(int*)a - *(int*)b); // Ascending order
-}
-
-
-
-int unique(int *arr, int size){
-    int unique_size = 1; // We'll start with the assumption that the first element is unique
-    for (int i = 1; i < size; i++) {
-        int is_unique = 1;
-        for (int j = 0; j < unique_size; j++) {
-            if (arr[i] == arr[j]) {
-                is_unique = 0; // We found a duplicate
-                break;
-            }
-        }
-        if (is_unique) {
-            arr[unique_size] = arr[i];
-            unique_size++;
-        }
-    }
-    return unique_size;
-}
-
-
+//int unique(int *arr, int size){
+//    int sarray_unique_int_size = 1; // We'll start with the assumption that the first element is sarray_unique_int
+//    for (int i = 1; i < size; i++) {
+//        int is_sarray_unique_int = 1;
+//        for (int j = 0; j < sarray_unique_int_size; j++) {
+//            if (arr[i] == arr[j]) {
+//                is_sarray_unique_int = 0; // We found a duplicate
+//                break;
+//            }
+//        }
+//        if (is_sarray_unique_int) {
+//            arr[sarray_unique_int_size] = arr[i];
+//            sarray_unique_int_size++;
+//        }
+//    }
+//    return sarray_unique_int_size;
+//}
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Prints CSR format matrix to screen
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] Ax (double*) - the matrix-vector product Ax
+ *  @param[in] indptr (int*) - the first/last index of each row in CSR format
+ *  @param[in] cols (int*) - column locations of each nonzero in CSR format
+ *  @param[in] vals (double*) - nonzero values in CSR matrix
+ *  @param[in] nrows (int) - the number of rows on this process (same as # owned d.o.fs)
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void Screen_print_CSR(int *indptr, int *cols, double *vals, int nrow){
     int i,j,nentry,row_start,row_end;
     for(i=0;i<nrow;i++){

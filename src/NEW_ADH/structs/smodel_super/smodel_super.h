@@ -166,6 +166,8 @@ typedef struct {
     /* boundary conditions mask */
     //maybe we can get rid of this through weak enforcement
     int *bc_mask;
+    //instead of mask, allocate array of ints that is dof of each dirichlet dof
+    //int *dirchlet_dofs;
     double *dirichlet_data;
     //Mark, havent looked into this yet. Maybe weak 
     STR_VALUE *str_values;    /* strings */

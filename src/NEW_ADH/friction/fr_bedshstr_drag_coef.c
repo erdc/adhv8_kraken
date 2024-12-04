@@ -1,20 +1,20 @@
-/* ADH Version 2.0.0 6/04 */
-
-/* This routine calculates a coefficient c_f, such that the shear stress tau is found as follows:
-   tau = 1/2 rho c_f vel*vel
-   This coefficient is for depth integrated model velocity.
-   The input required is:
-   double depth
-   double roughness_height
-   The function returns
-   double c_f
-   The minimum ratio of depth to roughness_height is 1./29.7
-
-   Brown Jul 24 2006
- */
-
+/*! \file  fr_bedshstr_drag_coef.c This file collections functions responsible for computinf friction coefficient  */
 #include "fr_defs.h"
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief This routine calculates a coefficient c_f, such that the shear stress tau is found as follows:
+ *  \f$ \tau = 1/2 \rho c_f \|V\|^2 \f$
+ *  This coefficient is for depth integrated model velocity.
+ *  
+ *  @param[in] depth (double) - water depth
+ *  @param[in] roughness_height (double) - roughness height
+ *  \returns double friction coefficient \f$c_f\f$
+ *  
+ *  \note The minimum ratio of depth to roughness_height is 1./29.7
+ *  \author Brown Jul 24 2006
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 double fr_bedshstr_drag_coef(
   /* bed shear stress drag coefficient */
   double depth,			/* local depth, L */

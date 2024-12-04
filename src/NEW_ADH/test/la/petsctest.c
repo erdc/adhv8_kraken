@@ -1,5 +1,17 @@
+/*! \file  petsctest.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function tests the PETSc solver
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int petsc_test(int argc, char **argv) {
 int ierr = -1;
 #ifdef _PETSC
@@ -166,8 +178,8 @@ int ierr = -1;
   ierr = KSPSetUp(ksp);
   ierr = KSPSolve(ksp,b,x);
   //scatter forward appears to update array as we need
-  VecGhostUpdateBegin(x,INSERT_VALUES,SCATTER_FORWARD);
-  VecGhostUpdateEnd(x,INSERT_VALUES,SCATTER_FORWARD);
+  //VecGhostUpdateBegin(x,INSERT_VALUES,SCATTER_FORWARD);
+  //VecGhostUpdateEnd(x,INSERT_VALUES,SCATTER_FORWARD);
   //view local solution
   ierr = VecView(x, PETSC_VIEWER_STDOUT_WORLD);
 

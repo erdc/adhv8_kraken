@@ -1,35 +1,19 @@
-/* This is a biconjugate gradient squared stabilized matrix solver. 
- It is a Krylov-based iterative method used to solve nonsymmetric
- linear systems.  
- 
- Ref:  H. A. vanderVorst, "Bi-CGStab:  A fast and smoothly converging 
- variant to Bi-CG for the solution of nonsymmetric systems",
- SIAM J. Sci. Statist. Comput., 13 (1992), pp. 631-644.
- 
- or       C. T. Kelley, "Iterative Methods for Linear and Nonlinear
- Equations", SIAM, Philadelphia, PA, 1995.
- 
- In general, the Bi-CGStab solver constructs bases for the Krylov 
- subspaces (A,b) and (A^T,c), where b is the right-hand-side vector
- and c is usually chosen so that c=b.  The method may break down, 
- although this does not seem to happen often in practice.
- 
- Return: Linear Solver Failure?
- NO or YES
- */
-
-//#include <mpi.h>
-//#include <stdio.h>
-//#include <math.h>
-//#include <stdbool.h>
-//#include <umfpack.h>
+/*! \file  inhouse.c This file tests the BiCGStab solver for split CSR matrix */
 #include "adh.h"
 #define SOLV_TOL 1e-5
 #define MAX_NODAL_DOF 4
-
-
-
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function tests the BiCGStab solver
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int inhouse_test(int argc, char **argv) {
 
   int status;
@@ -41,7 +25,7 @@ int inhouse_test(int argc, char **argv) {
   int nnz_off_diag=0;
   int rank=0;
   int npe=1;
-#ifdef _MESSG
+#ifdef _MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &npe);
 #endif
@@ -158,7 +142,7 @@ int inhouse_test(int argc, char **argv) {
   }
 
   //update residual
-  comm_update_double(resid,m,3,rank);
+  //comm_update_double(resid,m,3,rank);
   //Global sizes
   //M = 8;
   //N = 8;
@@ -181,14 +165,13 @@ int inhouse_test(int argc, char **argv) {
 //  for(k=0;k<nnz_off_diag;k++){
 //    printf("Rank %d, unscaled vals_off_diag[%d] = %f\n",rank,k,vals_off_diag[k]);
 //  }
-
   //now create routine that does the preconcitioning and then solve
   //scales matrix, rhs(residual), solution, and sets scale_vec
   scale_linear_system(indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
      vals_off_diag, resid, sol, scale_vect, m, n+nghost,rank, ghosts, nghost);
 
   //factor the matrix preconditioner
-  status = prep_umfpack(indptr_diag,cols_diag,vals_diag, sol, resid, m);
+  status = prep_umfpack(indptr_diag,cols_diag,vals_diag, m);
   //and factors with umfpack
   //for(k=0;k<nnz_diag;k++){
   //  printf("Rank %d, vals_diag[%d] = %f\n",rank,k,vals_diag[k]);
@@ -210,8 +193,6 @@ int inhouse_test(int argc, char **argv) {
   //for(k=0;k<nnz_diag;k++){
   //  printf("Rank %d, scaled nnz_diag[%d] = %f\n",rank,k,vals_diag[k]);
   //}
-
-
   return 0;
 }
 

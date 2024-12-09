@@ -30,7 +30,7 @@ static int DEBUG = OFF;
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-void smat_physics_alloc_init(SMAT_PHYSICS **mat_physics, int nmat, int *ntrns) {
+void smat_physics_alloc_init_array(SMAT_PHYSICS **mat_physics, int nmat, int *ntrns, int *nvars, int *nSubMods, int **subMod_nvars) {
     
     assert(nmat>=0);
     if (nmat == 0){
@@ -38,42 +38,74 @@ void smat_physics_alloc_init(SMAT_PHYSICS **mat_physics, int nmat, int *ntrns) {
         return;
     }
     else{
+        //allocate array of mat physics
         (*mat_physics) = (SMAT_PHYSICS *) tl_alloc(sizeof(SMAT_PHYSICS), nmat);
         int imat;
         SMAT_PHYSICS *mat; // for alias
     
         for (imat=0; imat<nmat; imat++) {
             mat = &(*mat_physics)[imat]; // alias
-            mat->ntrns = ntrns[imat];
-            mat->SW_FLOW = OFF;
-            mat->SW1_FLOW = OFF;
-            mat->SW2_FLOW = OFF;
-            mat->SW3_FLOW = OFF;
-            mat->NS_FLOW = OFF;
-            mat->NS3_FLOW = OFF;
-            mat->NS3_SPLIT = OFF;
-            mat->GW_FLOW = OFF;
-            mat->DW_FLOW = OFF;
-            mat->WVEL_SPLIT = OFF;
-            mat->PRESSURE = OFF;
-        
-            if (ntrns[imat] > 0) {
-                int itrns;
-                mat->TRANSPORT = (bool *) tl_alloc(sizeof(bool), ntrns[imat]);
-                for (itrns=0; itrns>ntrns[imat]; itrns++) {
-                    mat->TRANSPORT[itrns] = false;
-                }
-            }
-            //        mat->VORTICITY = OFF;
-            //        mat->SEDIMENT = OFF;
-            //        mat->SEDLIB = OFF;
-            //        mat->ICM = OFF;
-            //        mat->NSM = OFF;
-            //        mat->WAVE = OFF;
-            //        mat->WIND = OFF;
+            smat_physics_alloc_init(mat, ntrns[imat], nvars[imat], nSubMods[imat], nSubMod_nvar[imat]);
         }
         return;
     }
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Allocates and intializes physics material properties
+ *  \author    Corey Trahan, Ph.D.
+ *  \author    Mark Loveand, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ * @param[inout] mat_physics (SMAT_PHYSICS**)  double pointer to a physics material
+ *
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void smat_physics_alloc_init(SMAT_PHYSICS *mat, int ntrns, int nvar, int nSubMods, int *nSubMod_nvar){
+    int i;
+    assert(nvar>0);
+    //allocate and initialize each mat physics
+    mat->ntrns = ntrns;
+    mat->nvar = nvar;
+    mat->nSubModels = nSubMods;
+
+    if (ntrns > 0){
+        (mat->TRANSPORT) = (bool *) tl_alloc(sizeof(bool), ntrns);
+        for(i=0;i<ntrns;i++){
+            mat->TRANSPORT[i] = false;
+        }
+    }else{
+        mat->TRANSPORT = NULL;
+    }
+    mat->SW_FLOW = OFF;
+    mat->SW1_FLOW = OFF;
+    mat->SW2_FLOW = OFF;
+    mat->SW3_FLOW = OFF;
+    mat->NS_FLOW = OFF;
+    mat->NS3_FLOW = OFF;
+    mat->NS3_SPLIT = OFF;
+    mat->GW_FLOW = OFF;
+    mat->DW_FLOW = OFF;
+    mat->WVEL_SPLIT = OFF;
+    mat->PRESSURE = OFF;
+    (mat->vars) = (int *) tl_alloc(sizeof(int), nvar);
+    //initalize to 0, or different value
+    for(i=0;i<nvar;i++){
+        mat->vars[i] = 0;
+    }
+    //allocate and initialize array of elem_phyiscs
+    if(nSubMods>0){
+        selem_physics_alloc_init_array(&(mat->elem_physics), nSubMods, nSubMod_nvar); 
+    }else{
+        mat->elem_physics = NULL;
+    }
+
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

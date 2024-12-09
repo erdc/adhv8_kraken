@@ -18,27 +18,138 @@
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void smodel_super_alloc_init(SMODEL_SUPER **smod, int nSuperModels) {
+void smodel_super_alloc_init_array(SMODEL_SUPER **smod, int nSuperModels) {
     
     // assertions
     assert(nSuperModels > 0);  // must have a least one superModel defined to run
     
-    // allocate all the supermodels
+    // allocate array of supermodels
     (*smod) = (SMODEL_SUPER *) tl_alloc(sizeof(SMODEL_SUPER), nSuperModels);
-    SMODEL_SUPER *sm = (*smod); // alias
+    SMODEL_SUPER *sm; // alias
     
     // initialize
     int isup;
     for (isup=0; isup<nSuperModels; isup++) {
-        sm[isup].dt = 0.0;
-        sm[isup].dt_prev = 0.0;
-        sm[isup].inc_nonlin = 0.0;
-        sm[isup].tol_nonlin = 0.0;
+        sm = &(*smod)[imat]; // alias
+        smodel_super_alloc_init(sm);
         //sm[isup].matrix_petsc = NULL;
         //sm[isup].matrix_adh = NULL;
     }
+    //sm->dof_map_local = NULL;
+    //sm-dof_map_global = NULL;
+}
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Allocates and intializes an array of AdH Super Models
+ *  \author    Corey Trahan, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ * @param[inout] smod           (SUPER_MODEL **)  a double pointer to an array of AdH supermodels
+ * @param[in]  nSuperModels            (int) the total number of supermodels in the design model
+ *
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void smodel_super_alloc_init(SMODEL_SUPER *sm) {
+    
+    // assertions
+    assert(nSuperModels > 0);  // must have a least one superModel defined to run
+    
+    //SIO?
+    sm->io = NULL;  /* file names associated with this model application */
+    //SFLAGS flag;
+    sm->o_flag = 0;
+    sm->grid = NULL; // just a pointer to the grid in the design model
+
+    // initialize with default values
+    sm->isSimple = 0;
+    sm->dt = 0.0;
+    sm->dt_old = 0.0;
+    sm->dt_err = 0.0;
+    sm->dt_prev = 0.0;
+    sm->inc_nonlin = 0.0;
+    sm->tol_nonlin = 0.0;
+    sm->t_init = 0.0;
+    sm->t_prev = 0.0;
+    sm->t_final = 0.0;
+    sm->t_adpt_flag = 0;
+    sm->nseries = 0;              // the number of series in this model 
+    sm->itrns = 0;
+
+    //Mark adding other things that used to be part of solver
+    //should some of these be part of LINSYS?
+    sm->max_nonlin_linesearch_cuts = 0;
+    sm->max_nonlin_it = 0;
+    sm->it_count_nonlin = 0;
+    sm->force_nonlin_it = 0;
+    sm->nonlinear_it_total = 0;
+    sm->LINEAR_PROBLEM = 0;
+    sm->it_count_nonlin_failed = 0;
+
+
+    // now all held within slin_sys structure
+    sm->lin_sys = NULL; //pointer to the design model's linear system
+
+    //IDK if physics_mat_code is still used? dont believe we need dof_map_global
+    sm->physics_mat_code = NULL; // an code for each physics material that
+                           // determinds which equations will be
+                           // solved on that material
+    sm->dof_map_local = NULL;    // a local map from the local node ID to the
+                           // local equation number for building the
+                           // FE residual and matrix 
+                           //onl allocate if isSimple is not 1
+
+    sm->dof_map_global = NULL;   // for ghost nodes - a map from the local
+                           // node ID to the global equation number
+                           // for building the FE matrix 
+
+    sm->meshcode = 0; //need a way if supermodel is defined on entire mesh (0), surface(1), or floor(2)
  
-    sm->physics_mat_code = NULL;
+
+    //Mark adding sizes for convenience
+    sm->nphysics_mat_1d = 0;
+    sm->nphysics_mat_2d = 0;
+    sm->nphysics_mat_3d = 0;
+
+    //Mark, elements need integer to store the physics mat id
+    //do we want to assume grid is given so we can actuall allocate these?
+    sm->elem1d_physics_mat_id = NULL; //[nelem1d]
+    sm->elem2d_physics_mat_id = NULL; //[nelem2d]
+    sm->elem3d_physics_mat_id = NULL; //[nelem3d]
+    
+    //same with elem physics mats, these will come from super file
+    sm->elem1d_physics_mat = NULL;
+    sm->elem2d_physics_mat = NULL;
+    sm->elem3d_physics_mat = NULL;
+
+     //Mark proposes swapping nodal vars above to node-based material, this will cut down on memory
+    //but may be challenging to form. This won't be set by user but implicitly built
+    //at run time
+    sm->nphysics_mat_node = 0;
+    sm->node_physics_mat_id = NULL; //[nnode] ? local vs what idk
+    sm->node_physics_mat = NULL; //[nphysics_mat_node]
+
+
+    //SHOULD THESE BE IN SLINSYS OR SUPERMODEL??
+    /* boundary conditions mask */
+    //maybe we can get rid of this through weak enforcement
+    sm->bc_mask = NULL;
+    //instead of mask, allocate array of ints that is dof of each dirichlet dof
+    //int *dirchlet_dofs;
+    sm->dirichlet_data = NULL;
+    //Mark added local to process, this should be same as local_range[1]-local_range[0]
+    //are these redundant in any way to what we have in SLIN_SYS?
+    sm->my_ndofs = NULL; //pointers to design model, not arrays
+    sm->my_ndofs_old = NULL;
+    sm->ndofs = NULL; // local number of degrees of freedom
+    sm->ndofs_old = NULL; //local numer of solution variables the processor is in charge of
+    sm->macro_ndofs = NULL;
+    sm->macro_ndofs_old = NULL;
     //sm->dof_map_local = NULL;
     //sm-dof_map_global = NULL;
 }
@@ -114,7 +225,8 @@ void smodel_super_printScreen(SMODEL_SUPER *smod) {
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, double t_final,
-    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4] ) {
+    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4], int isSimple,
+    SGRID *grid, SLIN_SYS *sys) {
     int i,j;
     printf("Initializing smodel super without file read\n");
     // assign scalars
@@ -130,8 +242,12 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     sm->t_adpt_flag = 0;
     sm->nseries = 0;              // the number of series in this model 
     sm->itrns = 0;
+    sm->isSimple = isSimple;
 
+    // need to build the lin sys and the grid
     //start building up materials
+    sm->grid = grid;
+    sm->lin_sys = sys;
 
 
 
@@ -179,13 +295,33 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     printf("Number of physics mats in each dimension (1d,2d,3d): (%d,%d,%d)\n",sm->nphysics_mat_1d,sm->nphysics_mat_2d,sm->nphysics_mat_3d);
     int ntrns[1];
     int nSubModels[1];
+    int nvars[1];
+
+    int **subMod_nvars;
+
     //utilize fact only one of these models has a physics material defined
     nSubModels[0] = 1;
     ntrns[0] = 0;
+    nvars[0] = 3;
+    //this double pointer will be a set of nmat arrays, each of size nSubModels[i]
+    //tells us for each submodel how many variables there are
+    (subMod_nvars) = (int **) tl_alloc(sizeof(int *), sm->nphysics_mat_2d);
+    for (i=0;i<sm->nphysics_mat_2d;i++){
+        (subMod_nvars[i]) = (int*) tl_alloc(sizeof(int), nSubModels[i]);
+        for(j=0;j<subMod_nvars[i];j++){
+            subMod_nvars[i][j] = 1;
+        }
+    }
+
+
     //initialize pointers and allocate memory for physics materials
-    smat_physics_alloc_init(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, ntrns);
-    smat_physics_alloc_init(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, ntrns);
-    smat_physics_alloc_init(&sm->elem3d_physics_mat, sm->nphysics_mat_3d, ntrns);
+    smat_physics_alloc_init_array(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, ntrns, nvars, nSubModels, subMod_nvars);
+    smat_physics_alloc_init_array(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, ntrns, nvars, nSubModels, subMod_nvars);
+    smat_physics_alloc_init_array(&sm->elem3d_physics_mat, sm->nphysics_mat_3d, ntrns, nvars, nSubModels, subMod_nvars);
+
+//    smat_physics_alloc_init(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, ntrns);
+//    smat_physics_alloc_init(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, ntrns);
+//    smat_physics_alloc_init(&sm->elem3d_physics_mat, sm->nphysics_mat_3d, ntrns);
     printf("Initialized phyisics materials\n");
 
 
@@ -257,19 +393,6 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
             printf("Transport NOT ACTIVATED for 3d physics mat id %d\n",i);   
         }
     }
-
-
-
-
-
-    //Use infor in physics_mat to establish correct pointers to residual routines
-    //i think it may make sense to include the elem_physics structure as
-    //part of the physics mat
-    printf("Initializing elem physics routines\n");
-    selem_physics_alloc_init(&sm->elem1d_physics, sm->nphysics_mat_1d, nSubModels);
-    selem_physics_alloc_init(&sm->elem2d_physics, sm->nphysics_mat_2d, nSubModels);
-    selem_physics_alloc_init(&sm->elem3d_physics, sm->nphysics_mat_3d, nSubModels);
-    printf("Initialized elem physics routines\n");
     
     //now use elemVarCode info to pick out the correct pointers to routines
     //maybe store this in some sort of dictionary sort of thing?
@@ -278,10 +401,9 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     //how does this work?
     //sm->elem2d_physics[0][0].fe_resid = fe_sw2_body_resid;
     //hard code to poisson routine for now
-    sm->elem2d_physics[0][0].fe_resid =poisson_residual;
-    sm->elem2d_physics[0][0].nvar = 1;
-    sm->elem2d_physics[0][0].physics_vars = (int*) tl_alloc(sizeof(int), sm->elem2d_physics[0][0].nvar);
-    sm->elem2d_physics[0][0].physics_vars[0] = PERTURB_U;
+    sm->elem2d_physics_mat[0]->elem_physics[0][0].fe_resid = poisson_residual;
+    sm->elem2d_physics_mat[0]->elem_physics[0][0].nvar = 1;
+    sm->elem2d_physics_mat[0]->elem_physics[0][0].physics_vars[0] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[1] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[2] = PERTURB_V;
 
@@ -296,7 +418,9 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     for(i=0;i<sm->grid->nnodes;i++){
         sm->node_physics_mat_id[i] = 0;
     }
-    smat_physics_alloc_init(&sm->node_physics_mat, sm->nphysics_mat_node, ntrns);
+    //smat_physics_alloc_init(&sm->node_physics_mat, sm->nphysics_mat_node, ntrns);
+    nSubModels[0] = 0;
+    smat_physics_alloc_init_array(&sm->node_physics_mat, sm->nphysics_mat_node, ntrns, nvars, nSubModels, subMod_nvars);
     //node code is same as elemVarCode
     for(i=0;i<sm->nphysics_mat_node;i++){
         for(j=0;j<4;j++){
@@ -307,15 +431,16 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
 
     //also need to set the variables, not just equations
     //elemental materials first
-    sm->elem2d_physics_mat[0].nvar=3;
-    sm->elem2d_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->elem2d_physics_mat->nvar);
+    //should already be set
+    assert(sm->elem2d_physics_mat[0].nvar==3);
     sm->elem2d_physics_mat[0].vars[0] = PERTURB_V;
     sm->elem2d_physics_mat[0].vars[1] = PERTURB_U;
     sm->elem2d_physics_mat[0].vars[2] = PERTURB_H;
     sm->elem2d_physics_mat[0].nSubmodels = 1;
     //same for nodes
-    sm->node_physics_mat[0].nvar=3;
-    sm->node_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->node_physics_mat->nvar);
+    //sm->node_physics_mat[0].nvar = 3;
+    assert(sm->node_physics_mat[0].nvar == 3;);
+    //sm->node_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->node_physics_mat->nvar);
     sm->node_physics_mat[0].vars[0] = PERTURB_V;
     sm->node_physics_mat[0].vars[1] = PERTURB_U;
     sm->node_physics_mat[0].vars[2] = PERTURB_H;
@@ -323,22 +448,6 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     //initalize residual vector
     //need a routine to get ndofs for all of this
     //hard coded for now
-    sm->ndofs_old = 0;
-    sm->ndofs = sm->grid->nnodes*3;
-    sm->my_ndofs = sm->grid->nnodes*3;
-    sm->local_range[1] = sm->grid->nnodes*3;
-    sm->local_range[0] = 0;
-    sm->local_range_old[1] = 0;
-    sm->local_range_old[0] = 0;
-    sm->residual=NULL;
-    sm->sol=NULL;
-    sm->indptr_diag=NULL;
-    sm->indptr_off_diag=NULL;
-    sm->residual = (double*) tl_alloc(sizeof(double), sm->ndofs);
-    sm->sol = (double*) tl_alloc(sizeof(double), sm->ndofs);
-    sm->indptr_diag = (int*) tl_alloc(sizeof(int), sm->my_ndofs+1);
-    //when in init need to change this to check if we have more than one processor or not
-    sm->indptr_off_diag = NULL;
     
     //make a trivial fmap_local
     //maybe have special case when nmat is 1 to avoid storing this and use special case mapping

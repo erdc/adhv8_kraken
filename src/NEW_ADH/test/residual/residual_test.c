@@ -1,4 +1,4 @@
-/*! \file  residual_test.c This file tests the residual assembly */
+/*! \file residual_test.c This file tests the residual assembly */
 #include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -66,6 +66,8 @@ int residual_test(int argc, char **argv) {
 	strcpy(&elemVarCode[1],"0"); //GW
 	strcpy(&elemVarCode[2],"0"); //Transport
 
+
+	//initalize a design modek that is comprised of 1 super model
 	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 	printf("Supermodel read complete\n");
 

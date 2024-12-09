@@ -1,4 +1,4 @@
-/*! \file  inhouse.c This file tests the BiCGStab solver for split CSR matrix */
+/*! \file inhouse.c This file tests the BiCGStab solver for split CSR matrix */
 #include "adh.h"
 #define SOLV_TOL 1e-5
 #define MAX_NODAL_DOF 4

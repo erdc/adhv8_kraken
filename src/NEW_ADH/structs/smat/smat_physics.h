@@ -20,14 +20,12 @@ typedef struct {
     
     //convenitent to have total nvar to solve
     int nvar;
-    //similarly, how many physics routines to call
-    int nSubmodels;
-
     //needs var codes
     int *vars;//int elem_vars[nvar];
-
-
-
+    //similarly, how many physics routines to call
+    int nSubmodels;
+    //array of elem_physics structs, all they contain are pointers to physics routines
+    SELEM_PHYSICS *elem_physics; // [nSubModels] length array
 //    bool VORTICITY;
 //    bool SEDIMENT;
 //    bool SEDLIB;
@@ -39,7 +37,9 @@ typedef struct {
 } SMAT_PHYSICS;
 
 // methods
-void smat_physics_alloc_init(SMAT_PHYSICS **mat_physics, int nmat, int *ntrns);
+//void smat_physics_alloc_init_array(SMAT_PHYSICS **mat_physics, int nmat, int *ntrns);
+void smat_physics_alloc_init_array(SMAT_PHYSICS **mat_physics, int nmat, int *ntrns, int *nvars, int *nSubMods, int **subMod_nvars);
+void smat_physics_alloc_init(SMAT_PHYSICS *mat, int ntrns, int nvar, int nSubMods, int *nSubMod_nvar);
 void smat_physics_free(SMAT_PHYSICS *mat, int nmat);
 void smat_physics_allocate_read(SMAT_PHYSICS **mat, SGRID *grid);
 #endif

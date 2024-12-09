@@ -1,4 +1,4 @@
-/*! \file  petsctest.c This file tests the PETSc solver for split CSR matrix */
+/*! \file petsctest.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

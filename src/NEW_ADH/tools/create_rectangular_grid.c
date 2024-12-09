@@ -63,6 +63,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 	//create a grid to return
 	SGRID grid;
 
+	grid.elem2d = NULL;
 	//for now serial only, maybe add scotch in later
 
 
@@ -108,8 +109,11 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
     grid.my_nTris = grid.nTris;           // total # of residential only triangle elements in global mesh
 
 	if (grid.nelems1d > 0) {selem1d_init_alloc_array(&(grid.elem1d), grid.nelems1d);}
+	printf("Calling selem2d_init_alloc_array\n");
     if (grid.nelems2d > 0) {selem2d_init_alloc_array(&(grid.elem2d), grid.nelems2d);}
+    printf("Completed selem2d_init_alloc_array\n");
     if (grid.nelems3d > 0) {selem3d_init_alloc_array(&(grid.elem3d), grid.nelems3d);}
+    
     snode_init_alloc_array(&(grid.node), grid.nnodes);
 
 

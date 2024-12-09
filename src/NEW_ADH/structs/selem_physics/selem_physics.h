@@ -24,7 +24,9 @@ typedef struct {
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
-void selem_physics_alloc_init(SELEM_PHYSICS ***elemPhys,int nelems,int *nSubMods);
+//void selem_physics_alloc_init_array(SELEM_PHYSICS ***elemPhys,int nelems,int *nSubMods);
+void selem_physics_alloc_init_array(SELEM_PHYSICS **elemPhys, int nSubMods, int *nSubMod_nvar);
+void selem_physics_alloc_init(SELEM_PHYSICS *physics,int nvar);
 void selem_physics_free(SELEM_PHYSICS **elemPhys,int nelems,int *nSubMods);
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

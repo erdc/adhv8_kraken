@@ -1,4 +1,4 @@
-/*! \file  jacobian_test.c This file tests the assembly of a Jacobian matrix */
+/*! \file jacobian_test.c This file tests the assembly of a Jacobian matrix */
 #include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

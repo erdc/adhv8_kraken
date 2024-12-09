@@ -1,4 +1,4 @@
-/*! \file  newton_test.c This file tests the PETSc solver for split CSR matrix */
+/*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
 static int NEWTON_TEST_NX = 700;

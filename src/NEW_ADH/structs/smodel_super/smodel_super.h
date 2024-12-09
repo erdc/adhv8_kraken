@@ -9,7 +9,10 @@ typedef struct {
     SIO *io;  /* file names associated with this model application */
     SFLAGS flag;
     int o_flag;
-    SGRID *grid; // just a copy of the grid, do we want this or will it be confusing?
+    SGRID *grid; // just a pointer to the grid in the design model
+
+    //Mark added type flag, isSimple -> superModel has only one physics type on whole grid
+    int isSimple;
 
     double dt, old_dt, dt_err;
     double dt_prev;
@@ -32,70 +35,43 @@ typedef struct {
     int LINEAR_PROBLEM;
     int it_count_nonlin_failed;
 
-    //FE_MATRIX *matrix;  // stores matrix
+//    //Mark making changes, the structures should all be the same now
 //#ifdef _PETSC
-//        Mat         A;
-//        Mat         P;                      // Preallocator matrix for A
-//        int         PREALLOC_FLAG;          // Determines whether or not we preallocate space for the matrix
-//        int         Istart;                 // Start of PETSc matrix rows on pe
-//        int         Iend;                   // End of PETSc matrix rows on pe
-//        const int   *ownership_range;       // Gives the range of rows owned by each pe
-//        Vec         residual;
-//        Vec         sol;
-//        KSP         ksp;
-//        int         *bc_mask;
-//        int         old_bc_mask_size;
-//        double      *scale_vect; // Can I remove this too? - SAM
-//        // TODO: Remove two members below - SAM
-//        double *diagonal;
-//#else
-//        int    *bc_mask;
-//        double *residual;
-//        double *sol;
-//        double *scale_vect;
-//        double *diagonal;
-//        //SPARSE_VECT *matrix;
+//    Mat A;
+//    KSP ksp;
+//    Vec B; //Petsc residual
+//    Vec X; //Persc solution
 //#endif
+//    //Split CSR format
+//    //diagonal is locally owned dofs to process
+//    int *indptr_diag; //pointers to number of nnz each row
+//    int *cols_diag; //column addresses of all nonzero entries (local to process)
+//    double *vals_diag; //actual matrix values
+//    //this actually will be empty if serial run
+//    int *indptr_off_diag; //pointers to number of nnz each row
+//    int *cols_off_diag; //column addresses of all nonzero entries (global)
+//    double *vals_off_diag; //actual matrix values
+//    //Also needs nnz for allocation purposes
+//    int nnz_diag, nnz_off_diag, nnz_diag_old, nnz_off_diag_old;
+//    //vectors
+//    double *residual;
+//    double *sol;
+//    double *scale_vect;
+//    //mark, proposes using unified solution variable
+//    double *sol_old;
+//    double *sol_older;
+//    //actual solution of linear system is an increment within Newton iteration
+//    double *dsol;
+//    //things that are important to transforming local to global
+//    int *ghosts;
+//    int nghost;
+//    int local_size; //same as my_ndofs?
+//    int size_with_ghosts;
+//    int local_range[2];
+//    int local_range_old[2];
 
-    //Mark making changes, the structures should all be the same now
-#ifdef _PETSC
-    Mat A;
-    KSP ksp;
-    Vec B; //Petsc residual
-    Vec X; //Persc solution
-#endif
-    //Split CSR format
-    //diagonal is locally owned dofs to process
-    int *indptr_diag; //pointers to number of nnz each row
-    int *cols_diag; //column addresses of all nonzero entries (local to process)
-    double *vals_diag; //actual matrix values
-
-    //this actually will be empty if serial run
-    int *indptr_off_diag; //pointers to number of nnz each row
-    int *cols_off_diag; //column addresses of all nonzero entries (global)
-    double *vals_off_diag; //actual matrix values
-
-    //Also needs nnz for allocation purposes
-    int nnz_diag, nnz_off_diag, nnz_diag_old, nnz_off_diag_old;
-
-    //vectors
-    double *residual;
-    double *sol;
-    double *scale_vect;
-
-    //mark, proposes using unified solution variable
-    double *sol_old;
-    double *sol_older;
-    //actual solution of linear system is an increment within Newton iteration
-    double *dsol;
-
-    //things that are important to transforming local to global
-    int *ghosts;
-    int nghost;
-    int local_size; //same as my_ndofs?
-    int size_with_ghosts;
-    int local_range[2];
-    int local_range_old[2];
+    //above is now all held within slin_sys structure
+    SLIN_SYS *lin_sys; //pointer to the design model's linear system
 
 
     int *physics_mat_code; // an code for each physics material that
@@ -128,24 +104,25 @@ typedef struct {
 
     //Mark, maybe just role this into SMAT_PHYSICS object????
     
-    //Mark, this is gonna change? need to discuss
+    //Mark, has moved to SMAT_PHYSICS
     //this should be based on number of physics materials, no longer numbr of elements
-    int *nSubMods1d;                // [nphysics_mat_1d] the total number of physics modules on each 1D element
-    int *nSubMods2d;                // [nphysics_mat_2d] the total number of physics modules on each 2D element
-    int *nSubMods3d;                // [nphysics_mat_3d] the total number of physics modules on each 3D element
+    //int *nSubMods1d;                // [nphysics_mat_1d] the total number of physics modules on each 1D element
+    //int *nSubMods2d;                // [nphysics_mat_2d] the total number of physics modules on each 2D element
+    //int *nSubMods3d;                // [nphysics_mat_3d] the total number of physics modules on each 3D element
     
-    SELEM_PHYSICS **elem1d_physics;  // [nphysics_mat_1d][nsubmods_1d] the fe routines for each type of physics on each 1D element
-    SELEM_PHYSICS **elem2d_physics;  // [nphysics_mat_2d][nsubmods_2d] the fe routines for each type of physics on each 2D element
-    SELEM_PHYSICS **elem3d_physics;  // [nphysics_mat_3d][nsubmods_3d] the fe routines for each type of physics on each 3D element
+    //Now part of SMAT_PHYSICS
+    //SELEM_PHYSICS **elem1d_physics;  // [nphysics_mat_1d][nsubmods_1d] the fe routines for each type of physics on each 1D element
+    //SELEM_PHYSICS **elem2d_physics;  // [nphysics_mat_2d][nsubmods_2d] the fe routines for each type of physics on each 2D element
+    //SELEM_PHYSICS **elem3d_physics;  // [nphysics_mat_3d][nsubmods_3d] the fe routines for each type of physics on each 3D element
 
     //Mark added local to process, this should be same as local_range[1]-local_range[0]
     //are these redundant in any way?
-    int my_ndofs;
-    int my_ndofs_old;
-    int ndofs; // local number of degrees of freedom
-    int ndofs_old; //local numer of solution variables the processor is in charge of
-    int macro_ndofs;
-    int macro_ndofs_old;
+    int *my_ndofs; //pointers to design model, not arrays
+    int *my_ndofs_old;
+    int *ndofs; // local number of degrees of freedom
+    int *ndofs_old; //local numer of solution variables the processor is in charge of
+    int *macro_ndofs;
+    int *macro_ndofs_old;
 
     //Corey using for initialization, should be able to eliminate elemental vars at the least
     //should be able to create nodal material as well but would be more complex
@@ -259,14 +236,15 @@ typedef struct {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
-void smodel_super_alloc_init(SMODEL_SUPER **smod, int nSuperModels);
+void smodel_super_alloc_init(SMODEL_SUPER *sm)
+void smodel_super_alloc_init_array(SMODEL_SUPER **smod, int nSuperModels);
 void smodel_super_free(SMODEL_SUPER *smod, int nSuperModels);
 void smodel_super_read(SMODEL_SUPER *smod, FILE *fp);
 void smodel_super_printScreen(SMODEL_SUPER *smod);
 
 //Mark added for testing
 void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, double t_final,
-    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4] );
+    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4], int isSimple );
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

@@ -918,38 +918,6 @@ void split_CSR_mat_vec_mult(double *Ax, int *indptr_diag, int *cols_diag, double
 //    }
 //    return sarray_unique_int_size;
 //}
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
- *  \brief     Prints CSR format matrix to screen
- *  \author    Count Corey J. Trahan
- *  \author    Mark Loveland
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *  @param[in,out] Ax (double*) - the matrix-vector product Ax
- *  @param[in] indptr (int*) - the first/last index of each row in CSR format
- *  @param[in] cols (int*) - column locations of each nonzero in CSR format
- *  @param[in] vals (double*) - nonzero values in CSR matrix
- *  @param[in] nrows (int) - the number of rows on this process (same as # owned d.o.fs)
- *  \note
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void Screen_print_CSR(int *indptr, int *cols, double *vals, int nrow){
-    int i,j,nentry,row_start,row_end;
-    for(i=0;i<nrow;i++){
-        printf("CSR Matrix Row %d:",i);
-        printf("(col,val): ");
-        row_start = indptr[i];
-        row_end = indptr[i+1];
-        nentry = row_end-row_start;
-        for(j=0;j<nentry;j++){
-            printf(" (%d,%.17e)",cols[row_start+j],vals[row_start+j]);
-        }
-        printf("\n");
-    }
 
-}
 
 

@@ -48,7 +48,7 @@ static double *x0;         /* solution = u+u0 - u0 is the shift */
  *  @param[in] b (double*) - scaled rhs of the linear system
  *  @param[in] scale_vect (double*) - the vector that scaled the system of equations prior to solve, used for rescaling after solve is finished
  *  @param[in] local_size (int) - number of equations (rows in the matrix) owned by the process
- *  @param[in] size_with_ghosts (int) - number of rows + number of ghost d.o.f.s present
+ *  @param[in] size (int) - number of rows + number of ghost d.o.f.s present
  *  @param[in] rank (int) - MPI rank
  *  @param[in] ghosts (int*) - array of global dof numbers that are ghosts on the process
  *  @param[in] nghost (int) - number of ghost d.o.f.s on the process
@@ -58,7 +58,7 @@ static double *x0;         /* solution = u+u0 - u0 is the shift */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *b, 
-  double *scale_vect, int local_size, int size_with_ghosts, int rank,
+  double *scale_vect, int local_size, int size, int rank,
   int *ghosts, int nghost){
   int it;                     /* loop counter over the cg iterations */
   //int iapprox_update_flag;    /* flag for performing an update of the approximation */
@@ -76,9 +76,9 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   double min_conv_tol;        /* the minimum convergence tolerance */
   int isize_prev;
   /* allocates memory if needed */
-  if (isize < size_with_ghosts) {
+  if (isize < size) {
         isize_prev = isize;
-        isize = size_with_ghosts;
+        isize = size;
         r = (double *) tl_realloc(sizeof(double), isize, isize_prev, r);
         p = (double *) tl_realloc(sizeof(double), isize, isize_prev, p);
         Ap = (double *) tl_realloc(sizeof(double), isize, isize_prev, Ap);
@@ -89,46 +89,46 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
         Ms = (double *) tl_realloc(sizeof(double), isize, isize_prev, Ms);
         x0 = (double *) tl_realloc(sizeof(double), isize, isize_prev, x0);
   }
-  printf("Ndof with ghosts = %d\n",size_with_ghosts);
+  printf("Ndof with ghosts = %d\n",size);
   /* allocates memory if needed */
   // need to do different allocation later
   //breaks down for larger problems
-  //double r[size_with_ghosts];
+  //double r[size];
   //printf("allocated one doubles\n");
-  //double p[size_with_ghosts];
+  //double p[size];
   //printf("allocated two doubles\n");
-  //double Ap[size_with_ghosts];
-  //double Mp[size_with_ghosts];
-  //double q[size_with_ghosts];
-  //double s[size_with_ghosts];
-  //double As[size_with_ghosts];
-  //double Ms[size_with_ghosts];
-  //double x0[size_with_ghosts];
+  //double Ap[size];
+  //double Mp[size];
+  //double q[size];
+  //double s[size];
+  //double As[size];
+  //double Ms[size];
+  //double x0[size];
 
 
   /* zeroes the arrays */
   //need to store this to shift solution after solve
-  sarray_copy_dbl(x0, x, size_with_ghosts);
+  sarray_copy_dbl(x0, x, size);
 
   //initialize arrays to 0
-  sarray_init_dbl(x, size_with_ghosts);
-  sarray_init_dbl(r, size_with_ghosts);
-  sarray_init_dbl(q, size_with_ghosts);
-  sarray_init_dbl(p, size_with_ghosts);
-  sarray_init_dbl(Mp, size_with_ghosts);
-  sarray_init_dbl(Ap, size_with_ghosts);
-  sarray_init_dbl(s, size_with_ghosts);
-  sarray_init_dbl(As, size_with_ghosts);
-  sarray_init_dbl(Ms, size_with_ghosts);
+  sarray_init_dbl(x, size);
+  sarray_init_dbl(r, size);
+  sarray_init_dbl(q, size);
+  sarray_init_dbl(p, size);
+  sarray_init_dbl(Mp, size);
+  sarray_init_dbl(Ap, size);
+  sarray_init_dbl(s, size);
+  sarray_init_dbl(As, size);
+  sarray_init_dbl(Ms, size);
 
-  sarray_copy_dbl(p, b, size_with_ghosts);
+  sarray_copy_dbl(p, b, size);
   //in original routine but doesnt seem necessary
-  sarray_init_dbl(b,size_with_ghosts);
+  sarray_init_dbl(b,size);
   int i;
   //apply left preconditioning to RHS, this is stored in residual
   solve_umfpack(b, indptr_diag, cols_diag, vals_diag, p, local_size);
   //zero out rhs
-  sarray_init_dbl(p, size_with_ghosts);
+  sarray_init_dbl(p, size);
   //update ghosts
 
   /* Now Form Actual Residual */
@@ -136,7 +136,7 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   /* However, we miss an opportunity if our preconditioner is meaningful. */
   /* This will basically take r = S b - S A x, where x = S b, as the initial guess. */
   //should it really be updating the ghosts?
-  sarray_copy_dbl(x, b, size_with_ghosts);
+  sarray_copy_dbl(x, b, size);
   //for (i=0;i<local_size;i++){
   //  printf("Rank %d, x[%d] = %f\n",rank,i,vals_off_diag[i]);
   //}
@@ -155,11 +155,11 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   //  printf("Rank %d, Ax[%d] = %f\n",rank,i,Ap[i]);
   //}
   //from b to r and set as r = b-Ax with prexondition
-  sarray_copy_dbl(r, b, size_with_ghosts);
-  sarray_y_plus_ax_dbl(r, -1, Ap, size_with_ghosts );
-  sarray_init_dbl(Mp, size_with_ghosts);
-  sarray_init_dbl(Ap, size_with_ghosts);
-  sarray_copy_dbl(q, r, size_with_ghosts);
+  sarray_copy_dbl(r, b, size);
+  sarray_y_plus_ax_dbl(r, -1, Ap, size );
+  sarray_init_dbl(Mp, size);
+  sarray_init_dbl(Ap, size);
+  sarray_copy_dbl(q, r, size);
   //print vector
 
   //take linf norms of vectors
@@ -192,9 +192,9 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
 
 
     // c //
-    sarray_y_plus_ax_dbl(p, -omega, Ap,size_with_ghosts );
-    sarray_scale_replace_dbl(p,beta, size_with_ghosts);
-    sarray_y_plus_ax_dbl(p, 1, r, size_with_ghosts);
+    sarray_y_plus_ax_dbl(p, -omega, Ap,size );
+    sarray_scale_replace_dbl(p,beta, size);
+    sarray_y_plus_ax_dbl(p, 1, r, size);
     //for (i=0;i<local_size;i++){
     //printf("Rank %d, p[%d] = %f\n",rank,i,p[i]);
     //}
@@ -202,8 +202,8 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     comm_update_double(p, local_size, 3, rank);
 
     // (d) //
-    sarray_init_dbl(Mp, size_with_ghosts);
-    sarray_init_dbl(Ap,size_with_ghosts);
+    sarray_init_dbl(Mp, size);
+    sarray_init_dbl(Ap,size);
     split_CSR_mat_vec_mult(Mp, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag,
     p, local_size,ghosts,nghost);
     //if MPI
@@ -219,10 +219,10 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     //printf("gamma, alpha %f, %f\n",gamma,alpha);
 
     /* (f) */
-    sarray_copy_dbl(s, r, size_with_ghosts);
-    sarray_y_plus_ax_dbl(s, -alpha, Ap, size_with_ghosts);
-    sarray_init_dbl(Ms, size_with_ghosts);
-    sarray_init_dbl(As, size_with_ghosts);
+    sarray_copy_dbl(s, r, size);
+    sarray_y_plus_ax_dbl(s, -alpha, Ap, size);
+    sarray_init_dbl(Ms, size);
+    sarray_init_dbl(As, size);
     //need comm_update_double befor matvec mult
     comm_update_double(s, local_size, 3, rank);
     split_CSR_mat_vec_mult(Ms, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag,
@@ -243,12 +243,12 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     rho = messg_dsum(rho);
 
     /* (h) */
-    sarray_y_plus_ax_dbl(x, alpha, p, size_with_ghosts);
-    sarray_y_plus_ax_dbl(x, omega, s, size_with_ghosts);
+    sarray_y_plus_ax_dbl(x, alpha, p, size);
+    sarray_y_plus_ax_dbl(x, omega, s, size);
         
     /* (i) */
-    sarray_copy_dbl(r, s, size_with_ghosts);
-    sarray_y_plus_ax_dbl(r, -omega, As, size_with_ghosts);
+    sarray_copy_dbl(r, s, size);
+    sarray_y_plus_ax_dbl(r, -omega, As, size);
     /*rnorm = solv_l2_norm_scaled(my_ndof_solv, r, (double)(global_nnode)); */
     rnorm = sarray_l_infty_norm(r, local_size);
     //only do this in parallel

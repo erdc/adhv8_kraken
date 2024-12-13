@@ -21,14 +21,16 @@ static int *nnz_rows_off_diag_no_duplicate = NULL;
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *  @param[in,out] sm (SMODEL_SUPER*) - pointer to an instant of the SMODEL_SUPER struct,
- *  this will contain pointer to grid, physics materials, and CSR structure
+ *   @param[in,out] sm (SLIN_SYS*) - pointer to an instant of the SLIN_SYS struct,
+ *  this will contain pointer to the CSR structure
+ *  @param[in] sm (SMODEL_SUPER*) - pointer to an instant of the SMODEL_SUPER struct,
+ *  this will contain pointer to grid, physics materials
  * \note For now, we are doing the most memory safe but computationally redundant way. 
  * There is some potential to speed up the routine by guessing number of nonzeros per row.
  * For now there is no guessing.
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
+void create_sparsity_split_CSR(SLIN_SYS *lin_sys, SMODEL_SUPER *sm, SGRID *grid){
     //temporarily stores column positions of diagonal and off diagonal blocks
     //diagonal blocks are local column numbers, off-diagonal are global
 
@@ -51,16 +53,19 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     int *rn_diag;
     int count_off_diag = 0;
     int *rn_off_diag;
+    int *ghosts = lin_sys->ghosts;
     // We know that each row contains at least one non-zero entry, and the number of rows is known upfront. 
     // Thus, (i,j)-pairs can be represented as a vector of vectors
     //first allocate this by guessing a max size of nnz per row
+    //have a  check,if fmap is NULL we know we have simple model?
     int* fmap = sm->dof_map_local;
-    int *local_range = sm->local_range;
+
+    int *local_range = lin_sys->local_range;
     int nrows = local_range[1]-local_range[0];
     //int nnz_rows_diag[nrows];
 
     //see if we have off diagonal blocks to handle
-    if(sm->indptr_off_diag!=NULL){
+    if(lin_sys->indptr_off_diag!=NULL){
         has_off_diag=true;
     }
 
@@ -104,7 +109,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         //get_cell_dofs_2(dofs, nnodes, grid->elem3d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,sm->ghosts);
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
         
         //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
         for (k=0;k<ndofs_ele;k++){
@@ -151,7 +156,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         //get_cell_dofs_2(dofs, nnodes, grid->elem2d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,sm->ghosts);
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
         
         //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
         for (k=0;k<ndofs_ele;k++){
@@ -197,7 +202,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         //get_cell_dofs_2(dofs, nnodes, grid->elem1d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,sm->ghosts);
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
         
         //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
         for (k=0;k<ndofs_ele;k++){
@@ -270,7 +275,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         //get_cell_dofs_2(dofs, nnodes, grid->elem3d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,sm->ghosts);
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
         
         //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
         for (k=0;k<ndofs_ele;k++){
@@ -318,7 +323,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         //get_cell_dofs_2(dofs, nnodes, grid->elem2d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,sm->ghosts);
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
         
         //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
         for (k=0;k<ndofs_ele;k++){
@@ -365,7 +370,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         //get_cell_dofs_2(dofs, nnodes, grid->elem1d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
-        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,sm->ghosts);
+        local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
         
         //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
         for (k=0;k<ndofs_ele;k++){
@@ -416,7 +421,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
         NNZ_diag+=nnz_row_diag;
     }
 
-    sm->nnz_diag = NNZ_diag; 
+    lin_sys->nnz_diag = NNZ_diag; 
 
     //off diagonalblocks
     if (has_off_diag){
@@ -434,47 +439,47 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
             NNZ_off_diag+=nnz_row_off_diag;
         }
 
-        sm->nnz_off_diag = NNZ_off_diag;
+        lin_sys->nnz_off_diag = NNZ_off_diag;
     }
 
     // resize as needed
-    sm->cols_diag = (int *) tl_realloc(sizeof(int), sm->nnz_diag, sm->nnz_diag_old, sm->cols_diag);
-    sm->vals_diag = (double *) tl_realloc(sizeof(double), sm->nnz_diag, sm->nnz_diag_old, sm->vals_diag);
+    lin_sys->cols_diag = (int *) tl_realloc(sizeof(int), lin_sys->nnz_diag, lin_sys->nnz_diag_old, lin_sys->cols_diag);
+    lin_sys->vals_diag = (double *) tl_realloc(sizeof(double), lin_sys->nnz_diag, lin_sys->nnz_diag_old, lin_sys->vals_diag);
     if (has_off_diag){
-        sm->cols_off_diag = (int *) tl_realloc(sizeof(int), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->cols_off_diag);
-        sm->vals_off_diag = (double *) tl_realloc(sizeof(double), sm->nnz_off_diag, sm->nnz_off_diag_old, sm->vals_off_diag);
+        lin_sys->cols_off_diag = (int *) tl_realloc(sizeof(int), lin_sys->nnz_off_diag, lin_sys->nnz_off_diag_old, lin_sys->cols_off_diag);
+        lin_sys->vals_off_diag = (double *) tl_realloc(sizeof(double), lin_sys->nnz_off_diag, lin_sys->nnz_off_diag_old, lin_sys->vals_off_diag);
     }
 
     //now use info to fill in indptr and cols
     for(i=0;i<nrows;i++){
         //printf("filling in index ptr and column entries, row %d\n",i);
-        sm->indptr_diag[i] = count_diag;
+        lin_sys->indptr_diag[i] = count_diag;
         //printf("filling in index ptr and column entries, row %d\n",i);
         rn_diag = temp_cols_diag[i];
         //think about how to do this since each temp_rows may be different size
         for(j=0;j<nnz_rows_diag_no_duplicate[i];j++){
-            sm->cols_diag[count_diag] = rn_diag[j];
+            lin_sys->cols_diag[count_diag] = rn_diag[j];
             count_diag++;
         }
     }
     //also last sm->indptr  needs to be the last entry
-    sm->indptr_diag[nrows] = count_diag;
+    lin_sys->indptr_diag[nrows] = count_diag;
     //assert(sm->indptr_diag[nrows] = sm->nnz_diag);
 
     
     if (has_off_diag){
         for(i=0;i<nrows;i++){
             //printf("filling in index ptr and column entries, row %d\n",i);
-            sm->indptr_off_diag[i] = count_off_diag;
+            lin_sys->indptr_off_diag[i] = count_off_diag;
             //printf("filling in index ptr and column entries, row %d\n",i);
             rn_off_diag = temp_cols_off_diag[i];
             //think about how to do this since each temp_rows may be different size
             for(j=0;j<nnz_rows_off_diag_no_duplicate[i];j++){
-                sm->cols_off_diag[count_off_diag] = rn_off_diag[j];
+                lin_sys->cols_off_diag[count_off_diag] = rn_off_diag[j];
                 count_off_diag++;
             }
         }
-        sm->indptr_off_diag[nrows] = count_off_diag;
+        lin_sys->indptr_off_diag[nrows] = count_off_diag;
     }
 
     //destroy temp_rows?
@@ -530,15 +535,20 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
  *  \note should be called if ndofs changes due to new refinement or it is a new run
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
- void allocate_adh_system(SMODEL_SUPER *sm){   
+ void allocate_adh_system(SMODEL_SUPER *sm){
+    SLIN_SYS *lin_sys = sm->lin_sys; 
+    int ndofs, ndofs_old, my_ndofs;
+    ndofs =   *(sm->ndofs);
+    ndofs_old =   *(sm->ndofs_old);
+    my_ndofs = *(sm->my_ndofs);
     // For now, we pre-allocate assuming that all nodes have the max number of equations attached.
     // This is not optimal, although the AdH storage is dumped to CCS and all extra zeros are removed before actually solving.
     // ndofs = nnodes * max_nsys (over-allocated for mixed dof systems)
     printf("allocating solution\n");
-    sm->residual = (double *) tl_realloc(sizeof(double), sm->ndofs, sm->ndofs_old, sm->residual);
-    sm->sol =      (double *) tl_realloc(sizeof(double), sm->ndofs, sm->ndofs_old, sm->sol);
-    sarray_init_dbl(sm->residual, sm->ndofs);
-    sarray_init_dbl(sm->sol, sm->ndofs);
+    lin_sys->residual = (double *) tl_realloc(sizeof(double), ndofs, ndofs_old, lin_sys->residual);
+    lin_sys->sol =      (double *) tl_realloc(sizeof(double), ndofs, ndofs_old, lin_sys->sol);
+    sarray_init_dbl(lin_sys->residual, ndofs);
+    sarray_init_dbl(lin_sys->sol, ndofs);
     
     // proprietary AdH matrix allocation
     // standard CSR format
@@ -551,21 +561,21 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
     printf("Made residual and solution\n");
     //where does local_range get determined?
     //we now number of rows is sum(my_nnode*nodal_nvars)
-    sm->indptr_diag= (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->indptr_diag);
+    lin_sys->indptr_diag= (int *) tl_realloc(sizeof(int), lin_sys->local_size+1, lin_sys->local_range_old[1]-lin_sys->local_range_old[0]+1, lin_sys->indptr_diag);
     //if we split we have two structures
     //if it is only one process this should be NULL!!!!
     //create conditional here
-    sm->indptr_off_diag = (int *) tl_realloc(sizeof(int), sm->local_range[1]-sm->local_range[0]+1, sm->local_range_old[1]-sm->local_range_old[0]+1, sm->indptr_off_diag);
+    lin_sys->indptr_off_diag = (int *) tl_realloc(sizeof(int), lin_sys->local_range[1]-lin_sys->local_range[0]+1, lin_sys->local_range_old[1]-lin_sys->local_range_old[0]+1, lin_sys->indptr_off_diag);
     printf("Made indptr\n");
     //find nnz and store in indices
     //this does a single CSR format
     //create_sparsity_CSR(sm, grid);
     //this does a split CSR format, plan on doing this
-    create_sparsity_split_CSR(sm, sm->grid);
+    create_sparsity_split_CSR(lin_sys, sm, sm->grid);
     //do we want to store nnz? it is stored in sm->indptr[nrows]
     //do we want to store local_size = local_range[1]-local_range[0]
-    sarray_init_dbl(sm->vals_diag, sm->indptr_diag[sm->my_ndofs-1]);
-    sarray_init_dbl(sm->vals_off_diag, sm->indptr_off_diag[sm->my_ndofs-1]);
+    sarray_init_dbl(lin_sys->vals_diag, lin_sys->indptr_diag[my_ndofs-1]);
+    sarray_init_dbl(lin_sys->vals_off_diag, lin_sys->indptr_off_diag[my_ndofs-1]);
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -582,7 +592,7 @@ void create_sparsity_split_CSR(SMODEL_SUPER *sm, SGRID *grid){
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void allocate_petsc_objects(SMODEL_SUPER *sm){
+void allocate_petsc_objects(SLIN_SYS *lin_sys){
     int ierr;
     //set up anything PETSc after allocation but before load
  #ifdef _PETSC   
@@ -591,36 +601,36 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
 
     //this is somehow not null 
     if(sm->ksp == PETSC_NULLPTR){
-        ierr = KSPCreate(PETSC_COMM_WORLD, &(sm->ksp));
-        ierr = KSPSetFromOptions(sm->ksp);
+        ierr = KSPCreate(PETSC_COMM_WORLD, &(lin_sys->ksp));
+        ierr = KSPSetFromOptions(lin_sys->ksp);
     }
 
     // Check if Jacobian, sol, and residual have already been created.
     // If so, destroy each of them before creating new PETSc objects.
     //also somehow not null
     if(sm->A != PETSC_NULLPTR){
-        ierr = MatDestroy(&(sm->A));
-        ierr = KSPReset(sm->ksp);
-        ierr = KSPSetFromOptions(sm->ksp);
+        ierr = MatDestroy(&(lin_sys->A));
+        ierr = KSPReset(lin_sys->ksp);
+        ierr = KSPSetFromOptions(lin_sys->ksp);
     }
     //dont think we need preallocator matrix
 //    if(sm->P != PETSC_NULLPTR){
 //        ierr = MatDestroy(&(sm->P));
 //    }
     if(sm->X != PETSC_NULLPTR){
-        ierr = VecDestroy(&(sm->X));
+        ierr = VecDestroy(&(lin_sys->X));
     }
     if(sm->B != PETSC_NULLPTR){
-        ierr = VecDestroy(&(sm->B));
+        ierr = VecDestroy(&(lin_sys->B));
     }
     // Create Jacobian matrix from CSR format
     //don't know if i need to do this or just call after load anyway
     //vals should update by reference
     if (sm->indptr_off_diag == NULL){
-        MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->indptr_diag, sm->cols_diag, sm->vals_diag, &(sm->A));
+        MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, lin_sys->local_size, lin_sys->local_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, &(lin_sys->A));
         printf("PETSC Mat created with sequential array\n");
     }else{
-        MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->macro_ndofs, sm->macro_ndofs, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag, sm->vals_off_diag, &(sm->A));
+        MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, lin_sys->local_size, lin_sys->local_size, lin_sys->global_size, lin_sys->global_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag, lin_sys->vals_off_diag, &(lin_sys->A));
         printf("PETSC Mat created with split arrays\n");
     }
     
@@ -663,8 +673,8 @@ void allocate_petsc_objects(SMODEL_SUPER *sm){
     //ierr = VecSetSizes(sm->X, sm->my_ndofs, PETSC_DETERMINE);
     //ierr = VecSetFromOptions(sm->sol);
     //ierr = VecSetUp(sm->sol);
-    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, sm->my_ndofs, sm->macro_ndofs, sm->nghost, sm->ghosts, sm->residual, &(sm->B));
-    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, sm->my_ndofs, sm->macro_ndofs, sm->nghost, sm->ghosts, sm->dsol, &(sm->X));
+    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, lin_sys->local_size, lin_sys->global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->residual, &(lin_sys->B));
+    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, lin_sys->local_size, lin_sys->global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->dsol, &(lin_sys->X));
 
 
     /*Maybe need to revisit for ghosts but skip for now
@@ -778,22 +788,22 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
     //entries where bc_mask=YES
 
     //brute force for now, can find better way later
-    int my_ndof = sm->my_ndofs;
+    int my_ndof = *(sm->my_ndofs);
     int row, row_start, row_end, row_entry,local_col_no;
     double temp;
     for (row=0;row<my_ndof;row++){
-        row_start = sm->indptr_diag[row];
-        row_end = sm->indptr_diag[row+1];
+        row_start = sm->lin_sys->indptr_diag[row];
+        row_end = sm->lin_sys->indptr_diag[row+1];
         //for every row, look for columns and subtract to RHS
         for(row_entry=row_start; row_entry<row_end; row_entry++){
-            local_col_no = sm->cols_diag[row_entry];
+            local_col_no = sm->lin_sys->cols_diag[row_entry];
             if(sm->bc_mask[local_col_no] == YES){
-                temp = sm->vals_diag[row_entry];
+                temp = sm->lin_sys->vals_diag[row_entry];
                 //adjust RHS
                 //needed for method 1, for method 2 this should be unecceary
                 //sm->residual[row] -= temp*(sm->dirichlet_data[local_col_no] - sm->sol[local_col_no]);
                 //clear entry after moving
-                sm->vals_diag[row_entry] = 0.0;
+                sm->lin_sys->vals_diag[row_entry] = 0.0;
             }
 
         }
@@ -803,21 +813,21 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
     //if it is dirichlet dof, wipe out row
     for (row=0;row<my_ndof;row++){
         if(sm->bc_mask[row] == YES){
-            row_start = sm->indptr_diag[row];
-            row_end = sm->indptr_diag[row+1];
+            row_start = sm->lin_sys->indptr_diag[row];
+            row_end = sm->lin_sys->indptr_diag[row+1];
             //assign dirichlet data to residual
             //method 1 appears to work
             //sm->residual[row] = sm->dirichlet_data[row] - sm->sol[row];
             //method 2, require sol to have bc already  there
-            sm->residual[row] = 0.0;
+            sm->lin_sys->residual[row] = 0.0;
             //wipe out row and set diagonal to 1 (rescaling diagonal shouldn't matter in method 2)
             for(row_entry=row_start; row_entry<row_end; row_entry++){
-                local_col_no = sm->cols_diag[row_entry];
+                local_col_no = sm->lin_sys->cols_diag[row_entry];
                 //if non-diagonal set to 0, otherwise set diagonal to 1
                 if(local_col_no == row){
-                    sm->vals_diag[row_entry]= 1.0;
+                    sm->lin_sys->vals_diag[row_entry]= 1.0;
                 }else{
-                    sm->vals_diag[row_entry] = 0.0;
+                    sm->lin_sys->vals_diag[row_entry] = 0.0;
                 }
 
             }

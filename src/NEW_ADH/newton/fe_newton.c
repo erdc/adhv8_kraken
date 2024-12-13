@@ -76,8 +76,6 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     int linesearch_cuts;        /* the number of line searches */
     int solv_flag = NO;              /* flag that tells if the linear solver converged */
     int iend;                   /* loop limit */
-    int my_ndof;                /* the number of degrees of freedom I am responsible for */
-    int ndof = sm->ndofs;
     double resid_max_norm = 0.0;    /* the max norm of the residual */
     double resid_l2_norm = 0.0; /* the l2 norm of the residual */
     double old_resid_norm;      /* the previous norm of the residual - used for the line search */
@@ -101,6 +99,16 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     PetscViewer viewer;
 #endif
 #endif
+
+    //convenient aliasing
+    SLIN_SYS *lin_sys = sm->lin_sys;
+    double *dsol = lin_sys->dsol;
+    double *residual = lin_sys->residual;
+
+    int ndofs, my_ndofs, macro_ndofs;
+    ndofs = *(sm->ndofs);
+    my_ndofs = *(sm->my_ndofs);
+    macro_ndofs = *(sm->macro_ndofs);
     
 #ifdef _DEBUG
     if (DEBUG_FULL) {
@@ -250,7 +258,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     //New call, returns dof # instead of node #. Can back out nodes later if desired
     get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
         &imax_dof, &iinc_dof, include_dof,
-        sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol, sm->bc_mask
+        my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
         );
     //printf("residual norms computed: %.17e, %.17e, %.17e\n",resid_max_norm,resid_l2_norm,inc_max_norm);
 
@@ -260,7 +268,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     
 #ifdef _DEBUG
     if (DEBUG_FULL)
-        printScreen_dble_array("residual before solving", sm->residual, ndof, __LINE__, __FILE__);
+        printScreen_dble_array("residual before solving", sm->residual, ndofs, __LINE__, __FILE__);
     if (DEBUG_FULL || DEBUG_INIT_RESID || DEBUG_STOP_AFTER_INIT_RESID) {
         printf("\n **Initial resid_max_norm = %18.9e \n", resid_max_norm);
         if (DEBUG_STOP_AFTER_INIT_RESID) tl_error("Stopping after initial residual");
@@ -353,7 +361,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 //        }
         /* Set initial guess */
         //maybe redundant?
-        sarray_init_dbl(sm->dsol,ndof);
+        sarray_init_dbl(dsol,ndofs);
         
 
 #ifdef _DEBUG
@@ -364,8 +372,8 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
                     printf("*********** myid %d nnodes: %d nsys: nsys %d :: ",supersmpi->myid,nnodes,nsys);
 #endif
                     printf("BEFORE SOLVE!\n");
-                    printScreen_dble_array("sol before solving", sm->sol, ndof, __LINE__, __FILE__);
-                    printScreen_dble_array("residual before solving", sm->residual, ndof, __LINE__, __FILE__);
+                    printScreen_dble_array("sol before solving", sm->sol, ndofs, __LINE__, __FILE__);
+                    printScreen_dble_array("residual before solving", sm->residual, ndofs, __LINE__, __FILE__);
                     //printScreen_int_array("bc_mask before solving",sm->bc_mask, nnodes * nsys, __LINE__, __FILE__);
                     //printScreen_dble_array("scale_vect before solving",sm->scale_vect, nnodes * nsys, __LINE__, __FILE__);
 #ifdef _MESSG
@@ -385,12 +393,12 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         printf("Using PETSC solver\n");
         // Solver
         //be sure values get updated since we used set with split arrays ...
-        KSPSetOperators(sm->ksp,sm->A,sm->A);
+        KSPSetOperators(lin_sys->ksp,lin_sys->A,lin_sys->A);
         
 
         //precon and stuff
         PC          pc;      /* preconditioner context */
-        KSPGetPC(sm->ksp, &pc);
+        KSPGetPC(lin_sys->ksp, &pc);
         PetscCall(PCSetType(pc, PCLU)); //PCLU is direct LU
         //PetscCall(KSPSetTolerances(sm->ksp, 1.e-11, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT));
         // TODO: can I call this once in fe_main instead?
@@ -403,12 +411,12 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //ierr = MatView(sm->A, PETSC_VIEWER_STDOUT_WORLD);
         //ierr = VecView(sm->B, PETSC_VIEWER_STDOUT_WORLD);
 
-        KSPSolve(sm->ksp,sm->B,sm->X);
+        KSPSolve(lin_sys->ksp,lin_sys->B,lin_sys->X);
         //scatter forward appears to update array as we need
         //forward sends owned dofs -> ghosts
         //VecGhostUpdateBegin(sm->X,INSERT_VALUES,SCATTER_FORWARD);
         //VecGhostUpdateEnd(sm->X,INSERT_VALUES,SCATTER_FORWARD);
-        KSPGetIterationNumber(sm->ksp, &its);
+        KSPGetIterationNumber(lin_sys->ksp, &its);
         printf("KSP iterations: %i\n",its);
         //solv_flag = YES; // TODO: Does this need to change - SAM
        
@@ -418,24 +426,24 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
             // View Matrix
             PetscViewerASCIIOpen(PETSC_COMM_WORLD,"Amat.m",&(viewer));
             PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-            MatView(sm->A,viewer);
+            MatView(lin_sys->A,viewer);
             PetscViewerPopFormat(viewer);
         }
         if(DEBUG_FULL){
             // View sol
             PetscViewerASCIIOpen(PETSC_COMM_WORLD,"Svec.m",&(viewer));
             PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-            VecView(sm->sol,viewer);
+            VecView(lin_sys->sol,viewer);
             PetscViewerPopFormat(viewer);
             // View residual
             PetscViewerASCIIOpen(PETSC_COMM_WORLD,"Rvec.m",&(viewer));
             PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-            VecView(sm->residual,viewer);
+            VecView(lin_sys->residual,viewer);
             PetscViewerPopFormat(viewer);
             // Solver
             PetscViewerASCIIOpen(PETSC_COMM_WORLD,"KSP.m",&(viewer));
             PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-            KSPView(sm->ksp,viewer);
+            KSPView(lin_sys->ksp,viewer);
             PetscViewerPopFormat(viewer);
         }
 #endif
@@ -445,8 +453,8 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //does a scaling 
 
         //Mark commenting
-        scale_linear_system(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag,
-        sm->vals_off_diag, sm->residual, sm->dsol, sm->scale_vect, sm->local_size, sm->ndofs + sm->nghost, myid, sm->ghosts, sm->nghost);
+        scale_linear_system(lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag,
+        lin_sys->vals_off_diag, lin_sys->residual, lin_sys->dsol, lin_sys->scale_vect, lin_sys->local_size, lin_sys->size, myid, lin_sys->ghosts, lin_sys->nghost);
         
         printf("linear system scaled\n");
 
@@ -456,7 +464,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 //        temp4 = l_infty_norm(sm->ndofs,sm->residual);
 //        printf("CSR norms after scaling: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
         //factor the matrix preconditioner
-        status = prep_umfpack(sm->indptr_diag,sm->cols_diag,sm->vals_diag, sm->local_size);
+        status = prep_umfpack(lin_sys->indptr_diag,lin_sys->cols_diag,lin_sys->vals_diag, lin_sys->local_size);
         printf("umfpack prep completed\n");
         
         
@@ -475,8 +483,8 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 
 
         //actually solve linear system, returns solution
-        status = solve_linear_sys_bcgstab(sm->dsol, sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->indptr_off_diag, sm->cols_off_diag,
-        sm->vals_off_diag, sm->residual, sm->scale_vect, sm->local_size, sm->ndofs + sm->nghost ,myid, sm->ghosts, sm->nghost);
+        status = solve_linear_sys_bcgstab(dsol, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag,
+        lin_sys->vals_off_diag, residual, lin_sys->scale_vect, lin_sys->local_size, lin_sys->size ,myid, lin_sys->ghosts, lin_sys->nghost);
         printf("BCGSTAB completed\n");
         printf("SOLVER STATUS   %d\n\n",status);
 //        for(int j =0;j<ndof;j++){
@@ -495,8 +503,8 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //flip sign after update?
         //while not steady state??
 //        if (sm.flag.STEADY_STATE == OFF) {
-            for (i = 0, iend = ndof; i < iend; i++){
-                sm->dsol[i] = -sm->dsol[i];
+            for (i = 0, iend = ndofs; i < iend; i++){
+                dsol[i] = -dsol[i];
             }
 
 //        }
@@ -526,8 +534,8 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
                     printf("***********myid %d ",supersmpi->myid);
 #endif
                     printf("AFTER SOLVE!\n");
-                    printScreen_dble_array("sol after solving", sm->sol, ndof, __LINE__, __FILE__);
-                    printScreen_dble_array("residual before solving", sm->residual, ndof, __LINE__, __FILE__);
+                    printScreen_dble_array("sol after solving", sm->sol, ndofs, __LINE__, __FILE__);
+                    printScreen_dble_array("residual before solving", sm->residual, ndofs, __LINE__, __FILE__);
                     //printScreen_int_array("bc_mask after solving",sm->bc_mask, nnodes * nsys, __LINE__, __FILE__);
                     //printScreen_dble_array("scale_vect after solving",sm->scale_vect, nnodes * nsys, __LINE__, __FILE__);
                     //if (DEBUG_MATRIX) printScreen_matrix("matrix after solving", sm->diagonal, sm->matrix, nnodes, sm->max_nsys_sq,__LINE__, __FILE__);
@@ -558,7 +566,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         //new call
         get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
         &imax_dof, &iinc_dof, include_dof,
-        sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol, sm->bc_mask
+        my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
         );
         //printf("residual norms computed: %.17e, %.17e, %.17e\n",resid_max_norm,resid_l2_norm,inc_max_norm);
 #ifdef _DEBUG
@@ -637,8 +645,8 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
             
             /* reduces the increment */
-            for (i = 0, iend = sm->ndofs; i < iend; i++){
-                sm->dsol[i] *= 0.5;
+            for (i = 0, iend = ndofs; i < iend; i++){
+                dsol[i] *= 0.5;
             }
 
             /* calculates the residual */
@@ -668,7 +676,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
             //new call
             get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
             &imax_dof, &iinc_dof, include_dof,
-            sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol, sm->bc_mask
+            my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
             );
             
 #ifdef _MESSG
@@ -794,7 +802,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 #endif
 #endif
     
-    if (include_dof!= NULL) include_dof = (int *) tl_free(sizeof(int), ndof, include_dof);
+    if (include_dof!= NULL) include_dof = (int *) tl_free(sizeof(int), ndofs, include_dof);
     
     //this will need to change, ask corey
     //for (i=0;i<sm->nsubmodels; i++){

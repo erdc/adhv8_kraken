@@ -20,7 +20,7 @@ static double find_max_in_row(int *indptr, double *vals,int row_num);
  *  @param[in,out] x (double*) - scaled solution of the linear system Ax=b
  *  @param[in] scale_vect (double*) - the vector that scaled the system of equations prior to solve, used for rescaling after solve is finished
  *  @param[in] local_size (int) - number of equations (rows in the matrix) owned by the process
- *  @param[in] size_with_ghosts (int) - number of rows + number of ghost d.o.f.s present
+ *  @param[in] size (int) - number of rows + number of ghost d.o.f.s present
  *  @param[in] rank (int) - MPI rank
  *  @param[in] ghosts (int*) - array of global dof numbers that are ghosts on the process
  *  @param[in] nghost (int) - number of ghost d.o.f.s on the process
@@ -30,7 +30,7 @@ static double find_max_in_row(int *indptr, double *vals,int row_num);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void scale_linear_system(int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *b, 
-  double *x, double *scale_vect, int local_size, int size_with_ghosts, int rank,
+  double *x, double *scale_vect, int local_size, int size, int rank,
   int *ghosts, int nghost){
   
   int i,j;
@@ -68,7 +68,7 @@ void scale_linear_system(int *indptr_diag, int *cols_diag, double *vals_diag,
   double small_factor;        /* small^(-0.5) */
   small_factor = 1.0 / sqrt(small);
 
-  for (i = 0; i < size_with_ghosts; i++)
+  for (i = 0; i < size; i++)
     if (scale_vect[i] < small)
       scale_vect[i] = small_factor;
     else
@@ -77,7 +77,7 @@ void scale_linear_system(int *indptr_diag, int *cols_diag, double *vals_diag,
   /* scales the equations */
   
   double factor;
-  for (i = 0; i < size_with_ghosts; i++) {
+  for (i = 0; i < size; i++) {
     factor = scale_vect[i];
     b[i] *= factor;
     x[i] /= factor;

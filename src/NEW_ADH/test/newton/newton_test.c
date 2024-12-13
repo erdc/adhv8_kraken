@@ -56,9 +56,9 @@ int newton_test(int argc, char **argv) {
 
 
 	//create a supermodel with a grid in it
-	SMODEL_SUPER sm;
-	sm.grid = &grid;
-
+	//SMODEL_SUPER sm;
+	//sm.grid = &grid;
+    SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
 	double dt = 1.0;
 	double t0 = 0.0;
@@ -69,60 +69,67 @@ int newton_test(int argc, char **argv) {
 	strcpy(&elemVarCode[1],"0"); //GW
 	strcpy(&elemVarCode[2],"0"); //Transport
 
-	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
+	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
+	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, &grid);
 	//printf("Supermodel no read complete\n");
 
 
 	//allocate linear system
 	//doesn't currently work, need to go back and fix
 	//fe_allocate_initialize_linear_system(&sm);
-	sm.cols_diag = NULL;
-	sm.vals_diag = NULL;
-	sm.cols_off_diag=NULL;
-	sm.vals_off_diag=NULL;
-	sm.bc_mask = NULL;
-	sm.nnz_diag_old=0;
-	sm.nnz_off_diag_old=0;
-	printf("Calling sparsity split CSR\n");
-	create_sparsity_split_CSR(&sm, sm.grid);
+//	sm.cols_diag = NULL;
+//	sm.vals_diag = NULL;
+//	sm.cols_off_diag=NULL;
+//	sm.vals_off_diag=NULL;
+//	sm.bc_mask = NULL;
+//	sm.nnz_diag_old=0;
+//	sm.nnz_off_diag_old=0;
+//	printf("Calling sparsity split CSR\n");
+//	create_sparsity_split_CSR(&sm, sm.grid);
 	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 
 	//do we want to stor nnz? it is stored in sm->indptr[nrows]
     //do we want to store local_size = local_range[1]-local_range[0]
-    printf("NNZ = %d = %d\n",sm.indptr_diag[sm.my_ndofs], sm.nnz_diag);
-    sarray_init_dbl(sm.vals_diag, sm.indptr_diag[sm.my_ndofs]);
+//    printf("NNZ = %d = %d\n",sm.indptr_diag[sm.my_ndofs], sm.nnz_diag);
+//    sarray_init_dbl(sm.vals_diag, sm.indptr_diag[sm.my_ndofs]);//
 
-	//manually set up some solver parameters
-	sm.macro_ndofs = sm.ndofs;
-	sm.dsol = (double*) tl_alloc(sizeof(double), sm.ndofs);
-	sm.bc_mask = (int*) tl_alloc(sizeof(int), sm.ndofs);
-	sm.dirichlet_data = (double*) tl_alloc(sizeof(double), sm.ndofs);
-	sm.scale_vect = (double*) tl_alloc(sizeof(double), sm.ndofs);
-//    for(int i=0;i<sm.ndofs;i++){
-//    	sm.scale_vect[i] = 1.0;
-//    }
-	sm.tol_nonlin = 1e-5;
-	sm.inc_nonlin = 1e-3;
-	sm.max_nonlin_linesearch_cuts = 5;
-	sm.it_count_nonlin_failed = 0;
-	sm.max_nonlin_it = 20;
-	sm.LINEAR_PROBLEM = NO;
-	sm.force_nonlin_it = NO;
-	sm.force_nonlin_it = NO;
-	sm.nonlinear_it_total = 0;
-	sm.nghost=0;
-	sm.ghosts = NULL;
-	sm.local_size = sm.ndofs;
-	sm.sol_old = (double*) tl_alloc(sizeof(double), sm.ndofs);
-	sm.sol_older = (double*) tl_alloc(sizeof(double), sm.ndofs);
+//	//manually set up some solver parameters
+//	sm.macro_ndofs = sm.ndofs;
+//	sm.dsol = (double*) tl_alloc(sizeof(double), sm.ndofs);
+//	
+//	sm.dirichlet_data = (double*) tl_alloc(sizeof(double), sm.ndofs);
+//	sm.scale_vect = (double*) tl_alloc(sizeof(double), sm.ndofs);
+////    for(int i=0;i<sm.ndofs;i++){
+////    	sm.scale_vect[i] = 1.0;
+////    }
+//	sm.tol_nonlin = 1e-5;
+//	sm.inc_nonlin = 1e-3;
+//	sm.max_nonlin_linesearch_cuts = 5;
+//	sm.it_count_nonlin_failed = 0;
+//	sm.max_nonlin_it = 20;
+//	sm.LINEAR_PROBLEM = NO;
+//	sm.force_nonlin_it = NO;
+//	sm.force_nonlin_it = NO;
+//	sm.nonlinear_it_total = 0;
+//	sm.nghost=0;
+//	sm.ghosts = NULL;
+//	sm.local_size = sm.ndofs;
+//	sm.sol_old = (double*) tl_alloc(sizeof(double), sm.ndofs);
+//	sm.sol_older = (double*) tl_alloc(sizeof(double), sm.ndofs);
 
+ 	SMODEL_SUPER *sm;
+	sm = &(dm.superModel[0]);
+
+
+
+	dm.superModel[0].bc_mask = (int*) tl_alloc(sizeof(int), *(sm->ndofs));
 	// intialize dirichlet and old sol (initial guess)
-	for (int local_index=0; local_index<sm.ndofs; local_index++){
-		sm.dirichlet_data[local_index] = 0.0;
-		sm.sol_old[local_index] = 20.0;
-		sm.sol[local_index] = 20.0;
-		sm.dsol[local_index] = 0.0;
-		sm.bc_mask[local_index] = YES;
+	for (int local_index=0; local_index<dm.ndofs[0]; local_index++){
+		dm.superModel[0].dirichlet_data[local_index] = 0.0;
+		dm.superModel[0].lin_sys->sol_old[local_index] = 20.0;
+		dm.superModel[0].lin_sys->sol[local_index] = 20.0;
+		dm.superModel[0].lin_sys->dsol[local_index] = 0.0;
+		dm.superModel[0].bc_mask[local_index] = YES;
 	}
 	//overwrite some of the boundary
 	double x_coord, y_coord;
@@ -132,10 +139,10 @@ int newton_test(int argc, char **argv) {
 		y_coord = grid.node[i].y;
 
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
-			sm.dirichlet_data[i*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
-			sm.sol_old[i*3+1] = sm.dirichlet_data[i*3+1];
+			dm.superModel[0].dirichlet_data[i*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
+			dm.superModel[0].lin_sys->sol_old[i*3+1] = dm.superModel[0].dirichlet_data[i*3+1];
 		}else{
-			sm.bc_mask[i*3+1]=NO;
+			dm.superModel[0].bc_mask[i*3+1]=NO;
 		}
 		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
 	}
@@ -159,18 +166,18 @@ int newton_test(int argc, char **argv) {
 //	increment_function(&sm);
 	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 #ifdef _PETSC
-	sm.A = PETSC_NULLPTR;
-	sm.ksp = PETSC_NULLPTR;
-	sm.B = PETSC_NULLPTR;
-	sm.X = PETSC_NULLPTR;
+	sm->lin_sys->A = PETSC_NULLPTR;
+	sm->lin_sys->ksp = PETSC_NULLPTR;
+	sm->lin_sys->B = PETSC_NULLPTR;
+	sm->lin_sys->X = PETSC_NULLPTR;
 	printf("Calling PETSC Initialize\n");
 	PetscCall(PetscInitialize(&argc,&argv,NULL,
     "Compute e in parallel with PETSc.\n\n"));
     printf("Called PETSC Initialize\n");
-	allocate_petsc_objects(&sm);
+	allocate_petsc_objects(sm->lin_sys);
 #endif
 	//call fe_newton
-	fe_newton(&sm,0); 
+	fe_newton(sm,0); 
 	free_bcgstab();
 	//compare with analytic solution
 	//it is a scalar
@@ -192,7 +199,7 @@ int newton_test(int argc, char **argv) {
 	}
 
 	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
-	global_to_local_dbl_cg(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.dof_map_local, sm.node_physics_mat, sm.node_physics_mat_id);
+	global_to_local_dbl_cg(uh, sm->lin_sys->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
 
 //	printf("Final solution:\n");
 //	for(int i=0; i<nnodes;i++){

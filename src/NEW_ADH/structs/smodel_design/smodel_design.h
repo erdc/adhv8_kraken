@@ -1,5 +1,4 @@
 // An AdH DESIGN MODEL
-
 #ifndef H_SMODEL_DESIGN_
 #define H_SMODEL_DESIGN_
 
@@ -63,7 +62,9 @@ void smodel_design_alloc_init(SMODEL_DESIGN *dmod, int nSuperModels, int nMono, 
     int nUnique);
 void design_model_free(SMODEL_DESIGN *dmod);
 void design_model_printScreen(SMODEL_DESIGN *dmod);
-
+void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init, double t_final,
+    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4] ,
+    SGRID *grid);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 

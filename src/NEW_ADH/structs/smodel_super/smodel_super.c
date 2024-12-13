@@ -30,7 +30,7 @@ void smodel_super_alloc_init_array(SMODEL_SUPER **smod, int nSuperModels) {
     // initialize
     int isup;
     for (isup=0; isup<nSuperModels; isup++) {
-        sm = &(*smod)[imat]; // alias
+        sm = &(*smod)[isup]; // alias
         smodel_super_alloc_init(sm);
         //sm[isup].matrix_petsc = NULL;
         //sm[isup].matrix_adh = NULL;
@@ -58,7 +58,6 @@ void smodel_super_alloc_init_array(SMODEL_SUPER **smod, int nSuperModels) {
 void smodel_super_alloc_init(SMODEL_SUPER *sm) {
     
     // assertions
-    assert(nSuperModels > 0);  // must have a least one superModel defined to run
     
     //SIO?
     sm->io = NULL;  /* file names associated with this model application */
@@ -69,7 +68,7 @@ void smodel_super_alloc_init(SMODEL_SUPER *sm) {
     // initialize with default values
     sm->isSimple = 0;
     sm->dt = 0.0;
-    sm->dt_old = 0.0;
+    sm->old_dt = 0.0;
     sm->dt_err = 0.0;
     sm->dt_prev = 0.0;
     sm->inc_nonlin = 0.0;
@@ -401,9 +400,9 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     //how does this work?
     //sm->elem2d_physics[0][0].fe_resid = fe_sw2_body_resid;
     //hard code to poisson routine for now
-    sm->elem2d_physics_mat[0]->elem_physics[0][0].fe_resid = poisson_residual;
-    sm->elem2d_physics_mat[0]->elem_physics[0][0].nvar = 1;
-    sm->elem2d_physics_mat[0]->elem_physics[0][0].physics_vars[0] = PERTURB_U;
+    sm->elem2d_physics_mat[0].elem_physics[0].fe_resid = poisson_residual;
+    sm->elem2d_physics_mat[0].elem_physics[0].nvar = 1;
+    sm->elem2d_physics_mat[0].elem_physics[0].physics_vars[0] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[1] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[2] = PERTURB_V;
 
@@ -439,7 +438,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     sm->elem2d_physics_mat[0].nSubmodels = 1;
     //same for nodes
     //sm->node_physics_mat[0].nvar = 3;
-    assert(sm->node_physics_mat[0].nvar == 3;);
+    assert(sm->node_physics_mat[0].nvar == 3);
     //sm->node_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->node_physics_mat->nvar);
     sm->node_physics_mat[0].vars[0] = PERTURB_V;
     sm->node_physics_mat[0].vars[1] = PERTURB_U;

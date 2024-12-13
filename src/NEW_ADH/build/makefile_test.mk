@@ -47,11 +47,12 @@ $(wildcard $(MASTER_SRC_DIR)../structs/sflags) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sstr_value) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sgrid) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sarray) \
+$(wildcard $(MASTER_SRC_DIR)../structs/slin_sys) \
 $(wildcard $(MASTER_SRC_DIR)../structs/smat) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sio) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sseries) \
 $(wildcard $(MASTER_SRC_DIR)../structs/smodel_super) \
-$(wildcard $(MASTER_SRC_DIR).../structs/smodel_design) \
+$(wildcard $(MASTER_SRC_DIR)../structs/smodel_design) \
 $(wildcard $(MASTER_SRC_DIR)../residual) \
 $(wildcard $(MASTER_SRC_DIR)../jacobian)\
 $(wildcard $(MASTER_SRC_DIR)../la) \
@@ -92,6 +93,7 @@ $(MASTER_SRC_DIR)../structs/sflags \
 $(MASTER_SRC_DIR)../structs/sstr_value \
 $(MASTER_SRC_DIR)../structs/sgrid \
 $(MASTER_SRC_DIR)../structs/sarray \
+$(MASTER_SRC_DIR)../structs/slin_sys\
 $(MASTER_SRC_DIR)../structs/smat \
 $(MASTER_SRC_DIR)../structs/sio \
 $(MASTER_SRC_DIR)../structs/sseries \
@@ -133,8 +135,8 @@ DEPS                = $(foreach dir,    $(INCLUDE_DIR), $(wildcard  $(dir)/*.h))
 OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              += 
-CFLAGS              += -O3 -D_ADH_HDF5 #-D_PETSC  #-D_MPI #-Wall
-CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/opt/petsc/include -lhdf5 -I/opt/homebrew/include#-L/opt/homebrew/lib
+CFLAGS              += -O3 -D_ADH_HDF5 #-D_PETSC #-D_DEBUG #-D_MPI #-D_MESSG #-Wall
+CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/opt/petsc/include -lhdf5 -I/opt/homebrew/include #-L/opt/homebrew/lib
 FLAGS               = $(OPT) $(IFLAGS) $(LFLAGS) $(CFLAGS) $(LDLIBS) 
 #----------------------------
 

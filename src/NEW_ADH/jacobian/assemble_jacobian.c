@@ -22,7 +22,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
     SGRID *grid = sm->grid;
     int j,k,l,m;
     int* fmap = sm->dof_map_local;
-    int* ghosts = sm->ghosts;
+    int* ghosts = sm->lin_sys->ghosts;
     int nsubMods;
     int ndofs_ele;
     int nvar_ele,nnodes, var_code;
@@ -40,7 +40,18 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
     //double elem_mat[MAX_ELEM_DOF][MAX_ELEM_DOF];
     int dofs[MAX_ELEM_DOF],global_dofs[MAX_ELEM_DOF];
 
-
+    //some alisases for convenience
+    double *vals_diag = sm->lin_sys->vals_diag;
+    double *vals_off_diag = sm->lin_sys->vals_off_diag;
+    int *cols_diag = sm->lin_sys->cols_diag;
+    int *cols_off_diag = sm->lin_sys->cols_off_diag;
+    int *indptr_diag = sm->lin_sys->indptr_diag;
+    int *indptr_off_diag = sm->lin_sys->indptr_off_diag;
+    int nnz_diag = sm->lin_sys->nnz_diag;
+    int nnz_off_diag = sm->lin_sys->nnz_off_diag;
+    int local_range[2];
+    local_range[0]= sm->lin_sys->local_range[0];
+    local_range[1]= sm->lin_sys->local_range[1];
     //allocate 2d array, more memory than necessary
     //int vars_node[MAX_NNODE][MAX_NVAR];
 //    int **vars_node;
@@ -54,16 +65,14 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
 
 
     //zero out stuff
-    sarray_init_dbl(sm->vals_diag, sm->nnz_diag);
+    sarray_init_dbl(vals_diag, nnz_diag);
     //#ifdef? or avoid maybe
-    if (sm->indptr_off_diag !=NULL){
-     sarray_init_dbl(sm->vals_off_diag, sm->nnz_off_diag);
+    if (indptr_off_diag !=NULL){
+     sarray_init_dbl(vals_off_diag, nnz_off_diag);
     }
 
 
-    int local_range[2];
-    local_range[0]= sm->local_range[0];
-    local_range[1]= sm->local_range[1];
+
     int mat_id, nvars_elem, nphysics_models;
     int elem_vars[MAX_NVAR];
     //need sm->local_range whih is array of integers giving range (if process owned rows 0,1,2,3) then 
@@ -104,7 +113,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem3d_physics[mat_id], j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem3d_physics_mat[mat_id].elem_physics, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -117,7 +126,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         //single CSR, we will keep for now but want to use split insted      
         //load_global_mat_CSR(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
         //split CSR
-        load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
+        load_global_mat_split_CSR(vals_diag, indptr_diag, cols_diag, vals_off_diag, indptr_off_diag, cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
     }
 
     //maybe change MAX_ELEM_DOF from element to element?
@@ -166,7 +175,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem2d_physics[mat_id], j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem2d_physics_mat[mat_id].elem_physics, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
             //printf("perturb var called\n");
         }
         //store in global using 2 mappings
@@ -180,7 +189,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         //single CSR, we will keep for now but want to use split insted      
         //load_global_mat_CSR(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
         //split CSR
-        load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
+        load_global_mat_split_CSR(vals_diag, indptr_diag, cols_diag, vals_off_diag, indptr_off_diag, cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
     }
     //loop through all nelem1d
     for (j=0;j<grid->nelems1d;j++){
@@ -218,7 +227,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem1d_physics[mat_id], j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem1d_physics_mat[mat_id].elem_physics, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -231,7 +240,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         //single CSR, we will keep for now but want to use split insted      
         //load_global_mat_CSR(sm->vals, sm->indptr, sm->indices, elem_mat, ndofs_ele, global_dofs, local_range);
         //split CSR
-        load_global_mat_split_CSR(sm->vals_diag, sm->indptr_diag, sm->cols_diag, sm->vals_off_diag, sm->indptr_off_diag, sm->cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
+        load_global_mat_split_CSR(vals_diag, indptr_diag, cols_diag, vals_off_diag, indptr_off_diag, cols_off_diag, elem_mat, ndofs_ele, dofs, global_dofs, local_range);
     }
     //free memory, in time loop need to be smarter about this
     for(j=0;j<MAX_ELEM_DOF;j++){
@@ -439,7 +448,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
         //for now use CG map in here
 
         //temp_sol = sm->sol[get_cg_dof_2(perturb_var_code, NodeID, sm->node_physics_mat, sm->node_physics_mat_id)];
-        temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id)];
+        temp_sol = sm->lin_sys->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id)];
         NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol, perturbation);    // calculates epsilon and 2*epsilon
         
         //epsilon = 1.0;

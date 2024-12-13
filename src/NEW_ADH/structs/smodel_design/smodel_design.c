@@ -39,7 +39,7 @@ void smodel_design_alloc_init(SMODEL_DESIGN *dmod, int nSuperModels, int nMono, 
     (dmod)->nSuperModels = nSuperModels;
     (dmod)->nMono = nMono;
     (dmod)->nSimple = nSimple;
-    (dmod)->nUnique = nUnique
+    (dmod)->nUnique = nUnique;
 
     dmod->ndofs = (int*) tl_alloc(sizeof(int), nUnique);
     dmod->ndofs_old = (int*) tl_alloc(sizeof(int), nUnique);
@@ -111,6 +111,8 @@ void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init
     int isSimple=0;
     printf("Initializing design model without file read\n");
     smodel_design_alloc_init(dm, 1, 1, 0,1);
+
+
     //simple case where design model has one super model
     //these should be the values
     //dm->nSuperModels = 1;
@@ -137,36 +139,71 @@ void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init
 
     //fill out materials in each super model without reading superfile
     for(i=0;i<dm->nSuperModels;i++){
-        smodel_super_no_read_simple(dm->superModel[i], dt_in, t_init, t_final,
+        smodel_super_no_read_simple(&(dm->superModel[i]), dt_in, t_init, t_final,
         nphysics_mat_1d, nphysics_mat_2d, nphysics_mat_3d, elemVarCode, isSimple,
-        dm->grid, &(dm->lin_sys[i])); 
+        dm->grid, &(dm->lin_sys[i]));
+        
+        dm->superModel[i].tol_nonlin = 1e-5;
+        dm->superModel[i].inc_nonlin = 1e-3;
+        dm->superModel[i].max_nonlin_linesearch_cuts = 5;
+        dm->superModel[i].it_count_nonlin_failed = 0;
+        dm->superModel[i].max_nonlin_it = 20;
+        dm->superModel[i].LINEAR_PROBLEM = NO;
+        dm->superModel[i].force_nonlin_it = NO;
+        dm->superModel[i].force_nonlin_it = NO;
+        dm->superModel[i].nonlinear_it_total = 0; 
     }
 
-    //now with info from the super models, assign appropriate vals to the design model
-    //for each unique model we build up the sparsity and solution variables
-    //allocate CSR sparsity structure for each unique model
+    for(i=0;i<dm->nUnique;i++){
+        //define some pointers in each supermodel
+        
+        dm->superModel[i].my_ndofs = &(dm->my_ndofs[i]); //pointers to design model, not arrays
+        dm->superModel[i].my_ndofs_old = &(dm->my_ndofs_old[i]);
+        dm->superModel[i].ndofs = &(dm->ndofs[i]);
+        dm->superModel[i].ndofs_old = &(dm->ndofs_old[i]);
+        dm->superModel[i].macro_ndofs = &(dm->macro_ndofs[i]);
+        dm->superModel[i].macro_ndofs_old = &(dm->macro_ndofs_old[i]);
+        //assign some hard coded values first, then set the pointers
+        //in general these would require info taken from each superModel
+        dm->ndofs[i] = dm->grid->nnodes*3;
+        dm->ndofs_old[i] = 0;
+        dm->my_ndofs[i] = dm->grid->nnodes*3;
+        dm->my_ndofs_old[i] = 0;
+        dm->macro_ndofs[i] = dm->grid->nnodes*3;
+        dm->macro_ndofs_old[i] = 0;
+        //also set the lin sys variables
+        dm->lin_sys[i].local_range[1] = dm->grid->nnodes*3;
+        dm->lin_sys[i].local_range[0] = 0;
+        dm->lin_sys[i].local_range_old[1] = 0;
+        dm->lin_sys[i].local_range_old[0] = 0;
+        dm->lin_sys[i].nghost = 0;
+        //should ths just be pointers back to dm->ndofs[]?
+        dm->lin_sys[i].size = dm->grid->nnodes*3;
+        dm->lin_sys[i].local_size = dm->grid->nnodes*3;
+        dm->lin_sys[i].global_size = dm->grid->nnodes*3;
 
-    
+        //when in init need to change this to check if we have more than one processor or not
+        dm->lin_sys[i].residual=NULL;
+        dm->lin_sys[i].sol=NULL;
+        dm->lin_sys[i].indptr_diag=NULL;
+        dm->lin_sys[i].indptr_off_diag=NULL;
 
-    //assign some hard coded values first, then set the pointers
-    //in general these would require info taken from each superModel
-    dm->ndofs[0] = dm->grid->nnodes*3;
-    dm->ndofs_old[0] = 0;
-    dm->my_ndofs[0] = dm->grid->nnodes*3;
-    dm->lin_sys[0].local_range[1] = sm->grid->nnodes*3;
-    dm->lin_sys[0].local_range[0] = 0;
-    dm->lin_sys[0].local_range_old[1] = 0;
-    dm->lin_sys[0].local_range_old[0] = 0;
-
-    sm->residual=NULL;
-    sm->sol=NULL;
-    sm->indptr_diag=NULL;
-    sm->indptr_off_diag=NULL;
-    sm->residual = (double*) tl_alloc(sizeof(double), sm->ndofs);
-    sm->sol = (double*) tl_alloc(sizeof(double), sm->ndofs);
-    sm->indptr_diag = (int*) tl_alloc(sizeof(int), sm->my_ndofs+1);
-    //when in init need to change this to check if we have more than one processor or not
-    sm->indptr_off_diag = NULL;
+        //should this go somewhere else? Like still in super model since we have pointer now?
+        //but this should only happen over each unique model
+        dm->lin_sys[i].residual = (double*) tl_alloc(sizeof(double), dm->lin_sys[i].size);
+        dm->lin_sys[i].sol = (double*) tl_alloc(sizeof(double), dm->lin_sys[i].size);
+        dm->lin_sys[i].indptr_diag = (int*) tl_alloc(sizeof(int), dm->lin_sys[i].local_size+1);
+        dm->lin_sys[i].sol_old = (double*) tl_alloc(sizeof(double), dm->lin_sys[i].size);
+        dm->lin_sys[0].sol_older = (double*) tl_alloc(sizeof(double), dm->lin_sys[i].size);
+        //actual solution of linear system is an increment within Newton iteration
+        dm->lin_sys[i].dsol = (double*) tl_alloc(sizeof(double), dm->lin_sys[i].size);
+        dm->lin_sys[i].scale_vect = (double*) tl_alloc(sizeof(double), dm->lin_sys[i].size);
+        //now with info from the super models, assign appropriate vals to the design model
+        //for each unique model we build up the sparsity and solution variables
+        //allocate CSR sparsity structure for each unique model  
+        //missing a step to find proper index of supermodel that is unique
+        create_sparsity_split_CSR(dm->superModel[i].lin_sys, &(dm->superModel[i]), dm->grid);
+    }
 
 
 }

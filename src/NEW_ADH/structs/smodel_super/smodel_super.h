@@ -66,7 +66,7 @@ typedef struct {
 //    int *ghosts;
 //    int nghost;
 //    int local_size; //same as my_ndofs?
-//    int size_with_ghosts;
+//    int size;
 //    int local_range[2];
 //    int local_range_old[2];
 
@@ -93,9 +93,9 @@ typedef struct {
     int nphysics_mat_2d;
     int nphysics_mat_3d;
 
-    SMAT_PHYSICS *elem1d_physics_mat;
-    SMAT_PHYSICS *elem2d_physics_mat;
-    SMAT_PHYSICS *elem3d_physics_mat;
+    SMAT_PHYSICS *elem1d_physics_mat; //[nphysics_mat_1d]
+    SMAT_PHYSICS *elem2d_physics_mat; //[nphysics_mat_2d]
+    SMAT_PHYSICS *elem3d_physics_mat; //[nphysics_mat_3d]
 
     //Mark, elements need integer to store the physics mat id
     int *elem1d_physics_mat_id; //[nelem1d]
@@ -236,7 +236,7 @@ typedef struct {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
-void smodel_super_alloc_init(SMODEL_SUPER *sm)
+void smodel_super_alloc_init(SMODEL_SUPER *sm);
 void smodel_super_alloc_init_array(SMODEL_SUPER **smod, int nSuperModels);
 void smodel_super_free(SMODEL_SUPER *smod, int nSuperModels);
 void smodel_super_read(SMODEL_SUPER *smod, FILE *fp);
@@ -244,7 +244,9 @@ void smodel_super_printScreen(SMODEL_SUPER *smod);
 
 //Mark added for testing
 void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, double t_final,
-    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4], int isSimple );
+    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4], int isSimple,
+    SGRID *grid, SLIN_SYS *sys);
+
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

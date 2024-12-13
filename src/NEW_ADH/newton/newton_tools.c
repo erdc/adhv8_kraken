@@ -29,8 +29,8 @@ void initialize_system(SMODEL_SUPER *sm) {
 
     //For now, update sol with old_sol. we can pull out specific things later
     //using dof maps
-    for(i=0;i<sm->ndofs;i++){
-        sm->sol[i] = sm->sol_old[i];
+    for(i=0;i< *(sm->ndofs);i++){
+        sm->lin_sys->sol[i] = sm->lin_sys->sol_old[i];
     }
 
 
@@ -213,7 +213,7 @@ void increment_function(SMODEL_SUPER *sm){
 
 
     for (i = 0; i < sm->ndofs; i++) {
-        sm->sol[i] += sm->dsol[i];
+        sm->lin_sys->sol[i] += sm->lin_sys->dsol[i];
     }
 
 

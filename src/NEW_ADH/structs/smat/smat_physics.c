@@ -45,7 +45,7 @@ void smat_physics_alloc_init_array(SMAT_PHYSICS **mat_physics, int nmat, int *nt
     
         for (imat=0; imat<nmat; imat++) {
             mat = &(*mat_physics)[imat]; // alias
-            smat_physics_alloc_init(mat, ntrns[imat], nvars[imat], nSubMods[imat], nSubMod_nvar[imat]);
+            smat_physics_alloc_init(mat, ntrns[imat], nvars[imat], nSubMods[imat], subMod_nvars[imat]);
         }
         return;
     }
@@ -73,7 +73,7 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, int ntrns, int nvar, int nSubMod
     //allocate and initialize each mat physics
     mat->ntrns = ntrns;
     mat->nvar = nvar;
-    mat->nSubModels = nSubMods;
+    mat->nSubmodels = nSubMods;
 
     if (ntrns > 0){
         (mat->TRANSPORT) = (bool *) tl_alloc(sizeof(bool), ntrns);
@@ -151,6 +151,7 @@ void smat_physics_free(SMAT_PHYSICS *mat, int nmat) {
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+/*
 void smat_physics_allocate_read(SMAT_PHYSICS **mat, SGRID *grid) {
     
     int imat, itrns, ielem, nmat, flag = 0;
@@ -359,4 +360,5 @@ void smat_physics_allocate_read(SMAT_PHYSICS **mat, SGRID *grid) {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 }
+*/
 

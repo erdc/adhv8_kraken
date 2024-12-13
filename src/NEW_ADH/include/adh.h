@@ -56,6 +56,7 @@
 #include "sstr_value.h"
 #include "sgrid.h"
 #include "sarray.h"
+#include "slin_sys.h"
 
 //Mark adding
 #include "tokens.h"

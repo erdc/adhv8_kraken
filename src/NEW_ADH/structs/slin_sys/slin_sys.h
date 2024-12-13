@@ -39,7 +39,8 @@ typedef struct {
     int *ghosts;
     int nghost;
     int local_size; // same as my_ndofs
-    int size_with_ghosts; //same as ndofs
+    int global_size; //same as macro_ndofs
+    int size; //same as ndofs (SHOULD THESE THEN ALL BE POINTERS? NEED TO DECIDE SOON)
     int local_range[2];
     int local_range_old[2];
 
@@ -47,8 +48,8 @@ typedef struct {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
-void lin_sys_alloc_init(SLIN_SYS **lin_sys, int nlin_sys);
-void lin_sys_free(SLIN_SYS *lin_sys);
+void slin_sys_alloc_init_array(SLIN_SYS **lin_sys, int nlin_sys);
+void lin_sys_free(SLIN_SYS *lin_sys, int nlin_sys);
 void lin_sys_CSR_printScreen(SLIN_SYS *lin_sys);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

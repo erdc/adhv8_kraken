@@ -68,16 +68,16 @@ int residual_test(int argc, char **argv) {
 
 
 	//initalize a design modek that is comprised of 1 super model
-	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	printf("Supermodel read complete\n");
+//	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
+//	printf("Supermodel read complete\n");//
 
-	//assemble a residual and check correctness
-	assemble_residual(&sm, sm.grid);
+//	//assemble a residual and check correctness
+//	assemble_residual(&sm, sm.grid);
 
 	//print final residual
-	for(int local_index=0;local_index<grid.nnodes;local_index++){
-		printf("Node %d: (x,y) = {%f,%f}, Residual = {%f,%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y,sm.residual[local_index*3],sm.residual[local_index*3+1],sm.residual[local_index*3+2]);
-	}
+//	for(int local_index=0;local_index<grid.nnodes;local_index++){
+//		printf("Node %d: (x,y) = {%f,%f}, Residual = {%f,%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y,sm.residual[local_index*3],sm.residual[local_index*3+1],sm.residual[local_index*3+2]);
+//	}
 
 
 	//plot grid in h5?

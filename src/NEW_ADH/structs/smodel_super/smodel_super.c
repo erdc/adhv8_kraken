@@ -242,12 +242,10 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     sm->nseries = 0;              // the number of series in this model 
     sm->itrns = 0;
     sm->isSimple = isSimple;
-
     // need to build the lin sys and the grid
     //start building up materials
     sm->grid = grid;
     sm->lin_sys = sys;
-
 
 
     //now we fill in the physics mat objects with the provided codes to specify the equations to be solved
@@ -263,7 +261,6 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     sm->nphysics_mat_1d = nphysics_mat_1d;
     sm->nphysics_mat_2d = nphysics_mat_2d;
     sm->nphysics_mat_3d = nphysics_mat_3d;
-
 
     //use this simple set up to mark each cell with a single 0
     //this should be easy to determine from grid read
@@ -302,17 +299,19 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     nSubModels[0] = 1;
     ntrns[0] = 0;
     nvars[0] = 3;
+
+
     //this double pointer will be a set of nmat arrays, each of size nSubModels[i]
     //tells us for each submodel how many variables there are
     (subMod_nvars) = (int **) tl_alloc(sizeof(int *), sm->nphysics_mat_2d);
     for (i=0;i<sm->nphysics_mat_2d;i++){
         (subMod_nvars[i]) = (int*) tl_alloc(sizeof(int), nSubModels[i]);
-        for(j=0;j<subMod_nvars[i];j++){
+        for(j=0;j<nSubModels[i];j++){
             subMod_nvars[i][j] = 1;
         }
     }
 
-
+    printf("Entering SMAT_PHYSICS_ALLOC_ARRY\n");
     //initialize pointers and allocate memory for physics materials
     smat_physics_alloc_init_array(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, ntrns, nvars, nSubModels, subMod_nvars);
     smat_physics_alloc_init_array(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, ntrns, nvars, nSubModels, subMod_nvars);

@@ -212,7 +212,7 @@ void increment_function(SMODEL_SUPER *sm){
     int i;
 
 
-    for (i = 0; i < sm->ndofs; i++) {
+    for (i = 0; i < *(sm->ndofs); i++) {
         sm->lin_sys->sol[i] += sm->lin_sys->dsol[i];
     }
 

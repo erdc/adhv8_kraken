@@ -52,10 +52,7 @@ int residual_test(int argc, char **argv) {
 //	}
 
 
-	//create a supermodel with a grid in it
-	SMODEL_SUPER sm;
-	sm.grid = &grid;
-
+    SMODEL_DESIGN *dm;
 	//specify elemental physics and other properties in super model
 	double dt = 1.0;
 	double t0 = 0.0;
@@ -65,14 +62,13 @@ int residual_test(int argc, char **argv) {
 	strcpy(&elemVarCode[0],"2");//SW2D
 	strcpy(&elemVarCode[1],"0"); //GW
 	strcpy(&elemVarCode[2],"0"); //Transport
-
-
-	//initalize a design modek that is comprised of 1 super model
-//	smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-//	printf("Supermodel read complete\n");//
+	printf("GRID NELEMS2D = %d\n",grid.nelems2d);
+	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
+	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, &grid);
+	printf("NDOFS %d\n",dm->ndofs[0]);
 
 //	//assemble a residual and check correctness
-//	assemble_residual(&sm, sm.grid);
+	assemble_residual(&(dm->superModel[0]), dm->grid);
 
 	//print final residual
 //	for(int local_index=0;local_index<grid.nnodes;local_index++){
@@ -81,13 +77,16 @@ int residual_test(int argc, char **argv) {
 
 
 	//plot grid in h5?
-    strcpy(sm.grid->filename, "residtest");
-    init_hdf5_file(sm.grid);
+    strcpy(dm->grid->filename, "residtest");
+    init_hdf5_file(dm->grid);
     printf("hdf5 initialized\n");
-    sgrid_write_hdf5(sm.grid);
+    sgrid_write_hdf5(dm->grid);
     printf("hdf5 written\n");
-    sgrid_write_xdmf(sm.grid);
+    sgrid_write_xdmf(dm->grid);
     printf("xmf written\n");
+
+    //free stuff
+    
 	
 
 	return 0;

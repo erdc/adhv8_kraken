@@ -28,7 +28,7 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
     int current_var;
     bool isFound;
     ctr =0;
-
+    save_k=-1;
     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
 
     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
@@ -164,6 +164,7 @@ int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_m
     int current_var;
     bool isFound;
     int offset=0;
+    save_k=-1;
     
     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
     
@@ -211,6 +212,7 @@ int get_cg_dof_2(int var, int NodeID, SMAT_PHYSICS *node_physics_mat, int *nodal
     int current_var;
     bool isFound;
     int offset=0;
+    save_k=-1;
     
     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
     

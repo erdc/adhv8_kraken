@@ -19,10 +19,13 @@ int main(int argc, char **argv) {
 
     int ierr;
     //residual_test(argc,argv);
+    //printf("Residual test complete\n");
     //try an assembly
-    //jacobian_test(argc,argv);
+    jacobian_test(argc,argv);
+    printf("Jacobian test complete\n");
     //try a newton solve
     ierr = newton_test(argc,argv);
+    printf("Newton test complete\n");
     assert(ierr==0);
 
     

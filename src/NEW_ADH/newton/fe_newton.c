@@ -498,6 +498,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
         /* adds the increment to the solution */
         //(*inc_fnctn) (sm,isuperModel);
         increment_function(sm);
+        printf("Solution incremented\n");
 
         //Mark needs to check, why is this
         //flip sign after update?

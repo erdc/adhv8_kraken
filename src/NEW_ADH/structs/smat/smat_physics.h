@@ -24,8 +24,8 @@ typedef struct {
     int *vars;//int elem_vars[nvar];
     //similarly, how many physics routines to call
     int nSubmodels;
-    //array of elem_physics structs, all they contain are pointers to physics routines
-    SELEM_PHYSICS *elem_physics; // [nSubModels] length array
+    //array of model structs, all they contain are pointers to physics routines
+    SMODEL *model; // [nSubModels] length array
 //    bool VORTICITY;
 //    bool SEDIMENT;
 //    bool SEDLIB;

@@ -62,7 +62,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
     int macro_nnodes = grid->macro_nnodes;
 
     
-    //uses elem_physics to access all elemental routines and builds/solves linear systems
+    //uses model to access all elemental routines and builds/solves linear systems
     int status;
     int check = NO;		/* newton solver check */
     int keep_chugging = NO;     /* newton solver check */
@@ -433,7 +433,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
             // View sol
             PetscViewerASCIIOpen(PETSC_COMM_WORLD,"Svec.m",&(viewer));
             PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-            VecView(lin_sys->sol,viewer);
+            VecView(sol,viewer);
             PetscViewerPopFormat(viewer);
             // View residual
             PetscViewerASCIIOpen(PETSC_COMM_WORLD,"Rvec.m",&(viewer));
@@ -454,7 +454,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 
         //Mark commenting
         scale_linear_system(lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag,
-        lin_sys->vals_off_diag, lin_sys->residual, lin_sys->dsol, lin_sys->scale_vect, lin_sys->local_size, lin_sys->size, myid, lin_sys->ghosts, lin_sys->nghost);
+        lin_sys->vals_off_diag, lin_sys->residual, lin_sys->dsol, lin_sys->scale_vect, *(lin_sys->local_size), *(lin_sys->size), myid, lin_sys->ghosts, lin_sys->nghost);
         
         printf("linear system scaled\n");
 
@@ -464,7 +464,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 //        temp4 = l_infty_norm(sm->ndofs,sm->residual);
 //        printf("CSR norms after scaling: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
         //factor the matrix preconditioner
-        status = prep_umfpack(lin_sys->indptr_diag,lin_sys->cols_diag,lin_sys->vals_diag, lin_sys->local_size);
+        status = prep_umfpack(lin_sys->indptr_diag,lin_sys->cols_diag,lin_sys->vals_diag, *(lin_sys->local_size));
         printf("umfpack prep completed\n");
         
         
@@ -484,7 +484,7 @@ int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
 
         //actually solve linear system, returns solution
         status = solve_linear_sys_bcgstab(dsol, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag,
-        lin_sys->vals_off_diag, residual, lin_sys->scale_vect, lin_sys->local_size, lin_sys->size ,myid, lin_sys->ghosts, lin_sys->nghost);
+        lin_sys->vals_off_diag, residual, lin_sys->scale_vect, *(lin_sys->local_size), *(lin_sys->size) ,myid, lin_sys->ghosts, lin_sys->nghost);
         printf("BCGSTAB completed\n");
         printf("SOLVER STATUS   %d\n\n",status);
 //        for(int j =0;j<ndof;j++){

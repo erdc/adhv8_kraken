@@ -51,7 +51,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     int nnodes = mod->grid->elem2d[ie].nnodes;
     //get the solution on this element, for now just use U
     double elem_head[nnodes];
-    global_to_local_dbl_cg(elem_head, mod->lin_sys->sol, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat, mod->node_physics_mat_id);
+    global_to_local_dbl_cg(elem_head, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat, mod->node_physics_mat_id);
     //global_to_local_dbl_cg_2(elem_head, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->node_physics_mat, mod->node_physics_mat_id);
     //printf("Nnodes %d\n",nnodes);
     double f[nnodes];

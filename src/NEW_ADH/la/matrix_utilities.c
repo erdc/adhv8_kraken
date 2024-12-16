@@ -546,9 +546,9 @@ void create_sparsity_split_CSR(SLIN_SYS *lin_sys, SMODEL_SUPER *sm, SGRID *grid)
     // ndofs = nnodes * max_nsys (over-allocated for mixed dof systems)
     printf("allocating solution\n");
     lin_sys->residual = (double *) tl_realloc(sizeof(double), ndofs, ndofs_old, lin_sys->residual);
-    lin_sys->sol =      (double *) tl_realloc(sizeof(double), ndofs, ndofs_old, lin_sys->sol);
+    lin_sys->dsol =      (double *) tl_realloc(sizeof(double), ndofs, ndofs_old, lin_sys->dsol);
     sarray_init_dbl(lin_sys->residual, ndofs);
-    sarray_init_dbl(lin_sys->sol, ndofs);
+    sarray_init_dbl(lin_sys->dsol, ndofs);
     
     // proprietary AdH matrix allocation
     // standard CSR format
@@ -561,7 +561,7 @@ void create_sparsity_split_CSR(SLIN_SYS *lin_sys, SMODEL_SUPER *sm, SGRID *grid)
     printf("Made residual and solution\n");
     //where does local_range get determined?
     //we now number of rows is sum(my_nnode*nodal_nvars)
-    lin_sys->indptr_diag= (int *) tl_realloc(sizeof(int), lin_sys->local_size+1, lin_sys->local_range_old[1]-lin_sys->local_range_old[0]+1, lin_sys->indptr_diag);
+    lin_sys->indptr_diag= (int *) tl_realloc(sizeof(int), *(lin_sys->local_size)+1, lin_sys->local_range_old[1]-lin_sys->local_range_old[0]+1, lin_sys->indptr_diag);
     //if we split we have two structures
     //if it is only one process this should be NULL!!!!
     //create conditional here

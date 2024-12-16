@@ -29,6 +29,7 @@ typedef struct {
     int nUnique; //number of unique supermodels, leading to unique sparsity structure
                  //a Unique supermodel is one that is either monolithically coupled or
                  // unique sparsity
+    int *unique_id; //integer array of size nUnique, saves index of first Unique super model for each sparsity pattern
 
     
     // grid and physics on the grid
@@ -36,6 +37,7 @@ typedef struct {
 
     
     //array of linear systems, some supermodels may share the same
+    int *lin_sys_id; //array of [nSuperModels] that gives the index of the linear system it belongs to
     SLIN_SYS *lin_sys; //array of [nUnique] systems
 
     //Mark added local to process, this should be same as local_range[1]-local_range[0]

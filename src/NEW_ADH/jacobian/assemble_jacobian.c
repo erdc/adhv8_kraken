@@ -113,7 +113,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem3d_physics_mat[mat_id].elem_physics, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem3d_physics_mat[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -175,7 +175,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem2d_physics_mat[mat_id].elem_physics, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem2d_physics_mat[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
             //printf("perturb var called\n");
         }
         //store in global using 2 mappings
@@ -227,7 +227,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem1d_physics_mat[mat_id].elem_physics, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->elem1d_physics_mat[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -396,7 +396,7 @@ void load_global_mat_CSR(double *vals, int *indptr, int *indices, double **elem_
  *
  *  @param[in,out] elem_mat (double**) - stores the Jacobian, elemental matrix
  *  @param[in] sm (SMODEL_SUPER*) - a pointer to the SMODEL_SUPER structure, needed for residual routines
- *  @param[in] elem_physics (SELEM_PHYSICS*) - an array of SELEM_PHYSICS structures, needed to get proper residual routines
+ *  @param[in] model (SMODEL*) - an array of SMODEL structures, needed to get proper residual routines
  *  @param[in] ie (int) - the element number (local to process)
  *  @param[in] nodes_on_element (int) - the number of nodes on the element
  *  @param[in] nvar_ele (int) - the total number of variables active on element across all residual routines
@@ -413,7 +413,7 @@ void load_global_mat_CSR(double *vals, int *indptr, int *indices, double **elem_
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physics, 
+void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model, 
     int ie, int nodes_on_element, int nvar_ele, int *elem_vars ,int perturb_var_code, int nsubModels, int ele_var_no, int *NodeIDs, int DEBUG) {
     
     
@@ -448,7 +448,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
         //for now use CG map in here
 
         //temp_sol = sm->sol[get_cg_dof_2(perturb_var_code, NodeID, sm->node_physics_mat, sm->node_physics_mat_id)];
-        temp_sol = sm->lin_sys->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id)];
+        temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id)];
         NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol, perturbation);    // calculates epsilon and 2*epsilon
         
         //epsilon = 1.0;
@@ -466,10 +466,10 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
 #endif
 
             //this will give a local residual, in temp and will give code for model vars
-            nvar_pde = elem_physics[j].nvar;
+            nvar_pde = model[j].nvar;
             sarray_init_int(physics_vars, nvar_pde);
-            sarray_copy_int(physics_vars, elem_physics[j].physics_vars,nvar_pde);
-            eq_var_code = elem_physics[j].fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
+            sarray_copy_int(physics_vars, model[j].physics_vars,nvar_pde);
+            eq_var_code = model[j].fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
             add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element, 1);
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
@@ -478,7 +478,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SELEM_PHYSICS *elem_physic
 #endif
             //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
             //should always be same as var_code
-            eq_var_code2 = elem_physics[j].fe_resid(sm,temp_M,ie, epsilon,i, perturb_var_code, -1, DEBUG);
+            eq_var_code2 = model[j].fe_resid(sm,temp_M,ie, epsilon,i, perturb_var_code, -1, DEBUG);
             add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element, 1);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

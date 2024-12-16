@@ -48,7 +48,7 @@
 #include "selem_2d.h"
 #include "selem_3d.h"
 #include "squad.h"
-#include "selem_physics.h"
+#include "smodel.h"
 #include "slist_items.h"
 #include "smpi.h"
 #include "smeteor.h"

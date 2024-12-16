@@ -39,7 +39,7 @@ $(wildcard $(MASTER_SRC_DIR)../structs/snode) \
 $(wildcard $(MASTER_SRC_DIR)../structs/stensor) \
 $(wildcard $(MASTER_SRC_DIR)../structs/selem) \
 $(wildcard $(MASTER_SRC_DIR)../structs/squad) \
-$(wildcard $(MASTER_SRC_DIR)../structs/selem_physics) \
+$(wildcard $(MASTER_SRC_DIR)../structs/smodel) \
 $(wildcard $(MASTER_SRC_DIR)../structs/slist_items) \
 $(wildcard $(MASTER_SRC_DIR)../structs/smpi) \
 $(wildcard $(MASTER_SRC_DIR)../structs/smeteor) \
@@ -58,8 +58,8 @@ $(wildcard $(MASTER_SRC_DIR)../jacobian)\
 $(wildcard $(MASTER_SRC_DIR)../la) \
 $(wildcard $(MASTER_SRC_DIR)../newton) \
 $(wildcard $(MASTER_SRC_DIR)../fe) \
-$(wildcard $(MASTER_SRC_DIR)../sw2) \
-$(wildcard $(MASTER_SRC_DIR)../poisson) \
+$(wildcard $(MASTER_SRC_DIR)../models/sw2) \
+$(wildcard $(MASTER_SRC_DIR)../models/poisson) \
 $(wildcard $(MASTER_SRC_DIR)../test/la) \
 $(wildcard $(MASTER_SRC_DIR)../test/residual) \
 $(wildcard $(MASTER_SRC_DIR)../test/jacobian) \
@@ -85,7 +85,7 @@ $(MASTER_SRC_DIR)../structs/snode \
 $(MASTER_SRC_DIR)../structs/stensor \
 $(MASTER_SRC_DIR)../structs/selem \
 $(MASTER_SRC_DIR)../structs/squad \
-$(MASTER_SRC_DIR)../structs/selem_physics \
+$(MASTER_SRC_DIR)../structs/smodel \
 $(MASTER_SRC_DIR)../structs/slist_items \
 $(MASTER_SRC_DIR)../structs/smpi \
 $(MASTER_SRC_DIR)../structs/smeteor \
@@ -104,8 +104,8 @@ $(MASTER_SRC_DIR)../jacobian \
 $(MASTER_SRC_DIR)../la \
 $(MASTER_SRC_DIR)../newton \
 $(MASTER_SRC_DIR)../fe \
-$(MASTER_SRC_DIR)../sw2 \
-$(MASTER_SRC_DIR)../poisson \
+$(MASTER_SRC_DIR)../models/sw2 \
+$(MASTER_SRC_DIR)../models/poisson \
 $(MASTER_SRC_DIR)../test/la \
 $(MASTER_SRC_DIR)../test/residual \
 $(MASTER_SRC_DIR)../test/jacobian \

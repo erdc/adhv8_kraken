@@ -101,9 +101,9 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, int ntrns, int nvar, int nSubMod
     }
     //allocate and initialize array of elem_phyiscs
     if(nSubMods>0){
-        selem_physics_alloc_init_array(&(mat->elem_physics), nSubMods, nSubMod_nvar); 
+        smodel_alloc_init_array(&(mat->model), nSubMods, nSubMod_nvar); 
     }else{
-        mat->elem_physics = NULL;
+        mat->model = NULL;
     }
 
 }

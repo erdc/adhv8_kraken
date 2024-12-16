@@ -26,21 +26,16 @@ typedef struct {
 
     //vectors
     double *residual;
-    double *sol;
     double *scale_vect;
-
-    //mark, proposes using unified solution variable
-    double *sol_old;
-    double *sol_older;
     //actual solution of linear system is an increment within Newton iteration
     double *dsol;
 
     //things that are important to transforming local to global
     int *ghosts;
     int nghost;
-    int local_size; // same as my_ndofs
-    int global_size; //same as macro_ndofs
-    int size; //same as ndofs (SHOULD THESE THEN ALL BE POINTERS? NEED TO DECIDE SOON)
+    int *local_size; // same as my_ndofs, pointer back to design model
+    int *global_size; //same as macro_ndofs
+    int *size; //same as ndofs
     int local_range[2];
     int local_range_old[2];
 

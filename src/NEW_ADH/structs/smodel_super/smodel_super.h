@@ -72,6 +72,9 @@ typedef struct {
 
     //above is now all held within slin_sys structure
     SLIN_SYS *lin_sys; //pointer to the design model's linear system
+    double *sol; //solution variable, stored in each super model [ndofs]
+    double *sol_old;
+    double *sol_older;
 
 
     int *physics_mat_code; // an code for each physics material that
@@ -111,9 +114,9 @@ typedef struct {
     //int *nSubMods3d;                // [nphysics_mat_3d] the total number of physics modules on each 3D element
     
     //Now part of SMAT_PHYSICS
-    //SELEM_PHYSICS **elem1d_physics;  // [nphysics_mat_1d][nsubmods_1d] the fe routines for each type of physics on each 1D element
-    //SELEM_PHYSICS **elem2d_physics;  // [nphysics_mat_2d][nsubmods_2d] the fe routines for each type of physics on each 2D element
-    //SELEM_PHYSICS **elem3d_physics;  // [nphysics_mat_3d][nsubmods_3d] the fe routines for each type of physics on each 3D element
+    //SMODEL **elem1d_physics;  // [nphysics_mat_1d][nsubmods_1d] the fe routines for each type of physics on each 1D element
+    //SMODEL **elem2d_physics;  // [nphysics_mat_2d][nsubmods_2d] the fe routines for each type of physics on each 2D element
+    //SMODEL **elem3d_physics;  // [nphysics_mat_3d][nsubmods_3d] the fe routines for each type of physics on each 3D element
 
     //Mark added local to process, this should be same as local_range[1]-local_range[0]
     //are these redundant in any way?

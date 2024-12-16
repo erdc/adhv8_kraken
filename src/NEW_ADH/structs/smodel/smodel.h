@@ -1,6 +1,6 @@
 // Stores physics on each element
-#ifndef H_SELEM_PHYSICS_
-#define H_SELEM_PHYSICS_
+#ifndef H_SMODEL_
+#define H_SMODEL_
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -19,15 +19,15 @@ typedef struct {
     //also needs physics vars
     int* physics_vars;//int physics_vars[ndof];
     
-} SELEM_PHYSICS;
+} SMODEL;
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
-//void selem_physics_alloc_init_array(SELEM_PHYSICS ***elemPhys,int nelems,int *nSubMods);
-void selem_physics_alloc_init_array(SELEM_PHYSICS **elemPhys, int nSubMods, int *nSubMod_nvar);
-void selem_physics_alloc_init(SELEM_PHYSICS *physics,int nvar);
-void selem_physics_free(SELEM_PHYSICS **elemPhys,int nelems,int *nSubMods);
+//void smodel_alloc_init_array(SMODEL ***elemPhys,int nelems,int *nSubMods);
+void smodel_alloc_init_array(SMODEL **elemPhys, int nSubMods, int *nSubMod_nvar);
+void smodel_alloc_init(SMODEL *physics,int nvar);
+void smodel_free(SMODEL **elemPhys,int nelems,int *nSubMods);
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

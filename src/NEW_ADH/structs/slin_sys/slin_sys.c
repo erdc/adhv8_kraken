@@ -57,7 +57,7 @@ void lin_sys_CSR_printScreen(SLIN_SYS *lin_sys){
 	int *indptr = lin_sys->indptr_diag;
 	int *cols = lin_sys->cols_diag;
 	double *vals = lin_sys->vals_diag;
-	int nrow = lin_sys->local_size;
+	int nrow = *(lin_sys->local_size);
 
     int i,j,nentry,row_start,row_end;
     for(i=0;i<nrow;i++){

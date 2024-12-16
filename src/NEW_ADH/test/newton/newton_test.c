@@ -128,8 +128,8 @@ int newton_test(int argc, char **argv) {
 	for (int local_index=0; local_index<dm->ndofs[0]; local_index++){
 
 		dm->superModel[0].dirichlet_data[local_index] = 0.0;
-		dm->superModel[0].lin_sys->sol_old[local_index] = 20.0;
-		dm->superModel[0].lin_sys->sol[local_index] = 20.0;
+		dm->superModel[0].sol_old[local_index] = 20.0;
+		dm->superModel[0].sol[local_index] = 20.0;
 		dm->superModel[0].lin_sys->dsol[local_index] = 0.0;
 		dm->superModel[0].bc_mask[local_index] = YES;
 	}
@@ -143,7 +143,7 @@ int newton_test(int argc, char **argv) {
 
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
 			dm->superModel[0].dirichlet_data[i*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
-			dm->superModel[0].lin_sys->sol_old[i*3+1] = dm->superModel[0].dirichlet_data[i*3+1];
+			dm->superModel[0].sol_old[i*3+1] = dm->superModel[0].dirichlet_data[i*3+1];
 		}else{
 			dm->superModel[0].bc_mask[i*3+1]=NO;
 		}
@@ -203,7 +203,7 @@ int newton_test(int argc, char **argv) {
 	}
 
 	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
-	global_to_local_dbl_cg(uh, sm->lin_sys->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
+	global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
 
 //	printf("Final solution:\n");
 //	for(int i=0; i<nnodes;i++){

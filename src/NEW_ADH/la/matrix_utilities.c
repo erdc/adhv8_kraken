@@ -598,9 +598,10 @@ void allocate_petsc_objects(SLIN_SYS *lin_sys){
  #ifdef _PETSC   
     //PETSc solver will be stord in ksp object
     //ksp only will exist if PETSc is active
-
+    int local_size = *(lin_sys->local_size);
+    int global_size = *(lin_sys->global_size);
     //this is somehow not null 
-    if(sm->ksp == PETSC_NULLPTR){
+    if(lin_sys->ksp == PETSC_NULLPTR){
         ierr = KSPCreate(PETSC_COMM_WORLD, &(lin_sys->ksp));
         ierr = KSPSetFromOptions(lin_sys->ksp);
     }
@@ -608,7 +609,7 @@ void allocate_petsc_objects(SLIN_SYS *lin_sys){
     // Check if Jacobian, sol, and residual have already been created.
     // If so, destroy each of them before creating new PETSc objects.
     //also somehow not null
-    if(sm->A != PETSC_NULLPTR){
+    if(lin_sys->A != PETSC_NULLPTR){
         ierr = MatDestroy(&(lin_sys->A));
         ierr = KSPReset(lin_sys->ksp);
         ierr = KSPSetFromOptions(lin_sys->ksp);
@@ -617,20 +618,20 @@ void allocate_petsc_objects(SLIN_SYS *lin_sys){
 //    if(sm->P != PETSC_NULLPTR){
 //        ierr = MatDestroy(&(sm->P));
 //    }
-    if(sm->X != PETSC_NULLPTR){
+    if(lin_sys->X != PETSC_NULLPTR){
         ierr = VecDestroy(&(lin_sys->X));
     }
-    if(sm->B != PETSC_NULLPTR){
+    if(lin_sys->B != PETSC_NULLPTR){
         ierr = VecDestroy(&(lin_sys->B));
     }
     // Create Jacobian matrix from CSR format
     //don't know if i need to do this or just call after load anyway
     //vals should update by reference
-    if (sm->indptr_off_diag == NULL){
-        MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, lin_sys->local_size, lin_sys->local_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, &(lin_sys->A));
+    if (lin_sys->indptr_off_diag == NULL){
+        MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, local_size, local_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, &(lin_sys->A));
         printf("PETSC Mat created with sequential array\n");
     }else{
-        MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, lin_sys->local_size, lin_sys->local_size, lin_sys->global_size, lin_sys->global_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag, lin_sys->vals_off_diag, &(lin_sys->A));
+        MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, local_size, local_size, global_size, global_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag, lin_sys->vals_off_diag, &(lin_sys->A));
         printf("PETSC Mat created with split arrays\n");
     }
     
@@ -673,8 +674,8 @@ void allocate_petsc_objects(SLIN_SYS *lin_sys){
     //ierr = VecSetSizes(sm->X, sm->my_ndofs, PETSC_DETERMINE);
     //ierr = VecSetFromOptions(sm->sol);
     //ierr = VecSetUp(sm->sol);
-    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, lin_sys->local_size, lin_sys->global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->residual, &(lin_sys->B));
-    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, lin_sys->local_size, lin_sys->global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->dsol, &(lin_sys->X));
+    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, local_size, global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->residual, &(lin_sys->B));
+    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, local_size, global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->dsol, &(lin_sys->X));
 
 
     /*Maybe need to revisit for ghosts but skip for now

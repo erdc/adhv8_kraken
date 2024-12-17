@@ -56,7 +56,7 @@
 #include "sstr_value.h"
 #include "sgrid.h"
 #include "sarray.h"
-#include "slin_sys.h"
+
 
 //Mark adding
 #include "tokens.h"
@@ -65,6 +65,7 @@
 #include "smat_gw.h"
 #include "smat_transport.h"
 #include "smat_physics.h"
+#include "slin_sys.h"
 #include "dofmaps.h"
 
 

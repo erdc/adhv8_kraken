@@ -54,7 +54,7 @@ void smodel_design_alloc_init(SMODEL_DESIGN **dmod, int nSuperModels, int nMono,
     smodel_super_alloc_init_array(&((*dmod)->superModel),nSuperModels); //,nFluxInterfaces);
 
     //allocate array of nUnique linear systems
-    slin_sys_alloc_init_array(&((*dmod)->lin_sys),nUnique); 
+    slin_sys_alloc_array(&((*dmod)->lin_sys),nUnique); 
 
 
     //array of nMono dof maps maybe? but this comes from supermodels so maybe not

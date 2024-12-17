@@ -47,8 +47,8 @@ $(wildcard $(MASTER_SRC_DIR)../structs/sflags) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sstr_value) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sgrid) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sarray) \
-$(wildcard $(MASTER_SRC_DIR)../structs/slin_sys) \
 $(wildcard $(MASTER_SRC_DIR)../structs/smat) \
+$(wildcard $(MASTER_SRC_DIR)../structs/slin_sys) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sio) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sseries) \
 $(wildcard $(MASTER_SRC_DIR)../structs/smodel_super) \
@@ -93,8 +93,8 @@ $(MASTER_SRC_DIR)../structs/sflags \
 $(MASTER_SRC_DIR)../structs/sstr_value \
 $(MASTER_SRC_DIR)../structs/sgrid \
 $(MASTER_SRC_DIR)../structs/sarray \
-$(MASTER_SRC_DIR)../structs/slin_sys\
 $(MASTER_SRC_DIR)../structs/smat \
+$(MASTER_SRC_DIR)../structs/slin_sys\
 $(MASTER_SRC_DIR)../structs/sio \
 $(MASTER_SRC_DIR)../structs/sseries \
 $(MASTER_SRC_DIR)../structs/smodel_super \

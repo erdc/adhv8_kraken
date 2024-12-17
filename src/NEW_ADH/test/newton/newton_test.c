@@ -169,17 +169,7 @@ int newton_test(int argc, char **argv) {
 //	status = solve_umfpack(sm.dsol, sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.residual, sm.local_size);
 //	increment_function(&sm);
 	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
-#ifdef _PETSC
-	sm->lin_sys->A = PETSC_NULLPTR;
-	sm->lin_sys->ksp = PETSC_NULLPTR;
-	sm->lin_sys->B = PETSC_NULLPTR;
-	sm->lin_sys->X = PETSC_NULLPTR;
-	printf("Calling PETSC Initialize\n");
-	PetscCall(PetscInitialize(&argc,&argv,NULL,
-    "Compute e in parallel with PETSc.\n\n"));
-    printf("Called PETSC Initialize\n");
-	allocate_petsc_objects(sm->lin_sys);
-#endif
+
 	//call fe_newton
 	fe_newton(sm,0); 
 	free_bcgstab();

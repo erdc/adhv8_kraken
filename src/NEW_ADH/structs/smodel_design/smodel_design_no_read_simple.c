@@ -94,49 +94,28 @@ void smodel_design_no_read_simple(SMODEL_DESIGN **dm_ptr, double dt_in, double t
         dm->unique_id[i] = 0; 
         j= dm->unique_id[i];
 
-
-
-        
-        
-        //also set the lin sys variables
-        dm->lin_sys[i].local_range[1] = dm->grid->nnodes*3;
-        dm->lin_sys[i].local_range[0] = 0;
-        dm->lin_sys[i].local_range_old[1] = 0;
-        dm->lin_sys[i].local_range_old[0] = 0;
-        dm->lin_sys[i].nghost = 0;
-        //should ths just be pointers back to dm->ndofs[]?
-        dm->lin_sys[i].size = &(dm->ndofs[i]);
-        dm->lin_sys[i].local_size = &(dm->my_ndofs[i]);
-        dm->lin_sys[i].global_size = &(dm->macro_ndofs[i]);
-        dm->lin_sys[i].size_old = &(dm->ndofs_old[i]);
-        dm->lin_sys[i].local_size_old = &(dm->my_ndofs_old[i]);
-        dm->lin_sys[i].global_size_old = &(dm->macro_ndofs_old[i]);
-
-        //when in init need to change this to check if we have more than one processor or not
-        dm->lin_sys[i].residual=NULL;
-        dm->lin_sys[i].indptr_diag=NULL;
-        dm->lin_sys[i].indptr_off_diag=NULL;
-
-        //should this go somewhere else? Like still in super model since we have pointer now?
-        //but this should only happen over each unique model
-        dm->lin_sys[i].residual = (double*) tl_alloc(sizeof(double), *(dm->lin_sys[i].size));
-        
-        dm->lin_sys[i].indptr_diag = (int*) tl_alloc(sizeof(int), *(dm->lin_sys[i].local_size)+1);
-        //actual solution of linear system is an increment within Newton iteration
-        dm->lin_sys[i].dsol = (double*) tl_alloc(sizeof(double), *(dm->lin_sys[i].size));
-        dm->lin_sys[i].scale_vect = (double*) tl_alloc(sizeof(double), *(dm->lin_sys[i].size));
-
-        //init to 0's here?
-        sarray_init_dbl(dm->lin_sys[i].residual,*(dm->lin_sys[i].size));
-        sarray_init_dbl(dm->lin_sys[i].dsol,*(dm->lin_sys[i].size));
-        sarray_init_dbl(dm->lin_sys[i].scale_vect,*(dm->lin_sys[i].size));
-
-        //now with info from the super models, assign appropriate vals to the design model
-        //for each unique model we build up the sparsity and solution variables
-        //allocate CSR sparsity structure for each unique model  
-        //missing a step to find proper index of supermodel that is unique
-        //THIS SHOULDNT BE i, this should be the ith non-simple super model
-        create_sparsity_split_CSR(&(dm->lin_sys[i]), &(dm->superModel[j]), dm->grid);
+        //allocate the linear systems, need to wrap this into 1 routine
+        // separate into 3 steps for now, how do we want to do ghosts? 
+        //need way to set ghosts before calling sparsity init
+        slin_sys_init_ptrs(&(dm->lin_sys[i]), &(dm->my_ndofs[i]),&(dm->ndofs[i]),&(dm->macro_ndofs[i]),
+        &(dm->my_ndofs_old[i]), &(dm->ndofs_old[i]), &(dm->macro_ndofs_old[i]),
+        0, dm->ndofs[i], 0);
+        //likely will require the grid and maybe fmap? maybe if fmap empty then ghosts is easier
+        slin_sys_init_ghosts(&(dm->lin_sys[i]), dm->grid, dm->superModel[j].dof_map_local);
+        //if mono maybe call one routine and if not call another?
+        //for now just Mono
+        slin_sys_init_sparsity_mono(&(dm->lin_sys[i]), dm->superModel[j].elem3d_physics_mat_id, 
+        dm->superModel[j].elem2d_physics_mat_id , dm->superModel[j].elem1d_physics_mat_id ,
+        dm->superModel[j].elem3d_physics_mat, dm->superModel[j].elem2d_physics_mat,
+        dm->superModel[j].elem1d_physics_mat ,dm->superModel[j].node_physics_mat_id,
+        dm->superModel[j].node_physics_mat, dm->grid, dm->superModel[j].dof_map_local);
+#ifdef _PETSC
+        dm->lin_sys[i].A = PETSC_NULLPTR;
+        dm->lin_sys[i].ksp = PETSC_NULLPTR;
+        dm->lin_sys[i].B = PETSC_NULLPTR;
+        dm->lin_sys[i].X = PETSC_NULLPTR;
+        allocate_petsc_objects(&(dm->lin_sys[i]));
+#endif
     }
 
     //loop through every super model to allocate and assign pointters

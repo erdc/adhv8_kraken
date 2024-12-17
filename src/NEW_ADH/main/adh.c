@@ -15,7 +15,12 @@ int main(int argc, char **argv) {
 #ifdef _DEBUG
         debug_initialize();
 #endif
-
+#ifdef _PETSC
+    printf("Calling PETSC Initialize\n");
+    PetscCall(PetscInitialize(&argc,&argv,NULL,
+    "Compute e in parallel with PETSc.\n\n"));
+     printf("Called PETSC Initialize\n");
+#endif
 
     int ierr = 0;
     residual_test(argc,argv);

@@ -48,7 +48,17 @@ typedef struct {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
-void slin_sys_alloc_init_array(SLIN_SYS **lin_sys, int nlin_sys);
+void slin_sys_alloc_array(SLIN_SYS **lin_sys, int nlin_sys);
+void slin_sys_init_ghosts(SLIN_SYS *lin_sys, SGRID *grid, int *fmap);
+void slin_sys_init_ptrs(SLIN_SYS *lin_sys, int *my_ndof_ptr, int *ndof_ptr, int *macro_ndof_ptr,
+    int *my_ndof_ptr_old, int *ndof_ptr_old, int *macro_ndof_ptr_old,
+    int start, int end, int nghost);
+void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id, 
+    int *elem2d_physics_mat_id, int *elem1d_physics_mat_id,
+    SMAT_PHYSICS *elem3d_physics_mat, SMAT_PHYSICS *elem2d_physics_mat,
+    SMAT_PHYSICS *elem1d_physics_mat, int *node_physics_mat_id,
+    SMAT_PHYSICS *node_physics_mat, SGRID *grid, int *fmap);
+void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys);
 void lin_sys_free(SLIN_SYS *lin_sys, int nlin_sys);
 void lin_sys_CSR_printScreen(SLIN_SYS *lin_sys);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

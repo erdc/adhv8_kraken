@@ -118,9 +118,7 @@ void selem2d_free(SELEM_2D *elem2d) {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void selem2d_alloc_array(SELEM_2D **elem2d, int nelems2d) {
     assert(nelems2d > 0);
-    printf("Where am i\n");
     (*elem2d) = (SELEM_2D *) tl_alloc(sizeof(SELEM_2D), nelems2d);
-    printf("Where am i\n");
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++

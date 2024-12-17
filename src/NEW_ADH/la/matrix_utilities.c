@@ -2,7 +2,6 @@
 #include "adh.h" 
 static int **temp_cols_diag = NULL;
 static int **temp_cols_off_diag = NULL;
-static int isize = 0;  /* the size of the nnz rows arrays */
 static int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
 static int *nnz_rows_diag = NULL;
 static int *nnz_rows_off_diag = NULL;
@@ -61,7 +60,8 @@ void create_sparsity_split_CSR(SLIN_SYS *lin_sys, SMODEL_SUPER *sm, SGRID *grid)
     int* fmap = sm->dof_map_local;
 
     int *local_range = lin_sys->local_range;
-    int nrows = local_range[1]-local_range[0];
+    int nrows = *(lin_sys->local_size);//local_range[1]-local_range[0];
+    int isize = *(lin_sys->local_size_old);
     //int nnz_rows_diag[nrows];
 
     //see if we have off diagonal blocks to handle
@@ -80,17 +80,21 @@ void create_sparsity_split_CSR(SLIN_SYS *lin_sys, SMODEL_SUPER *sm, SGRID *grid)
             nnz_rows_off_diag_no_duplicate = (int *) tl_realloc(sizeof(int), isize, isize_prev, nnz_rows_off_diag_no_duplicate);
         }
     }
+    //update pointer values in structure
+    *(lin_sys->local_size_old) = isize;
 
-    //printf("NROWS=%d\n",nrows);
+    printf("NROWS=%d\n",nrows);
     //initialize arrays with zeros
     sarray_init_int(nnz_rows_diag, nrows);
+
     if (has_off_diag){
+        printf("HAS_OFF_DIAG???\n");
         sarray_init_int(nnz_rows_off_diag, nrows);
     }
 
     //First set of loops is solely to establish how many nonzeros are there 
     //and how to dynamically allocate temporary sparsity arrays
-
+    //printf("Looping through 1d\n");
     //loop through and find how much to allocate
     for (j=0;j<grid->nelems3d;j++){
         nnodes = grid->elem3d[j].nnodes;
@@ -135,7 +139,7 @@ void create_sparsity_split_CSR(SLIN_SYS *lin_sys, SMODEL_SUPER *sm, SGRID *grid)
 
         }
     }
-
+    //printf("Initial loop through 2d starting\n");
     //do 2d elements and then 1d
     //loop thorugh each element and find sparsity
     for (j=0;j<grid->nelems2d;j++){
@@ -182,7 +186,7 @@ void create_sparsity_split_CSR(SLIN_SYS *lin_sys, SMODEL_SUPER *sm, SGRID *grid)
 
         }
     }
-
+    //printf("Initial loop through 2d\n");
     //now 1d
     //loop thorugh each element and find sparsity
     for (j=0;j<grid->nelems1d;j++){
@@ -494,7 +498,7 @@ void create_sparsity_split_CSR(SLIN_SYS *lin_sys, SMODEL_SUPER *sm, SGRID *grid)
     //}
 
 
-    printf("About to free memory in create_sparsity_split_CSR\n");
+    //printf("About to free memory in create_sparsity_split_CSR\n");
 //    for(j=0;j<nrows;j++){
 //        tl_free(sizeof(int), nnz_temp_cols_diag[j]); 
 //    }

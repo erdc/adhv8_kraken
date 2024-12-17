@@ -232,6 +232,11 @@ int newton_test(int argc, char **argv) {
 	}
 	//printf("Final error code %d\n",err_code);
 
+	//free memory
+	u_exact = (double *) tl_free(sizeof(double), nnodes, u_exact);
+	uh = (double *) tl_free(sizeof(double), nnodes, uh);
+	nodes = (int *) tl_free(sizeof(int), nnodes, nodes);
+
 	return err_code;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

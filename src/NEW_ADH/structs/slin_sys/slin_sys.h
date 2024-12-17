@@ -39,6 +39,11 @@ typedef struct {
     int local_range[2];
     int local_range_old[2];
 
+    //old ones for refinement maybe, should also be pointer??
+    int *local_size_old;
+    int *size_old; 
+    int *global_size_old;
+
 } SLIN_SYS;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

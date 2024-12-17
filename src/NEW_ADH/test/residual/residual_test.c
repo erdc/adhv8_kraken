@@ -43,9 +43,9 @@ int residual_test(int argc, char **argv) {
     ax2y, axy2, ax2y2, flag3d );
 
 	//print coordinates
-  for(int local_index =0; local_index<grid.nnodes; local_index++){
-		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
-	}
+//  for(int local_index =0; local_index<grid.nnodes; local_index++){
+//		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
+//	}
 //	//print connectivity
 //	for(int local_index =0; local_index<grid.nelems2d; local_index++){
 //		printf("Element %d: (nd1,nd2,nd3) = {%d,%d,%d}\n",local_index ,grid.elem2d[local_index].nodes[0], grid.elem2d[local_index].nodes[1], grid.elem2d[local_index].nodes[2]);
@@ -62,10 +62,10 @@ int residual_test(int argc, char **argv) {
 	strcpy(&elemVarCode[0],"2");//SW2D
 	strcpy(&elemVarCode[1],"0"); //GW
 	strcpy(&elemVarCode[2],"0"); //Transport
-	printf("GRID NELEMS2D = %d\n",grid.nelems2d);
+	//printf("GRID NELEMS2D = %d\n",grid.nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, &grid);
-	printf("NDOFS %d\n",dm->ndofs[0]);
+	//printf("NDOFS %d\n",dm->ndofs[0]);
 
 //	//assemble a residual and check correctness
 	assemble_residual(&(dm->superModel[0]), dm->grid);
@@ -77,15 +77,16 @@ int residual_test(int argc, char **argv) {
 
 
 	//plot grid in h5?
-    strcpy(dm->grid->filename, "residtest");
-    init_hdf5_file(dm->grid);
-    printf("hdf5 initialized\n");
-    sgrid_write_hdf5(dm->grid);
-    printf("hdf5 written\n");
-    sgrid_write_xdmf(dm->grid);
-    printf("xmf written\n");
+//    strcpy(dm->grid->filename, "residtest");
+//    init_hdf5_file(dm->grid);
+//    printf("hdf5 initialized\n");
+//    sgrid_write_hdf5(dm->grid);
+//    printf("hdf5 written\n");
+//    sgrid_write_xdmf(dm->grid);
+//    printf("xmf written\n");
 
     //free stuff
+    
     
 	
 

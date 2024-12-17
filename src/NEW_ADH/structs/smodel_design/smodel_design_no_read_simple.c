@@ -28,14 +28,11 @@ void smodel_design_no_read_simple(SMODEL_DESIGN **dm_ptr, double dt_in, double t
     int ndof_temp, my_ndof_temp, macro_ndof_temp;
     printf("Initializing design model without file read\n");
     smodel_design_alloc_init(dm_ptr, 1, 1, 0,1);
-    printf("Design model alloc init completed\n");
 
     //creat alias for shorter code
     dm = *dm_ptr;
     //assign the pointer to the grid
     dm->grid = grid;
-
-    printf("DM GRID NELEMS2D %d\n",dm->grid->nelems2d);
 
     //simple case where design model has one super model
     //these should be the values
@@ -60,16 +57,12 @@ void smodel_design_no_read_simple(SMODEL_DESIGN **dm_ptr, double dt_in, double t
     dm->t_adpt_flag = 0;
     dm->nseries = 0;              // the number of series in this model 
     dm->itrns = 0;
-    printf("set some basic params in design model %d\n", dm->nSuperModels);
     //fill out materials in each super model without reading superfile
 
     for(i=0;i<dm->nSuperModels;i++){
-        printf("Calling super model init\n");
-        printf("Some grid stuff %d\n",dm->grid->nelems2d);
         smodel_super_no_read_simple(&(dm->superModel[i]), dt_in, t_init, t_final,
         nphysics_mat_1d, nphysics_mat_2d, nphysics_mat_3d, elemVarCode, isSimple,
         dm->grid, &(dm->lin_sys[i]));
-        printf("Super model init completed\n");
         
         dm->superModel[i].tol_nonlin = 1e-5;
         dm->superModel[i].inc_nonlin = 1e-3;
@@ -115,6 +108,9 @@ void smodel_design_no_read_simple(SMODEL_DESIGN **dm_ptr, double dt_in, double t
         dm->lin_sys[i].size = &(dm->ndofs[i]);
         dm->lin_sys[i].local_size = &(dm->my_ndofs[i]);
         dm->lin_sys[i].global_size = &(dm->macro_ndofs[i]);
+        dm->lin_sys[i].size_old = &(dm->ndofs_old[i]);
+        dm->lin_sys[i].local_size_old = &(dm->my_ndofs_old[i]);
+        dm->lin_sys[i].global_size_old = &(dm->macro_ndofs_old[i]);
 
         //when in init need to change this to check if we have more than one processor or not
         dm->lin_sys[i].residual=NULL;
@@ -139,7 +135,6 @@ void smodel_design_no_read_simple(SMODEL_DESIGN **dm_ptr, double dt_in, double t
         //for each unique model we build up the sparsity and solution variables
         //allocate CSR sparsity structure for each unique model  
         //missing a step to find proper index of supermodel that is unique
-        printf("Calling split CSR creator\n");
         //THIS SHOULDNT BE i, this should be the ith non-simple super model
         create_sparsity_split_CSR(&(dm->lin_sys[i]), &(dm->superModel[j]), dm->grid);
     }
@@ -165,11 +160,7 @@ void smodel_design_no_read_simple(SMODEL_DESIGN **dm_ptr, double dt_in, double t
         sarray_init_dbl(dm->superModel[i].sol,ndof_temp);
         sarray_init_dbl(dm->superModel[i].sol_old,ndof_temp);
         sarray_init_dbl(dm->superModel[i].sol_older,ndof_temp);
-        printf("Assigning some pointers, ndofs = %d , %d\n",dm->ndofs[j],  ndof_temp);
 
     }
 
-
-
-    printf("DM ndofs[0] = %d\n",dm->ndofs[0]);
 }

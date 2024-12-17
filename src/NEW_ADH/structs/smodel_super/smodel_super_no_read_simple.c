@@ -106,7 +106,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
         }
     }
 
-    printf("Entering SMAT_PHYSICS_ALLOC_ARRY\n");
+    //printf("Entering SMAT_PHYSICS_ALLOC_ARRY\n");
     //initialize pointers and allocate memory for physics materials
     smat_physics_alloc_init_array(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, ntrns, nvars, nSubModels, subMod_nvars);
     smat_physics_alloc_init_array(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, ntrns, nvars, nSubModels, subMod_nvars);
@@ -115,7 +115,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
 //    smat_physics_alloc_init(&sm->elem1d_physics_mat, sm->nphysics_mat_1d, ntrns);
 //    smat_physics_alloc_init(&sm->elem2d_physics_mat, sm->nphysics_mat_2d, ntrns);
 //    smat_physics_alloc_init(&sm->elem3d_physics_mat, sm->nphysics_mat_3d, ntrns);
-    printf("Initialized phyisics materials\n");
+   // printf("Initialized phyisics materials\n");
 
 
     //fill in elemVarCode for the physics mat that is nonempty
@@ -254,7 +254,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
 
     //allocate_adh_system(sm);
 
-    printf("Assigned sw2 to residual structure\n");
+    //printf("Assigned sw2 to residual structure\n");
 
     //call residual
     //double elemrhs[3]; 

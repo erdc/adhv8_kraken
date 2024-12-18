@@ -27,7 +27,8 @@ typedef struct {
 //void smodel_alloc_init_array(SMODEL ***elemPhys,int nelems,int *nSubMods);
 void smodel_alloc_init_array(SMODEL **elemPhys, int nSubMods, int *nSubMod_nvar);
 void smodel_alloc_init(SMODEL *physics,int nvar);
-void smodel_free(SMODEL **elemPhys,int nelems,int *nSubMods);
+void smodel_free_array(SMODEL *Models, int nModels);
+void smodel_free(SMODEL *model);
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

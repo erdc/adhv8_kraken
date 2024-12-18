@@ -18,19 +18,17 @@
  * \note This supermodel is already assumed to have a grid pointer within it that is populated
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void smodel_design_no_read_simple(SMODEL_DESIGN **dm_ptr, double dt_in, double t_init, double t_final,
+void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init, double t_final,
     int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4] ,
     SGRID *grid) {
     
-    SMODEL_DESIGN *dm;
+
     int i,j;
     int isSimple=0;
     int ndof_temp, my_ndof_temp, macro_ndof_temp;
     printf("Initializing design model without file read\n");
-    smodel_design_alloc_init(dm_ptr, 1, 1, 0,1);
-
-    //creat alias for shorter code
-    dm = *dm_ptr;
+    smodel_design_alloc(dm, 1, 1, 0,1);
+    printf("Smodel_design complete\n");
     //assign the pointer to the grid
     dm->grid = grid;
 

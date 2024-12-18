@@ -23,7 +23,7 @@ typedef struct {
     int nSuperModels;          // total # of superModels
     SMODEL_SUPER *superModel;   // Array of superModels to be flux coupled
 
-    int *superType; //[nSuperModels], for each supermodel, which is Mono and which are single models
+    //int *superType; //[nSuperModels], for each supermodel, which is Mono and which are single models
     int nMono; //number of monolothic-coupled supermodels 
     int nSimple; //number of single physics supermodels (nMono+nSimple = nSuperModels)
     int nUnique; //number of unique supermodels, leading to unique sparsity structure
@@ -60,11 +60,11 @@ typedef struct {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
 //void design_model_alloc_init(SMODEL_DESIGN **dmod, int nSuperModels);
-void smodel_design_alloc_init(SMODEL_DESIGN **dmod, int nSuperModels, int nMono, int nSimple,
+void smodel_design_alloc(SMODEL_DESIGN *dmod, int nSuperModels, int nMono, int nSimple,
     int nUnique);
-void design_model_free(SMODEL_DESIGN *dmod);
-void design_model_printScreen(SMODEL_DESIGN *dmod);
-void smodel_design_no_read_simple(SMODEL_DESIGN **dm_ptr, double dt_in, double t_init, double t_final,
+void smodel_design_free(SMODEL_DESIGN *dm);
+void smodel_design_printScreen(SMODEL_DESIGN *dmod);
+void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init, double t_final,
     int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4] ,
     SGRID *grid);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

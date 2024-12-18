@@ -59,7 +59,7 @@ int newton_test(int argc, char **argv) {
 	//create a supermodel with a grid in it
 	//SMODEL_SUPER sm;
 	//sm.grid = &grid;
-    SMODEL_DESIGN *dm;
+    SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
 	double dt = 1.0;
 	double t0 = 0.0;
@@ -72,7 +72,7 @@ int newton_test(int argc, char **argv) {
 	printf("GRID NELEMS2D = %d\n",grid.nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, &grid);
-	printf("NDOFS %d\n",dm->ndofs[0]);
+	printf("NDOFS %d\n",dm.ndofs[0]);
 	//printf("Supermodel no read complete\n");
 
 
@@ -120,18 +120,18 @@ int newton_test(int argc, char **argv) {
 //	sm.sol_older = (double*) tl_alloc(sizeof(double), sm.ndofs);
 
  	SMODEL_SUPER *sm;
-	sm = &(dm->superModel[0]);
+	sm = &(dm.superModel[0]);
 
 	printf("SETTING UP BCMASK\n");
 
 	// intialize dirichlet and old sol (initial guess)
-	for (int local_index=0; local_index<dm->ndofs[0]; local_index++){
+	for (int local_index=0; local_index<dm.ndofs[0]; local_index++){
 
-		dm->superModel[0].dirichlet_data[local_index] = 0.0;
-		dm->superModel[0].sol_old[local_index] = 20.0;
-		dm->superModel[0].sol[local_index] = 20.0;
-		dm->superModel[0].lin_sys->dsol[local_index] = 0.0;
-		dm->superModel[0].bc_mask[local_index] = YES;
+		dm.superModel[0].dirichlet_data[local_index] = 0.0;
+		dm.superModel[0].sol_old[local_index] = 20.0;
+		dm.superModel[0].sol[local_index] = 20.0;
+		dm.superModel[0].lin_sys->dsol[local_index] = 0.0;
+		dm.superModel[0].bc_mask[local_index] = YES;
 	}
 
 	//overwrite some of the boundary
@@ -142,10 +142,10 @@ int newton_test(int argc, char **argv) {
 		y_coord = grid.node[i].y;
 
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
-			dm->superModel[0].dirichlet_data[i*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
-			dm->superModel[0].sol_old[i*3+1] = dm->superModel[0].dirichlet_data[i*3+1];
+			dm.superModel[0].dirichlet_data[i*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
+			dm.superModel[0].sol_old[i*3+1] = dm.superModel[0].dirichlet_data[i*3+1];
 		}else{
-			dm->superModel[0].bc_mask[i*3+1]=NO;
+			dm.superModel[0].bc_mask[i*3+1]=NO;
 		}
 		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
 	}

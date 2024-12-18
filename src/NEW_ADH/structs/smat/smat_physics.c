@@ -124,11 +124,20 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, int ntrns, int nvar, int nSubMod
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-void smat_physics_free(SMAT_PHYSICS *mat, int nmat) {
+void smat_physics_free_array(SMAT_PHYSICS *mat, int nmat) {
     
     int imat;
     for (imat=0; imat<nmat; imat++) {
-        mat[imat].TRANSPORT = (bool *) tl_free(sizeof(bool), mat[imat].ntrns, mat[imat].TRANSPORT);
+        if(mat[imat].TRANSPORT!=NULL){
+            mat[imat].TRANSPORT = (bool *) tl_free(sizeof(bool), mat[imat].ntrns, mat[imat].TRANSPORT);
+        }
+        if(mat[imat].vars!=NULL){
+            mat[imat].vars = (int *) tl_free(sizeof(int), mat[imat].nvar, mat[imat].vars);
+        }
+        if(mat[imat].model!=NULL){
+            smodel_free_array(mat[imat].model, mat[imat].nSubmodels); 
+        }
+
     }
     mat = (SMAT_PHYSICS *) tl_free(sizeof(SMAT_PHYSICS), nmat, mat);
     

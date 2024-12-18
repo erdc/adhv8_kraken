@@ -59,6 +59,8 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
     SMAT_PHYSICS *elem1d_physics_mat, int *node_physics_mat_id,
     SMAT_PHYSICS *node_physics_mat, SGRID *grid, int *fmap);
 void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys);
+void slin_sys_free_array(SLIN_SYS *lin_sys, int nlin_sys);
+void slin_sys_free(SLIN_SYS *lin_sys);
 void lin_sys_free(SLIN_SYS *lin_sys, int nlin_sys);
 void lin_sys_CSR_printScreen(SLIN_SYS *lin_sys);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

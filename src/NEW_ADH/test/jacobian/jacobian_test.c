@@ -50,7 +50,7 @@ int jacobian_test(int argc, char **argv) {
 //	}
 
 
-    SMODEL_DESIGN *dm;
+    SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
 	double dt = 1.0;
 	double t0 = 0.0;
@@ -64,6 +64,6 @@ int jacobian_test(int argc, char **argv) {
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, &grid);
 	//printf("NDOFS %d\n",dm->ndofs[0]);
-	assemble_jacobian(&(dm->superModel[0]));
+	assemble_jacobian(&(dm.superModel[0]));
 	return 0;
 }

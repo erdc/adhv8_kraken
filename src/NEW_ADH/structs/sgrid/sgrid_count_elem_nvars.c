@@ -31,127 +31,127 @@ void load_vars(int score, int *elem_vars) ;
 //             7 = SW 3D W
 //             8 = NS 3D P
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void smodel_super_elemVars(SMODEL_SUPER *sm, SGRID *g) {
-    
-    // ++++++++++++++++++++++++++++++++++
-    // allocate elemental variable arrays
-    // ++++++++++++++++++++++++++++++++++
-    sm->node_nvars = (int *) tl_alloc(sizeof(int), g->nnodes);
-    sm->node_vars = (int **) tl_alloc(sizeof(int *), g->nnodes);
-    
-    // Just do this in the FE-engine so no need to store
-    sm->elem_nvars = (int **) tl_alloc(sizeof(int *), 3); // 0 = 1D, 1 = 2D, 2 = 3D
-    sm->elem_nvars[0] = (int *) tl_alloc(sizeof(int), g->nelems1d);
-    sm->elem_nvars[1] = (int *) tl_alloc(sizeof(int), g->nelems2d);
-    sm->elem_nvars[2] = (int *) tl_alloc(sizeof(int), g->nelems3d);
-    
-    sm->elem_vars = (int ***) tl_alloc(sizeof(int **), 3); // 0 = 1D, 1 = 2D, 2 = 3D
-    sm->elem_vars[0] = (int **) tl_alloc(sizeof(int *), g->nelems1d);
-    sm->elem_vars[1] = (int **) tl_alloc(sizeof(int *), g->nelems2d);
-    sm->elem_vars[2] = (int **) tl_alloc(sizeof(int *), g->nelems3d);
-    
-    int i, j, k, ie, lnnodes, mat =  UNSET_INT, nelems = 0, ndim = 0, nnodes = 0, score = 0;
-    for (ndim=1; ndim<4; ndim++) {
-        nelems = UNSET_INT;
-        if (ndim == 1) {
-            nelems = g->nelems1d;
-        } else if (ndim == 2) {
-            nelems = g->nelems2d;
-        } else if (ndim == 3) {
-            nelems = g->nelems3d;
-        }
-        for (ie=0; ie<nelems; ie++) {
-            mat = UNSET_INT; lnnodes = UNSET_INT;
-            if (ndim == 1) {
-                mat = g->elem1d[ie].mat; // done in engine
-                lnnodes = 2;
-            } else if (ndim == 2) {
-                mat = g->elem2d[ie].mat;
-                lnnodes = g->elem2d[ie].nnodes;
-            } else if (ndim == 3) {
-                mat = g->elem3d[ie].mat;
-                lnnodes = g->elem3d[ie].nnodes;
-            }
-            
-            // first count independent variables on element
-            score = sm->physics_mat_code[mat]; // done in engine
-            sm->elem_nvars[ndim-1][ie] = count_vars(score);
-            
-            // find max nvars for a node over all elements connected
-            int flag[lnnodes]; sarray_init_int(flag,lnnodes);
-            for (i=0; i<lnnodes; i++) {
-                if (sm->node_nvars[g->node[i].gid] < sm->elem_nvars[ndim-1][ie]) {
-                    flag[i] = 1;
-                    sm->node_nvars[g->node[i].gid] = sm->elem_nvars[ndim-1][ie];
-                }
-            }
-            
-            // allocate element array of independent variables
-            sm->elem_vars[ndim-1][ie] = (int *) tl_alloc(sizeof(int),sm->elem_nvars[ndim-1][ie]);
-            
-            // store independent variables on element
-            load_vars(score,sm->elem_vars[ndim-1][ie]);
-            
-            // store independent variables on node
-            for (i=0; i<lnnodes; i++) {
-                if (flag[i] == 1) { // adding variables
-                    assert(sm->node_nvars[g->node[i].gid] == sm->elem_nvars[ndim-1][ie]);
-                    for (j=0; j<sm->node_nvars[g->node[i].gid]; j++) {
-                        sm->node_vars[g->node[i].gid][j] = sm->elem_vars[ndim-1][ie][j];
-                    }
-                }
-            }
-            
-            if (DEBUG) {
-                printf("ELEM_VARS\n");
-                for (i=0; i<sm->elem_nvars[ndim-1][ie]; i++) {
-                    printf("sm->elem_vars[ndim = %d][ie = %d][dof = %d]: %d\n",ndim,ie,i,sm->elem_vars[ndim-1][ie][i]);
-                }
-            }
-        
-        } // nelems
-    } //ndims
-    
-    // define fmap
-    // FOR RESIDUAL CALCULATIONS
-    // fmap_local[0:nnodes] --> for residual (ghost nodes are not a thing here)
-    // FOR MATRIX
-    // send to residential Pe, resident ID and get back the following:
-    // need sm->fmap[on resident pe of resident id] --> returns local row position of matrix, need to add
-    // need sm->node_nvars[my_nnodes:nnodes] from their residential PEs
-    // need sm->node_vars[my_nnodes:nnodes] from their residential PEs
-    // receive/send 3 integers ---> fmap, nvars, code
-    // sm->ghost[sum(all ghosts ndofs)]
-    
-    // sm->local_equation_range[min,max+1] --> starting/ending row (essentially sum of node_nvars with a start)
-    
-    // fmap --> dof_map
-    
-    
-    // need global fmap and variables for ghost nodes
-    
-    // build the local node to local equation number map
-    sm->dof_map_local = (int *) tl_alloc(sizeof(int), g->nnodes);
-    sarray_init_value_int(sm->dof_map_local,g->nnodes,UNSET_INT);
-    int count = 0;
-    for (i=0; i<g->nnodes; i++) {
-        sm->dof_map_local[i] = count;
-        count += sm->node_nvars[i];
-    }
-    
-    if (DEBUG) {
-        printf("NODE_VARS\n");
-        for (i=0; i<g->nnodes; i++) {
-            for (j=0; j<sm->node_nvars[i]; j++) {
-                printf("sm->node_vars[gid = %d][dof = %d]: %d\n",i,j,sm->node_vars[i][j]);
-            }
-        }
-        printf("\n\nFMAP\n");
-        for (i=0; i<g->nnodes; i++) {
-            printf("sm->fmap[gid = %d]: %d\n",i,sm->dof_map_local[i]);
-        }
-    }
-}
+//void smodel_super_elemVars(SMODEL_SUPER *sm, SGRID *g) {
+//    
+//    // ++++++++++++++++++++++++++++++++++
+//    // allocate elemental variable arrays
+//    // ++++++++++++++++++++++++++++++++++
+//    sm->node_nvars = (int *) tl_alloc(sizeof(int), g->nnodes);
+//    sm->node_vars = (int **) tl_alloc(sizeof(int *), g->nnodes);
+//    
+//    // Just do this in the FE-engine so no need to store
+//    sm->elem_nvars = (int **) tl_alloc(sizeof(int *), 3); // 0 = 1D, 1 = 2D, 2 = 3D
+//    sm->elem_nvars[0] = (int *) tl_alloc(sizeof(int), g->nelems1d);
+//    sm->elem_nvars[1] = (int *) tl_alloc(sizeof(int), g->nelems2d);
+//    sm->elem_nvars[2] = (int *) tl_alloc(sizeof(int), g->nelems3d);
+//    
+//    sm->elem_vars = (int ***) tl_alloc(sizeof(int **), 3); // 0 = 1D, 1 = 2D, 2 = 3D
+//    sm->elem_vars[0] = (int **) tl_alloc(sizeof(int *), g->nelems1d);
+//    sm->elem_vars[1] = (int **) tl_alloc(sizeof(int *), g->nelems2d);
+//    sm->elem_vars[2] = (int **) tl_alloc(sizeof(int *), g->nelems3d);
+//    
+//    int i, j, k, ie, lnnodes, mat =  UNSET_INT, nelems = 0, ndim = 0, nnodes = 0, score = 0;
+//    for (ndim=1; ndim<4; ndim++) {
+//        nelems = UNSET_INT;
+//        if (ndim == 1) {
+//            nelems = g->nelems1d;
+//        } else if (ndim == 2) {
+//            nelems = g->nelems2d;
+//        } else if (ndim == 3) {
+//            nelems = g->nelems3d;
+//        }
+//        for (ie=0; ie<nelems; ie++) {
+//            mat = UNSET_INT; lnnodes = UNSET_INT;
+//            if (ndim == 1) {
+//                mat = g->elem1d[ie].mat; // done in engine
+//                lnnodes = 2;
+//            } else if (ndim == 2) {
+//                mat = g->elem2d[ie].mat;
+//                lnnodes = g->elem2d[ie].nnodes;
+//            } else if (ndim == 3) {
+//                mat = g->elem3d[ie].mat;
+//                lnnodes = g->elem3d[ie].nnodes;
+//            }
+//            
+//            // first count independent variables on element
+//            score = sm->physics_mat_code[mat]; // done in engine
+//            sm->elem_nvars[ndim-1][ie] = count_vars(score);
+//            
+//            // find max nvars for a node over all elements connected
+//            int flag[lnnodes]; sarray_init_int(flag,lnnodes);
+//            for (i=0; i<lnnodes; i++) {
+//                if (sm->node_nvars[g->node[i].gid] < sm->elem_nvars[ndim-1][ie]) {
+//                    flag[i] = 1;
+//                    sm->node_nvars[g->node[i].gid] = sm->elem_nvars[ndim-1][ie];
+//                }
+//            }
+//            
+//            // allocate element array of independent variables
+//            sm->elem_vars[ndim-1][ie] = (int *) tl_alloc(sizeof(int),sm->elem_nvars[ndim-1][ie]);
+//            
+//            // store independent variables on element
+//            load_vars(score,sm->elem_vars[ndim-1][ie]);
+//            
+//            // store independent variables on node
+//            for (i=0; i<lnnodes; i++) {
+//                if (flag[i] == 1) { // adding variables
+//                    assert(sm->node_nvars[g->node[i].gid] == sm->elem_nvars[ndim-1][ie]);
+//                    for (j=0; j<sm->node_nvars[g->node[i].gid]; j++) {
+//                        sm->node_vars[g->node[i].gid][j] = sm->elem_vars[ndim-1][ie][j];
+//                    }
+//                }
+//            }
+//            
+//            if (DEBUG) {
+//                printf("ELEM_VARS\n");
+//                for (i=0; i<sm->elem_nvars[ndim-1][ie]; i++) {
+//                    printf("sm->elem_vars[ndim = %d][ie = %d][dof = %d]: %d\n",ndim,ie,i,sm->elem_vars[ndim-1][ie][i]);
+//                }
+//            }
+//        
+//        } // nelems
+//    } //ndims
+//    
+//    // define fmap
+//    // FOR RESIDUAL CALCULATIONS
+//    // fmap_local[0:nnodes] --> for residual (ghost nodes are not a thing here)
+//    // FOR MATRIX
+//    // send to residential Pe, resident ID and get back the following:
+//    // need sm->fmap[on resident pe of resident id] --> returns local row position of matrix, need to add
+//    // need sm->node_nvars[my_nnodes:nnodes] from their residential PEs
+//    // need sm->node_vars[my_nnodes:nnodes] from their residential PEs
+//    // receive/send 3 integers ---> fmap, nvars, code
+//    // sm->ghost[sum(all ghosts ndofs)]
+//    
+//    // sm->local_equation_range[min,max+1] --> starting/ending row (essentially sum of node_nvars with a start)
+//    
+//    // fmap --> dof_map
+//    
+//    
+//    // need global fmap and variables for ghost nodes
+//    
+//    // build the local node to local equation number map
+//    sm->dof_map_local = (int *) tl_alloc(sizeof(int), g->nnodes);
+//    sarray_init_value_int(sm->dof_map_local,g->nnodes,UNSET_INT);
+//    int count = 0;
+//    for (i=0; i<g->nnodes; i++) {
+//        sm->dof_map_local[i] = count;
+//        count += sm->node_nvars[i];
+//    }
+//    
+//    if (DEBUG) {
+//        printf("NODE_VARS\n");
+//        for (i=0; i<g->nnodes; i++) {
+//            for (j=0; j<sm->node_nvars[i]; j++) {
+//                printf("sm->node_vars[gid = %d][dof = %d]: %d\n",i,j,sm->node_vars[i][j]);
+//            }
+//        }
+//        printf("\n\nFMAP\n");
+//        for (i=0; i<g->nnodes; i++) {
+//            printf("sm->fmap[gid = %d]: %d\n",i,sm->dof_map_local[i]);
+//        }
+//    }
+//}
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

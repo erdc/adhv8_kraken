@@ -20,14 +20,9 @@
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void smodel_design_alloc_init(SMODEL_DESIGN **dmod, int nSuperModels, int nMono, int nSimple,
+void smodel_design_alloc(SMODEL_DESIGN *dmod, int nSuperModels, int nMono, int nSimple,
     int nUnique) {
     int i;
-    
-    // allocate array/pointer of design models, for now hard set at 1
-    (*dmod) = (SMODEL_DESIGN *) tl_alloc(sizeof(SMODEL_DESIGN), 1);
-
-    
     // allocate the design grid (may choose to do different superModel grids later)
     // Need to add SFILE_IN gridFile to SGRID STRUCTURE
     // Need to add SFILE_IN facesFile to SGRID STRUCTURE
@@ -36,61 +31,28 @@ void smodel_design_alloc_init(SMODEL_DESIGN **dmod, int nSuperModels, int nMono,
     
     
     // initialize the design model and all its super and sub models
-    (*dmod)->nSuperModels = nSuperModels;
-    (*dmod)->nMono = nMono;
-    (*dmod)->nSimple = nSimple;
-    (*dmod)->nUnique = nUnique;
+    dmod->nSuperModels = nSuperModels;
+    dmod->nMono = nMono;
+    dmod->nSimple = nSimple;
+    dmod->nUnique = nUnique;
 
-    (*dmod)->ndofs = (int*) tl_alloc(sizeof(int), nUnique);
-    (*dmod)->ndofs_old = (int*) tl_alloc(sizeof(int), nUnique);
-    (*dmod)->my_ndofs = (int*) tl_alloc(sizeof(int), nUnique);
-    (*dmod)->my_ndofs_old = (int*) tl_alloc(sizeof(int), nUnique);
-    (*dmod)->macro_ndofs = (int*) tl_alloc(sizeof(int), nUnique);
-    (*dmod)->macro_ndofs_old = (int*) tl_alloc(sizeof(int), nUnique);
+    dmod->ndofs = (int*) tl_alloc(sizeof(int), nUnique);
+    dmod->ndofs_old = (int*) tl_alloc(sizeof(int), nUnique);
+    dmod->my_ndofs = (int*) tl_alloc(sizeof(int), nUnique);
+    dmod->my_ndofs_old = (int*) tl_alloc(sizeof(int), nUnique);
+    dmod->macro_ndofs = (int*) tl_alloc(sizeof(int), nUnique);
+    dmod->macro_ndofs_old = (int*) tl_alloc(sizeof(int), nUnique);
+    dmod->lin_sys_id = (int*) tl_alloc(sizeof(int), nSuperModels);
+    dmod->unique_id = (int*) tl_alloc(sizeof(int), nUnique);
 
-    (*dmod)->lin_sys_id = (int*) tl_alloc(sizeof(int), nSuperModels);
-    (*dmod)->unique_id = (int*) tl_alloc(sizeof(int), nUnique);
+    printf("callimg smodel_super_alloc\n");
     //allocate arra of nSuperModels super models
-    smodel_super_alloc_init_array(&((*dmod)->superModel),nSuperModels); //,nFluxInterfaces);
-
+    smodel_super_alloc_init_array(&(dmod->superModel),nSuperModels); //,nFluxInterfaces);
+    printf("callimg slin_sys_alloc_array\n");
     //allocate array of nUnique linear systems
-    slin_sys_alloc_array(&((*dmod)->lin_sys),nUnique); 
-
-
+    slin_sys_alloc_array(&(dmod->lin_sys),nUnique); 
     //array of nMono dof maps maybe? but this comes from supermodels so maybe not
-    
-    
 }
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
- *  \brief     Frees an AdH Designer Model
- *  \author    Corey Trahan, Ph.D.
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *
- * @param[inout] dmod           (SDMODEL *)  a pointer to an AdH design-level model
- * \note
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void smodel_design_free(SMODEL_DESIGN *dmod) {
-    
-    // aliases
-    SMODEL_SUPER *sm_p = dmod->superModel;
-    SGRID *grid_p = dmod->grid;
-    
-    smodel_super_free(sm_p,dmod->nSuperModels);
-    sgrid_free(grid_p);
-    //nFluxInterfaces = (int *) tl_free(sizeof(int), sm_p->nSuperModels, nFluxInterfaces);
-    dmod = (SMODEL_DESIGN *) tl_free(sizeof(SMODEL_DESIGN), 1, dmod);
-}
-
-
-
-
-
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!

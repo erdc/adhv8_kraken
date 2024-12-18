@@ -77,16 +77,9 @@ typedef struct {
     double *sol_older;
 
 
-    int *physics_mat_code; // an code for each physics material that
-                           // determinds which equations will be
-                           // solved on that material
     int *dof_map_local;    // a local map from the local node ID to the
                            // local equation number for building the
-                           // FE residual and matrix 
-
-    int *dof_map_global;   // for ghost nodes - a map from the local
-                           // node ID to the global equation number
-                           // for building the FE matrix 
+                           // FE residual and matrix [nnodes] long
 
     int meshcode; //need a way if supermodel is defined on entire mesh (0), surface(1), or floor(2)
 
@@ -104,6 +97,14 @@ typedef struct {
     int *elem1d_physics_mat_id; //[nelem1d]
     int *elem2d_physics_mat_id; //[nelem2d]
     int *elem3d_physics_mat_id; //[nelem3d]
+
+    //Only necessary for CG:
+    //Mark proposes swapping nodal vars above to node-based material, this will cut down on memory
+    //but may be challenging to form. This won't be set by user but implicitly built
+    //at run time
+    int nphysics_mat_node;
+    int *node_physics_mat_id; //[nnode] ? local vs what idk
+    SMAT_PHYSICS *node_physics_mat; //[nphysics_mat_node]
 
     //Mark, maybe just role this into SMAT_PHYSICS object????
     
@@ -127,19 +128,8 @@ typedef struct {
     int *macro_ndofs;
     int *macro_ndofs_old;
 
-    //Corey using for initialization, should be able to eliminate elemental vars at the least
-    //should be able to create nodal material as well but would be more complex
-    int **elem_nvars;
-    int ***elem_vars;
-    int *node_nvars;
-    int **node_vars;
 
-    //Mark proposes swapping nodal vars above to node-based material, this will cut down on memory
-    //but may be challenging to form. This won't be set by user but implicitly built
-    //at run time
-    int nphysics_mat_node;
-    int *node_physics_mat_id; //[nnode] ? local vs what idk
-    SMAT_PHYSICS *node_physics_mat; //[nphysics_mat_node]
+
 
 
 
@@ -149,7 +139,7 @@ typedef struct {
     //instead of mask, allocate array of ints that is dof of each dirichlet dof
     //int *dirchlet_dofs;
     double *dirichlet_data;
-    //Mark, havent looked into this yet. Maybe weak 
+    //Mark, havent looked into this yet. Need to iron out
     STR_VALUE *str_values;    /* strings */
     SSERIES *series_head;
     SSERIES *series_curr;
@@ -157,71 +147,53 @@ typedef struct {
     SSERIES *series_out;      /* output series */
     SSERIES *series_wind_head, *series_wind_curr;
     SSERIES *series_wave_head, *series_wave_curr;
-
-    //stripping out models and putting info in here
-
-    // SOLUTION VARIABLES //
-
-    // DERIVATIVE QUANTITIES DO NOT GO HERE //
-
-    //any physics specific quantities will be mapped from sol vector
-    //any time we want a new physical variable it will need to be added here
-
-    //this is listed in order of how dofs will be sorted, water depth
-    int nhead;
-    double *head;    // present in SW, GW, NS, ...
-    double *old_head;    /* pressure from the previous time step at time t_{n-1} */
-    double *older_head;  /* pressure from the time step before last t_{n-2} */
-
-    //3d sw
-    int ndisplacement;
-    double *displacement;
-    double *old_displacement;
-    double *older_displacement;
-
-    //navier stokes
-    double *prs;
-    double *old_prs;
-    double *older_prs;
-
-    //2d velocity
-    //present in SW2D, NS2D
-    int nvel2d;
-    SVECT2D *vel2d;
-    SVECT2D *old_vel2d;
-    SVECT2D *older_vel2d;
-
-    //3d velocity
-    int nvel3d;
-    SVECT *vel3d;
-    SVECT *old_vel3d;
-    SVECT *older_vel3d;
-
-    //concentrations for transport (do we need more than one for sediment too?)
-    int *nconcentration;
-    double *concentration;
-    double *old_concentration;
-    double *older_concentration;
-
-
-    //sediment solution variable, maybe find better name than c
-    int nc;
-    double *c;          // concentration
-    double *old_c;      // old concentration
-    double *older_c;    // older concentration
-
-
-
-    // END OF SOLUTION VARIABLES
-
-
-
-    //structures to contain data from other models OTHER than solution variables
-    //maybe just add scon and ssed
-#ifdef _SEDIMENT
-    SSED *sed;
-#endif
-
+//    //stripping out models and putting info in here
+//    // SOLUTION VARIABLES //
+//    // DERIVATIVE QUANTITIES DO NOT GO HERE //
+//    //any physics specific quantities will be mapped from sol vector
+//    //any time we want a new physical variable it will need to be added here
+//    //this is listed in order of how dofs will be sorted, water depth
+//    //do we do this or separate SW2/SW3/...
+//    int nhead;
+//    double *head;    // present in SW, GW, NS, ...
+//    double *old_head;    /* pressure from the previous time step at time t_{n-1} */
+//    double *older_head;  /* pressure from the time step before last t_{n-2} */
+//    //3d sw
+//    int ndisplacement;
+//    double *displacement;
+//    double *old_displacement;
+//    double *older_displacement;
+//    //navier stokes
+//    double *prs;
+//    double *old_prs;
+//    double *older_prs;
+//    //2d velocity
+//    //present in SW2D, NS2D
+//    int nvel2d;
+//    SVECT2D *vel2d;
+//    SVECT2D *old_vel2d;
+//    SVECT2D *older_vel2d;
+//    //3d velocity
+//    int nvel3d;
+//    SVECT *vel3d;
+//    SVECT *old_vel3d;
+//    SVECT *older_vel3d;
+//    //concentrations for transport (do we need more than one for sediment too?)
+//    int *nconcentration;
+//    double *concentration;
+//    double *old_concentration;
+//    double *older_concentration;
+//    //sediment solution variable, maybe find better name than c
+//    int nc;
+//    double *c;          // concentration
+//    double *old_c;      // old concentration
+//    double *older_c;    // older concentration
+//    // END OF SOLUTION VARIABLES
+//    //structures to contain data from other models OTHER than solution variables
+//    //maybe just add scon and ssed
+//#ifdef _SEDIMENT
+//    SSED *sed;
+//#endif
     //potentially surround these with different ifdefs
 //    SSW_2D *ssw2d;
 //    SSW_3D *ssw3d;
@@ -229,11 +201,6 @@ typedef struct {
 //    SCON *con;
 //    SNS_2D *sns2d;
 //    SNS_3D *sns3d;
-
-    
-
-
-
 } SMODEL_SUPER;
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -241,7 +208,11 @@ typedef struct {
 // Methods
 void smodel_super_alloc_init(SMODEL_SUPER *sm);
 void smodel_super_alloc_init_array(SMODEL_SUPER **smod, int nSuperModels);
-void smodel_super_free(SMODEL_SUPER *smod, int nSuperModels);
+
+
+void smodel_super_free_array(SMODEL_SUPER *sm, int nSuper);
+void smodel_super_free(SMODEL_SUPER *sm);
+
 void smodel_super_read(SMODEL_SUPER *smod, FILE *fp);
 void smodel_super_printScreen(SMODEL_SUPER *smod);
 

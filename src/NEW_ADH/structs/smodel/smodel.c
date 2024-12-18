@@ -114,7 +114,31 @@ void smodel_alloc_init(SMODEL *physics,int nvar) { // triple pointer?
     }
     return;
 }   
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Allocates and array of size nelem of physice FE routines
+ *  \author    Corey Trahan, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ * @param[inout] elemPhys           (SMODEL **)  the struct double pointer
+ * @param[in]  nelems           (int) the total number of elements (1D, 2D, or 3D)
+ * @param[in]  nSubModels                (int*) the total number of submodels on each element
+ *
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void smodel_free_array(SMODEL *Models, int nModels) { // triple pointer?
+    int ie;
+    for (ie=0; ie<nModels; ie++) {
+        smodel_free(&(Models[ie]));
+    }
+    //free the array of elemPhys
+    Models = (SMODEL *) tl_free(sizeof(SMODEL), nModels, Models);
+    return;
+}   
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
@@ -128,12 +152,8 @@ void smodel_alloc_init(SMODEL *physics,int nvar) { // triple pointer?
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void smodel_free(SMODEL **elemPhys,int nelems,int *nSubMods) {
-    int ie;
-    
-    for (ie=0; ie<nelems; ie++) {
-        elemPhys[ie] = (SMODEL *) tl_free(sizeof(SMODEL), nSubMods[ie], elemPhys[ie]);
-    }
-    elemPhys = (SMODEL **) tl_free(sizeof(SMODEL *), nelems, elemPhys);
+void smodel_free(SMODEL *model) {
+ 
+    (model->physics_vars) = (int*) tl_free(sizeof(int), model->nvar, model->physics_vars);
     
 }

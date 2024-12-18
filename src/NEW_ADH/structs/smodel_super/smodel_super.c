@@ -96,19 +96,10 @@ void smodel_super_alloc_init(SMODEL_SUPER *sm) {
     sm->sol = NULL;
     sm->sol_old = NULL;
     sm->sol_older = NULL;
-
-    //IDK if physics_mat_code is still used? dont believe we need dof_map_global
-    sm->physics_mat_code = NULL; // an code for each physics material that
-                           // determinds which equations will be
-                           // solved on that material
     sm->dof_map_local = NULL;    // a local map from the local node ID to the
                            // local equation number for building the
                            // FE residual and matrix 
                            //onl allocate if isSimple is not 1
-
-    sm->dof_map_global = NULL;   // for ghost nodes - a map from the local
-                           // node ID to the global equation number
-                           // for building the FE matrix 
 
     sm->meshcode = 0; //need a way if supermodel is defined on entire mesh (0), surface(1), or floor(2)
  
@@ -158,23 +149,6 @@ void smodel_super_alloc_init(SMODEL_SUPER *sm) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Frees an array of AdH supermodels
- *  \author    Corey Trahan, Ph.D.
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *
- * @param[inout] smod           (SMODEL_SUPER *)  an array of AdH supermodels
- * \note
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void smodel_super_free(SMODEL_SUPER *smod, int nSuperModels) {
-    smod = (SMODEL_SUPER *) tl_free(sizeof(SMODEL_SUPER), nSuperModels, smod);
-}
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
  *  \brief     Read SuperModel data from a file
  *  \author    Corey Trahan, Ph.D.
  *  \bug       none
@@ -189,7 +163,6 @@ void smodel_super_free(SMODEL_SUPER *smod, int nSuperModels) {
 void smodel_super_read(SMODEL_SUPER *smod, FILE *fp) {
     // read it
 }
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!

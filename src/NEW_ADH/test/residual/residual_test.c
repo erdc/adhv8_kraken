@@ -52,7 +52,7 @@ int residual_test(int argc, char **argv) {
 //	}
 
 
-    SMODEL_DESIGN *dm;
+    SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
 	double dt = 1.0;
 	double t0 = 0.0;
@@ -68,7 +68,7 @@ int residual_test(int argc, char **argv) {
 	//printf("NDOFS %d\n",dm->ndofs[0]);
 
 //	//assemble a residual and check correctness
-	assemble_residual(&(dm->superModel[0]), dm->grid);
+	assemble_residual(&(dm.superModel[0]), dm.grid);
 
 	//print final residual
 //	for(int local_index=0;local_index<grid.nnodes;local_index++){
@@ -86,7 +86,7 @@ int residual_test(int argc, char **argv) {
 //    printf("xmf written\n");
 
     //free stuff
-    
+    smodel_design_free(&dm);
     
 	
 

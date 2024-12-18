@@ -16,7 +16,8 @@
 int residual_test(int argc, char **argv) {
 
 	//create a grid
-	SGRID grid;
+	SGRID *grid;
+	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
 	//let's just do something simple
 	//3x3 triangular element grid
 	double xmin = 0.0;
@@ -38,7 +39,8 @@ int residual_test(int argc, char **argv) {
 	double ax2y2 = 0.0;
 	int flag3d =0;
 
-    grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
+
+    *grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
 
@@ -64,7 +66,7 @@ int residual_test(int argc, char **argv) {
 	strcpy(&elemVarCode[2],"0"); //Transport
 	//printf("GRID NELEMS2D = %d\n",grid.nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, &grid);
+	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
 	//printf("NDOFS %d\n",dm->ndofs[0]);
 
 //	//assemble a residual and check correctness

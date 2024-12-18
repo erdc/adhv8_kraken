@@ -17,10 +17,7 @@ void smodel_design_free(SMODEL_DESIGN *dm) {
     //free more complex structures
     if(dm->lin_sys!=NULL){slin_sys_free_array(dm->lin_sys,dm->nUnique);}
     if(dm->superModel != NULL) {smodel_super_free_array(dm->superModel,dm->nSuperModels);}
-    printf("attampting to free grid\n");
-    printf("nelems2d = %d\n",dm->grid->nelems2d);
     if(dm->grid !=NULL){sgrid_free(dm->grid);}
-
     //free basic arrays, complex models have pointers to these so must go last
     if(dm->unique_id!=NULL){dm->unique_id = (int *) tl_free(sizeof(int), dm->nUnique, dm->unique_id);}
     if(dm->lin_sys_id!=NULL){dm->lin_sys_id = (int *) tl_free(sizeof(int), dm->nSuperModels, dm->lin_sys_id);}

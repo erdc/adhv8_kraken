@@ -19,7 +19,8 @@ static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *gri
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int newton_test(int argc, char **argv) {
 	//create a grid
-	SGRID grid;
+	SGRID *grid;
+	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
 	//let's just do something simple
 	//3x3 triangular element grid
 	double xmin = 0.0;
@@ -41,11 +42,11 @@ int newton_test(int argc, char **argv) {
 	double ax2y2 = 0.0;
 	int flag3d =0;
 	int err_code=-1;
-    grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
+    *grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
-    nnodes = grid.nnodes;
+    nnodes = grid->nnodes;
 	//print coordinates
 //  for(int local_index =0; local_index<grid.nnodes; local_index++){
 //		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
@@ -69,9 +70,9 @@ int newton_test(int argc, char **argv) {
 	strcpy(&elemVarCode[0],"2");//SW2D
 	strcpy(&elemVarCode[1],"0"); //GW
 	strcpy(&elemVarCode[2],"0"); //Transport
-	printf("GRID NELEMS2D = %d\n",grid.nelems2d);
+	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, &grid);
+	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
 	printf("NDOFS %d\n",dm.ndofs[0]);
 	//printf("Supermodel no read complete\n");
 
@@ -138,8 +139,8 @@ int newton_test(int argc, char **argv) {
 	double x_coord, y_coord;
 	for (int i=0; i<nnodes; i++){
 		//mark the boundary only
-		x_coord = grid.node[i].x;
-		y_coord = grid.node[i].y;
+		x_coord = grid->node[i].x;
+		y_coord = grid->node[i].y;
 
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
 			dm.superModel[0].dirichlet_data[i*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
@@ -177,7 +178,7 @@ int newton_test(int argc, char **argv) {
 	//it is a scalar
 	double *u_exact;
 	u_exact = (double*) tl_alloc(sizeof(double),nnodes);
-	compute_exact_solution_poisson(u_exact, nnodes, &grid);
+	compute_exact_solution_poisson(u_exact, nnodes, grid);
 //	for(int i=0;i<nnodes;i++){
 //		printf("Exact solution[%d] = %f\n",i,u_exact[i]);
 //	}
@@ -226,6 +227,10 @@ int newton_test(int argc, char **argv) {
 	u_exact = (double *) tl_free(sizeof(double), nnodes, u_exact);
 	uh = (double *) tl_free(sizeof(double), nnodes, uh);
 	nodes = (int *) tl_free(sizeof(int), nnodes, nodes);
+
+
+	smodel_design_free(&dm);
+
 
 	return err_code;
 }

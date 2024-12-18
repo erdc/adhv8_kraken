@@ -69,9 +69,13 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 
 	//set some parameters, hard coded for triangles for now
 	grid.nnodes = npx*npy;
+	grid.max_nnodes = grid.nnodes;
 	grid.nelems3d = 0;
 	grid.nelems2d = (npx-1)*(npy-1)*2;
 	grid.nelems1d = 0;
+	grid.max_nelems1d = 0;
+	grid.max_nelems2d = 8;
+	grid.max_nelems3d = 0;
 	grid.nTets=0;
 	grid.nPrisms=0;
 	grid.nTris= grid.nelems2d;

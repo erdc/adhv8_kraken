@@ -67,16 +67,17 @@ void smodel_super_alloc_init(SMODEL_SUPER *sm) {
 
     // initialize with default values
     sm->isSimple = 0;
-    sm->dt = 0.0;
-    sm->old_dt = 0.0;
-    sm->dt_err = 0.0;
-    sm->dt_prev = 0.0;
-    sm->inc_nonlin = 0.0;
-    sm->tol_nonlin = 0.0;
-    sm->t_init = 0.0;
-    sm->t_prev = 0.0;
-    sm->t_final = 0.0;
-    sm->t_adpt_flag = 0;
+    sm->dt = NULL;
+    sm->old_dt = NULL;
+    sm->dt_err = NULL;
+    sm->dt_prev = NULL;
+    sm->inc_nonlin = 0;
+    sm->tol_nonlin = 0;
+    sm->t_init = NULL;
+    sm->t_prev = NULL;
+    sm->t_final = NULL;
+    sm->t_adpt_flag = NULL;
+    sm->nsubsteps = 1;
     sm->nseries = 0;              // the number of series in this model 
     sm->itrns = 0;
 
@@ -145,6 +146,8 @@ void smodel_super_alloc_init(SMODEL_SUPER *sm) {
     sm->macro_ndofs_old = NULL;
     //sm->dof_map_local = NULL;
     //sm-dof_map_global = NULL;
+
+    sm->forward_step = NULL;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

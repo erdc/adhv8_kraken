@@ -58,12 +58,14 @@ $(wildcard $(MASTER_SRC_DIR)../jacobian)\
 $(wildcard $(MASTER_SRC_DIR)../la) \
 $(wildcard $(MASTER_SRC_DIR)../newton) \
 $(wildcard $(MASTER_SRC_DIR)../fe) \
+$(wildcard $(MASTER_SRC_DIR)../timeloop) \
 $(wildcard $(MASTER_SRC_DIR)../models/sw2) \
 $(wildcard $(MASTER_SRC_DIR)../models/poisson) \
 $(wildcard $(MASTER_SRC_DIR)../test/la) \
 $(wildcard $(MASTER_SRC_DIR)../test/residual) \
 $(wildcard $(MASTER_SRC_DIR)../test/jacobian) \
 $(wildcard $(MASTER_SRC_DIR)../test/newton) \
+$(wildcard $(MASTER_SRC_DIR)../test/timeloop) \
 $(wildcard $(MASTER_SRC_DIR)../main)
 
 
@@ -104,12 +106,14 @@ $(MASTER_SRC_DIR)../jacobian \
 $(MASTER_SRC_DIR)../la \
 $(MASTER_SRC_DIR)../newton \
 $(MASTER_SRC_DIR)../fe \
+$(MASTER_SRC_DIR)../timeloop \
 $(MASTER_SRC_DIR)../models/sw2 \
 $(MASTER_SRC_DIR)../models/poisson \
 $(MASTER_SRC_DIR)../test/la \
 $(MASTER_SRC_DIR)../test/residual \
 $(MASTER_SRC_DIR)../test/jacobian \
-$(MASTER_SRC_DIR)../test/newton
+$(MASTER_SRC_DIR)../test/newton \
+$(MASTER_SRC_DIR)../test/timeloop
 
 
 
@@ -136,7 +140,7 @@ OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              += 
 CFLAGS              += -O3 -D_ADH_HDF5 #-D_PETSC #-D_DEBUG #-D_MPI #-D_MESSG #-Wall
-CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/opt/petsc/include -lhdf5 -I/opt/homebrew/include #-L/opt/homebrew/lib
+CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/include -lhdf5  #-L/opt/homebrew/lib
 FLAGS               = $(OPT) $(IFLAGS) $(LFLAGS) $(CFLAGS) $(LDLIBS) 
 #----------------------------
 

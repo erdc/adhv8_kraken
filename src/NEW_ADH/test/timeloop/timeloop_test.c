@@ -1,8 +1,8 @@
 /*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 700;
-static int NEWTON_TEST_NY = 700;
+static int NEWTON_TEST_NX = 100;
+static int NEWTON_TEST_NY = 100;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -17,7 +17,7 @@ static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *gri
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int newton_test(int argc, char **argv) {
+int timeloop_test(int argc, char **argv) {
 	//create a grid
 	SGRID *grid;
 	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
@@ -64,7 +64,7 @@ int newton_test(int argc, char **argv) {
 	//specify elemental physics and other properties in super model
 	double dt = 1.0;
 	double t0 = 0.0;
-	double tf = 1.0;
+	double tf = 2.0;
 
 	char elemVarCode[4]; 
 	strcpy(&elemVarCode[0],"2");//SW2D
@@ -171,8 +171,9 @@ int newton_test(int argc, char **argv) {
 //	increment_function(&sm);
 	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 
-	//call fe_newton
-	fe_newton(sm); 
+	//set forward_step and call timeloop
+	time_loop(&dm); 
+
 	//compare with analytic solution
 	//it is a scalar
 	double *u_exact;

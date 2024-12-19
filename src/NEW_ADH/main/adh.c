@@ -32,8 +32,12 @@ int main(int argc, char **argv) {
     ierr = newton_test(argc,argv);
     assert(ierr==0);
     printf(">>>>>>>>>>>>>>>Newton test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
+    //try a time step
+    ierr = timeloop_test(argc,argv);
+    assert(ierr==0);
+    printf(">>>>>>>>>>>>>>>TIMELOOP test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
 
-    
+    free_bcgstab();
     //not returning 0 will result in MPI error
     return 0;
 }

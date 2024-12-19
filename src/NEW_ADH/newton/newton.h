@@ -12,8 +12,6 @@ void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *i
          int my_ndofs, int ndofs, int macro_ndofs, double *residual, double *dsol, int *bc_mask);
 
 //from fe_newton.c
-int fe_newton(SMODEL_SUPER *sm,                           /* input supermodel */
-              int isuperModel                            /* the supermodel id */           
-);
+int fe_newton(SMODEL_SUPER *sm);
 
 #endif

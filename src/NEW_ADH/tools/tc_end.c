@@ -2,7 +2,7 @@
 
 #include "adh.h"
 
-int tc_end(SMODEL_SUPER *mod)
+int tc_end(SMODEL_DESIGN *mod)
 {
     int interval;               /* the interval of the new time step */
     double dt_new;              /* the new delta t */
@@ -46,39 +46,40 @@ int tc_end(SMODEL_SUPER *mod)
 //        return (NO);
 //    }
 
-    if (mod->t_prev >= mod->t_final) {
-        return (YES);
-    }
+    //Mark, need to adapt this to new way
+//    if (mod->t_prev >= mod->t_final) {
+//        return (YES);
+//    }//
 
-    /* if we failed on the last step then do not adjust the time step 
-       if we did not fail, then relax the time step */
-    if (mod->flag.TIME_ADAPT_FAIL == NO)
-        mod->dt *= DT_ENLARGE_FACTOR;
+//    /* if we failed on the last step then do not adjust the time step 
+//       if we did not fail, then relax the time step */
+//    if (mod->flag.TIME_ADAPT_FAIL == NO)
+//        mod->dt *= DT_ENLARGE_FACTOR;//
 
-    /* initializes the new dt to the time series provided by the user */
-    interval = sseries_get_interval(*(mod->series_dt), mod->t_prev);
-    dt_new = tc_eval_series(*(mod->series_dt), interval, mod->t_prev, 0);
+//    /* initializes the new dt to the time series provided by the user */
+//    interval = sseries_get_interval(*(mod->series_dt), mod->t_prev);
+//    dt_new = tc_eval_series(*(mod->series_dt), interval, mod->t_prev, 0);//
 
-    /* compares to the time step indicated by the error indicator */
-    if (mod->t_adpt_flag == ON)
-        if (dt_new > mod->dt_err)
-            dt_new = mod->dt_err;
+//    /* compares to the time step indicated by the error indicator */
+//    if (mod->t_adpt_flag == ON)
+//        if (dt_new > mod->dt_err)
+//            dt_new = mod->dt_err;//
 
-    /* compares to the current increment */
-    if (dt_new < mod->dt)
-        mod->dt = dt_new;
+//    /* compares to the current increment */
+//    if (dt_new < mod->dt)
+//        mod->dt = dt_new;//
 
-    /* if we are within one time step of the end, then take exactly the right amount */
-    if (mod->t_prev + mod->dt >= mod->t_final)
-        mod->dt = mod->t_final - mod->t_prev;
-    /* if we are within one and a little time step of the end, then take half the time */
-    else if (mod->t_prev + 2.0 * mod->dt >= mod->t_final)
-        mod->dt = 0.5 * (mod->t_final - mod->t_prev);
+//    /* if we are within one time step of the end, then take exactly the right amount */
+//    if (mod->t_prev + mod->dt >= mod->t_final)
+//        mod->dt = mod->t_final - mod->t_prev;
+//    /* if we are within one and a little time step of the end, then take half the time */
+//    else if (mod->t_prev + 2.0 * mod->dt >= mod->t_final)
+//        mod->dt = 0.5 * (mod->t_final - mod->t_prev);//
 
-    /* makes sure everyone is on the same dt */
-#ifdef _MESSG
-    mod->dt = messg_dmin(mod->dt,mod->grid->smpi->ADH_COMM);
-#endif
+//    /* makes sure everyone is on the same dt */
+//#ifdef _MESSG
+//    mod->dt = messg_dmin(mod->dt,mod->grid->smpi->ADH_COMM);
+//#endif
 
     /* returns a no */
     return (NO);

@@ -5,8 +5,8 @@
 int doesFileExist(const char *fname);
 
 // time-stepping tools
-int tc_end(SMODEL_SUPER *);
-void tc_init(SMODEL_SUPER *);
+int tc_end(SMODEL_DESIGN *);
+void tc_init(SMODEL_DESIGN *);
 void tc_timeunits(FILE *, int);
 double tc_eval_series(SSERIES, int, double, int);
 #ifdef _ADH_GROUNDWATER

@@ -58,8 +58,8 @@ void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init
     //fill out materials in each super model without reading superfile
 
     for(i=0;i<dm->nSuperModels;i++){
-        smodel_super_no_read_simple(&(dm->superModel[i]), dt_in, t_init, t_final,
-        nphysics_mat_1d, nphysics_mat_2d, nphysics_mat_3d, elemVarCode, isSimple,
+        smodel_super_no_read_simple(&(dm->superModel[i]), &(dm->dt), &(dm->t_init), &(dm->t_prev),
+        &(dm->t_final),nphysics_mat_1d, nphysics_mat_2d, nphysics_mat_3d, elemVarCode, isSimple,
         dm->grid, &(dm->lin_sys[i]));
         
         dm->superModel[i].tol_nonlin = 1e-5;

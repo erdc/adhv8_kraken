@@ -18,9 +18,9 @@
  * \note This supermodel is already assumed to have a grid pointer within it that is populated
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, double t_final,
-    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4], int isSimple,
-    SGRID *grid, SLIN_SYS *sys) {
+void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init, double* t_prev,
+    double* t_final, int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, 
+    char elemVarCode[4], int isSimple, SGRID *grid, SLIN_SYS *sys) {
     int i,j;
     printf("Initializing smodel super without file read\n");
     // assign scalars
@@ -31,9 +31,11 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
     sm->inc_nonlin = 1e-3;
     sm->tol_nonlin = 1e-5;
     sm->t_init = t_init;
-    sm->t_prev = t_init;
+    sm->t_prev = t_prev;
     sm->t_final = t_final;
-    sm->t_adpt_flag = 0;
+    sm->nsubsteps = 1;
+    //keep null for now
+    //sm->t_adpt_flag = 0;
     sm->nseries = 0;              // the number of series in this model 
     sm->itrns = 0;
     sm->isSimple = isSimple;
@@ -252,6 +254,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, 
         sm->dof_map_local[i] = i*3;
     }
 
+    sm->forward_step = fe_newton;
     //allocate_adh_system(sm);
 
     //printf("Assigned sw2 to residual structure\n");

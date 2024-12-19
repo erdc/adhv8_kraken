@@ -14,14 +14,18 @@ typedef struct {
     //Mark added type flag, isSimple -> superModel has only one physics type on whole grid
     int isSimple;
 
-    double dt, old_dt, dt_err;
-    double dt_prev;
+    //just pointers to dm
+    double *dt, *old_dt, *dt_err;
+    double* dt_prev;
     double inc_nonlin;
     double tol_nonlin;
-    double t_init;
-    double t_prev;
-    double t_final;
-    int t_adpt_flag;
+    double* t_init;
+    double* t_prev;
+    double* t_final;
+    int* t_adpt_flag;
+    //an additional integer if we want to subtimestep off the main dt
+    //nsubstep of 1 would be dt = dt of super model
+    int nsubsteps;
 
     int nseries;              // the number of series in this model 
     int itrns;
@@ -107,7 +111,7 @@ typedef struct {
     SMAT_PHYSICS *node_physics_mat; //[nphysics_mat_node]
 
     //Mark, maybe just role this into SMAT_PHYSICS object????
-    
+    int (*forward_step)();
     //Mark, has moved to SMAT_PHYSICS
     //this should be based on number of physics materials, no longer numbr of elements
     //int *nSubMods1d;                // [nphysics_mat_1d] the total number of physics modules on each 1D element
@@ -217,9 +221,9 @@ void smodel_super_read(SMODEL_SUPER *smod, FILE *fp);
 void smodel_super_printScreen(SMODEL_SUPER *smod);
 
 //Mark added for testing
-void smodel_super_no_read_simple(SMODEL_SUPER *sm, double dt_in, double t_init, double t_final,
-    int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, char elemVarCode[4], int isSimple,
-    SGRID *grid, SLIN_SYS *sys);
+void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init, double* t_prev,
+    double* t_final, int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, 
+    char elemVarCode[4], int isSimple, SGRID *grid, SLIN_SYS *sys);
 
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

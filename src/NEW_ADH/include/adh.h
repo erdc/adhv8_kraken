@@ -87,6 +87,8 @@
 #include "fe.h"
 #include "sw2.h"
 #include "poisson.h"
+//Mark added time loop
+#include "time_loop.h"
 
 
 // FOLDERS
@@ -101,4 +103,5 @@
 #include "testresidual.h"
 #include "testjacobian.h"
 #include "testnewton.h"
+#include "testtimeloop.h"
 //#endif

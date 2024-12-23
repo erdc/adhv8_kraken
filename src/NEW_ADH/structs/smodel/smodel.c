@@ -104,7 +104,7 @@ void smodel_alloc_init(SMODEL *physics,int nvar) { // triple pointer?
     physics->fe_init = NULL;
     physics->fe_update = NULL;
     physics->fe_solve = NULL;
-    physics->fe_resid = NULL;
+    physics->fe_resid = -1;
     physics->fe_load = NULL;
     physics->nvar = nvar;
     //allocate array of physics variables and set to default

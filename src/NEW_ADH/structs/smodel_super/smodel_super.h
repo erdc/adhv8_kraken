@@ -2,6 +2,8 @@
 #ifndef H_SMODEL_SUPER_
 #define H_SMODEL_SUPER_
 
+
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 typedef struct {
@@ -110,8 +112,11 @@ typedef struct {
     int *node_physics_mat_id; //[nnode] ? local vs what idk
     SMAT_PHYSICS *node_physics_mat; //[nphysics_mat_node]
 
-    //Mark, maybe just role this into SMAT_PHYSICS object????
-    int (*forward_step)();
+    //Mark a pointer to array of function pointers, using model_codes.h
+    //void *forward_step;
+    int forward_step;
+    
+    //void (*printFunc)(struct MyStruct *); // Function pointer
     //Mark, has moved to SMAT_PHYSICS
     //this should be based on number of physics materials, no longer numbr of elements
     //int *nSubMods1d;                // [nphysics_mat_1d] the total number of physics modules on each 1D element
@@ -207,6 +212,8 @@ typedef struct {
 //    SNS_3D *sns3d;
 } SMODEL_SUPER;
 
+
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
@@ -224,7 +231,13 @@ void smodel_super_printScreen(SMODEL_SUPER *smod);
 void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init, double* t_prev,
     double* t_final, int nphysics_mat_1d, int nphysics_mat_2d, int nphysics_mat_3d, 
     char elemVarCode[4], int isSimple, SGRID *grid, SLIN_SYS *sys);
+//from fe_newton.c
+//int fe_newton(struct SMODEL_SUPER* sm);
 
+//TODOD, write this up!
+int smodel_super_forward_step(SMODEL_SUPER* sm, int (*ts_fnctn)(SMODEL_SUPER*));
+
+int smodel_super_resid(SMODEL_SUPER* sm, double *rhs, int ie, double perturbation, int perturb_node, int perturb_var, int perturb_sign, int DEBUG, int (*fe_resid)(SMODEL_SUPER *, double *, int, double, int, int, int, int));
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

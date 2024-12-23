@@ -78,6 +78,9 @@
 #include "smodel_super.h"
 #include "smodel_design.h"
 
+#include "model_codes.h"
+#include "models.h"
+
 //Mark added
 #include "residual.h"
 #include "jacobian.h"

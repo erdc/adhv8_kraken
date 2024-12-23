@@ -31,7 +31,7 @@
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int fe_newton(SMODEL_SUPER *sm)
+int fe_newton(SMODEL_SUPER* sm)
 {
 
     //pointer to the grid

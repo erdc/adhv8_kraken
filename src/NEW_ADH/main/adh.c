@@ -3,6 +3,9 @@ int main(int argc, char **argv) {
 
     SMODEL_SUPER sm;
 
+    //set resid routines
+    set_models(fe_resid);
+
 #ifdef _MPI
     printf("HERE\n");
     MPI_Init(NULL, NULL);

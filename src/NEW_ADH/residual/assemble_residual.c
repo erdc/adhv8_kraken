@@ -89,8 +89,8 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
             //either modify resid routines to return int or add an argument, can decide later
             //var_code will contain ordered digits of each equation, same codes used in elem*_vars[]
             //maybe model comes from mat as well? instead of elem number, get mat number
-            var_code = sm->elem3d_physics_mat[mat_id].model[k].fe_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-
+            //var_code = sm->elem3d_physics_mat[mat_id].model[k].fe_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+            var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->elem3d_physics_mat[mat_id].model[k].fe_resid]);
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
             add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes,-1.0);
@@ -148,7 +148,8 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
             //either modify resid routines to return int or add an argument, can decide later
             //var_code will contain ordered digits of each equation, same codes used in elem*_vars[]
             //maybe model comes from mat as well? instead of elem number, get mat number
-            var_code = sm->elem2d_physics_mat[mat_id].model[k].fe_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+            //var_code = sm->elem2d_physics_mat[mat_id].model[k].fe_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+            var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->elem2d_physics_mat[mat_id].model[k].fe_resid]);
             //printf("Element: %d, Physics module: %d, Physics Residual = {%f,%f,%f,%f,%f,%f,%f,%f,%f}\n",j,k,eq_rhs[0],eq_rhs[1],eq_rhs[2],eq_rhs[3],eq_rhs[4],eq_rhs[5],eq_rhs[6],eq_rhs[7],eq_rhs[8]);
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
@@ -199,8 +200,8 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
             //either modify resid routines to return int or add an argument, can decide later
             //var_code will contain ordered digits of each equation, same codes used in elem*_vars[]
             //maybe model comes from mat as well? instead of elem number, get mat number
-            var_code = sm->elem1d_physics_mat[mat_id].model[k].fe_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-
+            //var_code = sm->elem1d_physics_mat[mat_id].model[k].fe_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
+            var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->elem1d_physics_mat[mat_id].model[k].fe_resid]);
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
             add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes,-1.0);

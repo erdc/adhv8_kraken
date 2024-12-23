@@ -1,10 +1,16 @@
 #include "adh.h"
 
+//could move to global file?
+static int (*forward_stepper[N_TIME_STEPPERS]) (SMODEL_SUPER*);
+
 
 int time_loop(SMODEL_DESIGN *dm){
 	int TIME_STEP_WORKED = TRUE, LOOP_INCOMPLETE = TRUE;
 	int ierr = YES;
 	int ts=0;
+
+	//assign function pointers, maybe move to a global file?
+	set_forward_steppers(forward_stepper);
 
 	//aliasing for convenience
 	int nsuper = dm->nSuperModels;
@@ -50,7 +56,7 @@ int advance_time(SMODEL_DESIGN *dm, int nsuper){
 		//we restrict super models to have time steps as integer fractions
 		//of the design model time step
 		for (isub=0; isub<nsubsteps; isub++){
-			TS_SUCCESS = sm->forward_step(sm);
+			TS_SUCCESS = smodel_super_forward_step(sm, forward_stepper[sm->forward_step]);
 			//check if time step succeeded
 			if (!TS_SUCCESS){
 				return TS_SUCCESS;

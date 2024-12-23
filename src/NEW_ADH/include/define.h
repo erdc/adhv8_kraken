@@ -126,17 +126,6 @@
 /* the default tolerance for a series */
 #define XY_DEFAULT_TOL 1.0E-1
 
-/* for fe sw3 perturbations */
-#define PERTURB_U 1
-#define PERTURB_V 2
-#define PERTURB_W 3
-#define PERTURB_DPL 4
-#define PERTURB_H 5
-#define PERTURB_C 6
-#define PERTURB_P 7
-#define PERTURB_D 8
-#define PERTURB_NONE -1
-
 /* Constituent numbers */
 #define TKE 1			/* turbulent kinetic energy */
 #define TDS 2			/* turbulent dissipation */

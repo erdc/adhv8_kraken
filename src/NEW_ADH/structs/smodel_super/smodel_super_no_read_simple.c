@@ -196,7 +196,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     //how does this work?
     //sm->elem2d_physics[0][0].fe_resid = fe_sw2_body_resid;
     //hard code to poisson routine for now
-    sm->elem2d_physics_mat[0].model[0].fe_resid = poisson_residual;
+    sm->elem2d_physics_mat[0].model[0].fe_resid = POISSON;//poisson_residual;
     sm->elem2d_physics_mat[0].model[0].nvar = 1;
     sm->elem2d_physics_mat[0].model[0].physics_vars[0] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[1] = PERTURB_U;
@@ -254,7 +254,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
         sm->dof_map_local[i] = i*3;
     }
 
-    sm->forward_step = fe_newton;
+    sm->forward_step = FE_NEWTON;
     //allocate_adh_system(sm);
 
     //printf("Assigned sw2 to residual structure\n");

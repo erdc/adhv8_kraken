@@ -59,6 +59,7 @@ $(wildcard $(MASTER_SRC_DIR)../la) \
 $(wildcard $(MASTER_SRC_DIR)../newton) \
 $(wildcard $(MASTER_SRC_DIR)../fe) \
 $(wildcard $(MASTER_SRC_DIR)../timeloop) \
+$(wildcard $(MASTER_SRC_DIR)../models) \
 $(wildcard $(MASTER_SRC_DIR)../models/sw2) \
 $(wildcard $(MASTER_SRC_DIR)../models/poisson) \
 $(wildcard $(MASTER_SRC_DIR)../test/la) \
@@ -107,6 +108,7 @@ $(MASTER_SRC_DIR)../la \
 $(MASTER_SRC_DIR)../newton \
 $(MASTER_SRC_DIR)../fe \
 $(MASTER_SRC_DIR)../timeloop \
+$(MASTER_SRC_DIR)../models \
 $(MASTER_SRC_DIR)../models/sw2 \
 $(MASTER_SRC_DIR)../models/poisson \
 $(MASTER_SRC_DIR)../test/la \

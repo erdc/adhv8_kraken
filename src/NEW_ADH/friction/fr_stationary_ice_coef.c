@@ -1,5 +1,5 @@
 /*! \file  fr_stationary_ice_coef.c This file calculates a coefficient c_f for stationary ice coefficient of friction, such that the shear stress may be computed  */
-#include "fr_defs.h"
+#include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*! \brief This routine calculates a coefficient c_f for stationary ice coefficient, such that the shear stress tau is found as follows:

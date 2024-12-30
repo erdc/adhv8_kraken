@@ -38,12 +38,11 @@ int fe_newton(SMODEL_SUPER* sm)
     SGRID *grid = sm->grid;
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // DEBUG OPTIONS
-    int DEBUG_FULL = OFF;       // prints everything but matrix
-    int DEBUG_MATRIX = OFF;     // prints the matrix
-    int DEBUG_PICKETS = OFF;    // check memory
-    
-    int DEBUG_INIT_RESID = OFF;             // print the initial residual only
-    int DEBUG_STOP_AFTER_INIT_RESID = OFF;  // stop of this intitial residual print
+    //int DEBUG_FULL = OFF;       // prints everything but matrix
+    //int DEBUG_MATRIX = OFF;     // prints the matrix
+    //int DEBUG_PICKETS = OFF;    // check memory
+    //int DEBUG_INIT_RESID = OFF;             // print the initial residual only
+    //int DEBUG_STOP_AFTER_INIT_RESID = OFF;  // stop of this intitial residual print
     
     //if (init_fnctn == fe_sw_hybrid_wvel_init) DEBUG_FULL = ON;
     //if (init_fnctn == fe_transport_init) DEBUG_STOP_AFTER_INIT_RESID = ON;
@@ -54,20 +53,16 @@ int fe_newton(SMODEL_SUPER* sm)
 #ifdef _MESSG
         MPI *smpi = grid->smpi
 #endif
-    
-    int nnodes = grid->nnodes;
-    int my_nnodes = grid->my_nnodes;
-    int macro_nnodes = grid->macro_nnodes;
 
     
     //uses model to access all elemental routines and builds/solves linear systems
     int status;
     int check = NO;		/* newton solver check */
     int keep_chugging = NO;     /* newton solver check */
-    double next_dt = 0;         /* temp variable for the time step for STEADY STATE */
-    double ratio = 0;           /* STEADY STATE VARIABLES */
-    int i, j, k;                /* loop counter */
-    int idof;                   /* location of the maximum residual */
+    //double next_dt = 0;         /* temp variable for the time step for STEADY STATE */
+    //double ratio = 0;           /* STEADY STATE VARIABLES */
+    int i;                      /* loop counter */
+    //int idof;                   /* location of the maximum residual */
     int imax_dof = 0;          /* location of the maximum residual */
     int iinc_dof = 0;          /* location of the maximum ..increment? */
     int it;                     /* the nonlinear iteration counter */
@@ -77,15 +72,15 @@ int fe_newton(SMODEL_SUPER* sm)
     double resid_max_norm = 0.0;    /* the max norm of the residual */
     double resid_l2_norm = 0.0; /* the l2 norm of the residual */
     double old_resid_norm;      /* the previous norm of the residual - used for the line search */
-    double partial_max_norm;    /* the partial residual norm prior to summing over processors */
-    double partial_l2_norm;     /* the partial residual norm prior to summing over processors */
+    //double partial_max_norm;    /* the partial residual norm prior to summing over processors */
+    //double partial_l2_norm;     /* the partial residual norm prior to summing over processors */
     double inc_max_norm = 0.0;  /* the max increment change */
-    static double initial_residual; /* Initial_Residual */
-    double spatial_residual_proc;   /* Individual Processor resid */
-    double lolh;
-    static int count_std;
-    int mn_node = 0, im_node = 0;
-    int tot_nnode;
+    //static double initial_residual; /* Initial_Residual */
+    //double spatial_residual_proc;   /* Individual Processor resid */
+    //double lolh;
+    //static int count_std;
+    //int mn_node = 0, im_node = 0;
+    //int tot_nnode;
     int UMFail_max = NO;
     int solv_flag_min = NO;
     int myid = 0, npes = 1, proc_count = 0;
@@ -110,6 +105,9 @@ int fe_newton(SMODEL_SUPER* sm)
     
 #ifdef _DEBUG
     if (DEBUG_FULL) {
+            int nnodes = grid->nnodes;
+            int my_nnodes = grid->my_nnodes;
+            int macro_nnodes = grid->macro_nnodes;
             printf("fe_newton :: myid: %d ndim: %d :: grid->my_nnodes: %d :: grid->nnodes: %d  :: macro_nnodes: %d\n",
                    grid->smpi->myid,
                    grid->ndim,
@@ -124,7 +122,7 @@ int fe_newton(SMODEL_SUPER* sm)
     // must not be case, need to dig into this later
     
     // Is there a 2D SW model inside the superModel?
-    int is_2d_hydro = ON;
+    //int is_2d_hydro = ON;
 
     //old way of checking, for now just assume this is always on
 //    for (i=0; i<sm->nsubmodels; i++){
@@ -839,7 +837,7 @@ int fe_newton(SMODEL_SUPER* sm)
         /* we are forcing it to accept the result at the max nonlinear iteration */
         if (sm->force_nonlin_it == YES) return (TRUE);
         
-        tc_scale(&sm->dt
+        tc_scale(sm->dt
 #ifdef _MESSG
                  , supersmpi->ADH_COMM
 #endif

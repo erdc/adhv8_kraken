@@ -1,5 +1,5 @@
 /*! \file  fr_rheight_to_manningsn.c This file converts a value of the equivalent sand roughness height to a value of Manning's n.  */
-#include "fr_defs.h"
+#include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*! \brief This file converts a value of the equivalent sand roughness height to a value of Manning's n.

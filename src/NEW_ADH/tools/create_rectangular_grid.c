@@ -213,7 +213,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 				// Note usage of one-index
 				// Console
 				//printf("nodes: %d %d %d \t cross: %20.10f %20.10f %20.10f \n", \
-						nd1+1,nd2+1,nd3+1,cross.x,cross.y,cross.z);
+				//		nd1+1,nd2+1,nd3+1,cross.x,cross.y,cross.z);
             			// File
 				//allocate and save to element
 				temp_node[0].x = grid.node[nd1].x;
@@ -273,7 +273,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
                 // Note usage of one-index
                 // Console
                 //printf("nodes: %d %d %d \t cross: %20.10f %20.10f %20.10f \n", \
-                nd1+1,nd2+1,nd3+1,cross.x,cross.y,cross.z);
+                //nd1+1,nd2+1,nd3+1,cross.x,cross.y,cross.z);
                 // save to grid
                 //allocate and save to element
 				temp_node[0].x = grid.node[nd1].x;
@@ -341,7 +341,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
                 // Note usage of one-index
                 // Console
                 //printf("nodes: %d %d %d \t cross: %20.10f %20.10f %20.10f \n", \
-                nd1+1,nd2+1,nd3+1,cross.x,cross.y,cross.z);
+                //nd1+1,nd2+1,nd3+1,cross.x,cross.y,cross.z);
                 // File
                 //save to grid
                 //allocate and save to element
@@ -405,7 +405,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
                 // Note usage of one-index
                 // Console
 				//printf("nodes: %d %d %d \t cross: %20.10f %20.10f %20.10f \n", \
-						nd1+1,nd2+1,nd3+1,cross.x,cross.y,cross.z);
+				//		nd1+1,nd2+1,nd3+1,cross.x,cross.y,cross.z);
                 // save to frid object
                 //allocate and save to element
 				temp_node[0].x = grid.node[nd1].x;

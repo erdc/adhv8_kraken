@@ -14,7 +14,6 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys){
-    int ierr;
     //set up anything PETSc after allocation but before load
  #ifdef _PETSC   
     //PETSc solver will be stord in ksp object

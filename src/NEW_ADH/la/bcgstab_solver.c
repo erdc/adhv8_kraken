@@ -1,7 +1,5 @@
 /*! \file  bcgstab_solver.c This file has functions responsible for solving linear system in split CSR format using BCG-stabilized method */
 #include "adh.h"
-//these could be macros or user-defined at run time
-#define SOLV_TOL 1e-5
 //keep umfpack calls in one script
 static  void *Symbolic, *Numeric;
 static int isize = 0;           /* the size of the arrays */
@@ -124,7 +122,6 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   sarray_copy_dbl(p, b, size);
   //in original routine but doesnt seem necessary
   sarray_init_dbl(b,size);
-  int i;
   //apply left preconditioning to RHS, this is stored in residual
   solve_umfpack(b, indptr_diag, cols_diag, vals_diag, p, local_size);
   //zero out rhs

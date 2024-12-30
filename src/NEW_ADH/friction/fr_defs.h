@@ -15,10 +15,6 @@
 #define TOT_CO 3
 #define ERROR -1
 
-/* macros */
-#define MAX(a,b) (a > b ? a : b)
-#define MIN(a,b) (a < b ? a : b)
-
 /* function prototypes */
 double fr_bedshstr_drag_coef(
   double,

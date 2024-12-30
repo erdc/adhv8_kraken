@@ -141,7 +141,7 @@ DEPS                = $(foreach dir,    $(INCLUDE_DIR), $(wildcard  $(dir)/*.h))
 OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              += 
-CFLAGS              += -O3 -D_ADH_HDF5 #-D_PETSC #-D_DEBUG #-D_MPI #-D_MESSG #-Wall
+CFLAGS              += -O3 -D_ADH_HDF5 -Wno-incompatible-pointer-types-discards-qualifiers #-D_PETSC #-D_DEBUG #-D_MPI #-D_MESSG #-Wall
 CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/include -lhdf5  #-L/opt/homebrew/lib
 FLAGS               = $(OPT) $(IFLAGS) $(LFLAGS) $(CFLAGS) $(LDLIBS) 
 #----------------------------

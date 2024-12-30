@@ -90,6 +90,4 @@ void smodel_super_free(SMODEL_SUPER *sm) {
         sm->dirichlet_data = (double *) tl_free(sizeof(double), *(sm->ndofs), sm->dirichlet_data);
     }
 
-
-
 }

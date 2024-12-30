@@ -1,7 +1,5 @@
 /*! \file inhouse.c This file tests the BiCGStab solver for split CSR matrix */
 #include "adh.h"
-#define SOLV_TOL 1e-5
-#define MAX_NODAL_DOF 4
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -15,7 +13,6 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int inhouse_test(int argc, char **argv) {
-
   int status;
   int nghost = 0;
   int m=0;
@@ -24,8 +21,9 @@ int inhouse_test(int argc, char **argv) {
   int nnz_diag=0;
   int nnz_off_diag=0;
   int rank=0;
-  int npe=1;
+  
 #ifdef _MPI
+  int npe=1;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &npe);
 #endif
@@ -193,7 +191,7 @@ int inhouse_test(int argc, char **argv) {
   //for(k=0;k<nnz_diag;k++){
   //  printf("Rank %d, scaled nnz_diag[%d] = %f\n",rank,k,vals_diag[k]);
   //}
-  return 0;
+  return status;
 }
 
 

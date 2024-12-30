@@ -98,7 +98,6 @@ void smodel_alloc_init_array(SMODEL **elemPhys, int nSubMods, int *nSubMod_nvar)
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_alloc_init(SMODEL *physics,int nvar) { // triple pointer?
-    int i;
     assert(nvar>0);
     physics->fe_inc = NULL;
     physics->fe_init = NULL;

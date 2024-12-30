@@ -22,7 +22,6 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_design_alloc(SMODEL_DESIGN *dmod, int nSuperModels, int nMono, int nSimple,
     int nUnique) {
-    int i;
     // allocate the design grid (may choose to do different superModel grids later)
     // Need to add SFILE_IN gridFile to SGRID STRUCTURE
     // Need to add SFILE_IN facesFile to SGRID STRUCTURE

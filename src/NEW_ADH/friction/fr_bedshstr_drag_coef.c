@@ -1,5 +1,5 @@
 /*! \file  fr_bedshstr_drag_coef.c This file collections functions responsible for computinf friction coefficient  */
-#include "fr_defs.h"
+#include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*! \brief This routine calculates a coefficient c_f, such that the shear stress tau is found as follows:

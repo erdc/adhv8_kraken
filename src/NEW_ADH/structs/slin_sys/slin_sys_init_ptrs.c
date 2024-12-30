@@ -44,5 +44,4 @@ void slin_sys_init_ptrs(SLIN_SYS *lin_sys, int *my_ndof_ptr, int *ndof_ptr, int 
     sarray_init_dbl(lin_sys->residual,i);
     sarray_init_dbl(lin_sys->dsol,i);
     sarray_init_dbl(lin_sys->scale_vect,i);
-
 }

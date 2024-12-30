@@ -1,7 +1,7 @@
 #include "adh.h"
 int main(int argc, char **argv) {
 
-    SMODEL_SUPER sm;
+    //SMODEL_SUPER sm;
 
     //set resid routines
     set_models(fe_resid);

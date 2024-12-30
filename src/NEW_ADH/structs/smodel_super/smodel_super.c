@@ -181,7 +181,7 @@ void smodel_super_read(SMODEL_SUPER *smod, FILE *fp) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_super_printScreen(SMODEL_SUPER *smod) {
     
-    printf("dt: %10.5f || dt_prev: %10.5f\n",smod->dt,smod->dt_prev);
+    printf("dt: %10.5f || dt_prev: %10.5f\n",*(smod->dt),*(smod->dt_prev));
     printf("inc_nonlin: %10.5e || tol_nonlin: %10.5e\n",smod->inc_nonlin,smod->tol_nonlin);
     
 }

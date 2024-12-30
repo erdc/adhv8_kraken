@@ -16,7 +16,7 @@ static int DEBUG = OFF;
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
-    int j,k,l,m;
+    int j,k;
     //seems like the easiest way?
     //maybe think about this
     //we want/need a local and global mapping (local as in local to PE)
@@ -35,11 +35,10 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
     //for a given elemental rhs, this will give index local to process where we should put entries
     int dofs[MAX_ELEM_DOF];
     int nnodes;
-    int node_id, node_mat_id;
     int elem_vars[MAX_NVAR];
     int physics_vars[MAX_NVAR];
     int var_code;
-    int nvar_node[MAX_NNODE];
+    //int nvar_node[MAX_NNODE];
     //allocate 2d array, more memory than necessary
     //int vars_node[MAX_NNODE][MAX_NVAR];
 //    int **vars_node;

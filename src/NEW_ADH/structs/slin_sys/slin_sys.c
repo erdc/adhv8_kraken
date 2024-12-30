@@ -21,7 +21,6 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void slin_sys_alloc_array(SLIN_SYS **lin_sys, int nlin_sys){
-	int i;
 	// allocate
     (*lin_sys) = (SLIN_SYS *) tl_alloc(sizeof(SLIN_SYS), nlin_sys);
 

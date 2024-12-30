@@ -45,11 +45,14 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
     //could illuciadate arguments, but will look at this later
     //modify linear system to have dirichlet conditions at
     //entries where bc_mask=YES
+    //Method 1: doesnt require solution to have dirichlet conditions set
+    //Method 2: assumes solution already has dirichlet condition values set
 
     //brute force for now, can find better way later
     int my_ndof = *(sm->my_ndofs);
     int row, row_start, row_end, row_entry,local_col_no;
-    double temp;
+    //Required for method 1 only
+    //double temp;
     for (row=0;row<my_ndof;row++){
         row_start = sm->lin_sys->indptr_diag[row];
         row_end = sm->lin_sys->indptr_diag[row+1];
@@ -57,10 +60,15 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
         for(row_entry=row_start; row_entry<row_end; row_entry++){
             local_col_no = sm->lin_sys->cols_diag[row_entry];
             if(sm->bc_mask[local_col_no] == YES){
-                temp = sm->lin_sys->vals_diag[row_entry];
+                //required for Method 1
+                ////////////////////////////////////////////
+                //temp = sm->lin_sys->vals_diag[row_entry];
                 //adjust RHS
                 //needed for method 1, for method 2 this should be unecceary
                 //sm->residual[row] -= temp*(sm->dirichlet_data[local_col_no] - sm->sol[local_col_no]);
+                ////////////////////////////////////////////
+
+                //used in both method 1 and method 2
                 //clear entry after moving
                 sm->lin_sys->vals_diag[row_entry] = 0.0;
             }
@@ -75,9 +83,9 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
             row_start = sm->lin_sys->indptr_diag[row];
             row_end = sm->lin_sys->indptr_diag[row+1];
             //assign dirichlet data to residual
-            //method 1 appears to work
+            //Method 1
             //sm->residual[row] = sm->dirichlet_data[row] - sm->sol[row];
-            //method 2, require sol to have bc already  there
+            //Method 2, requires sol to have bc already  there
             sm->lin_sys->residual[row] = 0.0;
             //wipe out row and set diagonal to 1 (rescaling diagonal shouldn't matter in method 2)
             for(row_entry=row_start; row_entry<row_end; row_entry++){

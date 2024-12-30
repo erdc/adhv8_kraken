@@ -49,7 +49,6 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
     int i,j,k,l, mat_id;
     int elem_vars[MAX_NVAR];
     int dofs[max_elem_dofs],global_dofs[max_elem_dofs];
-    int dum1,dum2;
     int isize_prev;
     int NNZ_diag = 0;
     int nnz_row_diag;
@@ -528,7 +527,4 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
     }
     
     printf("CSR sparsity completed\n");
-
-
-
 }

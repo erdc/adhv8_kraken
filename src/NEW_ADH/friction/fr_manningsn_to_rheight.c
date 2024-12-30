@@ -1,5 +1,5 @@
 /*! \file  fr_manningsn_to_rheight.c This file collections functions responsible for computing friction coefficient  */
-#include "fr_defs.h"
+#include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*! \brief This routine converts a value of Manning's n to a value of the equivalent sand roughness height.

@@ -4,7 +4,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #include "adh.h"
-static int FILE_DEBUG = OFF;
+//static int FILE_DEBUG = OFF;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -156,7 +156,7 @@ void initialize_dirichlet_bc(SMODEL_SUPER *sm) {
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void update_function(SMODEL_SUPER *sm){
-    int j,k;
+    //int j,k;
 
     //is this just comm update double on sol?
     //need to check if this is necessary
@@ -254,8 +254,7 @@ void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *i
          int *imax_dof, int *iinc_dof, int *include_dof,
          int my_ndofs, int ndofs, int macro_ndofs, double *residual, double *dsol, int *bc_mask){
     
-    int i, j, include_dof_flag;
-    double lolh = 1.0;
+    int i, include_dof_flag;
     double partial_l2_norm = 0.;
     double partial_max_norm = 0.;
     double partial_inc_max_norm = 0.;

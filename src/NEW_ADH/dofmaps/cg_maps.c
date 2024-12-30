@@ -24,9 +24,11 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
 
-    int i,j,k,l,save_k,index,temp,ctr,nvars_node, nodal_mat_ID, nodeID, current_nodal_nvars,offset, temp_nodal_var;
+    int i,j,k,save_k,ctr,nodal_mat_ID, nodeID, current_nodal_nvars,offset, temp_nodal_var;
     int current_var;
+#ifdef _DEBUG
     bool isFound;
+#endif
     ctr =0;
     save_k=-1;
     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
@@ -50,7 +52,9 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
         current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
         for (j=0; j<elem_nvars; j++){
             //map the current var from the residual to the correct var number in global residual
+#ifdef _DEBUG
             isFound=FALSE;
+#endif
             current_var = elem_vars[j];
 
             //loop through the nodal vars to look for match
@@ -58,13 +62,18 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
                 temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
                 //note current_nodal_vars depends on i
                 if(current_var == temp_nodal_var){
+#ifdef _DEBUG
                     isFound=TRUE;
+#endif
                     save_k = k;
                     break;
                 }
 
             }
-            //assert(isFound);
+            //for debugging
+#ifdef _DEBUG
+            assert(isFound);
+#endif
             local_dofs[ctr] =  offset + save_k;
             ctr+=1;
         }
@@ -94,9 +103,10 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
 
-    int i,j,k,l,save_k,index,temp,ctr,nvars_node, nodal_mat_ID, nodeID, current_nodal_nvars,offset, temp_nodal_var;
-    int current_var;
+    int i,j,k,l,save_k,ctr,nodal_mat_ID, nodeID, current_var,current_nodal_nvars,offset, temp_nodal_var;
+#ifdef _DEBUG
     bool isFound;
+#endif
     ctr =0;
     
 
@@ -118,7 +128,9 @@ void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_
         current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
         for (j=0; j<elem_nvars; j++){
             //map the current var from the residual to the correct var number in global residual
+#ifdef _DEBUG
             isFound=FALSE;
+#endif
             current_var = elem_vars[j];
 
             //loop through the nodal vars to look for match
@@ -126,13 +138,17 @@ void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_
                 temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
                 //note current_nodal_vars depends on i
                 if(current_var == temp_nodal_var){
+#ifdef _DEBUG
                     isFound=TRUE;
+#endif
                     save_k = k;
                     break;
                 }
 
             }
-            //assert(isFound);
+#ifdef _DEBUG
+            assert(isFound);
+#endif
             local_dofs[ctr] =  offset + save_k;
             ctr+=1;
         }
@@ -160,9 +176,10 @@ void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
 
-    int k,l,save_k, nodal_mat_ID, current_nodal_nvars, temp_nodal_var;
-    int current_var;
+    int k,save_k, nodal_mat_ID, current_nodal_nvars, temp_nodal_var;
+#ifdef _DEBUG
     bool isFound;
+#endif
     int offset=0;
     save_k=-1;
     
@@ -174,18 +191,24 @@ int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_m
     nodal_mat_ID = nodal_physics_mat_id[NodeID];
     current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
     //map the current var and node to the correct equation number in global residual
+#ifdef _DEBUG
     isFound=FALSE;
+#endif
     //loop through the nodal vars to look for match
     for(k=0;k<current_nodal_nvars;k++){
         temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
         if(var == temp_nodal_var){
+#ifdef _DEBUG
             isFound=TRUE;
+#endif
             save_k = k;
             break;
         }
 
     }
-    //assert(isFound);
+#ifdef _DEBUG
+    assert(isFound);
+#endif
     return offset + save_k;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -209,8 +232,9 @@ int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_m
 int get_cg_dof_2(int var, int NodeID, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
 
     int k,l,save_k, nodal_mat_ID, current_nodal_nvars, temp_nodal_var;
-    int current_var;
+#ifdef _DEBUG
     bool isFound;
+#endif
     int offset=0;
     save_k=-1;
     
@@ -225,18 +249,24 @@ int get_cg_dof_2(int var, int NodeID, SMAT_PHYSICS *node_physics_mat, int *nodal
     nodal_mat_ID = nodal_physics_mat_id[NodeID];
     current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
     //map the current var and node to the correct equation number in global residual
+#ifdef _DEBUG
     isFound=FALSE;
+#endif
     //loop through the nodal vars to look for match
     for(k=0;k<current_nodal_nvars;k++){
         temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
         if(var == temp_nodal_var){
+#ifdef _DEBUG
             isFound=TRUE;
+#endif
             save_k = k;
             break;
         }
 
     }
-    //assert(isFound);
+#ifdef _DEBUG
+    assert(isFound);
+#endif
     return offset + save_k;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

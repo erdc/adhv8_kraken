@@ -1,7 +1,7 @@
 /*! \file  assemble_jacobian.c This file collections functions responsible for assembling the Jacobian matrix based on central finite difference  */
 #include "adh.h"
 static int DEBUG = OFF;
-static void sarray_init_double_2d_special(double to[MAX_ELEM_DOF][MAX_ELEM_DOF]);
+//static void sarray_init_double_2d_special(double to[MAX_ELEM_DOF][MAX_ELEM_DOF]);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -20,14 +20,11 @@ static void sarray_init_double_2d_special(double to[MAX_ELEM_DOF][MAX_ELEM_DOF])
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void assemble_jacobian(SMODEL_SUPER *sm) {
     SGRID *grid = sm->grid;
-    int j,k,l,m;
+    int j,k;
     int* fmap = sm->dof_map_local;
     int* ghosts = sm->lin_sys->ghosts;
-    int nsubMods;
     int ndofs_ele;
-    int nvar_ele,nnodes, var_code;
-    int node_id, node_mat_id;
-    int nvar_node[MAX_NNODE];
+    int nnodes, var_code;
     //maybe change this from 3d to 2d to 1d
     //in loop we dont want to have to alloc and free everytime, think about this
     double **elem_mat;
@@ -278,7 +275,7 @@ void load_global_mat_split_CSR(double *vals, int *indptr, int *indices, double *
     //need local to global mapping stores in global_dofs
     //assume we have at least global row start that this PE owns
     int col_start_ind,col_end_ind,col_index;
-    int global_row,row,col, global_col;
+    int row,col, global_col;
     int nrows = local_range[1]-local_range[0];
 
 
@@ -539,11 +536,11 @@ inline void elem_matrix_deriv(double **mat, int node_no, int var_no, int nnodes,
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-static void sarray_init_double_2d_special(double to[MAX_ELEM_DOF][MAX_ELEM_DOF]) {
-    int i,j;
-    for (i=0; i<MAX_ELEM_DOF; i++) {
-        for (j=0; j<MAX_ELEM_DOF; j++) {
-            to[i][j] = 0.0;
-        }
-    }
-}
+//static void sarray_init_double_2d_special(double to[MAX_ELEM_DOF][MAX_ELEM_DOF]) {
+//    int i,j;
+//    for (i=0; i<MAX_ELEM_DOF; i++) {
+//        for (j=0; j<MAX_ELEM_DOF; j++) {
+//            to[i][j] = 0.0;
+//        }
+//    }
+//}

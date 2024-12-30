@@ -25,7 +25,7 @@ void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init
 
     int i,j;
     int isSimple=0;
-    int ndof_temp, my_ndof_temp, macro_ndof_temp;
+    int ndof_temp;
     printf("Initializing design model without file read\n");
     smodel_design_alloc(dm, 1, 1, 0,1);
     printf("Smodel_design complete\n");
@@ -119,9 +119,7 @@ void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init
     //loop through every super model to allocate and assign pointters
     for(i=0;i<dm->nSuperModels;i++){
         j = dm->lin_sys_id[i];
-        my_ndof_temp = dm->my_ndofs[j];
         ndof_temp = dm->ndofs[j];
-        macro_ndof_temp = dm->macro_ndofs[j];
 
         dm->superModel[i].my_ndofs = &(dm->my_ndofs[j]); //pointers to design model, not arrays
         dm->superModel[i].my_ndofs_old = &(dm->my_ndofs_old[j]);

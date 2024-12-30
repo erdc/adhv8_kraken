@@ -1,5 +1,5 @@
 /*! \file  fr_equiv_depavg_shstr_coef.c This file collections functions responsible for computing friction coefficient  */
-#include "fr_defs.h"
+#include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*! \brief This routine calculates a coefficient \f$c_{eda}\f$, such that the shear stress \f$tau\f$ is found as follows:

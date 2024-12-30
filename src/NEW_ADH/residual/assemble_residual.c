@@ -214,8 +214,6 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->lin_sys->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
-
-
 //    for(j=0;j<MAX_NNODE;j++){
 //        free(vars_node[j]);
 //    } 

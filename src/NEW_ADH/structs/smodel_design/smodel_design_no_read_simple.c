@@ -112,7 +112,7 @@ void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init
         dm->lin_sys[i].ksp = PETSC_NULLPTR;
         dm->lin_sys[i].B = PETSC_NULLPTR;
         dm->lin_sys[i].X = PETSC_NULLPTR;
-        allocate_petsc_objects(&(dm->lin_sys[i]));
+        slin_sys_allocate_petsc_objects(&(dm->lin_sys[i]));
 #endif
     }
 

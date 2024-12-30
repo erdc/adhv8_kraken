@@ -45,7 +45,6 @@ void slin_sys_free(SLIN_SYS *lin_sys) {
     VecDestroy(&(lin_sys->B)); //Petsc residual
     VecDestroy(&(lin_sys->X)); //Petsc residual //Persc solution
 #endif
-    
     //Free all pointers in Split CSR format
     if(lin_sys->indptr_diag!=NULL){
         lin_sys->indptr_diag= (int *) tl_free(sizeof(int), *(lin_sys->local_size)+1, lin_sys->indptr_diag);

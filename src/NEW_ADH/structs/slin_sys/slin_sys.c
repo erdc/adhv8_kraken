@@ -24,7 +24,40 @@ void slin_sys_alloc_array(SLIN_SYS **lin_sys, int nlin_sys){
 	// allocate
     (*lin_sys) = (SLIN_SYS *) tl_alloc(sizeof(SLIN_SYS), nlin_sys);
 
-    //some loop that allocates stuff in lin_sys
+    //some loop that allocates/initializes stuff in lin_sys
+    slin_sys_init_array(*lin_sys, nlin_sys);
+
+}
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Allocates and intializes an AdH Linear System
+ *  \author    Corey Trahan, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ * @param[inout] dmod           (SDMODEL **)  a pointer to an AdH design-level model
+ * @param[in]  nSuperModels            (int) the total number of supermodels in the design model
+ * @param[in]  nSubModels                (int*) the total number of submodels in each supermodel
+ * @param[in]  nFluxInterfaces      (int*) the total number of flux interfaces between supermodels
+ *
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void slin_sys_init_array(SLIN_SYS *lin_sys, int nlin_sys){
+    //set some loop that sets default values
+    int isys;
+    for(isys=0;isys<nlin_sys;isys++){
+        lin_sys[isys].nnz_diag =0;
+        lin_sys[isys].nnz_off_diag=0;
+        lin_sys[isys].nnz_diag_old=0;
+        lin_sys[isys].nnz_off_diag_old=0;
+        lin_sys[isys].local_range[0]=0;
+        lin_sys[isys].local_range[1]=0;
+        lin_sys[isys].local_range_old[0]=0;
+        lin_sys[isys].local_range_old[1]=0;
+    }
 
 
 }

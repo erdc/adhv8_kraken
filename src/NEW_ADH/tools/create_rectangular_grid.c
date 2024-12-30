@@ -74,7 +74,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 	grid.nelems2d = (npx-1)*(npy-1)*2;
 	grid.nelems1d = 0;
 	grid.max_nelems1d = 0;
-	grid.max_nelems2d = 8;
+	grid.max_nelems2d = (npx-1)*(npy-1)*2;
 	grid.max_nelems3d = 0;
 	grid.nTets=0;
 	grid.nPrisms=0;

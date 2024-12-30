@@ -38,14 +38,15 @@ int fe_newton(SMODEL_SUPER* sm)
     SGRID *grid = sm->grid;
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // DEBUG OPTIONS
-    //int DEBUG_FULL = OFF;       // prints everything but matrix
-    //int DEBUG_MATRIX = OFF;     // prints the matrix
-    //int DEBUG_PICKETS = OFF;    // check memory
-    //int DEBUG_INIT_RESID = OFF;             // print the initial residual only
-    //int DEBUG_STOP_AFTER_INIT_RESID = OFF;  // stop of this intitial residual print
-    
+#ifdef _DEBUG
+    int DEBUG_FULL = OFF;       // prints everything but matrix
+    int DEBUG_MATRIX = OFF;     // prints the matrix
+    int DEBUG_PICKETS = OFF;    // check memory
+    int DEBUG_INIT_RESID = OFF;             // print the initial residual only
+    int DEBUG_STOP_AFTER_INIT_RESID = OFF;  // stop of this intitial residual print
     //if (init_fnctn == fe_sw_hybrid_wvel_init) DEBUG_FULL = ON;
     //if (init_fnctn == fe_transport_init) DEBUG_STOP_AFTER_INIT_RESID = ON;
+#endif
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -104,10 +105,10 @@ int fe_newton(SMODEL_SUPER* sm)
     macro_ndofs = *(sm->macro_ndofs);
     
 #ifdef _DEBUG
+    int nnodes = grid->nnodes;
+    int my_nnodes = grid->my_nnodes;
+    int macro_nnodes = grid->macro_nnodes;
     if (DEBUG_FULL) {
-            int nnodes = grid->nnodes;
-            int my_nnodes = grid->my_nnodes;
-            int macro_nnodes = grid->macro_nnodes;
             printf("fe_newton :: myid: %d ndim: %d :: grid->my_nnodes: %d :: grid->nnodes: %d  :: macro_nnodes: %d\n",
                    grid->smpi->myid,
                    grid->ndim,
@@ -264,7 +265,7 @@ int fe_newton(SMODEL_SUPER* sm)
     
 #ifdef _DEBUG
     if (DEBUG_FULL)
-        printScreen_dble_array("residual before solving", sm->residual, ndofs, __LINE__, __FILE__);
+        printScreen_dble_array("residual before solving", residual, ndofs, __LINE__, __FILE__);
     if (DEBUG_FULL || DEBUG_INIT_RESID || DEBUG_STOP_AFTER_INIT_RESID) {
         printf("\n **Initial resid_max_norm = %18.9e \n", resid_max_norm);
         if (DEBUG_STOP_AFTER_INIT_RESID) tl_error("Stopping after initial residual");
@@ -369,7 +370,7 @@ int fe_newton(SMODEL_SUPER* sm)
 #endif
                     printf("BEFORE SOLVE!\n");
                     printScreen_dble_array("sol before solving", sm->sol, ndofs, __LINE__, __FILE__);
-                    printScreen_dble_array("residual before solving", sm->residual, ndofs, __LINE__, __FILE__);
+                    printScreen_dble_array("residual before solving", residual, ndofs, __LINE__, __FILE__);
                     //printScreen_int_array("bc_mask before solving",sm->bc_mask, nnodes * nsys, __LINE__, __FILE__);
                     //printScreen_dble_array("scale_vect before solving",sm->scale_vect, nnodes * nsys, __LINE__, __FILE__);
 #ifdef _MESSG
@@ -391,11 +392,12 @@ int fe_newton(SMODEL_SUPER* sm)
         //be sure values get updated since we used set with split arrays ...
         KSPSetOperators(lin_sys->ksp,lin_sys->A,lin_sys->A);
         
-
+        //Want user to specify this but hard code for now
         //precon and stuff
         PC          pc;      /* preconditioner context */
         KSPGetPC(lin_sys->ksp, &pc);
         PetscCall(PCSetType(pc, PCLU)); //PCLU is direct LU
+        
         //PetscCall(KSPSetTolerances(sm->ksp, 1.e-11, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT));
         // TODO: can I call this once in fe_main instead?
         // Does the matrix operator need to be specified before SetFromOptions each time?
@@ -429,12 +431,12 @@ int fe_newton(SMODEL_SUPER* sm)
             // View sol
             PetscViewerASCIIOpen(PETSC_COMM_WORLD,"Svec.m",&(viewer));
             PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-            VecView(sol,viewer);
+            VecView(lin_sys->X,viewer);
             PetscViewerPopFormat(viewer);
             // View residual
             PetscViewerASCIIOpen(PETSC_COMM_WORLD,"Rvec.m",&(viewer));
             PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-            VecView(lin_sys->residual,viewer);
+            VecView(lin_sys->B,viewer);
             PetscViewerPopFormat(viewer);
             // Solver
             PetscViewerASCIIOpen(PETSC_COMM_WORLD,"KSP.m",&(viewer));
@@ -532,7 +534,7 @@ int fe_newton(SMODEL_SUPER* sm)
 #endif
                     printf("AFTER SOLVE!\n");
                     printScreen_dble_array("sol after solving", sm->sol, ndofs, __LINE__, __FILE__);
-                    printScreen_dble_array("residual before solving", sm->residual, ndofs, __LINE__, __FILE__);
+                    printScreen_dble_array("residual before solving", residual, ndofs, __LINE__, __FILE__);
                     //printScreen_int_array("bc_mask after solving",sm->bc_mask, nnodes * nsys, __LINE__, __FILE__);
                     //printScreen_dble_array("scale_vect after solving",sm->scale_vect, nnodes * nsys, __LINE__, __FILE__);
                     //if (DEBUG_MATRIX) printScreen_matrix("matrix after solving", sm->diagonal, sm->matrix, nnodes, sm->max_nsys_sq,__LINE__, __FILE__);

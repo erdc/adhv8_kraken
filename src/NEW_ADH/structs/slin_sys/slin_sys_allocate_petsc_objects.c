@@ -15,7 +15,8 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys){
     //set up anything PETSc after allocation but before load
- #ifdef _PETSC   
+ #ifdef _PETSC
+    int ierr;   
     //PETSc solver will be stord in ksp object
     //ksp only will exist if PETSc is active
     int local_size = *(lin_sys->local_size);

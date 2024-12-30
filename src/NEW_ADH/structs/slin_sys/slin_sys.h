@@ -63,6 +63,7 @@ void slin_sys_free_array(SLIN_SYS *lin_sys, int nlin_sys);
 void slin_sys_free(SLIN_SYS *lin_sys);
 void lin_sys_free(SLIN_SYS *lin_sys, int nlin_sys);
 void lin_sys_CSR_printScreen(SLIN_SYS *lin_sys);
+void slin_sys_init_array(SLIN_SYS *lin_sys, int nlin_sys);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #endif

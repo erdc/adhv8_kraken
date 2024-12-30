@@ -24,6 +24,8 @@ void slin_sys_init_ptrs(SLIN_SYS *lin_sys, int *my_ndof_ptr, int *ndof_ptr, int 
 
     //when in init need to change this to check if we have more than one processor or not
     lin_sys->indptr_off_diag=NULL;
+    lin_sys->cols_off_diag=NULL;
+    lin_sys->vals_off_diag=NULL;
     lin_sys->ghosts=NULL;
     //should this go somewhere else? Like still in super model since we have pointer now?
     //but this should only happen over each unique model

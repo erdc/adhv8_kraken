@@ -24,7 +24,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
     int* fmap = sm->dof_map_local;
     //zero out stuff
     sarray_init_dbl(sm->lin_sys->residual, *(sm->ndofs));
-    printf("zeroed residual structure\n");
+    //printf("zeroed residual structure\n");
     //create array which is the max_nvar in the supermodel
     //and max_nnode of the grid
     //will need to define these properties later

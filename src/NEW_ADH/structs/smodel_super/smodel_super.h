@@ -239,6 +239,8 @@ int smodel_super_forward_step(SMODEL_SUPER* sm, int (*ts_fnctn)(SMODEL_SUPER*));
 
 int smodel_super_resid(SMODEL_SUPER* sm, double *rhs, int ie, double perturbation, int perturb_node, int perturb_var, int perturb_sign, int DEBUG, int (*fe_resid)(SMODEL_SUPER *, double *, int, double, int, int, int, int));
 
+void smodel_super_update_dirichlet_data(SMODEL_SUPER *sm);
+void smodel_super_prep_sol(SMODEL_SUPER *sm);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 

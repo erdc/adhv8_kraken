@@ -62,6 +62,7 @@ $(wildcard $(MASTER_SRC_DIR)../timeloop) \
 $(wildcard $(MASTER_SRC_DIR)../models) \
 $(wildcard $(MASTER_SRC_DIR)../models/sw2) \
 $(wildcard $(MASTER_SRC_DIR)../models/poisson) \
+$(wildcard $(MASTER_SRC_DIR)../models/heat) \
 $(wildcard $(MASTER_SRC_DIR)../test/la) \
 $(wildcard $(MASTER_SRC_DIR)../test/residual) \
 $(wildcard $(MASTER_SRC_DIR)../test/jacobian) \
@@ -111,6 +112,7 @@ $(MASTER_SRC_DIR)../timeloop \
 $(MASTER_SRC_DIR)../models \
 $(MASTER_SRC_DIR)../models/sw2 \
 $(MASTER_SRC_DIR)../models/poisson \
+$(MASTER_SRC_DIR)../models/heat \
 $(MASTER_SRC_DIR)../test/la \
 $(MASTER_SRC_DIR)../test/residual \
 $(MASTER_SRC_DIR)../test/jacobian \

@@ -19,9 +19,10 @@
 #define FE_NEWTON 0
 
 //residual routine codes
-#define N_RESID_ROUTINES 2
+#define N_RESID_ROUTINES 3
 #define SW2 0
 #define POISSON 1
+#define HEAT 2
 
 
 //global array of function pointers to resid routines

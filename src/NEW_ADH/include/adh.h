@@ -90,6 +90,7 @@
 #include "fe.h"
 #include "sw2.h"
 #include "poisson.h"
+#include "heat.h"
 //Mark added time loop
 #include "time_loop.h"
 

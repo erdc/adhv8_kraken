@@ -1,9 +1,11 @@
 /*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 100;
-static int NEWTON_TEST_NY = 100;
-static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
+static int NEWTON_TEST_NX = 150;
+static int NEWTON_TEST_NY = 150;
+static double alpha = 3;
+static double beta = 1.2;
+static void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -24,9 +26,9 @@ int timeloop_test(int argc, char **argv) {
 	//let's just do something simple
 	//3x3 triangular element grid
 	double xmin = 0.0;
-	double xmax = 2.0;
+	double xmax = 1.0;
 	double ymin = 0.0;
-	double ymax = 2.0;
+	double ymax = 1.0;
 	int npx = NEWTON_TEST_NX;
 	int npy = NEWTON_TEST_NY;
 	double theta = 0.0;
@@ -62,7 +64,7 @@ int timeloop_test(int argc, char **argv) {
 	//sm.grid = &grid;
     SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
-	double dt = 1.0;
+	double dt = 2.0/20.0;
 	double t0 = 0.0;
 	double tf = 2.0;
 
@@ -74,6 +76,9 @@ int timeloop_test(int argc, char **argv) {
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
 	printf("NDOFS %d\n",dm.ndofs[0]);
+
+	//OVER WRITE TO HEAT
+	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_resid = HEAT;
 	//printf("Supermodel no read complete\n");
 
 
@@ -135,16 +140,16 @@ int timeloop_test(int argc, char **argv) {
 		dm.superModel[0].bc_mask[local_index] = YES;
 	}
 
-	//overwrite some of the boundary
+	//overwrite intial condition
 	double x_coord, y_coord;
 	for (int i=0; i<nnodes; i++){
 		//mark the boundary only
 		x_coord = grid->node[i].x;
 		y_coord = grid->node[i].y;
-
+		//need to set IC
+		dm.superModel[0].sol[i*3+1] = 1 + x_coord*x_coord + alpha * y_coord*y_coord;
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
-			dm.superModel[0].dirichlet_data[i*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
-			dm.superModel[0].sol_old[i*3+1] = dm.superModel[0].dirichlet_data[i*3+1];
+			continue;
 		}else{
 			dm.superModel[0].bc_mask[i*3+1]=NO;
 		}
@@ -178,7 +183,7 @@ int timeloop_test(int argc, char **argv) {
 	//it is a scalar
 	double *u_exact;
 	u_exact = (double*) tl_alloc(sizeof(double),nnodes);
-	compute_exact_solution_poisson(u_exact, nnodes, grid);
+	compute_exact_solution_heat(u_exact, nnodes, grid,tf);
 //	for(int i=0;i<nnodes;i++){
 //		printf("Exact solution[%d] = %f\n",i,u_exact[i]);
 //	}
@@ -247,19 +252,21 @@ int timeloop_test(int argc, char **argv) {
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid){
+void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t){
 
 	//test case comes from
-	//https://jsdokken.com/dolfinx-tutorial/chapter1/fundamentals.html
+	//https://jsdokken.com/dolfinx-tutorial/chapter2/heat_code.html
 
-	//problem is -/\u = f on Omega
-	//f = -6
+	//problem is du/dt - /\u + f = 0 on Omega
+	//f = beta - 2 - 2*alpha
+	// beta = 1.2
+	// alpha = 3.0
 	//u_D = u_exact on dOmega
-	//u_exact = 1 + x^2 + 2y^2
+	//u_exact = 1 + x^2 + alpha*y^2+beta*t
 
 	//works for cg only at the moment, would need cell by cell loop for dg
 	for(int i =0; i<ndof ; i++){
-		u_exact[i] = 1.0 + grid->node[i].x*grid->node[i].x + 2*grid->node[i].y*grid->node[i].y;
+		u_exact[i] = 1.0 + grid->node[i].x*grid->node[i].x + alpha*grid->node[i].y*grid->node[i].y + beta*t;
 	}
 
 

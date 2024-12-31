@@ -144,7 +144,6 @@ int newton_test(int argc, char **argv) {
 
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
 			dm.superModel[0].dirichlet_data[i*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
-			dm.superModel[0].sol_old[i*3+1] = dm.superModel[0].dirichlet_data[i*3+1];
 		}else{
 			dm.superModel[0].bc_mask[i*3+1]=NO;
 		}

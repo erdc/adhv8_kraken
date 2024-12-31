@@ -1,30 +1,24 @@
 #include "adh.h"
-
 //could move to global file?
 static int (*forward_stepper[N_TIME_STEPPERS]) (SMODEL_SUPER*);
-
-
 int time_loop(SMODEL_DESIGN *dm){
 	int TIME_STEP_WORKED = TRUE, LOOP_INCOMPLETE = TRUE;
 	int ierr = YES;
 	int ts=0;
-
 	//assign function pointers, maybe move to a global file?
 	set_forward_steppers(forward_stepper);
-
 	//aliasing for convenience
 	int nsuper = dm->nSuperModels;
 	//the outer time loop
 	do {
 			ts+=1;
-			printf("DESIGN MODEL ON TIME STEP %d\n",ts);
+			//printf("DESIGN MODEL ON TIME STEP %d\n",ts);
 			//update t_prev and change dt if timeseries says to
 			LOOP_INCOMPLETE = update_dt(dm);
 
 			//attempt to advance the whole design model by one time step
 			TIME_STEP_WORKED = advance_time(dm, nsuper);
-
-			printf("TIME_STEP_WORKED = %d, LOOP_INCOMPLETE = %d\n",TIME_STEP_WORKED,LOOP_INCOMPLETE);
+			//printf("TIME_STEP_WORKED = %d, LOOP_INCOMPLETE = %d\n",TIME_STEP_WORKED,LOOP_INCOMPLETE);
 
 			//output step
 
@@ -56,6 +50,13 @@ int advance_time(SMODEL_DESIGN *dm, int nsuper){
 		//we restrict super models to have time steps as integer fractions
 		//of the design model time step
 		for (isub=0; isub<nsubsteps; isub++){
+			//update sol_old and sol_older
+			// prep solutions
+ 			smodel_super_prep_sol(sm);
+			//update dirichlet data
+			smodel_super_update_dirichlet_data(sm);
+
+			//forward step in time
 			TS_SUCCESS = smodel_super_forward_step(sm, forward_stepper[sm->forward_step]);
 			//check if time step succeeded
 			if (!TS_SUCCESS){

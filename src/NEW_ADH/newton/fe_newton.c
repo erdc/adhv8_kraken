@@ -300,7 +300,7 @@ int fe_newton(SMODEL_SUPER* sm)
         
         
         sm->nonlinear_it_total++;
-        printf("nonlinear it: %d\n",sm->nonlinear_it_total);
+        //printf("nonlinear it: %d\n",sm->nonlinear_it_total);
 
         //Old code. dont think  this applies anymore
         /*
@@ -329,7 +329,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
         assemble_jacobian(sm);
-        printf("Assembled\n");
+        //printf("Assembled\n");
 
         
 //        double temp1 = l_infty_norm(sm->nnz_diag, sm->vals_diag);
@@ -340,7 +340,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //Screen_print_CSR(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->ndofs);
         
         apply_Dirichlet_BC(sm);
-        printf("Dirichlet applied\n");
+        //printf("Dirichlet applied\n");
 //        Screen_print_CSR(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->ndofs);
 //        get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
 //        &imax_dof, &iinc_dof, include_dof,
@@ -394,6 +394,7 @@ int fe_newton(SMODEL_SUPER* sm)
         
         //Want user to specify this but hard code for now
         //precon and stuff
+        KSPSetType(lin_sys->ksp,KSPPREONLY);
         PC          pc;      /* preconditioner context */
         KSPGetPC(lin_sys->ksp, &pc);
         PetscCall(PCSetType(pc, PCLU)); //PCLU is direct LU
@@ -453,8 +454,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //Mark commenting
         scale_linear_system(lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag,
         lin_sys->vals_off_diag, lin_sys->residual, lin_sys->dsol, lin_sys->scale_vect, *(lin_sys->local_size), *(lin_sys->size), myid, lin_sys->ghosts, lin_sys->nghost);
-        
-        printf("linear system scaled\n");
+        //printf("linear system scaled\n");
 
 //        temp1 = l_infty_norm(sm->nnz_diag, sm->vals_diag);
 //        temp2 = l2_norm(sm->vals_diag, sm->nnz_diag);
@@ -463,7 +463,7 @@ int fe_newton(SMODEL_SUPER* sm)
 //        printf("CSR norms after scaling: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
         //factor the matrix preconditioner
         status = prep_umfpack(lin_sys->indptr_diag,lin_sys->cols_diag,lin_sys->vals_diag, *(lin_sys->local_size));
-        printf("umfpack prep completed\n");
+        //printf("umfpack prep completed\n");
         
         
 
@@ -483,8 +483,8 @@ int fe_newton(SMODEL_SUPER* sm)
         //actually solve linear system, returns solution
         status = solve_linear_sys_bcgstab(dsol, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag,
         lin_sys->vals_off_diag, residual, lin_sys->scale_vect, *(lin_sys->local_size), *(lin_sys->size) ,myid, lin_sys->ghosts, lin_sys->nghost);
-        printf("BCGSTAB completed\n");
-        printf("SOLVER STATUS   %d\n\n",status);
+        //printf("BCGSTAB completed\n");
+        //printf("SOLVER STATUS   %d\n\n",status);
 //        for(int j =0;j<ndof;j++){
 //            printf("dsol[%d] = %.17e \n",j,sm->dsol[j]);
 //        }
@@ -496,7 +496,7 @@ int fe_newton(SMODEL_SUPER* sm)
         /* adds the increment to the solution */
         //(*inc_fnctn) (sm,isuperModel);
         increment_function(sm);
-        printf("Solution incremented\n");
+        //printf("Solution incremented\n");
 
         //Mark needs to check, why is this
         //flip sign after update?
@@ -710,7 +710,7 @@ int fe_newton(SMODEL_SUPER* sm)
                 //       sm->submodel[0].sgw->gw_phead[im_node],sm->submodel[0].sgw->gw_phead[im_node]+sm->sol[im_node]);
 //#endif
             //}
-            printf(" NFALSEDES: %2d",grid->nnodes);
+            printf(" NNODES: %2d",grid->nnodes);
             if (linesearch_cuts > 0)  printf(" LS");
             printf("\n");
         }
@@ -786,10 +786,8 @@ int fe_newton(SMODEL_SUPER* sm)
 #else
         keep_chugging = check;
 #endif
-        
     //printf("CHECK VAL %d\n",check);
-    printf("CHECK VAL %d\n",check);
-
+    //printf("CHECK VAL %d\n",check);
     }while (keep_chugging);
 
 #ifdef _PETSC
@@ -855,6 +853,8 @@ int fe_newton(SMODEL_SUPER* sm)
         /* if failed to converge, then reset to old values */
         printf("Failed to converge, reinitiliaing!!\n");
         initialize_system(sm);
+        //need to think about this bit
+        initialize_dirichlet_bc(sm);
         //(*init_fnctn) (sm, isuperModel);
         
         if (myid <= 0 && solv_flag_min == YES)

@@ -1,8 +1,11 @@
 /*! \file  bcgstab_solver.c This file has functions responsible for solving linear system in split CSR format using BCG-stabilized method */
 #include "adh.h"
 //keep umfpack calls in one script
+//TODO: Maybe mve Symbolic, Numeric into slin_sys so we can avoid factoring everytime for Linear problem
 static  void *Symbolic, *Numeric;
+static double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
 static int isize = 0;           /* the size of the arrays */
+static int isize_local = 0;
 static double *r;          /* the linear solver residual */
 static double *p;          /* the search direction */
 static double *Ap;         /* AMp */
@@ -12,6 +15,7 @@ static double *s;          /* the second search direction for bcgstab */
 static double *As;         /* AMs */
 static double *Ms;         /* Ms */
 static double *x0;         /* solution = u+u0 - u0 is the shift */
+static int is_first_call = 1;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -87,7 +91,7 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
         Ms = (double *) tl_realloc(sizeof(double), isize, isize_prev, Ms);
         x0 = (double *) tl_realloc(sizeof(double), isize, isize_prev, x0);
   }
-  printf("Ndof with ghosts = %d\n",size);
+  //printf("Ndof with ghosts = %d\n",size);
   /* allocates memory if needed */
   // need to do different allocation later
   //breaks down for larger problems
@@ -165,9 +169,10 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   //if it is in parallel. collect with allreduce
   rnorm = messg_dmax(rnorm);
   bnorm = messg_dmax(bnorm);
-
+#ifdef _DEBUG
   printf("RNORM = %6.4e\n",rnorm);
   printf("BNORM = %6.4e\n",bnorm);
+#endif
   rhop = 1.0;
   alpha = 1.0;
   omega = 1.0;
@@ -253,8 +258,9 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     //printf("Rnorm, %f\n",rnorm);
 
   }
+#ifdef _DEBUG
   printf("BCGSTAB # IT = %d\n",it);
-
+#endif
   //undo scaling (need to add in error checks)
   unscale_linear_system(x,x0,scale_vect,local_size);
 
@@ -269,10 +275,6 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
  // for (i = 0; i <local_size; i++){
 //    printf("Rank %d Final u[%d] = %f\n",rank,i,x[i]);
 //  }
-
-  //need to free after each solve? or not till end of simulation?
-  umfpack_di_free_symbolic (&Symbolic) ;
-  umfpack_di_free_numeric (&Numeric) ;
   //add later to see if converged or not
   int status = 0;
   return status;
@@ -294,6 +296,7 @@ void umfpack_clear(void){
   //clear memory
   umfpack_di_free_symbolic (&Symbolic) ;
   umfpack_di_free_numeric (&Numeric) ;
+
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -314,10 +317,25 @@ void umfpack_clear(void){
 int prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, int nrow){
   //load into umfpack, need to transpose because umfpack uses ccs format
   int status;
-  double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
-  umfpack_di_defaults(Control);    /* default control parameters */
+
+  //maybe in future see if we only need to do this once, greatly speeds things up
+  //IF LINEAR PROBLEM, SHOULD ONLY NEED TO FACTORIZE ONCE AT BEGGINING OF TIME LOOP
+  if (is_first_call){
+    umfpack_di_defaults(Control);    /* default control parameters */
+    is_first_call = 0;
+    //status = umfpack_di_symbolic (nrow, nrow, indptr_diag, cols_diag, vals_diag, &Symbolic, Control, Info);
+    //status = umfpack_di_numeric (indptr_diag, cols_diag, vals_diag, Symbolic, &Numeric, Control, Info) ;
+  }
+  //always symbolically factor, doesnt seem to make big difference?
+//  if(isize_local != nrow){
+//    printf("Symbolically factoring umfpack\n");
+//    status = umfpack_di_symbolic (nrow, nrow, indptr_diag, cols_diag, vals_diag, &Symbolic, Control, Info);
+//    isize_local = nrow;
+//  }
   status = umfpack_di_symbolic (nrow, nrow, indptr_diag, cols_diag, vals_diag, &Symbolic, Control, Info);
   status = umfpack_di_numeric (indptr_diag, cols_diag, vals_diag, Symbolic, &Numeric, Control, Info) ;
+
+
   return status;
 
 }
@@ -340,9 +358,7 @@ int prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, int nrow){
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int solve_umfpack(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, double *b, int nrow){
-  int status;
-  double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
-  umfpack_di_defaults(Control);    /* default control parameters */
+  int status;   /* default control parameters */
   //try this to account for CSR format, use solution as RHS
   status = umfpack_di_solve (UMFPACK_Aat, indptr_diag, cols_diag, vals_diag, x, b, Numeric, Control, Info);
   return status;
@@ -376,6 +392,8 @@ void free_bcgstab(void){
         Ms = (double *) tl_free(sizeof(double), isize, Ms);
     if (x0 != NULL)
         x0 = (double *) tl_free(sizeof(double), isize, x0);
+    
+    umfpack_clear();
 }
 
 

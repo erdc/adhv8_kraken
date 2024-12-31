@@ -93,7 +93,15 @@ void initialize_dirichlet_bc(SMODEL_SUPER *sm) {
     //maybe there is list of indices you want?
     //need to discuss
 
-    printf("Initializing Dirichlet B.C. \n");
+    //printf("Initializing Dirichlet B.C. \n");
+    int idof;
+    int ndofs = *(sm->ndofs);
+    for(idof = 0; idof<ndofs; idof++){
+        //need to use sseries strings to set dirichlet_data
+        if(sm->bc_mask[idof] == YES){
+            sm->sol[idof] = sm->dirichlet_data[idof];
+        }
+    }
 //    int istart = 0, isers = 0, istr = 0;
 //    for (i = 0; i < grid->nnodes; i++) {//
 
@@ -160,7 +168,8 @@ void update_function(SMODEL_SUPER *sm){
 
     //is this just comm update double on sol?
     //need to check if this is necessary
-    printf("calling update function\n");
+    //printf("calling update function\n");
+    return;
 
     ////loop through all nelem3d
 //    for (j=0;j<grid->nelem3d;j++){

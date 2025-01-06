@@ -1,9 +1,10 @@
 /*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 700;
-static int NEWTON_TEST_NY = 700;
+static int NEWTON_TEST_NX = 700;//00;
+static int NEWTON_TEST_NY = 700;//00;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
+static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -47,6 +48,7 @@ int newton_test(int argc, char **argv) {
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
     nnodes = grid->nnodes;
+    sgrid_reorder(grid);
 	//print coordinates
 //  for(int local_index =0; local_index<grid.nnodes; local_index++){
 //		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
@@ -137,21 +139,25 @@ int newton_test(int argc, char **argv) {
 
 	//overwrite some of the boundary
 	double x_coord, y_coord;
+	int id;
 	for (int i=0; i<nnodes; i++){
 		//mark the boundary only
 		x_coord = grid->node[i].x;
 		y_coord = grid->node[i].y;
+		id = grid->node[i].id;
+		//printf("x %f, y %f, ID = %d\n",x_coord,y_coord,id);
 
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
-			dm.superModel[0].dirichlet_data[i*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
+			dm.superModel[0].dirichlet_data[id*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
 		}else{
-			dm.superModel[0].bc_mask[i*3+1]=NO;
+			dm.superModel[0].bc_mask[id*3+1]=NO;
 		}
-		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
 	}
 	printf("BCMASK COMPLETE\n");
 	//set up bc mask
-
+//	for (int i=0; i<nnodes; i++){
+//		printf("Dirichlet data node[%d] = %f\n", i, dm.superModel[0].dirichlet_data[i*3+1]);
+//	}
 //	for (int i=0;i<sm.ndofs;i++){
 //		printf("sm bc mask[%d] = %d\n",i,sm.bc_mask[i]);
 //	}
@@ -194,7 +200,17 @@ int newton_test(int argc, char **argv) {
 	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
 	global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
 
+//	for(int i=0; i<nnodes;i++){
+//		printf("before perm sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
+//	}
+if (grid->inv_per_node!=NULL){
+	permute_array(uh,grid->inv_per_node,nnodes);
+}
 //	printf("Final solution:\n");
+//	for(int i=0; i<nnodes;i++){
+//		printf("node id[%d] = %d, peritab[%d] = %d\n",i,grid->node[i].id,i,grid->inv_per_node[i]);
+//	} //
+
 //	for(int i=0; i<nnodes;i++){
 //		printf("sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
 //	} 
@@ -262,4 +278,18 @@ void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid){
 
 
 
+}
+
+
+void permute_array(double *arr,int *p, int n){
+	double *temp;
+	temp = (double *) tl_alloc(sizeof(double),n);
+	for(int i =0;i<n;i++){
+		temp[p[i]] = arr[i];
+	}
+	// Copy permuted elements back to the original array
+    for (int i = 0; i < n; i++) {
+        arr[i] = temp[i];
+    }
+	temp = (double *) tl_free(sizeof(double),n,temp);
 }

@@ -5,6 +5,12 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #include "adh.h"
+static double *x0;         /* solution = u+u0 - u0 is the shift */
+static int isize = 0;
+static double PETSC_RTOL = 1e-13;
+static double PETSC_ATOL = 1e-15;
+static double PETSC_DTOL = 1e5;
+static int PETSC_MAXIT = 10000;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -85,15 +91,6 @@ int fe_newton(SMODEL_SUPER* sm)
     int UMFail_max = NO;
     int solv_flag_min = NO;
     int myid = 0, npes = 1, proc_count = 0;
-#ifdef _PETSC
-    int ierr = 0; // SAM HERE
-    int its;
-    MatInfo info;
-#ifdef _DEBUG
-    PetscViewer viewer;
-#endif
-#endif
-
     //convenient aliasing
     SLIN_SYS *lin_sys = sm->lin_sys;
     double *dsol = lin_sys->dsol;
@@ -103,6 +100,22 @@ int fe_newton(SMODEL_SUPER* sm)
     ndofs = *(sm->ndofs);
     my_ndofs = *(sm->my_ndofs);
     macro_ndofs = *(sm->macro_ndofs);
+#ifdef _PETSC
+    int ierr = 0; // SAM HERE
+    int its;
+    int isize_prev;
+    MatInfo info;
+    if(isize<ndofs){
+        isize_prev = isize;
+        isize = ndofs;
+        x0 = (double *) tl_realloc(sizeof(double), isize, isize_prev, x0);
+    }
+#ifdef _DEBUG
+    PetscViewer viewer;
+#endif
+#endif
+
+
     
 #ifdef _DEBUG
     int nnodes = grid->nnodes;
@@ -387,6 +400,13 @@ int fe_newton(SMODEL_SUPER* sm)
 
         //PETSC option
 #ifdef _PETSC
+        //do linear scaling, idk if it makes difference?
+        scale_linear_system(lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag,
+        lin_sys->vals_off_diag, lin_sys->residual, lin_sys->dsol, lin_sys->scale_vect, *(lin_sys->local_size), *(lin_sys->size), myid, lin_sys->ghosts, lin_sys->nghost);
+        
+        //store temporary vector of inital guess for linear system
+        sarray_copy_dbl(x0, dsol,  ndofs);
+
         printf("Using PETSC solver\n");
         // Solver
         //be sure values get updated since we used set with split arrays ...
@@ -394,22 +414,28 @@ int fe_newton(SMODEL_SUPER* sm)
         
         //Want user to specify this but hard code for now
         //precon and stuff
-        KSPSetType(lin_sys->ksp,KSPPREONLY);
+        //KSPSetType(lin_sys->ksp,KSPGMRES); //GMRES iteratice solver
+        KSPSetType(lin_sys->ksp,KSPPREONLY); //Direct solve
         PC          pc;      /* preconditioner context */
         KSPGetPC(lin_sys->ksp, &pc);
-        PetscCall(PCSetType(pc, PCLU)); //PCLU is direct LU
+        
+        //PetscCall(PCSetType(pc,PCILU));//ILU only works in serial
+        PetscCall(PCSetType(pc,PCLU)); //PCLU is direct LU
         
         //PetscCall(KSPSetTolerances(sm->ksp, 1.e-11, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT));
         // TODO: can I call this once in fe_main instead?
         // Does the matrix operator need to be specified before SetFromOptions each time?
-        //KSPSetFromOptions(sm->ksp);
+        //KSPSetFromOptions(lin_sys->ksp);
         // TODO: I don't think sol needs to be initialized to zero but should double-check
         // set resid and solution into PETSdc objects should be fine on initialization
         // what about ghost values?
         //solution goes in X
         //ierr = MatView(sm->A, PETSC_VIEWER_STDOUT_WORLD);
         //ierr = VecView(sm->B, PETSC_VIEWER_STDOUT_WORLD);
-
+        //HARD CODED FOR NOW, NEED TO CHANGE
+        KSPSetTolerances(lin_sys->ksp, PETSC_RTOL, PETSC_ATOL, PETSC_DTOL, PETSC_MAXIT);
+        //KSPSetInitialGuessNonzero(lin_sys->ksp,PETSC_TRUE);
+        //solve
         KSPSolve(lin_sys->ksp,lin_sys->B,lin_sys->X);
         //scatter forward appears to update array as we need
         //forward sends owned dofs -> ghosts
@@ -417,6 +443,12 @@ int fe_newton(SMODEL_SUPER* sm)
         //VecGhostUpdateEnd(sm->X,INSERT_VALUES,SCATTER_FORWARD);
         KSPGetIterationNumber(lin_sys->ksp, &its);
         printf("KSP iterations: %i\n",its);
+        //unscale, idk if helps or not
+        unscale_linear_system(dsol,x0,lin_sys->scale_vect,*(lin_sys->local_size));
+        //printf("SOLVER STATUS   %d\n\n",status);
+//    for(int j =0;j<ndofs;j++){
+//            printf("dsol[%d] = %.17e \n",j,lin_sys->dsol[j]);
+//        }
         //solv_flag = TRUE; // TODO: Does this need to change - SAM
        
 #ifdef _DEBUG

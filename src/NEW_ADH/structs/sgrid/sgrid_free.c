@@ -28,5 +28,6 @@ void sgrid_free(SGRID *g) {
         for (inode=0; inode<g->max_nnodes; inode++) {snode_free(&(g->node[inode]));}
         g->node = (SNODE *) tl_free(sizeof(SNODE), g->max_nnodes, g->node);
     }
+    if(g->inv_per_node!=NULL){g->inv_per_node = (int *) tl_free(sizeof(int), g->nnodes, g->inv_per_node);}
     g = (SGRID *) tl_free(sizeof(SGRID), 1, g);
 }

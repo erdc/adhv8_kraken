@@ -64,6 +64,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 	SGRID grid;
 
 	grid.elem2d = NULL;
+	grid.inv_per_node = NULL;
 	//for now serial only, maybe add scotch in later
 
 

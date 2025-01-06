@@ -138,6 +138,9 @@ typedef struct {
     
     // Nodal Attributes
     NODAL_ATTRIBUTES nodal_attribute;
+
+    //inverse permutation for output (serial only)
+    int *inv_per_node;
     
 } SGRID;
 
@@ -161,6 +164,7 @@ void sgrid_write_elemental_pe(SGRID *g);
 void sgrid_write_xdmf_nodal_pe(SGRID *g);
 void sgrid_write_xdmf_elemental_pe(SGRID *g);
 void sgrid_read_nodal_attribute(SGRID *g);
+int sgrid_reorder(SGRID *grid);
 
 /***********************************************************/
 /***********************************************************/

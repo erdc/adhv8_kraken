@@ -6,6 +6,7 @@ static int NEWTON_TEST_NY = 150;
 static double alpha = 3;
 static double beta = 1.2;
 static void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t);
+static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -49,6 +50,7 @@ int timeloop_test(int argc, char **argv) {
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
     nnodes = grid->nnodes;
+    sgrid_reorder(grid);
 	//print coordinates
 //  for(int local_index =0; local_index<grid.nnodes; local_index++){
 //		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
@@ -142,16 +144,18 @@ int timeloop_test(int argc, char **argv) {
 
 	//overwrite intial condition
 	double x_coord, y_coord;
+	int id;
 	for (int i=0; i<nnodes; i++){
 		//mark the boundary only
 		x_coord = grid->node[i].x;
 		y_coord = grid->node[i].y;
+		id = grid->node[i].id;
 		//need to set IC
-		dm.superModel[0].sol[i*3+1] = 1 + x_coord*x_coord + alpha * y_coord*y_coord;
+		dm.superModel[0].sol[id*3+1] = 1 + x_coord*x_coord + alpha * y_coord*y_coord;
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
 			continue;
 		}else{
-			dm.superModel[0].bc_mask[i*3+1]=NO;
+			dm.superModel[0].bc_mask[id*3+1]=NO;
 		}
 		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
 	}
@@ -200,7 +204,9 @@ int timeloop_test(int argc, char **argv) {
 
 	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
 	global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
-
+if (grid->inv_per_node!=NULL){
+	permute_array(uh,grid->inv_per_node,nnodes);
+}
 //	printf("Final solution:\n");
 //	for(int i=0; i<nnodes;i++){
 //		printf("sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
@@ -271,4 +277,16 @@ void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double 
 
 
 
+}
+void permute_array(double *arr,int *p, int n){
+	double *temp;
+	temp = (double *) tl_alloc(sizeof(double),n);
+	for(int i =0;i<n;i++){
+		temp[p[i]] = arr[i];
+	}
+	// Copy permuted elements back to the original array
+    for (int i = 0; i < n; i++) {
+        arr[i] = temp[i];
+    }
+	temp = (double *) tl_free(sizeof(double),n,temp);
 }

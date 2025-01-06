@@ -48,6 +48,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     g->smpi = (SMPI *) tl_alloc(sizeof(SMPI), 1);
     g->part_smpi = NULL;
     g->part_map = NULL;
+    g->inv_per_node = NULL;
     smpi_defaults(g->smpi);
 #ifndef _MESSG
     smpi_init(g->smpi);

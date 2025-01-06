@@ -16,6 +16,9 @@ static double *As;         /* AMs */
 static double *Ms;         /* Ms */
 static double *x0;         /* solution = u+u0 - u0 is the shift */
 static int is_first_call = 1;
+static double min_conv_tol = 1e-11;
+static double conv_tol = 1e-11;
+static int max_it = 100;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -74,8 +77,6 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   double rhop;                /* rho from the previous iteration */
   double bnorm;               /* the norm of the right hand side */
   //double snorm;               /* the norm of s */
-  double conv_tol;            /* the convergence tolerance */
-  double min_conv_tol;        /* the minimum convergence tolerance */
   int isize_prev;
   /* allocates memory if needed */
   if (isize < size) {
@@ -177,13 +178,11 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   alpha = 1.0;
   omega = 1.0;
   it = 0;
-  min_conv_tol = 1e-11;
-  conv_tol = 1e-11;
+
   rho = sarray_dot_dbl(r, q, local_size);
   //if in parallel sum among processors
   rho = messg_dsum(rho);
   //printf("RHO = %f\n",rho);
-  int max_it = 100;
   //start itertative loop
   while (rnorm > (min_conv_tol + bnorm * conv_tol) && it < max_it){
     // a
@@ -322,6 +321,7 @@ int prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, int nrow){
   //IF LINEAR PROBLEM, SHOULD ONLY NEED TO FACTORIZE ONCE AT BEGGINING OF TIME LOOP
   if (is_first_call){
     umfpack_di_defaults(Control);    /* default control parameters */
+    Control [UMFPACK_ORDERING] = UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_BEST;//UMFPACK_ORDERING_NONE;
     is_first_call = 0;
     //status = umfpack_di_symbolic (nrow, nrow, indptr_diag, cols_diag, vals_diag, &Symbolic, Control, Info);
     //status = umfpack_di_numeric (indptr_diag, cols_diag, vals_diag, Symbolic, &Numeric, Control, Info) ;

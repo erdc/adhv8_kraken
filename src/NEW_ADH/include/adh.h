@@ -14,6 +14,7 @@
 #include <stdbool.h>
 //Mark added
 #include <umfpack.h>
+#include <scotch.h>
 
 #ifdef _ADH_HDF5
 #include <hdf5.h>

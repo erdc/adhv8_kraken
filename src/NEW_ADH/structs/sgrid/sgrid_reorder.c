@@ -219,7 +219,7 @@ int sgrid_reorder(SGRID *grid){
     //g is Gibbs-Poole (default)
     //d Block Halo Approximate Minimum Degree method (not recommended)
     //f Block Halo Approximate Minimum Fill method (not recommended)
-    err = SCOTCH_stratMeshOrder(&stratdat,reorder_strat); 
+    //err = SCOTCH_stratMeshOrder(&stratdat,reorder_strat); 
     //this all seems to not work great, breaks above 10x10 mesh ?
     //using defaults in source code
     //SCOTCH_Num mesh_strat = SCOTCH_STRATQUALITY;
@@ -231,12 +231,25 @@ int sgrid_reorder(SGRID *grid){
     //also doesnt work?
     //mesh_strat = SCOTCH_STRATBALANCE;
     //err = SCOTCH_stratMeshOrderBuild(&stratdat,SCOTCH_STRATQUALITY,0.1);
+
+    //try graph order instead
+    //possible strings
+    //SCOTCH_STRATDEFAULT
+    //SCOTCH_STRATQUALITY
+    //SCOTCH_STRATSPEED
+    //SCOTCH_STRATBALANCE
+    SCOTCH_stratGraphOrderBuild(&stratdat,SCOTCH_STRATQUALITY,0,0.2);
+    SCOTCH_Graph grafdat;
+	SCOTCH_graphInit (&grafdat);
+
     err = SCOTCH_meshBuild (&meshdat, velmbas, vnodbas, velmnbr, vnodnbr, verttab, NULL,
 	NULL, NULL, NULL, edgenbr, edgetab);
 #ifdef _DEBUG
 	err =SCOTCH_meshCheck(&meshdat);
 	printf("Completed SCOTCH MESH Check, err = %d\n",err);
 #endif
+
+	err = SCOTCH_meshGraph(&meshdat, &grafdat);
 	//Permutation tables is what we want, will embed these into SGRID
 	SCOTCH_Num *permtab;
 	SCOTCH_Num *peritab;
@@ -251,7 +264,8 @@ int sgrid_reorder(SGRID *grid){
 	sarray_init_int(peritab,vnodnbr);
 	//printf("Calling SCOTCH MESH reorder\n");
 	//seg faults any thing above 10x10 mesh??
- 	err = SCOTCH_meshOrder(&meshdat,&stratdat, permtab, peritab, NULL, NULL, NULL);
+ 	//err = SCOTCH_meshOrder(&meshdat,&stratdat, permtab, peritab, NULL, NULL, NULL);
+ 	err = SCOTCH_graphOrder(&grafdat, &stratdat ,permtab, peritab, NULL, NULL, NULL);
  	//printf("SCOTCH MESH reorder completed\n");
  	//printf("Permutation info generated\n");
  	//for(k=0;k<vnodnbr;k++){printf("permtab[%d] = %d, peritab[%d] = %d\n",k,permtab[k],k,peritab[k]);}
@@ -293,6 +307,7 @@ int sgrid_reorder(SGRID *grid){
  	//free up memory
  	SCOTCH_meshExit(&meshdat);
  	SCOTCH_stratExit(&stratdat);
+ 	SCOTCH_graphExit(&grafdat);
  	verttab = (SCOTCH_Num *) tl_free(sizeof(SCOTCH_Num),vnodnbr+velmnbr+1,verttab);
  	edgetab = (SCOTCH_Num *) tl_free(sizeof(SCOTCH_Num), edgenbr,edgetab);
  	permtab = (SCOTCH_Num *) tl_free(sizeof(SCOTCH_Num), vnodnbr, permtab);

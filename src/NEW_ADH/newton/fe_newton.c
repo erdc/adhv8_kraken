@@ -7,10 +7,14 @@
 #include "adh.h"
 static double *x0;         /* solution = u+u0 - u0 is the shift */
 static int isize = 0;
-static double PETSC_RTOL = 1e-13;
-static double PETSC_ATOL = 1e-15;
+static double PETSC_RTOL = 1e-7;
+static double PETSC_ATOL = 1e-9;
 static double PETSC_DTOL = 1e5;
 static int PETSC_MAXIT = 10000;
+#ifdef _PETSC
+    static const char *PETSC_PRECON = PCLU; //PCILU;PCLU;
+    static const char *PETSC_KSP = KSPPREONLY;//KSPGMRES;//KSPPREONLY
+#endif
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -342,7 +346,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
         assemble_jacobian(sm);
-        //printf("Assembled\n");
+
 
         
 //        double temp1 = l_infty_norm(sm->nnz_diag, sm->vals_diag);
@@ -414,13 +418,13 @@ int fe_newton(SMODEL_SUPER* sm)
         
         //Want user to specify this but hard code for now
         //precon and stuff
-        //KSPSetType(lin_sys->ksp,KSPGMRES); //GMRES iteratice solver
-        KSPSetType(lin_sys->ksp,KSPPREONLY); //Direct solve
+        KSPSetType(lin_sys->ksp,PETSC_KSP); //GMRES iteratice solver
+        //KSPSetType(lin_sys->ksp,KSPPREONLY); //Direct solve
         PC          pc;      /* preconditioner context */
         KSPGetPC(lin_sys->ksp, &pc);
         
-        //PetscCall(PCSetType(pc,PCILU));//ILU only works in serial
-        PetscCall(PCSetType(pc,PCLU)); //PCLU is direct LU
+        PetscCall(PCSetType(pc,PETSC_PRECON));//ILU only works in serial
+    
         
         //PetscCall(KSPSetTolerances(sm->ksp, 1.e-11, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT));
         // TODO: can I call this once in fe_main instead?
@@ -434,6 +438,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //ierr = VecView(sm->B, PETSC_VIEWER_STDOUT_WORLD);
         //HARD CODED FOR NOW, NEED TO CHANGE
         KSPSetTolerances(lin_sys->ksp, PETSC_RTOL, PETSC_ATOL, PETSC_DTOL, PETSC_MAXIT);
+        //KSPSetTolerances(lin_sys->ksp, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
         //KSPSetInitialGuessNonzero(lin_sys->ksp,PETSC_TRUE);
         //solve
         KSPSolve(lin_sys->ksp,lin_sys->B,lin_sys->X);

@@ -4,6 +4,7 @@
 //TODO: Maybe mve Symbolic, Numeric into slin_sys so we can avoid factoring everytime for Linear problem
 static  void *Symbolic, *Numeric;
 static double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
+static double PRE_ORDER_STRAT  = UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_BEST;//UMFPACK_ORDERING_NONE;
 static int isize = 0;           /* the size of the arrays */
 static int isize_local = 0;
 static double *r;          /* the linear solver residual */
@@ -321,7 +322,7 @@ int prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, int nrow){
   //IF LINEAR PROBLEM, SHOULD ONLY NEED TO FACTORIZE ONCE AT BEGGINING OF TIME LOOP
   if (is_first_call){
     umfpack_di_defaults(Control);    /* default control parameters */
-    Control [UMFPACK_ORDERING] = UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_BEST;//UMFPACK_ORDERING_NONE;
+    Control [UMFPACK_ORDERING] = PRE_ORDER_STRAT;
     is_first_call = 0;
     //status = umfpack_di_symbolic (nrow, nrow, indptr_diag, cols_diag, vals_diag, &Symbolic, Control, Info);
     //status = umfpack_di_numeric (indptr_diag, cols_diag, vals_diag, Symbolic, &Numeric, Control, Info) ;

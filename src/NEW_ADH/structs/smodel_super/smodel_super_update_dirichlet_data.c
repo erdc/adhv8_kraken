@@ -17,7 +17,7 @@ void smodel_super_update_dirichlet_data(SMODEL_SUPER *sm){
 			//mark the boundary only
 			x_coord = grid->node[i].x;
 			y_coord = grid->node[i].y;
-			id = grid->node[i].id;;
+			id = grid->node[i].id;
 			if ( is_near(x_coord,0.0) || is_near(x_coord,1.0) || is_near(y_coord,0.0) || is_near(y_coord,1.0) ){
 				sm->dirichlet_data[id*3+1] = 1.0 + x_coord*x_coord + alpha * y_coord*y_coord + beta*t;
 			}

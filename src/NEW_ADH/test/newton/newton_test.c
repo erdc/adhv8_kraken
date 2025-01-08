@@ -1,8 +1,8 @@
 /*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 700;//00;
-static int NEWTON_TEST_NY = 700;//00;
+static int NEWTON_TEST_NX = 700;//700;
+static int NEWTON_TEST_NY = 700;//700;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -198,7 +198,8 @@ int newton_test(int argc, char **argv) {
 	}
 
 	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
-	global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
+	//global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
+	global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat);
 
 //	for(int i=0; i<nnodes;i++){
 //		printf("before perm sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);

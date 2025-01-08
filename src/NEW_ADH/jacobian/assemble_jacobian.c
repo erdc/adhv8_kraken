@@ -115,7 +115,8 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
         //get_cell_dofs_2(dofs,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -178,7 +179,8 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
         //get_cell_dofs_2(dofs,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -229,7 +231,8 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
         //get_cell_dofs_2(dofs,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -445,7 +448,8 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
         //for now use CG map in here
 
         //temp_sol = sm->sol[get_cg_dof_2(perturb_var_code, NodeID, sm->node_physics_mat, sm->node_physics_mat_id)];
-        temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id)];
+        //temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id)];
+        temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat)];
         NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol, perturbation);    // calculates epsilon and 2*epsilon
         
         //epsilon = 1.0;

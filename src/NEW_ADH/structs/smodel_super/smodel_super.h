@@ -108,9 +108,11 @@ typedef struct {
     //Mark proposes swapping nodal vars above to node-based material, this will cut down on memory
     //but may be challenging to form. This won't be set by user but implicitly built
     //at run time
-    int nphysics_mat_node;
-    int *node_physics_mat_id; //[nnode] ? local vs what idk
-    SMAT_PHYSICS *node_physics_mat; //[nphysics_mat_node]
+    //int nphysics_mat_node;
+    //int *node_physics_mat_id; //[nnode] ? local vs what idk
+    //SMAT_PHYSICS *node_physics_mat; // [nphysics_mat_node]
+    //Mark, NOTE: CHANGE TO THIS
+    SMAT_PHYSICS **node_physics_mat; //[nnode] array of pointers to SMAT_PHYSICS on elements
 
     //Mark a pointer to array of function pointers, using model_codes.h
     //void *forward_step;

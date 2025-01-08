@@ -139,4 +139,8 @@ Design philosophy:
 
 Structs folder are all the AdH specific structures: header files specifying the data, initialization/read routines, free routines or short convenience routines like screen prints etc. The main tasks like solving a system or newton step will be separate folders which will utilize the AdH structures in various combinations.
 
+Other notes:
+
+We assume that the elem_physics_mat layout by users is so that at any given node, the connected elements will have an element physics that contains ALL possible variables on that node. Our code will not allow for example a node shared by 2 cells where one cell wants H,U,V while the other wants H,T. The engine assigns nodal variables based on the max dof cell associated with each node. If two cells share a node and one is H,U,V and other cell is H,U, this will work. Another one that would break is if we have three cells associated with one node, one cell solves for H, one cell solves for U, and another solves for V. 
+
  */

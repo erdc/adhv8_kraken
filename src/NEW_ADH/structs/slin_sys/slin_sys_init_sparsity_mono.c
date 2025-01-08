@@ -29,8 +29,8 @@ static int *nnz_rows_off_diag_no_duplicate = NULL;
 void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id, 
     int *elem2d_physics_mat_id, int *elem1d_physics_mat_id,
     SMAT_PHYSICS *elem3d_physics_mat, SMAT_PHYSICS *elem2d_physics_mat,
-    SMAT_PHYSICS *elem1d_physics_mat, int *node_physics_mat_id,
-    SMAT_PHYSICS *node_physics_mat, SGRID *grid, int *fmap){
+    SMAT_PHYSICS *elem1d_physics_mat,
+    SMAT_PHYSICS **node_physics_mat, SGRID *grid, int *fmap){
     
     //now with info from the super models, assign appropriate vals to the design model
     //for each unique model we build up the sparsity and solution variables
@@ -114,8 +114,9 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
         //get_cell_dofs_2(dofs, nnodes, grid->elem3d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,node_physics_mat);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -161,8 +162,9 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
         //get_cell_dofs_2(dofs, nnodes, grid->elem2d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,node_physics_mat);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -207,8 +209,9 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
         //get_cell_dofs_2(dofs, nnodes, grid->elem1d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,node_physics_mat);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -280,8 +283,9 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
         //get_cell_dofs_2(dofs, nnodes, grid->elem3d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,node_physics_mat);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -328,8 +332,9 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
         //get_cell_dofs_2(dofs, nnodes, grid->elem2d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,node_physics_mat);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -375,8 +380,9 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,node_physics_mat, node_physics_mat_id);
         //get_cell_dofs_2(dofs, nnodes, grid->elem1d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,node_physics_mat);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);

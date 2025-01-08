@@ -208,20 +208,32 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     //hard code nodal vars too and dof_map_local, easy because it is all same
     //need to form routines to form correct nodal mats
     //this will give us proper mappings
-    sm->nphysics_mat_node = 1;
-    sm->node_physics_mat_id = (int*) tl_alloc(sizeof(int), sm->grid->nnodes);
-    for(i=0;i<sm->grid->nnodes;i++){
-        sm->node_physics_mat_id[i] = 0;
-    }
-    //smat_physics_alloc_init(&sm->node_physics_mat, sm->nphysics_mat_node, ntrns);
-    nSubModels[0] = 0;
-    smat_physics_alloc_init_array(&sm->node_physics_mat, sm->nphysics_mat_node, ntrns, nvars, nSubModels, subMod_nvars);
+    
+    //sm->nphysics_mat_node = 1;
+    //sm->node_physics_mat_id = (int*) tl_alloc(sizeof(int), sm->grid->nnodes);
+    //for(i=0;i<sm->grid->nnodes;i++){
+    //    sm->node_physics_mat_id[i] = 0;
+    //}
+    //nSubModels[0] = 0;
+    //smat_physics_alloc_init_array(&sm->node_physics_mat, sm->nphysics_mat_node, ntrns, nvars, nSubModels, subMod_nvars);
     //node code is same as elemVarCode
-    for(i=0;i<sm->nphysics_mat_node;i++){
-        for(j=0;j<4;j++){
-            strcpy(&sm->node_physics_mat[i].elemVarCode[j],&elemVarCode[j]);
-        }
+//    for(i=0;i<sm->nphysics_mat_node;i++){
+//        for(j=0;j<4;j++){
+//            strcpy(&sm->node_physics_mat[i].elemVarCode[j],&elemVarCode[j]);
+//        }
+//    }
+
+
+    //instead, set up node_physics_mat to point to highest dof element physics mat
+    sm->node_physics_mat = (SMAT_PHYSICS **) tl_alloc(sizeof(SMAT_PHYSICS *), sm->grid->nnodes);
+    //hard code set to first elem2d physics mat for this simple test case
+    for(i=0;i<sm->grid->nnodes;i++){
+        sm->node_physics_mat[i] = &(sm->elem2d_physics_mat[0]);
     }
+
+
+
+
 
 
     //also need to set the variables, not just equations
@@ -234,11 +246,11 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     sm->elem2d_physics_mat[0].nSubmodels = 1;
     //same for nodes
     //sm->node_physics_mat[0].nvar = 3;
-    assert(sm->node_physics_mat[0].nvar == 3);
+    assert(sm->node_physics_mat[0]->nvar == 3);
     //sm->node_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->node_physics_mat->nvar);
-    sm->node_physics_mat[0].vars[0] = PERTURB_V;
-    sm->node_physics_mat[0].vars[1] = PERTURB_U;
-    sm->node_physics_mat[0].vars[2] = PERTURB_H;
+    sm->node_physics_mat[0]->vars[0] = PERTURB_V;
+    sm->node_physics_mat[0]->vars[1] = PERTURB_U;
+    sm->node_physics_mat[0]->vars[2] = PERTURB_H;
 
     //initalize residual vector
     //need a routine to get ndofs for all of this

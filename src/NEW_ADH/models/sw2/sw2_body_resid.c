@@ -44,32 +44,13 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbation, int perturb_node, int perturb_var, int perturb_sign, int DEBUG) {
-    //printf("Seeing residual %f %f %f\n",elem_rhs[0],elem_rhs[1],elem_rhs[2]);
-    //printf("The elemental djac = %f\n", mod->grid->elem2d[ie].djac);
-    SELEM_2D *elem2d = &(mod->grid->elem2d[ie]); // be careful not to shallow copy here
-    //call a simple integral
-    int nnodes = mod->grid->elem2d[ie].nnodes;
-    //get the solution on this element, for now just use U
-    double elem_head[nnodes];
-    global_to_local_dbl_cg(elem_head, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat, mod->node_physics_mat_id);
-    //global_to_local_dbl_cg_2(elem_head, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->node_physics_mat, mod->node_physics_mat_id);
-    //printf("Nnodes %d\n",nnodes);
-    double f[nnodes];
-    for (int i =0;i<nnodes;i++){
-        f[i] = mod->grid->elem2d[ie].nodes[i];
-    }
-    //perturb solution variable only
-    if (perturb_var == PERTURB_U){
-        elem_head[perturb_node] += perturb_sign * perturbation;
-    }
-    integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, elem_head, elem_rhs);
-    integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, -1, f, elem_rhs);
-
-    return 0;
-    //int DEBUG_LOCAL = OFF;
+//    //local debug flags
+//    int DEBUG_LOCAL = OFF;
 //    int debug_node = UNSET_INT;
 //    int debug_pe = 0;
-//    
+//    int DEBUG_PICKETS = OFF;
+//   
+//    //convenitent if looking at only a specific node
 //    if (mod->grid->elem2d[ie].nodes[0] == debug_node-1 ||
 //        mod->grid->elem2d[ie].nodes[1] == debug_node-1 ||
 //        mod->grid->elem2d[ie].nodes[2] == debug_node-1) {
@@ -78,39 +59,38 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
 //        ierr_code = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 //        if (myid == debug_pe) {
 //#endif
-//        DEBUG = ON;
+//      DEBUG = ON;
 //#ifdef _MESSG
 //        }
 //#endif
 //    }
-//    
-//    int DEBUG_PICKETS = OFF;
 //#ifdef _DEBUG
 //    if (DEBUG == ON) DEBUG_LOCAL = ON;
 //    if (DEBUG_PICKETS == ON) tl_check_all_pickets(__FILE__,__LINE__);
 //    time_t time1;  time(&time1);
 //#endif
-//    
+//    //local variables
 //    int i;
 //    int PRESSURE_FLAG = ON;
-//    double t1, t2, t3, t4, t5;
-//    
-//    // aliases
-//    SSW_2D *sw2 = mod->sw->d2;
+//    double t1, t2, t3, t4, t5;   
+//    // aliases for convenience
+//    SSW *sw2 = mod->sw;
 //    SGRID *grid = mod->grid;
 //    SELEM_2D *elem2d = &(grid->elem2d[ie]); // be careful not to shallow copy here
 //    SVECT2D *grad_shp = elem2d->grad_shp;
 //    int nnodes = elem2d->nnodes;
-//    double alpha = mod->tau_temporal;
-//    double dt = mod->dt;
+//    double alpha = mod->tau_temporal; //where to put this?
+//    double dt = (*mod->dt)/(mod->nsubsteps);
 //    double djac = elem2d->djac;
-//    double g = mod->gravity;
-//    double drying_lower_limit = mod->drying_lower_limit;
-//    int imat = elem2d->mat;
-//    STR_VALUE str_values = mod->str_values[elem2d->string];
-//    int wd_flag = mod->grid->wd_flag[ie];
-//    SQUAD *quad = grid->quad_rect; // for quadrilateral quadrature calculations
-//    
+//    double g = mod->gravity; //where to put this
+//    double drying_lower_limit = sw2->drying_lower_limit;
+//    int imat = elem2d->mat; // what is this used for?
+//    STR_VALUE str_values = mod->str_values[elem2d->string]; //still in use?
+//    int wd_flag = sw2->nsw_elem[ie].wd_flag; //WARNING, ie is not correct, need to use Coreys map eventually
+//    if(nnodes == 4){
+//        //only make for quadrilateral elements?
+//        SQUAD *quad = grid->quad_rect; // for quadrilateral quadrature calculations
+//    }
 //    int isTriangle = NO;  if (nnodes == NDONTRI) isTriangle = YES;
 //#ifdef _DEBUG
 //    if (DEBUG == ON || DEBUG_LOCAL == ON) {
@@ -119,22 +99,18 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
 //        assert(imat > -1);
 //        assert(perturb_var == PERTURB_NONE || perturb_var == PERTURB_H || perturb_var == PERTURB_U || perturb_var == PERTURB_V);
 //    }
-//#endif
-//    
+//#endif    
 //    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 //    // GRID VARIABLES
-//    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-//    
+//    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/    
 //    double node_z[nnodes];
 //    SNODE nodes[nnodes];
 //    for (i=0; i<nnodes; i++) {
 //        snode_copy(&(nodes[i]), grid->node[elem2d->nodes[i]]);
 //        node_z[i] = nodes[i].z;
 //    }
-//    
 //    SVECT elem_nds[nnodes];
 //    snode2svect(nodes, elem_nds, nnodes);
-//    
 //    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 //    // INDEPENDENT VARIABLES
 //    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

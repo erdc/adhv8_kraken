@@ -64,8 +64,11 @@ void smodel_super_free(SMODEL_SUPER *sm) {
     if(sm->elem3d_physics_mat!=NULL){
         smat_physics_free_array(sm->elem3d_physics_mat,sm->nphysics_mat_3d);
     }
+    //if(sm->node_physics_mat!=NULL){
+    //    smat_physics_free_array(sm->node_physics_mat,sm->nphysics_mat_node);
+    //}
     if(sm->node_physics_mat!=NULL){
-        smat_physics_free_array(sm->node_physics_mat,sm->nphysics_mat_node);
+        sm->node_physics_mat = (SMAT_PHYSICS **) tl_free(sizeof(SMAT_PHYSICS *), sm->grid->nnodes, sm->node_physics_mat);
     }
 
     //free mat ids
@@ -78,9 +81,9 @@ void smodel_super_free(SMODEL_SUPER *sm) {
     if(sm->elem3d_physics_mat_id!=NULL){
         sm->elem3d_physics_mat_id = (int *) tl_free(sizeof(int), sm->grid->nelems3d, sm->elem3d_physics_mat_id);
     }
-    if(sm->node_physics_mat_id!=NULL){
-        sm->node_physics_mat_id = (int *) tl_free(sizeof(int), sm->grid->nnodes, sm->node_physics_mat_id);
-    }
+//    if(sm->node_physics_mat_id!=NULL){
+//        sm->node_physics_mat_id = (int *) tl_free(sizeof(int), sm->grid->nnodes, sm->node_physics_mat_id);
+//    }
 
     //free bc masks and dirichlet data
     if(sm->bc_mask!=NULL){

@@ -4,7 +4,7 @@
 //TODO: Maybe mve Symbolic, Numeric into slin_sys so we can avoid factoring everytime for Linear problem
 static  void *Symbolic, *Numeric;
 static double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
-static double PRE_ORDER_STRAT  = UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_BEST;//UMFPACK_ORDERING_NONE;
+static double PRE_ORDER_STRAT  = UMFPACK_ORDERING_NONE;//UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_BEST;//UMFPACK_ORDERING_NONE;
 static int isize = 0;           /* the size of the arrays */
 static int isize_local = 0;
 static double *r;          /* the linear solver residual */

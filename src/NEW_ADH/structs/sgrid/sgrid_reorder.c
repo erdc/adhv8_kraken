@@ -238,7 +238,10 @@ int sgrid_reorder(SGRID *grid){
     //SCOTCH_STRATQUALITY
     //SCOTCH_STRATSPEED
     //SCOTCH_STRATBALANCE
-    SCOTCH_stratGraphOrderBuild(&stratdat,SCOTCH_STRATQUALITY,0,0.2);
+    //default
+    //SCOTCH_stratGraphOrderBuild(&stratdat,SCOTCH_STRATQUALITY,0,0.2);
+    //reducing balance ratio
+    SCOTCH_stratGraphOrderBuild(&stratdat,SCOTCH_STRATQUALITY,0,0.01);
     SCOTCH_Graph grafdat;
 	SCOTCH_graphInit (&grafdat);
 

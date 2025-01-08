@@ -124,8 +124,8 @@ void smodel_super_alloc_init(SMODEL_SUPER *sm) {
      //Mark proposes swapping nodal vars above to node-based material, this will cut down on memory
     //but may be challenging to form. This won't be set by user but implicitly built
     //at run time
-    sm->nphysics_mat_node = 0;
-    sm->node_physics_mat_id = NULL; //[nnode] ? local vs what idk
+    //sm->nphysics_mat_node = 0;
+    //sm->node_physics_mat_id = NULL; //[nnode] ? local vs what idk
     sm->node_physics_mat = NULL; //[nphysics_mat_node]
 
 

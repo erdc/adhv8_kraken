@@ -22,9 +22,9 @@
  *  @param[in] nodal_physics_mat_id (int*) - array of integers that gives the nodal physics mat id
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
+void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS **node_physics_mat){
 
-    int i,j,k,save_k,ctr,nodal_mat_ID, nodeID, current_nodal_nvars,offset, temp_nodal_var;
+    int i,j,k,save_k,ctr, nodeID, current_nodal_nvars,offset, temp_nodal_var;
     int current_var;
 #ifdef _DEBUG
     bool isFound;
@@ -45,11 +45,12 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
 //        }
         offset=fmaplocal[nodeID];
         //now for current node
-        nodal_mat_ID = nodal_physics_mat_id[nodeID];
+        //nodal_mat_ID = nodal_physics_mat_id[nodeID];
         //on this node get nodal vars
         //need to iron this out, this is a 2d array of ints , nnodes x nvar
         //int current_nodal_vars = *nodal_vars[local_node_ids[i]];
-        current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
+        //current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
+        current_nodal_nvars = node_physics_mat[nodeID]->nvar;
         for (j=0; j<elem_nvars; j++){
             //map the current var from the residual to the correct var number in global residual
 #ifdef _DEBUG
@@ -59,7 +60,7 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
 
             //loop through the nodal vars to look for match
             for(k=0;k<current_nodal_nvars;k++){
-                temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
+                temp_nodal_var = node_physics_mat[nodeID]->vars[k];
                 //note current_nodal_vars depends on i
                 if(current_var == temp_nodal_var){
 #ifdef _DEBUG
@@ -174,9 +175,9 @@ void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_
  *  given node and variable number
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
+int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS **node_physics_mat){
 
-    int k,save_k, nodal_mat_ID, current_nodal_nvars, temp_nodal_var;
+    int k,save_k, current_nodal_nvars, temp_nodal_var;
 #ifdef _DEBUG
     bool isFound;
 #endif
@@ -188,15 +189,14 @@ int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_m
     //may need to adjust in parallel? shouldnt if node ids local to process
     offset=fmaplocal[NodeID];
     //now current node
-    nodal_mat_ID = nodal_physics_mat_id[NodeID];
-    current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
+    current_nodal_nvars = node_physics_mat[NodeID]->nvar;
     //map the current var and node to the correct equation number in global residual
 #ifdef _DEBUG
     isFound=FALSE;
 #endif
     //loop through the nodal vars to look for match
     for(k=0;k<current_nodal_nvars;k++){
-        temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
+        temp_nodal_var = node_physics_mat[NodeID]->vars[k];
         if(var == temp_nodal_var){
 #ifdef _DEBUG
             isFound=TRUE;
@@ -291,11 +291,11 @@ int get_cg_dof_2(int var, int NodeID, SMAT_PHYSICS *node_physics_mat, int *nodal
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void global_to_local_dbl_cg(double *local, double *global, int *nodes, int nnodes, int var, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id) {
+void global_to_local_dbl_cg(double *local, double *global, int *nodes, int nnodes, int var, int *fmaplocal, SMAT_PHYSICS **node_physics_mat) {
     int i=0;
     int temp;
     for (i=0; i<nnodes; i++) {
-        temp = get_cg_dof(var, nodes[i], fmaplocal, node_physics_mat, nodal_physics_mat_id);
+        temp = get_cg_dof(var, nodes[i], fmaplocal, node_physics_mat);
         local[i] = global[temp];
     }
 }

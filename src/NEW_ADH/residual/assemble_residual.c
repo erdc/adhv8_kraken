@@ -98,8 +98,9 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //get_cell_dofs_2(dofs,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->lin_sys->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
@@ -159,7 +160,8 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
         //alternative, computes fmaplocal instead of storing
         //get_cell_dofs_2(dofs, nnodes, grid->elem2d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
@@ -209,7 +211,8 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        //get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
         //get_cell_dofs_2(dofs,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->lin_sys->residual, elem_rhs, nnodes, nvars_elem, dofs);

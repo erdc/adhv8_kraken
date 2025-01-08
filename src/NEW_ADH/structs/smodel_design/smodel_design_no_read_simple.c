@@ -102,11 +102,16 @@ void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init
         slin_sys_init_ghosts(&(dm->lin_sys[i]), dm->grid, dm->superModel[j].dof_map_local);
         //if mono maybe call one routine and if not call another?
         //for now just Mono
+//        slin_sys_init_sparsity_mono(&(dm->lin_sys[i]), dm->superModel[j].elem3d_physics_mat_id, 
+//        dm->superModel[j].elem2d_physics_mat_id , dm->superModel[j].elem1d_physics_mat_id ,
+//        dm->superModel[j].elem3d_physics_mat, dm->superModel[j].elem2d_physics_mat,
+//        dm->superModel[j].elem1d_physics_mat ,dm->superModel[j].node_physics_mat_id,
+//        dm->superModel[j].node_physics_mat, dm->grid, dm->superModel[j].dof_map_local);
         slin_sys_init_sparsity_mono(&(dm->lin_sys[i]), dm->superModel[j].elem3d_physics_mat_id, 
         dm->superModel[j].elem2d_physics_mat_id , dm->superModel[j].elem1d_physics_mat_id ,
         dm->superModel[j].elem3d_physics_mat, dm->superModel[j].elem2d_physics_mat,
-        dm->superModel[j].elem1d_physics_mat ,dm->superModel[j].node_physics_mat_id,
-        dm->superModel[j].node_physics_mat, dm->grid, dm->superModel[j].dof_map_local);
+        dm->superModel[j].elem1d_physics_mat ,dm->superModel[j].node_physics_mat, 
+        dm->grid, dm->superModel[j].dof_map_local);
 #ifdef _PETSC
         dm->lin_sys[i].A = PETSC_NULLPTR;
         dm->lin_sys[i].ksp = PETSC_NULLPTR;

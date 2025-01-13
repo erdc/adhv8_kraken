@@ -30,6 +30,7 @@ void svect2d_integrity_check_array(SVECT2D *, int, int, char *);
 SVECT2D svect2d_avg(SVECT2D, SVECT2D);
 void svect2d_init_array_value_range(SVECT2D *, double, double, int, int);
 SVECT2D svect2d_average_array(SVECT2D *vect, int size);
-
+void dumpVector2D(SVECT2D *vel, int nnodes, double *u, double *v);
+void printScreen_debug_svec2d(char *descript, SVECT2D *v, int n, int *global_nd_ids);
 
 #endif

@@ -36,5 +36,7 @@ SVECT svect_sum_array(SVECT *, int);
 void svect_integrity_check(SVECT, int, char *);
 void svect_integrity_check_array(SVECT *, int, int, char *);
 SVECT svect_cross(SVECT v1, SVECT v2);
+void printScreen_debug_svect(char *descript, SVECT *v, int n, int *global_nd_ids);
+void printScreen_debug_vec(char *descript, SVECT *f, int n);
 
 #endif

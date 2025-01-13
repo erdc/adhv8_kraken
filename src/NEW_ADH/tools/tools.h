@@ -66,5 +66,27 @@ int compare_ints(const void *a, const void *b);
 void printScreen_dble_array(char * descript, double *array, int size,  int linenumber, char *filename);
 void printScreen_int_array(char * descript, int *array, int size, int linenumber, char *filename);
 
+void printScreen_debug2_dbl(char *descript, double *f, int n, int *global_nd_ids);
+void printScreen_debug_int(char *descript, int *f, int n);
+void printScreen_debug_dbl(char *descript, double *f, int n);
+void printScreen_debug2_dbl(char *descript, double *f, int n, int *global_nd_ids);
+void printScreen_rhs_3dof(char *string, int nnodes, int ie, int *nodes, double *elem_rhs);
+void Is_Double_Inf_or_NaN(double X,char *filename,int linenumber);
+void Is_DoubleArray_Inf_or_NaN(double *X,int arraybounds,char *filename,int linenumber);
+
+SVECT2D tl_bendway_correction(
+  SVECT2D * grad_shp,
+  SVECT2D * elem_vel,
+  double *elem_head,
+  double *elem_c,
+  double prop1,
+  double prop2,
+  double drying_lower_limit,
+  double roughness,
+  double fluid_density,
+  int routine_flag,     /* flag indicator indicating what routine is call  bwc  */
+  int ie
+);
+double get_coriolis_angular_speed(double coriolis_factor);
 
 #endif

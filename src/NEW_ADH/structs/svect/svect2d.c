@@ -64,6 +64,29 @@ void svect2d_print_array(FILE *fout, SVECT2D *v, int nnodes) {
     }
 }
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Writes a 2D AdH vector array to screen with global IDS
+ *  \author    Corey Trahan, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ *  @param[in] descript variable name string
+ *  @param[in] f the vector array
+ *  @param[in] n the number of array elements
+ *  @param[in] global_nd_ids the global IDs of the array nodes
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void printScreen_debug_svec2d(char *descript, SVECT2D *v, int n, int *global_nd_ids) {
+    int i;
+    for (i=0; i<n; i++) printf("%s[%d] {x,y} gnode id: %d || {%30.20e,%30.20e}\n",descript,i,global_nd_ids[i],v[i].x,v[i].y);
+}
+
+
 void svect2d_print_array_MPI(SGRID *grid, FILE * fp_out1, FILE *fp_out2, SVECT2D *data, int **ndata, int my_nnode_max, int *my_nnode_ext, int flag)
 {
 //    int i;                        /* loop counter */
@@ -273,6 +296,31 @@ SVECT2D svect2d_average_array(SVECT2D *vect, int size) {
     avg.x *= (1./(double) size);  // apparently, doing this instead of dividing
     avg.y *= (1./(double) size);  // matters a whole lot, and stabilized source test
     return avg;
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     return two double arrays from a 2D AdH vector array
+ *  \author    Corey Trahan, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ *  @param[out] u a double array of x-velocities
+ *  @param[out] v a double array of y-velocities
+ *  @param[in] vel the 2D vector array
+ *  @param[in] nnodes the total number of elements in the 2D vector array
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void dumpVector2D(SVECT2D *vel, int nnodes, double *u, double *v) {
+    int i;
+    for (i=0; i<nnodes; i++) {
+        u[i] = vel[i].x;
+        v[i] = vel[i].y;
+    }
 }
 
 /**********************************************/

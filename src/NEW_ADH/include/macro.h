@@ -796,12 +796,12 @@
                 for(j99=0;j99<2;j99++) \
                         l99[j99] = vec[j99].x*vec[j99].x + vec[j99].y*vec[j99].y; \
                 xsi99 = sqrt(l99[0]/l99[1]); \
-                new_elem_rhs99[only99].c_eq += (1.0-xsi99) * new_elem_rhs99[i99].c_eq; \
-                new_elem_rhs99[only99].x_eq += (1.0-xsi99) * new_elem_rhs99[i99].x_eq; \
-                new_elem_rhs99[only99].y_eq += (1.0-xsi99) * new_elem_rhs99[i99].y_eq; \
-                new_elem_rhs99[i99].c_eq *= xsi99; \
-                new_elem_rhs99[i99].x_eq *= xsi99; \
-                new_elem_rhs99[i99].y_eq *= xsi99; \
+                new_elem_rhs99[only99*3] += (1.0-xsi99) * new_elem_rhs99[i99*3]; \
+                new_elem_rhs99[only99*3+1] += (1.0-xsi99) * new_elem_rhs99[i99*3+1]; \
+                new_elem_rhs99[only99*3+2] += (1.0-xsi99) * new_elem_rhs99[i99*3+2]; \
+                new_elem_rhs99[i99*3] *= xsi99; \
+                new_elem_rhs99[i99*3+1] *= xsi99; \
+                new_elem_rhs99[i99*3+2] *= xsi99; \
         } \
 }
 #define RE_DISTRIBUTE_1D(x99,new_x99,new_elem_rhs99,only99) \
@@ -815,12 +815,12 @@
                 for(j99=0;j99<2;j99++) \
                         l99[j99] = vec[j99].x*vec[j99].x + vec[j99].y*vec[j99].y; \
                 xsi99 = sqrt(l99[0]/l99[1]); \
-                new_elem_rhs99[only99].c_eq += (1.0-xsi99) * new_elem_rhs99[i99].c_eq; \
-                new_elem_rhs99[only99].x_eq += (1.0-xsi99) * new_elem_rhs99[i99].x_eq; \
-                new_elem_rhs99[only99].y_eq += (1.0-xsi99) * new_elem_rhs99[i99].y_eq; \
-                new_elem_rhs99[i99].c_eq *= xsi99; \
-                new_elem_rhs99[i99].x_eq *= xsi99; \
-                new_elem_rhs99[i99].y_eq *= xsi99; \
+                new_elem_rhs99[only99*3] += (1.0-xsi99) * new_elem_rhs99[i99*3]; \
+                new_elem_rhs99[only99*3+1] += (1.0-xsi99) * new_elem_rhs99[i99*3+1]; \
+                new_elem_rhs99[only99*3+2] += (1.0-xsi99) * new_elem_rhs99[i99*3+2]; \
+                new_elem_rhs99[i99*3] *= xsi99; \
+                new_elem_rhs99[i99*3+1] *= xsi99; \
+                new_elem_rhs99[i99*3+2] *= xsi99; \
         } \
 }
 #define RE_DISTRIBUTE_RES(x99,new_x99,new_elem_rhs99,only99) \

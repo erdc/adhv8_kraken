@@ -74,6 +74,65 @@ void svect_printScreen_array(char * descript, SVECT *v, char *name, int size, in
         svect_printScreen(v[i],name);
     }
 }
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Writes a 3D AdH vector array to screen
+ *  \author    Corey Trahan, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ *  @param[in] descript variable name string
+ *  @param[in] f the vector array
+ *  @param[in] n the number of array elements
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void printScreen_debug_vec(char *descript, SVECT *f, int n) {
+    int i;
+    printf("%s || x || ",descript);
+    for (i=0; i<n; i++) {
+        printf("%30.20f \t ",f[i].x);
+    }
+    printf("\n");
+
+    printf("%s || y || ",descript);
+    for (i=0; i<n; i++) {
+        printf("%30.20f \t ",f[i].y);
+    }
+    printf("\n");
+
+    printf("%s || z || ",descript);
+    for (i=0; i<n; i++) {
+        printf("%30.20f \t ",f[i].z);
+    }
+    printf("\n");
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Writes a 3D AdH vector array to screen with global IDS
+ *  \author    Corey Trahan, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ *  @param[in] descript variable name string
+ *  @param[in] f the vector array
+ *  @param[in] n the number of array elements
+ *  @param[in] global_nd_ids the global IDs of the array nodes
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void printScreen_debug_svect(char *descript, SVECT *v, int n, int *global_nd_ids) {
+    int i;
+    for (i=0; i<n; i++) printf("%s[%d] {x,y,z} gnode id: %d || {%20.10e,%20.10e,%20.10e}\n",descript,i,global_nd_ids[i],v[i].x,v[i].y,v[i].z);
+}
+
 
 void svect_print_array_MPI(SGRID *grid, FILE * fp_out1, FILE *fp_out2, SVECT *data, int **ndata, int my_nnode_max, int *my_nnode_ext, int flag)
 {

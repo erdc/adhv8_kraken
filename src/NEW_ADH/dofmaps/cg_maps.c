@@ -302,6 +302,39 @@ void global_to_local_dbl_cg(double *local, double *global, int *nodes, int nnode
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
+ *  \brief     extracts sub-array of solution values for specific variable at a given set of nodes
+ *  \author    Corey Trahan, Ph.D.
+ *  \author    Mark Loveland, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ *  @param[in,out] local (double*) - the array containing local (to the element) values of a specific variable
+ *  @param[in] global (double*) - the full array of the solution vector
+ *  @param[in] nodes (int*) - array of node IDs local to process
+ *  @param[in] nnodes (int) - the numer of nodes in the nodes array
+ *  @param[in] var (int) - the variable code to be extracted
+ *  @param[in] fmaplocal (int*) - array containing first dof number (local to process) at each node
+ *  @param[in] node_physics_mat (SMAT_PHYSICS*) - array of SMAT_PHYSICS structs containing variable info at nodes
+ *  @param[in] nodal_physics_mat_id (int*) - array of ints containing the nodal physics mat id at each node
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void global_to_local_SVECT2D_cg(SVECT2D *local, double *global, int *nodes, int nnodes, int varx, int vary, int *fmaplocal, SMAT_PHYSICS **node_physics_mat) {
+    int i=0;
+    int temp1,temp2;
+    for (i=0; i<nnodes; i++) {
+        temp1 = get_cg_dof(varx, nodes[i], fmaplocal, node_physics_mat);
+        temp2 = get_cg_dof(vary, nodes[i], fmaplocal, node_physics_mat);
+        local[i].x = global[temp1];
+        local[i].y = global[temp2];
+    }
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
  *  \brief     extracts sub-array of solution values for specific variable at a given set of nodes without fmaplocal
  *  \author    Corey Trahan, Ph.D.
  *  \author    Mark Loveland, Ph.D.

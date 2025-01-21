@@ -15,6 +15,7 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm);
 void split_CSR_mat_vec_mult(double *Ax, int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag, double *vals_off_diag,
   double *x, int nrows, int *ghosts, int nghost);
+void check_diag(SMODEL_SUPER *sm);
 
 
 // bcgstab solver routines

@@ -107,6 +107,53 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
+ *  \brief     Function to check for near zero entries and force dirichlet conditions
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] sm (SMODEL_SUPER*) - pointer to an instant of the SuperModel struct
+ *  \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void check_diag(SMODEL_SUPER *sm){
+    //NOTE: THIS WILL BREAK IN PARALLEL, NEED TO ADD GHOSTS LATER
+
+    //could illuciadate arguments, but will look at this later
+    //modify linear system to have dirichlet conditions at
+    //entries where bc_mask=YES
+    //Method 1: doesnt require solution to have dirichlet conditions set
+    //Method 2: assumes solution already has dirichlet condition values set
+
+    //brute force for now, can find better way later
+    int my_ndof = *(sm->my_ndofs);
+    int row, row_start, row_end, index;
+    //Required for method 1 only
+    //double temp;
+    //sarray_printScreen_int(sm->bc_mask, *(sm->ndofs), "bcmask old");
+    for (row=0;row<my_ndof;row++){
+        row_start = sm->lin_sys->indptr_diag[row];
+        row_end = sm->lin_sys->indptr_diag[row+1];
+        //find index of diagonal element in row
+        index = binary_search_part(sm->lin_sys->cols_diag, row_start, row_end, row);
+        //printf("Diagonal index of row[%d] %d (col %d)\n",row,index,sm->lin_sys->cols_diag[index]);
+        //check if the entry is < some tolerance
+        
+        if (fabs(sm->lin_sys->vals_diag[index]) < SMALL){
+            //(1) add to bc mask
+            //(2) ensure dirichlet data is 0 (is this what we want?)
+            sm->bc_mask[row] = YES;
+            //sm->dirichlet_data[index] = 0.0;
+        }
+
+    }
+    //sarray_printScreen_int(sm->bc_mask, *(sm->ndofs), "bcmask new");
+}
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
  *  \brief     Performs mat/vec multiplication in split CSR format
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland

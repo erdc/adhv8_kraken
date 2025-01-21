@@ -171,20 +171,20 @@
 #define CHAR_SIZE 12
 
 /* definitions of names for various solves */
-#define HYD 1
-#define TRN 2
-#define BLT 3
-#define SLT 4
-#define GRD 5
-#define HVEL 6
-#define WVEL 7
-#define SALT 8
-#define CLAY 9
-#define SAND 10
-#define TEMP 11
-#define DIFF 12
-#define NS 13
-#define GW 14
+//#define HYD 1
+//#define TRN 2
+//#define BLT 3
+//#define SLT 4
+//#define GRD 5
+//#define HVEL 6
+//#define WVEL 7
+//#define SALT 8
+//#define CLAY 9
+//#define SAND 10
+//#define TEMP 11
+//#define DIFF 12
+//#define NS 13
+//#define GW 14
 
 /* post processing dataset flags */
 typedef enum

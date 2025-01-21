@@ -4,7 +4,7 @@
 //TODO: Maybe mve Symbolic, Numeric into slin_sys so we can avoid factoring everytime for Linear problem
 static  void *Symbolic, *Numeric;
 static double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
-static double PRE_ORDER_STRAT  = UMFPACK_ORDERING_NONE;//UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_BEST;//UMFPACK_ORDERING_NONE;
+static double PRE_ORDER_STRAT  = UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_NONE;//UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_BEST;//UMFPACK_ORDERING_NONE;
 static int isize = 0;           /* the size of the arrays */
 static int isize_local = 0;
 static double *r;          /* the linear solver residual */
@@ -79,6 +79,7 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   double bnorm;               /* the norm of the right hand side */
   //double snorm;               /* the norm of s */
   int isize_prev;
+  int status;
   /* allocates memory if needed */
   if (isize < size) {
         isize_prev = isize;
@@ -129,7 +130,7 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   //in original routine but doesnt seem necessary
   sarray_init_dbl(b,size);
   //apply left preconditioning to RHS, this is stored in residual
-  solve_umfpack(b, indptr_diag, cols_diag, vals_diag, p, local_size);
+  status = solve_umfpack(b, indptr_diag, cols_diag, vals_diag, p, local_size);
   //zero out rhs
   sarray_init_dbl(p, size);
   //update ghosts
@@ -152,7 +153,7 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   //  printf("Rank %d, Ax[%d] = %f\n",rank,i,Mp[i]);
   //}
   //next, apply preconditioner to Mp, save in Ap
-  solve_umfpack(Ap, indptr_diag, cols_diag, vals_diag, Mp, local_size);
+  status = solve_umfpack(Ap, indptr_diag, cols_diag, vals_diag, Mp, local_size);
   //print vector
   //for (i=0;i<local_size;i++){
   //  printf("Rank %d, Ax[%d] = %f\n",rank,i,Ap[i]);
@@ -276,7 +277,6 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
 //    printf("Rank %d Final u[%d] = %f\n",rank,i,x[i]);
 //  }
   //add later to see if converged or not
-  int status = 0;
   return status;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

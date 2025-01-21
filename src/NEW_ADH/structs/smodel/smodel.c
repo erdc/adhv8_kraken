@@ -100,10 +100,10 @@ void smodel_alloc_init_array(SMODEL **elemPhys, int nSubMods, int *nSubMod_nvar)
 void smodel_alloc_init(SMODEL *physics,int nvar) { // triple pointer?
     assert(nvar>0);
     physics->fe_inc = NULL;
-    physics->fe_init = NULL;
+    physics->fe_init = UNSET_INT;
     physics->fe_update = NULL;
     physics->fe_solve = NULL;
-    physics->fe_resid = -1;
+    physics->fe_resid = UNSET_INT;
     physics->fe_load = NULL;
     physics->nvar = nvar;
     //allocate array of physics variables and set to default

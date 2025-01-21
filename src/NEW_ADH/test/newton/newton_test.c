@@ -1,8 +1,8 @@
 /*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 700;//700;
-static int NEWTON_TEST_NY = 700;//700;
+static int NEWTON_TEST_NX = 75;//700;
+static int NEWTON_TEST_NY = 74;//700;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -144,7 +144,10 @@ int newton_test(int argc, char **argv) {
 		//mark the boundary only
 		x_coord = grid->node[i].x;
 		y_coord = grid->node[i].y;
-		id = grid->node[i].id;
+		id = i;
+		//id = grid->node[i].id;
+		//better, but then permtab always has to be there
+		//id = grid->node[grid->permtab[i]].id;
 		//printf("x %f, y %f, ID = %d\n",x_coord,y_coord,id);
 
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
@@ -203,10 +206,13 @@ int newton_test(int argc, char **argv) {
 
 //	for(int i=0; i<nnodes;i++){
 //		printf("before perm sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
+//		printf("Node[%d]. id = %d, original id = %d\n",i,grid->node[i].id,grid->node[i].original_id);
+//		printf("Permtab[%d] = %d, peritab[%d] = %d\n",i,grid->per_node[i], i, grid->inv_per_node[i]);
 //	}
-if (grid->inv_per_node!=NULL){
-	permute_array(uh,grid->inv_per_node,nnodes);
-}
+//Nodes reordered so not necessary
+//if (grid->inv_per_node!=NULL){
+//	permute_array(uh,grid->inv_per_node,nnodes);
+//}
 //	printf("Final solution:\n");
 //	for(int i=0; i<nnodes;i++){
 //		printf("node id[%d] = %d, peritab[%d] = %d\n",i,grid->node[i].id,i,grid->inv_per_node[i]);

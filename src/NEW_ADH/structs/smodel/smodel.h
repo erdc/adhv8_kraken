@@ -8,7 +8,8 @@
 typedef struct {
     
     void *fe_inc;
-    void *fe_init;
+    //void *fe_init;
+    int fe_init;
     void *fe_update;
     void *fe_solve;
     // this could be body or boundary, depending on what element

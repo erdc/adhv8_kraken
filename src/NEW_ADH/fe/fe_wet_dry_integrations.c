@@ -39,7 +39,7 @@
 
 void inline fe_sw2_wd_average(SVECT *elem_nds, double *depth, SVECT2D *v_wd, double *f_wd, double djac, double *f_wd_avg, SVECT2D *v_wd_avg) {
     
-    DOF_3 averages[NDONTRI]; dof3_init_array(averages, NDONTRI);
+    double averages[NDONTRI*3]; sarray_init_dbl(averages,NDONTRI*3);
     int redistribute_flag = OFF; // do not redistribute in SUPG
     double vars[2];
     vars[0] = 1.;
@@ -50,10 +50,10 @@ void inline fe_sw2_wd_average(SVECT *elem_nds, double *depth, SVECT2D *v_wd, dou
     if (v_wd_avg != NULL) {v_wd_avg->x = 0.; v_wd_avg->y = 0.;}
     if (factor > 0.0) {
         double wet_area = djac * factor;
-        *f_wd_avg   = averages[0].c_eq / wet_area;
+        *f_wd_avg   = averages[0] / wet_area;
         if (v_wd_avg != NULL) {
-            v_wd_avg->x = averages[0].x_eq / wet_area; // cjt :: note, same as (*v_avg).x
-            v_wd_avg->y = averages[0].y_eq / wet_area; // cjt :: note, same as (*v_avg).y
+            v_wd_avg->x = averages[1] / wet_area; // cjt :: note, same as (*v_avg).x
+            v_wd_avg->y = averages[2] / wet_area; // cjt :: note, same as (*v_avg).y
         }
     }
 }
@@ -346,7 +346,7 @@ void inline fe_sw2_wd_pressure_triangle(SVECT *elem_nds, double *elem_head, SVEC
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-void inline fe_sw2_wd_bodyForce_triangle(SVECT *elem_nds, double *elem_head, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, double *vars, DOF_3 *rhs) {
+void inline fe_sw2_wd_bodyForce_triangle(SVECT *elem_nds, double *elem_head, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, double *vars, double *rhs) {
     int i;
     
     double dt = vars[0];
@@ -356,8 +356,8 @@ void inline fe_sw2_wd_bodyForce_triangle(SVECT *elem_nds, double *elem_head, SVE
     double rhs_y[NDONTRI] = {0., 0., 0.};
     integrate_triangle_phi_h_df(djac, c, elem_head, *v, rhs_x, rhs_y);
     for (i=0; i<NDONTRI; i++) {
-        rhs[i].x_eq += rhs_x[i];
-        rhs[i].y_eq += rhs_y[i];
+        rhs[i*3+1]+= rhs_x[i];
+        rhs[i*3+2]+= rhs_y[i];
     }
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

@@ -144,6 +144,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 			zr = a0 + ax*x + ax2*x*x + ay*y + ay2*y*y + axy*x*y + ax2y*x*x*y + axy2*x*y*y + ax2y2*x*x*y*y;
 			//fprintf(fp,"ND %d %20.10f %20.10f %20.10f\n", k, xr, yr, zr);
 			grid.node[npoints].id = npoints;
+			grid.node[npoints].original_id = npoints;
 			//serial for now
 			grid.node[npoints].gid = grid.node[npoints].id;
 			grid.node[npoints].x = xr;

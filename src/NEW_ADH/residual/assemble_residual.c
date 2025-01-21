@@ -144,7 +144,6 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
             sarray_copy_int(physics_vars, sm->elem2d_physics_mat[mat_id].model[k].physics_vars,nvar_pde);
             //convention for filling temp will be:
             // for i in node (for j in nvar temp[nnode*i + j] = result)
-
             //either modify resid routines to return int or add an argument, can decide later
             //var_code will contain ordered digits of each equation, same codes used in elem*_vars[]
             //maybe model comes from mat as well? instead of elem number, get mat number

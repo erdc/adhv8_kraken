@@ -389,6 +389,22 @@ inline void integrate_triangle_phi_h_df(double djac, double c, double *h, SVECT2
         integral_y[2] += con * (sum_h + h[2]);
     }
 }
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief  Peforms following triangular integration:
+ *  \f$  \int_{0}^{1} \int_{0}^{1-\widehat{x}} \big( c \, \phi_i(\widehat{x},\widehat{y}) \, f(\widehat{x},\widehat{y}) \, g(\widehat{x},\widehat{y})\big) d\widehat{y}\,d\widehat{x} \f$
+ *  \author  Corey Trahan, Ph.D.
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void integrate_triangle_phi_f_g(double djac, double c, double *f, double *g, double *integral) {
+    double g_sum = 2 * (g[0] + g[1] + g[2]);
+    double t1 = c * djac * one_60;
+    integral[0] += t1 * (f[0] * (g_sum + 4*g[0]) + f[1] * (g_sum - g[2]) + f[2] * (g_sum - g[1]));
+    integral[1] += t1 * (f[1] * (g_sum + 4*g[1]) + f[2] * (g_sum - g[0]) + f[0] * (g_sum - g[2]));
+    integral[2] += t1 * (f[2] * (g_sum + 4*g[2]) + f[1] * (g_sum - g[0]) + f[0] * (g_sum - g[1]));
+}
+
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -621,6 +637,43 @@ inline void integrate_quadrilateral_phi_f_lump(SVECT *nd, double c, double *f, d
     integral[2] += integral[2] * f[2];
     integral[3] += integral[3] * f[3];
 }
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+// returns the 2D projected quadrilateral Jacobian
+inline double get_quadrilateral_linear_djac2d(double xhat, double yhat, SVECT *nd) {
+    double x12, x23, x34, x14, x24, x13, tx, ty, tc, term;
+    x12 = (nd[0].x - nd[1].x);
+    x23 = (nd[1].x - nd[2].x);
+    x34 = (nd[2].x - nd[3].x);
+    x14 = (nd[0].x - nd[3].x);
+    x24 = (nd[1].x - nd[3].x);
+    x13 = (nd[0].x - nd[2].x);
+    tx = ( x34*nd[0].y - x34*nd[1].y - x12*nd[2].y + x12*nd[3].y);
+    ty = ( x23*nd[0].y - x14*nd[1].y + x14*nd[2].y - x23*nd[3].y);
+    tc = (-x24*nd[0].y + x13*nd[1].y + x24*nd[2].y - x13*nd[3].y);
+    term = tx*xhat + ty*yhat + tc;
+    return (one_8 * term);
+}
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+// returns the 2D projected quadrilateral Jacobian and cartesian space shape function gradients
+inline double get_quadrilateral_linear_djac_gradPhi(double xhat, double yhat, SVECT *nd, SVECT *grad_shp) {
+    
+    double djac2d = get_quadrilateral_linear_djac2d(xhat, yhat, nd);
+    double con = (1./(djac2d * 8.));
+    grad_shp[ 0 ].x = con * (       -xhat*nd[2].y + (xhat - 1)*nd[3].y - (nd[1].y - nd[2].y)*yhat + nd[1].y );
+    grad_shp[ 1 ].x = con * (  (xhat + 1)*nd[2].y -       xhat*nd[3].y + (nd[0].y - nd[3].y)*yhat - nd[0].y );
+    grad_shp[ 2 ].x = con * (        xhat*nd[0].y - (xhat + 1)*nd[1].y - (nd[0].y - nd[3].y)*yhat + nd[3].y );
+    grad_shp[ 3 ].x = con * ( -(xhat - 1)*nd[0].y +       xhat*nd[1].y + (nd[1].y - nd[2].y)*yhat - nd[2].y );
+    
+    grad_shp[ 0 ].y = con * (  (nd[2].x - nd[3].x)*xhat + (nd[1].x - nd[2].x)*yhat - nd[1].x + nd[3].x );
+    grad_shp[ 1 ].y = con * ( -(nd[2].x - nd[3].x)*xhat - (nd[0].x - nd[3].x)*yhat + nd[0].x - nd[2].x );
+    grad_shp[ 2 ].y = con * ( -(nd[0].x - nd[1].x)*xhat + (nd[0].x - nd[3].x)*yhat + nd[1].x - nd[3].x );
+    grad_shp[ 3 ].y = con * (  (nd[0].x - nd[1].x)*xhat - (nd[1].x - nd[2].x)*yhat - nd[0].x + nd[2].x );
+    
+    return djac2d;
+}
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*! \brief  Peforms following quadrilateral integration:
@@ -896,4 +949,77 @@ inline void integrate_quadrilateral_phi_h_g_df(SVECT *nd, double c, double *df, 
     integral_y[2] += con * ( d1*x1 - d2*x2 - d3*x3 + d4*x4);
     integral_y[3] += con * ( d5*x1 - d6*x2 - d7*x3 + d8*x4);
 }
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief  Peforms following quadrilateral integration:
+ *  \f$ \int_{-1}^{1} \int_{-1}^{1} \big( c \, \mathbf{\nabla} \phi_i(\widehat{x},\widehat{y}) \cdot \mathbf{\overline{v}}  \big) d\widehat{y}\,d\widehat{x}   \f$
+ *  \author  Corey Trahan, Ph.D.
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void integrate_quadrilateral_gradPhi_dot_vbar(SVECT *nd, double c, SVECT2D vbar, double *integral) {
+    
+    double con = 6. * c;
+    integral[0] += con * (-vbar.y * nd[1].x + vbar.y * nd[3].x + vbar.x * nd[1].y - vbar.x * nd[3].y);
+    integral[1] += con * ( vbar.y * nd[0].x - vbar.y * nd[2].x - vbar.x * nd[0].y + vbar.x * nd[2].y);
+    integral[2] += con * ( vbar.y * nd[1].x - vbar.y * nd[3].x - vbar.x * nd[1].y + vbar.x * nd[3].y);
+    integral[3] += con * (-vbar.y * nd[0].x + vbar.y * nd[2].x + vbar.x * nd[0].y - vbar.x * nd[2].y);
+    
+}
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief  Peforms following quadrilateral integration:
+ *  \f{eqnarray*}{
+ *   integral_x &=& \int_{-1}^{1} \int_{-1}^{1} \bigg(c \, \phi_i(\widehat{x},\widehat{y}) \, \frac{\partial \f(\widehat{x},\widehat{y})}{x} \, h(\widehat{x},\widehat{y}) \bigg) d\widehat{y}\,d\widehat{x} \\
+ *   integral_y &=& \int_{-1}^{1} \int_{-1}^{1} \bigg(c \, \phi_i(\widehat{x},\widehat{y}) \, \frac{\partial \f(\widehat{x},\widehat{y})}{y} \, h(\widehat{x},\widehat{y}) \bigg) d\widehat{y}\,d\widehat{x}
+ *  \f}
+ *  \author  Corey Trahan, Ph.D.
+ *  \note CJT \:: SW 2D pressure body integral
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void integrate_quadrilateral_phi_h_df(SVECT *nd, double c, double *df, double *h, double *integral_x, double *integral_y) {
+    
+    double x1, x2, x3, x4, y1, y2, y3, y4, f1, f2, f3, f4, h1, h2, h3, h4;
+    double g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12, g13, g14, g15, g16;
+    double t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26;
+    double con = 0.;
+    
+    extractNodesQuad(nd,&x1,&x2,&x3,&x4,&y1,&y2,&y3,&y4);
+    extractFunctionQuad(df,&f1,&f2,&f3,&f4);
+    extractFunctionQuad(h,&h1,&h2,&h3,&h4);
+    
+    t1 = f2 - f4; t2 = 3*f2 - f3 - 2*f4; t3 = 2*f2 + f3 - 3*f4; t4 = 3*f1 - f3 - 2*f4; t5 = 3*f1 - 2*f3 - f4;
+    t6 = f1 - f3; t7 = 2*f1 - f3 - f4; t8 = f1 - 2*f2 + f4; t9 = f1 + f2 - 2*f4; t10 = 3*f1 - 2*f2 - f3;
+    t11 = 2*f1 - f2 - f3; t12 = 3*f2 - 2*f3 - f4; t13 = 2*f2 - f3 - f4; t14 = 2*f1 - 3*f3 + f4; t15 = 2*f1 - 3*f2 + f4;
+    t16 = f1 - 3*f2 + 2*f4; t17 = f1 + f2 - 2*f3; t18 = f2 + f3 - 2*f4; t19 = f1 - 3*f3 + 2*f4; t20 = f1 - 2*f3 + f4;
+    t21 = f1 + 2*f2 - 3*f4; t22 = f1 + 2*f2 - 3*f3; t23 = 2*f1 + f2 - 3*f3; t24 = f2 + 2*f3 - 3*f4; t25 = 2*f1 + f2 - 3*f4;
+    t26 = 3*f1 - f2 - 2*f3;
+    
+    g1 = (6*t1*h1 + t2*h2 + t1*h3 + t3*h4);    g5 = (2*t4*h1 + t5*h2 + t6*h3 + t7*h4);
+    g2 = (t2*h1 + 2*t12*h2 + t13*h3 + t1*h4);  g6 = (t5*h1 + 6*t6*h2 + t14*h3 + t6*h4);
+    g3 = (t1*h1 + t13*h2 + 2*t1*h3 + t18*h4);  g7 = (t6*h1 + t14*h2 + 2*t19*h3 + t20*h4);
+    g4 = (t3*h1 + t1*h2 + t18*h3 + 2*t24*h4);  g8 = (t7*h1 + t6*h2 + t20*h3 + 2*t6*h4);
+    
+    g9 = (2*t1*h1 - t8*h2 + t1*h3 + t9*h4);    g13 = (2*t10*h1 + t11*h2 + t6*h3 + t26*h4);
+    g10 = (t8*h1 + 2*t15*h2 + t16*h3 - t1*h4); g14 = (t11*h1 + 2*t6*h2 + t17*h3 + t6*h4);
+    g11 = (t1*h1 - t16*h2 + 6*t1*h3 + t21*h4); g15 = (t6*h1 + t17*h2 + 2*t22*h3 + t23*h4);
+    g12 = (t9*h1 + t1*h2 + t21*h3 + 2*t25*h4); g16 = (t26*h1 + t6*h2 + t23*h3 + 6*t6*h4);
+    
+    con = one_72 * c;
+    if (integral_x != NULL) {
+        integral_x[0] += con * ( -g1*y1 + g5*y2 + g9*y3  - g13*y4);
+        integral_x[1] += con * ( -g2*y1 + g6*y2 - g10*y3 - g14*y4);
+        integral_x[2] += con * ( -g3*y1 + g7*y2 + g11*y3 - g15*y4);
+        integral_x[3] += con * ( -g4*y1 + g8*y2 + g12*y3 - g16*y4);
+    }
+    
+    if (integral_y != NULL) {
+        integral_y[0] += con * ( g1*x1 - g5*x2 - g9*x3  + g13*x4);
+        integral_y[1] += con * ( g2*x1 - g6*x2 + g10*x3 + g14*x4);
+        integral_y[2] += con * ( g3*x1 - g7*x2 - g11*x3 + g15*x4);
+        integral_y[3] += con * ( g4*x1 - g8*x2 - g12*x3 + g16*x4);
+    }
+}
+
 

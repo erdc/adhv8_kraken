@@ -1,17 +1,21 @@
-/*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
+/*! \file nonlinear_newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
-static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 15;//150;
-static int NEWTON_TEST_NY = 15;//150;
-static double alpha = 3;
-static double beta = 1.2;
-static void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t);
-static void permute_array(double *arr,int *p, int n);
+static double NEWTON_TEST_TOL = 1e-5;
+static int NEWTON_TEST_NX = 150;//700;
+static int NEWTON_TEST_NY = 150;//700;
+static void compute_exact_solution_nonlinear_poisson(double *u_exact, int ndof, SGRID *grid);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function tests the Newton solvet using a Poisson equation with analytic
+ *  \brief     This function tests the Newton solvet using a nonlinear 
+ *   Poisson equation with analytic solution.
+ *  equation is -\/.(q(u)\/u) + f = 0
+ *                q(u) = 1 + u^2
+ * 	              f = 10 + 10x + 20y
+ *                Omega = (0,1) x (0,1)
+ * 				  u = u_{exact} on \partial \Omega
+ *                u_{exact} = 1 + x + 2y 
  *  solution
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
@@ -20,7 +24,7 @@ static void permute_array(double *arr,int *p, int n);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int timeloop_test(int argc, char **argv) {
+int nonlinear_newton_test(int argc, char **argv) {
 	//create a grid
 	SGRID *grid;
 	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
@@ -50,7 +54,7 @@ int timeloop_test(int argc, char **argv) {
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
     nnodes = grid->nnodes;
-    sgrid_reorder(grid);
+    //sgrid_reorder(grid);
 	//print coordinates
 //  for(int local_index =0; local_index<grid.nnodes; local_index++){
 //		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
@@ -66,9 +70,9 @@ int timeloop_test(int argc, char **argv) {
 	//sm.grid = &grid;
     SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
-	double dt = 2.0/20.0;
+	double dt = 600.0;
 	double t0 = 0.0;
-	double tf = 2.0;
+	double tf = 864000.0;
 
 	char elemVarCode[4]; 
 	strcpy(&elemVarCode[0],"2");//SW2D
@@ -78,10 +82,11 @@ int timeloop_test(int argc, char **argv) {
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
 	printf("NDOFS %d\n",dm.ndofs[0]);
-
-	//OVER WRITE TO HEAT
-	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_resid = HEAT;
 	//printf("Supermodel no read complete\n");
+	//overwrite from linear to nonlinear
+	dm.superModel[0].LINEAR_PROBLEM = NO;
+	dm.superModel[0].tol_nonlin = 1e-8;
+    dm.superModel[0].inc_nonlin = 1e-7;
 
 
 	//allocate linear system
@@ -142,27 +147,30 @@ int timeloop_test(int argc, char **argv) {
 		dm.superModel[0].bc_mask[local_index] = YES;
 	}
 
-	//overwrite intial condition
+	//overwrite some of the boundary
 	double x_coord, y_coord;
 	int id;
 	for (int i=0; i<nnodes; i++){
 		//mark the boundary only
 		x_coord = grid->node[i].x;
 		y_coord = grid->node[i].y;
+		id = i;
 		//id = grid->node[i].id;
-		id=i;
-		//need to set IC
-		dm.superModel[0].sol[id*3+1] = 1 + x_coord*x_coord + alpha * y_coord*y_coord;
+		//better, but then permtab always has to be there
+		//id = grid->node[grid->permtab[i]].id;
+		//printf("x %f, y %f, ID = %d\n",x_coord,y_coord,id);
+
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
-			continue;
+			dm.superModel[0].dirichlet_data[id*3+1] = 1.0 + x_coord + 2 * y_coord;
 		}else{
 			dm.superModel[0].bc_mask[id*3+1]=NO;
 		}
-		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
 	}
 	printf("BCMASK COMPLETE\n");
 	//set up bc mask
-
+//	for (int i=0; i<nnodes; i++){
+//		printf("Dirichlet data node[%d] = %f\n", i, dm.superModel[0].dirichlet_data[i*3+1]);
+//	}
 //	for (int i=0;i<sm.ndofs;i++){
 //		printf("sm bc mask[%d] = %d\n",i,sm.bc_mask[i]);
 //	}
@@ -181,14 +189,13 @@ int timeloop_test(int argc, char **argv) {
 //	increment_function(&sm);
 	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 
-	//set forward_step and call timeloop
-	time_loop(&dm); 
-
+	//call fe_newton
+	fe_newton(sm); 
 	//compare with analytic solution
 	//it is a scalar
 	double *u_exact;
 	u_exact = (double*) tl_alloc(sizeof(double),nnodes);
-	compute_exact_solution_heat(u_exact, nnodes, grid,tf);
+	compute_exact_solution_nonlinear_poisson(u_exact, nnodes, grid);
 //	for(int i=0;i<nnodes;i++){
 //		printf("Exact solution[%d] = %f\n",i,u_exact[i]);
 //	}
@@ -206,11 +213,21 @@ int timeloop_test(int argc, char **argv) {
 	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
 	//global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
 	global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat);
-//not needed anymore since nodes are reordered
+
+//for(int i=0; i<nnodes;i++){
+//		printf("before perm sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
+////		printf("Node[%d]. id = %d, original id = %d\n",i,grid->node[i].id,grid->node[i].original_id);
+////		printf("Permtab[%d] = %d, peritab[%d] = %d\n",i,grid->per_node[i], i, grid->inv_per_node[i]);
+//	}
+//Nodes reordered so not necessary
 //if (grid->inv_per_node!=NULL){
 //	permute_array(uh,grid->inv_per_node,nnodes);
 //}
 //	printf("Final solution:\n");
+//	for(int i=0; i<nnodes;i++){
+//		printf("node id[%d] = %d, peritab[%d] = %d\n",i,grid->node[i].id,i,grid->inv_per_node[i]);
+//	} //
+
 //	for(int i=0; i<nnodes;i++){
 //		printf("sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
 //	} 
@@ -261,35 +278,35 @@ int timeloop_test(int argc, char **argv) {
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t){
+void compute_exact_solution_nonlinear_poisson(double *u_exact, int ndof, SGRID *grid){
 
 	//test case comes from
-	//https://jsdokken.com/dolfinx-tutorial/chapter2/heat_code.html
+	//https://jsdokken.com/dolfinx-tutorial/chapter1/fundamentals.html
 
-	//problem is du/dt - /\u + f = 0 on Omega
-	//f = beta - 2 - 2*alpha
-	// beta = 1.2
-	// alpha = 3.0
+	//problem is -/\u = f on Omega
+	//f = -6
 	//u_D = u_exact on dOmega
-	//u_exact = 1 + x^2 + alpha*y^2+beta*t
+	//u_exact = 1 + x^2 + 2y^2
 
 	//works for cg only at the moment, would need cell by cell loop for dg
 	for(int i =0; i<ndof ; i++){
-		u_exact[i] = 1.0 + grid->node[i].x*grid->node[i].x + alpha*grid->node[i].y*grid->node[i].y + beta*t;
+		u_exact[i] = 1.0 + grid->node[i].x + 2*grid->node[i].y;
 	}
 
 
 
 }
-void permute_array(double *arr,int *p, int n){
-	double *temp;
-	temp = (double *) tl_alloc(sizeof(double),n);
-	for(int i =0;i<n;i++){
-		temp[p[i]] = arr[i];
-	}
-	// Copy permuted elements back to the original array
-    for (int i = 0; i < n; i++) {
-        arr[i] = temp[i];
-    }
-	temp = (double *) tl_free(sizeof(double),n,temp);
-}
+
+
+//void permute_array(double *arr,int *p, int n){
+//	double *temp;
+//	temp = (double *) tl_alloc(sizeof(double),n);
+//	for(int i =0;i<n;i++){
+//		temp[p[i]] = arr[i];
+//	}
+//	// Copy permuted elements back to the original array
+//    for (int i = 0; i < n; i++) {
+//        arr[i] = temp[i];
+//    }
+//	temp = (double *) tl_free(sizeof(double),n,temp);
+//}

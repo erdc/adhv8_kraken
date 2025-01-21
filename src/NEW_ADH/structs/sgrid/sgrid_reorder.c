@@ -28,6 +28,7 @@ int sgrid_reorder(SGRID *grid){
 #ifdef _MPI
 	return 0;
 #else
+	int seed=0;
 	//maybe debug only
 	assert(sizeof(SCOTCH_Num) == sizeof(int));
 //	if (sizeof (SCOTCH_Num) > sizeof (int)) {
@@ -213,8 +214,8 @@ int sgrid_reorder(SGRID *grid){
     //vendtab = verttab + 1;
     SCOTCH_Mesh meshdat;
     err = SCOTCH_meshInit(&meshdat);
-    SCOTCH_Strat  stratdat;
-    err = SCOTCH_stratInit (&stratdat);
+    SCOTCH_Graph grafdat;
+    SCOTCH_graphInit (&grafdat);
     //either routine seems to work? Idk what is good
     //g is Gibbs-Poole (default)
     //d Block Halo Approximate Minimum Degree method (not recommended)
@@ -241,12 +242,20 @@ int sgrid_reorder(SGRID *grid){
     //default
     //SCOTCH_stratGraphOrderBuild(&stratdat,SCOTCH_STRATQUALITY,0,0.2);
     //reducing balance ratio
-    SCOTCH_stratGraphOrderBuild(&stratdat,SCOTCH_STRATQUALITY,0,0.01);
-    SCOTCH_Graph grafdat;
-	SCOTCH_graphInit (&grafdat);
+
+	// Set seed and reset SCOTCH random number generator to produce
+    // deterministic partitions on repeated calls
+    SCOTCH_randomSeed(seed);
+    SCOTCH_randomReset();
 
     err = SCOTCH_meshBuild (&meshdat, velmbas, vnodbas, velmnbr, vnodnbr, verttab, NULL,
 	NULL, NULL, NULL, edgenbr, edgetab);
+	
+   
+    SCOTCH_Strat  stratdat;
+    err = SCOTCH_stratInit(&stratdat);
+    SCOTCH_stratGraphOrderBuild(&stratdat,SCOTCH_STRATQUALITY,0,0.01);
+	
 #ifdef _DEBUG
 	err =SCOTCH_meshCheck(&meshdat);
 	printf("Completed SCOTCH MESH Check, err = %d\n",err);
@@ -275,33 +284,52 @@ int sgrid_reorder(SGRID *grid){
 
  	//use permtab to reorder nodes and then update connectivity
  	//first loop through elements and update id's
- 	for(j=0;j<nelems3d;j++){
-		nnodes_on_elem = grid->elem3d[j].nnodes;
-		for(i=0;i<nnodes_on_elem;i++){
-			nd1 = grid->elem3d[j].nodes[i];
-			grid->elem3d[j].nodes[i] = permtab[nd1];
-		}
-	}
-	for(j=0;j<nelems2d;j++){
-		nnodes_on_elem = grid->elem2d[j].nnodes;
-		for(i=0;i<nnodes_on_elem;i++){
-			nd1 = grid->elem2d[j].nodes[i];
-			grid->elem2d[j].nodes[i] = permtab[nd1];
-		}
-	}
-	for(j=0;j<nelems1d;j++){
-		nnodes_on_elem = grid->elem1d[j].nnodes;
-		for(i=0;i<nnodes_on_elem;i++){
-			nd1 = grid->elem1d[j].nodes[i];
-			grid->elem1d[j].nodes[i] = permtab[nd1];
-		}
-	}
-	//store permtab in node.id
-	for(i=0;i<vnodnbr;i++){
-		grid->node[i].id = permtab[i];
-	}
-	//store peritab in sgrid
-	grid->inv_per_node = peritab;
+ 	//ACTUALLY WILL BREAK STUFF, WE DONT CHANGE CONNECTIONS BUT NODE ORDERINGS
+ 	//JUST ADD PERMUTATION IN GRID INSTEAD
+ 	//OR DO THIS AND SWITCH ACTUAL NODE ORDER, SOMETHING IS CAUSING
+ 	//PRECISION ISSUES IN THIS BLOCK
+ 	//what if we  do nothing
+// 	for(j=0;j<nelems3d;j++){
+//		nnodes_on_elem = grid->elem3d[j].nnodes;
+//		for(i=0;i<nnodes_on_elem;i++){
+//			nd1 = grid->elem3d[j].nodes[i];
+//			grid->elem3d[j].nodes[i] = permtab[nd1];
+//		}
+//	}
+//	for(j=0;j<nelems2d;j++){
+//		nnodes_on_elem = grid->elem2d[j].nnodes;
+//		for(i=0;i<nnodes_on_elem;i++){
+//			nd1 = grid->elem2d[j].nodes[i];
+//			grid->elem2d[j].nodes[i] = permtab[nd1];
+//		}
+//	}
+//	for(j=0;j<nelems1d;j++){
+//		nnodes_on_elem = grid->elem1d[j].nnodes;
+//		for(i=0;i<nnodes_on_elem;i++){
+//			nd1 = grid->elem1d[j].nodes[i];
+//			grid->elem1d[j].nodes[i] = permtab[nd1];
+//		}
+//	}
+//	//Reorder node data, must copy data temporarily
+//	SNODE *node_temp;
+//	snode_alloc_array(&node_temp,vnodnbr) ;
+//	snode_copy_array(node_temp, grid->node, vnodnbr);
+//	for(i=0;i<vnodnbr;i++){
+//		//overwrite data
+//		//node permtab[i] is new location of original node i
+//		grid->node[permtab[i]] = node_temp[i];
+//	}
+//	//store permtab in node.id? or just separately?
+//	//not used because ids are stored in elem.nodes
+//	for(i=0;i<vnodnbr;i++){
+//		grid->node[i].id = i;
+//	}
+//	//store peritab in sgrid// should be in original_id??
+//	grid->inv_per_node = peritab;
+//	//grid->per_node = permtab;
+//	//free node_temp
+//	snode_free_array(node_temp, vnodnbr);
+
 
 
 	//printf("Rank %d out of %d\n",rank,npe);
@@ -313,6 +341,7 @@ int sgrid_reorder(SGRID *grid){
  	SCOTCH_graphExit(&grafdat);
  	verttab = (SCOTCH_Num *) tl_free(sizeof(SCOTCH_Num),vnodnbr+velmnbr+1,verttab);
  	edgetab = (SCOTCH_Num *) tl_free(sizeof(SCOTCH_Num), edgenbr,edgetab);
+ 	//saving permtab now
  	permtab = (SCOTCH_Num *) tl_free(sizeof(SCOTCH_Num), vnodnbr, permtab);
 
 	if ( err != 0) {

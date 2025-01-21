@@ -141,6 +141,9 @@ typedef struct {
 
     //inverse permutation for output (serial only)
     int *inv_per_node;
+
+    //Mark added for now, need to ask
+    int **nd_on_QuadEdge;
     
 } SGRID;
 

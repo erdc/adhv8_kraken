@@ -78,7 +78,7 @@ int fe_newton(SMODEL_SUPER* sm)
     int iinc_dof = 0;          /* location of the maximum ..increment? */
     int it;                     /* the nonlinear iteration counter */
     int linesearch_cuts;        /* the number of line searches */
-    int solv_flag = NO;              /* flag that tells if the linear solver converged */
+    int solv_flag = YES;              /* flag that tells if the linear solver converged */
     int iend;                   /* loop limit */
     double resid_max_norm = 0.0;    /* the max norm of the residual */
     double resid_l2_norm = 0.0; /* the l2 norm of the residual */
@@ -93,7 +93,7 @@ int fe_newton(SMODEL_SUPER* sm)
     //int mn_node = 0, im_node = 0;
     //int tot_nnode;
     int UMFail_max = NO;
-    int solv_flag_min = NO;
+    int solv_flag_min = YES;
     int myid = 0, npes = 1, proc_count = 0;
     //convenient aliasing
     SLIN_SYS *lin_sys = sm->lin_sys;
@@ -134,8 +134,6 @@ int fe_newton(SMODEL_SUPER* sm)
                    grid->macro_nnodes);
     }
 #endif
-
-
     //In an ideal world the residual for SW models with h <0 = 0 but this
     // must not be case, need to dig into this later
     
@@ -274,7 +272,6 @@ int fe_newton(SMODEL_SUPER* sm)
         &imax_dof, &iinc_dof, include_dof,
         my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
         );
-    //printf("residual norms computed: %.17e, %.17e, %.17e\n",resid_max_norm,resid_l2_norm,inc_max_norm);
 
 #ifdef _MESSG
     resid_max_norm = messg_dmax(resid_max_norm, smpi->ADH_COMM);
@@ -355,10 +352,13 @@ int fe_newton(SMODEL_SUPER* sm)
 //        double temp4 = l_infty_norm(sm->ndofs,sm->residual);
 //        printf("CSR norms: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
         //Screen_print_CSR(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->ndofs);
-        
+        //check diagonal for near 0 entries and add to dirichlet data, ensure 0 increment
+        check_diag(sm);
         apply_Dirichlet_BC(sm);
+
+        //sarray_printScreen_int(sm->bc_mask, ndofs,"bc mask");
         //printf("Dirichlet applied\n");
-//        Screen_print_CSR(sm->indptr_diag, sm->cols_diag, sm->vals_diag, sm->ndofs);
+        //lin_sys_CSR_printScreen(lin_sys);
 //        get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
 //        &imax_dof, &iinc_dof, include_dof,
 //        sm->my_ndofs, sm->ndofs, sm->macro_ndofs, sm->residual, sm->dsol, sm->bc_mask
@@ -506,7 +506,6 @@ int fe_newton(SMODEL_SUPER* sm)
 //        printf("CSR norms after scaling: %.17e, %.17e, %.17e, %.17e\n",temp1,temp2,temp3,temp4);
         //factor the matrix preconditioner
         status = prep_umfpack(lin_sys->indptr_diag,lin_sys->cols_diag,lin_sys->vals_diag, *(lin_sys->local_size));
-        //printf("umfpack prep completed\n");
         
         
 
@@ -528,12 +527,12 @@ int fe_newton(SMODEL_SUPER* sm)
         lin_sys->vals_off_diag, residual, lin_sys->scale_vect, *(lin_sys->local_size), *(lin_sys->size) ,myid, lin_sys->ghosts, lin_sys->nghost);
         //printf("BCGSTAB completed\n");
         //printf("SOLVER STATUS   %d\n\n",status);
-//        for(int j =0;j<ndof;j++){
-//            printf("dsol[%d] = %.17e \n",j,sm->dsol[j]);
+//        for(int j =0;j<ndofs;j++){
+//            printf("dsol[%d] = %.17e \n",j,dsol[j]);
 //        }
-        //  for (int i=0;i<sm->ndofs;i++){
-        //  printf("Dsol increment[%d] = %f\n",i,sm->dsol[i]);
-        //}
+//        for (int i=0;i<ndofs;i++){
+//          printf("Dsol increment[%d] = %f\n",i,dsol[i]);
+//        }
 #endif        
         
         /* adds the increment to the solution */
@@ -545,6 +544,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //flip sign after update?
         //while not steady state??
 //        if (sm.flag.STEADY_STATE == OFF) {
+            //Commenting for now/
             for (i = 0, iend = ndofs; i < iend; i++){
                 dsol[i] = -dsol[i];
             }
@@ -554,9 +554,9 @@ int fe_newton(SMODEL_SUPER* sm)
         /* calculates the residual after the increment?*/
         old_resid_norm = resid_l2_norm;
         update_function(sm);
-//        for (int i=0;i<sm->ndofs;i++){
-//        printf("solution after increment, before new residual call[%d] = %f\n",i,sm->sol[i]);
-//       }
+        //for (int i=0;i<sm->ndofs;i++){
+        //    printf("solution after increment, before new residual call[%d] = %f\n",i,sm->sol[i]);
+        //}
         assemble_residual(sm,grid);
 //                for (int i=0;i<sm->ndofs;i++){
 //        printf("solution after increment, after new residual call[%d] = %f\n",i,sm->sol[i]);
@@ -627,8 +627,6 @@ int fe_newton(SMODEL_SUPER* sm)
 //                }
 //            }
         }
-
-
 //Mark, do we really need UMFAIL too? Commenting out for now       
 #ifdef _MESSG
         //UMFail_max = messg_imax(solver->UMFail, supersmpi->ADH_COMM);
@@ -636,8 +634,7 @@ int fe_newton(SMODEL_SUPER* sm)
 #else
         //UMFail_max = messg_imax(solver->UMFail);
         solv_flag_min = messg_imin(solv_flag);
-#endif
-        
+#endif     
         //Mark todo, what is this?
 //        if (solver->PRN_NEWTON != OFF) {
 //            // CJT :: right now, no way to tell which model this node resides on (need an inverse fmap!
@@ -785,7 +782,6 @@ int fe_newton(SMODEL_SUPER* sm)
         /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         // CONVERGENCE CHECK
         check = YES;
-
         if (solv_flag_min == YES) {
             check *= YES;
         } else {

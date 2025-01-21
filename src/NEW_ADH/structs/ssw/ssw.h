@@ -19,8 +19,7 @@ typedef struct {
     double viscosity;
     double manning_units_constant;
     double density;
-    double tau_pg
-
+    double tau_pg;
     // surface water flags (set defaults)
     int elem_rhs_realloc;
 

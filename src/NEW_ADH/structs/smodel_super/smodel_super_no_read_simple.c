@@ -240,17 +240,17 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     //elemental materials first
     //should already be set
     assert(sm->elem2d_physics_mat[0].nvar==3);
-    sm->elem2d_physics_mat[0].vars[0] = PERTURB_V;
+    sm->elem2d_physics_mat[0].vars[0] = PERTURB_H;
     sm->elem2d_physics_mat[0].vars[1] = PERTURB_U;
-    sm->elem2d_physics_mat[0].vars[2] = PERTURB_H;
+    sm->elem2d_physics_mat[0].vars[2] = PERTURB_V;
     sm->elem2d_physics_mat[0].nSubmodels = 1;
     //same for nodes
     //sm->node_physics_mat[0].nvar = 3;
     assert(sm->node_physics_mat[0]->nvar == 3);
     //sm->node_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->node_physics_mat->nvar);
-    sm->node_physics_mat[0]->vars[0] = PERTURB_V;
-    sm->node_physics_mat[0]->vars[1] = PERTURB_U;
-    sm->node_physics_mat[0]->vars[2] = PERTURB_H;
+    //sm->node_physics_mat[0]->vars[0] = PERTURB_H;
+    //sm->node_physics_mat[0]->vars[1] = PERTURB_U;
+    //sm->node_physics_mat[0]->vars[2] = PERTURB_V;
 
     //initalize residual vector
     //need a routine to get ndofs for all of this

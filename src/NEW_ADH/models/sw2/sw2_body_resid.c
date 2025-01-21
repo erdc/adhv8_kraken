@@ -86,11 +86,9 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     double drying_lower_limit = sw2->drying_lower_limit;
     int imat = elem2d->mat; // what is this used for?, should switch to something like mod->coverage->coverage_2d[SW2_INDEX][ie]
     STR_VALUE str_values = mod->str_values[elem2d->string]; //still in use?
-    int wd_flag = sw2->nsw_elem[ie].wd_flag; //WARNING, ie is not correct, need to use Coreys map eventually
-    if(nnodes == 4){
-        //only make for quadrilateral elements?
-        SQUAD *quad = grid->quad_rect; // for quadrilateral quadrature calculations
-    }
+    int wd_flag = sw2->dvar.elem_flags[sw2->WD_FLAG][ie]; //WARNING, ie is not always correct, could be sw2->dvar.dvar_elem_map[ie] need to use Coreys map eventually? how to avoid conditional. a function pointer?
+    //only make for quadrilateral elements?
+    SQUAD *quad = grid->quad_rect; // for quadrilateral quadrature calculations
     int isTriangle = NO;  if (nnodes == NDONTRI) isTriangle = YES;
 #ifdef _DEBUG
     if (DEBUG == ON || DEBUG_LOCAL == ON) {
@@ -113,7 +111,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     snode2svect(nodes, elem_nds, nnodes);
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // INDEPENDENT VARIABLES
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/ 
     double elem_head[nnodes]; SVECT2D elem_vel[nnodes];
     //for now use cg map but use Corey's index maps later on
     global_to_local_dbl_cg(elem_head, mod->sol, elem2d->nodes, nnodes, PERTURB_H, mod->dof_map_local, mod->node_physics_mat);
@@ -137,31 +135,31 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     global_to_local_SVECT2D_cg(elem_old_vel, mod->sol_old, elem2d->nodes, nnodes, PERTURB_U, PERTURB_V, mod->dof_map_local, mod->node_physics_mat);
     global_to_local_SVECT2D_cg(elem_older_vel, mod->sol_older, elem2d->nodes, nnodes, PERTURB_U, PERTURB_V, mod->dof_map_local, mod->node_physics_mat);  
     double elem_density[nnodes]; sarray_init_value_dbl(elem_density,nnodes,0.);
-    if (mod->flag.BAROCLINIC == 1) { //where to put this?
+    if (FALSE){//(mod->flag.BAROCLINIC == 1) { //where to put this?
         //global_to_local_dbl(sw2->nd, elem_density, elem2d->nodes, nnodes);
         //use array mapping
         global_to_local_dbl_cg_arr_map(elem_density, elem2d->nodes, nnodes, sw2->dvar.dvar_node_map, sw2->dvar.nodal_dvar[sw2->DENSITY]);
         for (i=0; i<nnodes; i++) {
             if (elem_head[i] < 0) elem_density[i] = 0;
            }
-    }   
+    }  
     // local external pressure (atmospheric, lids, etc) :: CJT :: should we use local density here?
     double elem_pressure[nnodes]; sarray_init_value_dbl(elem_pressure,nnodes,0.); // cjt :: used in SUPG only right now
     if (PRESSURE_FLAG == ON) {
         int id = UNSET_INT;
         for (i = 0; i < nnodes; i++) {
-            if (grid->node[i].string > NORMAL) {
-                if (mod->str_values[grid->node[i].string].ol_flow.bc_flag == BCT_LID_DFT) {
-                    id = mod->str_values[grid->node[i].string].ol_flow.iu_0;
+            if (nodes[i].string > NORMAL) { //bug?? switched to nodes alias not gri
+                if (mod->str_values[nodes[i].string].ol_flow.bc_flag == BCT_LID_DFT) {
+                    id = mod->str_values[nodes[i].string].ol_flow.iu_0;
                     t1 = sseries_get_value(id, mod->series_head,0);
                     elem_pressure[i] = mod->density * g * t1;
-                } else if (mod->str_values[grid->node[i].string].ol_flow.bc_flag == BCT_LID_ELV) {
-                    id = mod->str_values[grid->node[i].string].ol_flow.iu_0;
+                } else if (mod->str_values[nodes[i].string].ol_flow.bc_flag == BCT_LID_ELV) {
+                    id = mod->str_values[nodes[i].string].ol_flow.iu_0;
                     t1 = sseries_get_value(id, mod->series_head,0);
                     t1 -= elem_nds[i].z;
                     if (elem_head[i] > t1) elem_pressure[i] = 2. * mod->density * g * (elem_head[i] - t1);
-                } else if (mod->str_values[grid->node[i].string].ol_flow.bc_flag == BCT_LID_DEP) {
-                    id = mod->str_values[grid->node[i].string].ol_flow.iu_0;
+                } else if (mod->str_values[nodes[i].string].ol_flow.bc_flag == BCT_LID_DEP) {
+                    id = mod->str_values[nodes[i].string].ol_flow.iu_0;
                     t1 = sseries_get_value(id, mod->series_head,0);
                 if (elem_head[i] > t1) elem_pressure[i] = 2. * mod->density * g * (elem_head[i] - t1);
                 }
@@ -237,35 +235,43 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     double elem_old_vel_wd_avg_mag = svect2d_mag(elem_old_vel_wd_avg);  
     // friction variables
     double h_fric = MAX(elem_h_wd_avg, SMALL);
-    double roughness = fe_sw2_get_roughness(mod, h_fric, elem_vel_wd_avg_mag, elem2d->string, UNUSED);
+    double roughness = 0.03;//fe_sw2_get_roughness(mod, h_fric, elem_vel_wd_avg_mag, elem2d->string, UNUSED);
     // loads the diffusion eddy tensor
     double ev_st = 0., ev_tr = 0.;
     STENSOR2DAI ev; stensor2dai_init(&ev);
-    if (mod->mat[imat].sw->EVSF == YES) {  // user supplied eddy viscosity
-        ev.xx = mod->mat[imat].sw->ev.xx;
-        ev.yy = mod->mat[imat].sw->ev.yy;
-        ev.xy = mod->mat[imat].sw->ev.xy;
-        ev.yx = mod->mat[imat].sw->ev.xy;
-        ev.xx += mod->viscosity;
-        ev.yy += mod->viscosity;
-        ev.xy += mod->viscosity;
-        ev.yx += mod->viscosity;    
-        ev_st = fabs(ev.xx - ev.yy);
-        ev_tr = MIN(ev.xx, ev.yy);
-    } else if (mod->mat[imat].sw->EEVF == YES) {  // use estimated eddy viscosity
-        if (isTriangle == TRUE) {
-            fe_sw2_get_EEVF(mod->mat[imat].sw->eev_mode, mod->mat[imat].sw->eev_coef, g, drying_lower_limit, h_fric, roughness, area, elem_grad_u, elem_grad_v, elem_vel_avg_mag, wd_flag, &ev_st, &ev_tr);
-        } else {
-            ///Users/rditlcjt/Dropbox/Science/adh/repo_gitlab/src/adh/fe/sw2/fe_sw2_body_resid.c use elementally averaged gradients here
-            SVECT2D elem_grad_u_avg = integrate_quadrilateral_gradF(elem_nds, 1./area, elem_u);
-            SVECT2D elem_grad_v_avg = integrate_quadrilateral_gradF(elem_nds, 1./area, elem_v);      
-            fe_sw2_get_EEVF(mod->mat[imat].sw->eev_mode, mod->mat[imat].sw->eev_coef, g, drying_lower_limit, h_fric, roughness, area, elem_grad_u_avg, elem_grad_v_avg, elem_vel_avg_mag, wd_flag, &ev_st, &ev_tr);
-        }
-        ev.xx = ev_st;
-        ev.xy = ev_tr;
-        ev.yx = ev_tr;
-        ev.yy = ev_st;
-    }    
+    //TO DO:
+    //hard set to 0 for now
+    ev.xx = 0.0;
+    ev.yy = 0.0;
+    ev.xy = 0.0;
+    ev.yx = 0.0;
+    ev_st = fabs(ev.xx - ev.yy);
+    ev_tr = MIN(ev.xx, ev.yy);
+//    if (mod->mat[imat].sw->EVSF == YES) {  // user supplied eddy viscosity, should be in coverages now?
+//        ev.xx = mod->mat[imat].sw->ev.xx;
+//        ev.yy = mod->mat[imat].sw->ev.yy;
+//        ev.xy = mod->mat[imat].sw->ev.xy;
+//        ev.yx = mod->mat[imat].sw->ev.xy;
+//        ev.xx += mod->viscosity;
+//        ev.yy += mod->viscosity;
+//        ev.xy += mod->viscosity;
+//        ev.yx += mod->viscosity;    
+//        ev_st = fabs(ev.xx - ev.yy);
+//        ev_tr = MIN(ev.xx, ev.yy);
+//    } else if (mod->mat[imat].sw->EEVF == YES) {  // use estimated eddy viscosity
+//        if (isTriangle == TRUE) {
+//            fe_sw2_get_EEVF(mod->mat[imat].sw->eev_mode, mod->mat[imat].sw->eev_coef, g, drying_lower_limit, h_fric, roughness, area, elem_grad_u, elem_grad_v, elem_vel_avg_mag, wd_flag, &ev_st, &ev_tr);
+//        } else {
+//            ///Users/rditlcjt/Dropbox/Science/adh/repo_gitlab/src/adh/fe/sw2/fe_sw2_body_resid.c use elementally averaged gradients here
+//            SVECT2D elem_grad_u_avg = integrate_quadrilateral_gradF(elem_nds, 1./area, elem_u);
+//            SVECT2D elem_grad_v_avg = integrate_quadrilateral_gradF(elem_nds, 1./area, elem_v);      
+//            fe_sw2_get_EEVF(mod->mat[imat].sw->eev_mode, mod->mat[imat].sw->eev_coef, g, drying_lower_limit, h_fric, roughness, area, elem_grad_u_avg, elem_grad_v_avg, elem_vel_avg_mag, wd_flag, &ev_st, &ev_tr);
+//        }
+//        ev.xx = ev_st;
+//        ev.xy = ev_tr;
+//        ev.yx = ev_tr;
+//        ev.yy = ev_st;
+//    }    
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // DEBUG SCREEN PRINT
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -327,11 +333,11 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     double rhs_c_eq[nnodes], rhs_x_eq[nnodes], rhs_y_eq[nnodes];
     double vars[2]; // for passing doubles through wet-dry routine  
     // this is used to store later for transport
-    for (i=0; i<nnodes; i++) {
-        //mod->sw->d2->elem_rhs_dacont_extra_terms[i][ie] = 0.;
+    //NEED TO REINCORPORATE
+    //for (i=0; i<nnodes; i++) {
         //should be
-        sw2->elem_rhs_dacont_extra_terms[i][ie] = 0.;
-    }    
+    //    sw2->elem_rhs_dacont_extra_terms[i][ie] = 0.;
+    //}    
    /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                 SHOCK CAPTURING CONTRIBUTION
      *-------------------------------------------------------------------------------------------
@@ -341,23 +347,24 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
      * \note CJT \:: formulation?
      *********************************************************************************************/    
     if (isTriangle == TRUE) {
-        if (wd_flag == 1 || wd_flag == 2) {            
+        if (wd_flag == 1 || wd_flag == 2) {   
+                    
             double elem_wse_grad_mag = svect2d_mag_safe(elem_grad_wse); //warning, this adds an epsilon to avoid 0
             double elem_u_grad_mag   = svect2d_mag_safe(elem_grad_u);
             double elem_v_grad_mag   = svect2d_mag_safe(elem_grad_v);            
-            double sh_cap_coef_u = one_2 * mod->drying_upper_limit * djac * elem_u_grad_mag;
-            double sh_cap_coef_v = one_2 * mod->drying_upper_limit * djac * elem_v_grad_mag;            
-            double shock_avg_depth = mod->drying_upper_limit;
-            if (shock_avg_depth < mod->drying_upper_limit) shock_avg_depth = mod->drying_upper_limit;
-            double temp = (elem_vel_avg_mag / sqrt(g * mod->drying_upper_limit));
+            double sh_cap_coef_u = one_2 * sw2->drying_upper_limit * djac * elem_u_grad_mag;
+            double sh_cap_coef_v = one_2 * sw2->drying_upper_limit * djac * elem_v_grad_mag;            
+            double shock_avg_depth = sw2->drying_upper_limit;
+            if (shock_avg_depth < sw2->drying_upper_limit) shock_avg_depth = sw2->drying_upper_limit;
+            double temp = (elem_vel_avg_mag / sqrt(g * sw2->drying_upper_limit)); 
             if (temp > 1) temp = 1.;            
-            double sh_cap_coef = one_2 * elem_vel_avg_mag * djac * mod->drying_upper_limit * elem_wse_grad_mag / (shock_avg_depth * shock_avg_depth + SMALL);            
+            double sh_cap_coef = one_2 * elem_vel_avg_mag * djac * sw2->drying_upper_limit * elem_wse_grad_mag / (shock_avg_depth * shock_avg_depth + SMALL);            
             SVECT2D grad_unorm, grad_vnorm, norm;
             grad_unorm.x = elem_grad_u.x / elem_u_grad_mag;  grad_unorm.y = elem_grad_u.y / elem_u_grad_mag;
             grad_vnorm.x = elem_grad_v.x / elem_v_grad_mag;  grad_vnorm.y = elem_grad_v.y / elem_v_grad_mag;            
             for (i=0; i<nnodes; i++) {
                 // mass contributions, every 3rd equation is continuity
-                rhs[i*3] = dt * one_2 * g * djac * ((mod->drying_lower_limit * elem_grad_wse.x) * grad_shp[i].x + (mod->drying_lower_limit * elem_grad_wse.y) * grad_shp[i].y);        
+                rhs[i*3] = dt * one_2 * g * djac * ((sw2->drying_lower_limit * elem_grad_wse.x) * grad_shp[i].x + (sw2->drying_lower_limit * elem_grad_wse.y) * grad_shp[i].y);        
                 // momentum contribution
                 norm.x = svect2d_dotp(grad_unorm, elem_grad_u);
                 norm.y = svect2d_dotp(grad_vnorm, elem_grad_v);
@@ -367,7 +374,8 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
                 rhs[i*3+2] = sh_cap_coef_v * dt * djac * norm.y * svect2d_dotp(grad_vnorm, grad_shp[i]);
             }            
             for (i=0; i<nnodes; i++) {
-                mod->sw->d2->elem_rhs_dacont_extra_terms[i][ie] += rhs[i*3]; // cjt :: store
+                //NEED TO FIX!!!
+                //sw2->elem_rhs_dacont_extra_terms[i][ie] += rhs[i*3]; // cjt :: store
                 elem_rhs[i*3] += rhs[i*3];
                 elem_rhs[i*3+1] += rhs[i*3+1];
                 elem_rhs[i*3+2] += rhs[i*3+2];
@@ -383,6 +391,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             }
 #endif
         }
+
     }    
     /*!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                    ADVECTION CONTRIBUTION
@@ -422,7 +431,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     if (DEBUG == ON || DEBUG_LOCAL == ON) {
         printScreen_rhs_3dof("2D SW || ADVECTION",nnodes, ie, elem2d->nodes, rhs);
     }
-#endif   
+#endif 
     /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                    TEMPORAL CONTRIBUTION
      *-------------------------------------------------------------------------------------------
@@ -446,7 +455,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
                     (-1.) * (1. + alpha), elem_rhs, "2D SW || TEMPORAL T(N)", DEBUG, DEBUG_LOCAL, wd_flag);    
     // ++ t(n-1) terms +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     fe_sw2_temporal(ie, elem2d, nnodes, elem_nds, djac, drying_lower_limit, elem_older_head, elem_older_vel, factor_older,
-                    (alpha / 2.), elem_rhs, "2D SW || TEMPORAL T(N-1)", DEBUG, DEBUG_LOCAL, wd_flag);    
+                    (alpha / 2.), elem_rhs, "2D SW || TEMPORAL T(N-1)", DEBUG, DEBUG_LOCAL, wd_flag);   
     /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                    DIFFUSION CONTRIBUTION
      *-------------------------------------------------------------------------------------------
@@ -460,7 +469,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
      *********************************************************************************************/    
     // get elementally averaged depth
     double temp = elem_h_wd_avg;
-    if (elem_h_wd_avg < mod->drying_upper_limit) {
+    if (elem_h_wd_avg < sw2->drying_upper_limit) {
         temp = sw2->drying_upper_limit;
     }    
     sarray_init_dbl(rhs_x_eq,nnodes);
@@ -532,7 +541,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
         printScreen_rhs_3dof("2D SW || FRICTION",nnodes, ie, elem2d->nodes, rhs);
         printf("roughness: %20.10f \t resistance: %20.10f t1: %20.10f \n",roughness, resistance,t1);
     }
-#endif    
+#endif  
     // calculate bed stress for PG
     SVECT2D elem_bed_stress;
     elem_bed_stress.x = resistance * elem_vel_wd_avg.x * elem_vel_wd_avg_mag;
@@ -550,24 +559,24 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
      *  \note CJT \:: currently only for triangles, but can use elementally averaged gradients and include quads
      *********************************************************************************************/    
     //Ask corey about vorticity_id
-    if (mod->vorticity_id > UNSET_INT && nnodes == NDONTRI) {
-        SVECT2D stream_accel_vect; svect2d_init(&stream_accel_vect);
-        double elem_c[nnodes];
-        //need to change this to get the correct constituent from transport
-        for (i=0; i<nnodes; i++) elem_c[i] =  mod->con[mod->vorticity_id].concentration[elem2d->nodes[i]];        
-        // 0 is the routine flag, 0 indicates that hydro is calling
-        stream_accel_vect = tl_bendway_correction(grad_shp, elem_old_vel, elem_old_head, elem_c, mod->con[mod->vorticity_id].property[1],
-                                                  mod->con[mod->vorticity_id].property[2], mod->drying_lower_limit, roughness, mod->density, 0, ie);      
-        for (i=0; i<nnodes; i++) {
-            elem_rhs[i*3+1] += one_3 * dt * stream_accel_vect.x * djac;
-            elem_rhs[i*3+2] += one_3 * dt * stream_accel_vect.y * djac;
-        }
-#ifdef _DEBUG
-        if (DEBUG == ON || DEBUG_LOCAL == ON) {
-            printScreen_rhs_3dof("2D SW || VORTICITY",nnodes, ie, elem2d->nodes, elem_rhs);
-        }
-#endif
-    }    
+//    if (mod->vorticity_id > UNSET_INT && nnodes == NDONTRI) {
+//        SVECT2D stream_accel_vect; svect2d_init(&stream_accel_vect);
+//        double elem_c[nnodes];
+//        //need to change this to get the correct constituent from transport
+//        for (i=0; i<nnodes; i++) elem_c[i] =  mod->con[mod->vorticity_id].concentration[elem2d->nodes[i]];        
+//        // 0 is the routine flag, 0 indicates that hydro is calling
+//        stream_accel_vect = tl_bendway_correction(grad_shp, elem_old_vel, elem_old_head, elem_c, mod->con[mod->vorticity_id].property[1],
+//                                                  mod->con[mod->vorticity_id].property[2], sw2->drying_lower_limit, roughness, mod->density, 0, ie);      
+//        for (i=0; i<nnodes; i++) {
+//            elem_rhs[i*3+1] += one_3 * dt * stream_accel_vect.x * djac;
+//            elem_rhs[i*3+2] += one_3 * dt * stream_accel_vect.y * djac;
+//        }
+//#ifdef _DEBUG
+//        if (DEBUG == ON || DEBUG_LOCAL == ON) {
+//            printScreen_rhs_3dof("2D SW || VORTICITY",nnodes, ie, elem2d->nodes, elem_rhs);
+//        }
+//#endif
+//    }    
     /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                    CORIOLIS CONTRIBUTION
      *-------------------------------------------------------------------------------------------
@@ -579,7 +588,8 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
      *
      *********************************************************************************************/    
     sarray_init_dbl(rhs_x_eq, nnodes); sarray_init_dbl(rhs_y_eq, nnodes);
-    double coriolis_speed = get_coriolis_angular_speed(mod->mat[imat].sw->coriolis);
+    //double coriolis_speed = get_coriolis_angular_speed(mod->mat[imat].sw->coriolis); //need to fix
+    double coriolis_speed = 0.0;
     t1 = dt * factor * coriolis_speed;
     if (isTriangle == TRUE) {
         integrate_triangle_phi_f_g(djac, -t1, elem_head, elem_v, rhs_x_eq); //no wd wrapper?
@@ -614,45 +624,45 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
      *********************************************************************************************/
     //Mark, work needs to be done here
     SVECT2D total_stress; svect2d_init(&total_stress);
-    if (wd_flag == 0) { // only apply on fully wet element        
-        SVECT2D wind_stress;  svect2d_init(&wind_stress);
-        SVECT2D wave_stress;  svect2d_init(&wave_stress);        
-        if (mod->flag.WIND && wd_flag == 0) {
-            int nws = 0;
-#ifdef _WINDLIB
-            nws = mod->windlib->nws;
-#endif
-            wind_stress = swind_elem2d_get_local_stress(2, mod->sw->d2->winds, elem2d, elem2d->nodes, elem_h_wd_avg, g,
-                mod->density, mod->mat[imat].sw->windatt, mod->mat[imat].sw->wind_flag, mod->flag.WIND_LIBRARY, nws);
-        }        
-        if (mod->flag.WAVE && wd_flag == 0) {
-            wave_stress = swave_elem2d_get_local_stress(2, mod->flag.CSTORM_WSID, mod->sw->d2->waves, *elem2d, elem2d->nodes);
-        }        
-        total_stress.x = wind_stress.x + wave_stress.x;
-        total_stress.y = wind_stress.y + wave_stress.y;        
-        sarray_init_dbl(rhs_x_eq, nnodes); sarray_init_dbl(rhs_y_eq, nnodes);
-        if (isTriangle == TRUE) {
-            integrate_triangle_phi(djac, total_stress.x, rhs_x_eq);
-            integrate_triangle_phi(djac, total_stress.y, rhs_y_eq);
-        } else {
-            integrate_quadrilateral_phi(elem_nds, total_stress.x, rhs_x_eq);
-            integrate_quadrilateral_phi(elem_nds, total_stress.y, rhs_y_eq);
-        }        
-        for (i=0; i<nnodes; i++) {
-            elem_rhs[i*3+1] -= dt * rhs_x_eq[i];
-            elem_rhs[i*3+2] -= dt * rhs_y_eq[i];
-        }
-#ifdef _DEBUG
-        if (DEBUG == ON || DEBUG_LOCAL == ON) {
-            for (i=0; i<nnodes; i++) {
-                rhs[i*3] = 0.;
-                rhs[i*3+1] = - dt * rhs_x_eq[i];
-                rhs[i*3+2] = - dt * rhs_y_eq[i];
-            }
-            printScreen_rhs_3dof("2D SW || SURFACE_STRESS",nnodes, ie, elem2d->nodes, rhs);
-        }
-#endif
-    }    
+    //if (wd_flag == 0) { // only apply on fully wet element        
+//        SVECT2D wind_stress;  svect2d_init(&wind_stress);
+//        SVECT2D wave_stress;  svect2d_init(&wave_stress);        
+//        if (mod->flag.WIND && wd_flag == 0) {
+//            int nws = 0;
+//#ifdef _WINDLIB
+//            nws = mod->windlib->nws;
+//#endif
+//            wind_stress = swind_elem2d_get_local_stress(2, sw2->winds, elem2d, elem2d->nodes, elem_h_wd_avg, g,
+//                mod->density, mod->mat[imat].sw->windatt, mod->mat[imat].sw->wind_flag, mod->flag.WIND_LIBRARY, nws);
+//        }        
+//        if (mod->flag.WAVE && wd_flag == 0) {
+//            wave_stress = swave_elem2d_get_local_stress(2, mod->flag.CSTORM_WSID, mod->sw->d2->waves, *elem2d, elem2d->nodes);
+//        }        
+//        total_stress.x = wind_stress.x + wave_stress.x;
+//        total_stress.y = wind_stress.y + wave_stress.y;        
+//        sarray_init_dbl(rhs_x_eq, nnodes); sarray_init_dbl(rhs_y_eq, nnodes);
+//        if (isTriangle == TRUE) {
+//            integrate_triangle_phi(djac, total_stress.x, rhs_x_eq);
+//            integrate_triangle_phi(djac, total_stress.y, rhs_y_eq);
+//        } else {
+//            integrate_quadrilateral_phi(elem_nds, total_stress.x, rhs_x_eq);
+//            integrate_quadrilateral_phi(elem_nds, total_stress.y, rhs_y_eq);
+//        }        
+//        for (i=0; i<nnodes; i++) {
+//            elem_rhs[i*3+1] -= dt * rhs_x_eq[i];
+//            elem_rhs[i*3+2] -= dt * rhs_y_eq[i];
+//        }
+//#ifdef _DEBUG
+//        if (DEBUG == ON || DEBUG_LOCAL == ON) {
+//            for (i=0; i<nnodes; i++) {
+//                rhs[i*3] = 0.;
+//                rhs[i*3+1] = - dt * rhs_x_eq[i];
+//                rhs[i*3+2] = - dt * rhs_y_eq[i];
+//            }
+//            printScreen_rhs_3dof("2D SW || SURFACE_STRESS",nnodes, ie, elem2d->nodes, rhs);
+//        }
+//#endif
+//    }    
     /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                 RAINFALL CONTRIBUTION
      *-------------------------------------------------------------------------------------------
@@ -662,30 +672,30 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
      *********************************************************************************************/
     double elem_water_source = 0.;
     //need to figure this out too
-    if (mod->str_values[elem2d->string].ol_flow.bc_flag == BCT_WATER_SOURCE) {
-        int isers = mod->str_values[elem2d->string].ol_flow.isigma;
-        elem_water_source = sseries_get_value(isers, mod->series_head, 0);        
-        sarray_init_dbl(rhs_c_eq, nnodes);
-        if (isTriangle == TRUE) {
-            integrate_triangle_phi(djac, elem_water_source, rhs_c_eq);
-        } else {
-            integrate_quadrilateral_phi(elem_nds, elem_water_source, rhs_c_eq);
-        }        
-        t1 = dt * factor;
-        for (i=0; i<nnodes; i++) {
-            elem_rhs[i*3] -= t1 * rhs_c_eq[i];
-        }
-#ifdef _DEBUG
-        if (DEBUG == ON || DEBUG_LOCAL == ON) {
-            for (i=0; i<nnodes; i++) {
-                rhs[i*3] = -t1 * rhs_c_eq[i];
-                rhs[i*3+1] = 0;
-                rhs[i*3+2] = 0;
-            }
-            printScreen_rhs_3dof("2D SW || SOURCE",nnodes, ie, elem2d->nodes, rhs);
-        }
-#endif
-    }    
+//    if (mod->str_values[elem2d->string].ol_flow.bc_flag == BCT_WATER_SOURCE) {
+//        int isers = mod->str_values[elem2d->string].ol_flow.isigma;
+//        elem_water_source = sseries_get_value(isers, mod->series_head, 0);        
+//        sarray_init_dbl(rhs_c_eq, nnodes);
+//        if (isTriangle == TRUE) {
+//            integrate_triangle_phi(djac, elem_water_source, rhs_c_eq);
+//        } else {
+//            integrate_quadrilateral_phi(elem_nds, elem_water_source, rhs_c_eq);
+//        }        
+//        t1 = dt * factor;
+//        for (i=0; i<nnodes; i++) {
+//            elem_rhs[i*3] -= t1 * rhs_c_eq[i];
+//        }
+//#ifdef _DEBUG
+//        if (DEBUG == ON || DEBUG_LOCAL == ON) {
+//            for (i=0; i<nnodes; i++) {
+//                rhs[i*3] = -t1 * rhs_c_eq[i];
+//                rhs[i*3+1] = 0;
+//                rhs[i*3+2] = 0;
+//            }
+//            printScreen_rhs_3dof("2D SW || SOURCE",nnodes, ie, elem2d->nodes, rhs);
+//        }
+//#endif
+//    }    
     /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                 PRESSURE CONTRIBUTION
      *-------------------------------------------------------------------------------------------
@@ -749,7 +759,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             printScreen_rhs_3dof("2D SW || BODY FORCE",nnodes, ie, elem2d->nodes, rhs);
         }
 #endif
-        sarray_add_replace_dbl(elem_rhs, rhs, ndof);        
+        sarray_add_replace_dbl(elem_rhs, rhs, ndof);       
         /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n
          * Calculates the boundary integral on element edges. This is to auto-find no-flow boundaries.  \n
          *  \f{eqnarray*}{
@@ -785,13 +795,14 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             printScreen_rhs_3dof("2D SW || BOUNDARY PRESSURE",nnodes, ie, elem2d->nodes, rhs);
         }
 #endif
-        sarray_add_replace_dbl(elem_rhs, rhs, ndof);                  
+        sarray_add_replace_dbl(elem_rhs, rhs, ndof);                 
         /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          *                                BAROCLINIC PRESSURE CONTRIBUTION
          *-------------------------------------------------------------------------------------------
          * Calculates the density pressure additions to the elemental residual. \n
          *********************************************************************************************/
-        if (mod->flag.BAROCLINIC != OFF) {            
+        //NEED TO FIGURE OUT FLAGS 
+        if (FALSE){//(mod->flag.BAROCLINIC != OFF) {            
             /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n
              * Calculates the density driven body pressure on element. \n
              *  \f{eqnarray*}{
@@ -887,7 +898,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
 #endif
             sarray_add_replace_dbl(elem_rhs, rhs, ndof);  
         }//end of BAROCLINIC
-    } //end of PRESSURE   
+    } //end of PRESSURE     
     /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                      SUPG CONTRIBUTION
      *-------------------------------------------------------------------------------------------
@@ -912,18 +923,17 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
         double grad_shp_x[nnodes]; for (i=0; i<nnodes; i++) {grad_shp_x[i] = grad_shp[i].x;}
         double grad_shp_y[nnodes]; for (i=0; i<nnodes; i++) {grad_shp_y[i] = grad_shp[i].y;}
         double elem_h_wd_avg_denom = MAX(elem_h_wd_avg, NOT_QUITE_SMALL);
-        double tau = fe_get_supg_tau_sw(nnodes, elem_nds, g_factor, elem_h_wd_avg_denom, elem_vel_wd_avg.x, elem_vel_wd_avg.y,0.,grad_shp_x,grad_shp_y,NULL,area * factor_old, mod->tau_pg, 2, 2, 2);//need to figure out        
+        double tau = fe_get_supg_tau_sw(nnodes, elem_nds, g_factor, elem_h_wd_avg_denom, elem_vel_wd_avg.x, elem_vel_wd_avg.y,0.,grad_shp_x,grad_shp_y,NULL,area * factor_old, sw2->tau_pg, 2, 2, 2);//need to figure out         
         // calculate constant strong equation set. This may mean elementally averaging each term.
         if (isTriangle == TRUE) {
             //replaced            
-            DOF_3 dfdt[NDONTRI] = { {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0} };
-            DOF_3 advection[NDONTRI] = { {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0} };
             double dfdt[ndof];
             double advection[ndof]; 
             int redistribute_flag = OFF; // do not redistribute in SUPG            
             // elementally averaged wet/dry temporal derivatives
             double dhdt = 0., dudt = 0., dvdt = 0.;
             sarray_init_dbl(dfdt, ndof); // cjt :: note: older version of AdH all use current velocity here ... looks wrong
+            sarray_init_dbl(advection, ndof);
             vars[0] = 1;
             vars[1] = 1;
             factor_old = fe_sw2_wet_dry_wrapper(dfdt, elem_nds, elem_old_head, NULL, NULL, elem_old_vel, NULL, elem_old_head, djac, redistribute_flag, DEBUG, vars, fe_sw2_wd_integrate_triangle_f); //fe_sw2_wd_average_tri);
@@ -941,17 +951,19 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             // wet/dry convection terms :: these are already constant since they a gradients
             vars[0] = dt;
             vars[1] = 1;
-            factor = fe_sw2_wet_dry_wrapper(advection, elem_nds, elem_head, grad_shp, NULL, elem_vel, NULL, elem_head, djac, redistribute_flag, DEBUG, vars, fe_sw2_wd_gls_convection_triangle);            
+            factor = fe_sw2_wet_dry_wrapper(advection, elem_nds, elem_head, grad_shp, NULL, elem_vel, NULL, elem_head, djac, redistribute_flag, DEBUG, vars, fe_sw2_wd_gls_convection_triangle);         
             // pressure terms ::  these are already constant since they a gradients
             //  g * dh/dx * dt + g * dz_dx * dt + dpress/dx * dt
             double x_pressure = g_factor * (elem_grad_head.x + elem_grad_z.x) * dt * factor + elem_grad_prs.x * dt * factor;
             double y_pressure = g_factor * (elem_grad_head.y + elem_grad_z.y) * dt * factor + elem_grad_prs.y * dt * factor;            
             // friction terms :: cjt :: has factor but not wet-dry wrapped??
             double x_friction = g * elem_bed_stress.x * dt * factor;
-            double y_friction = g * elem_bed_stress.y * dt * factor;            
-            // coriolis terms
-            double x_coriolis = -elem_vel_wd_avg.y * coriolis_speed;
-            double y_coriolis =  elem_vel_wd_avg.x * coriolis_speed;            
+            double y_friction = g * elem_bed_stress.y * dt * factor;           
+            // coriolis terms 
+            //NEED TO ADD BACK
+            double x_coriolis =0.0;// -elem_vel_wd_avg.y * coriolis_speed;
+            double y_coriolis = 0.0;// elem_vel_wd_avg.x * coriolis_speed;
+
             // constant, strong equation set :: cjt :: trunk has factor on total stress and coriolis, but there are not wet-dry wrapped
             c_eq = dhdt + advection[0] + factor * elem_water_source * djac * dt;
             x_eq = dudt + advection[1] + (x_pressure + x_friction/elem_h_wd_avg_denom) * djac + (x_coriolis - total_stress.x / elem_h_wd_avg_denom) * djac * factor * dt;
@@ -1059,7 +1071,8 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
                                grad_shp[i].y * (tau * elem_vel_wd_avg.y * elem_h_wd_avg * x_eq));
                 rhs_y_eq[i] = (grad_shp[i].y * (tau * g_factor * elem_h_wd_avg * c_eq + tau * elem_vel_wd_avg.y * elem_h_wd_avg * y_eq) +
                                grad_shp[i].x * (tau * elem_vel_wd_avg.x * elem_h_wd_avg * y_eq));
-            }                        
+            }   
+
         } else {            
             // elementally averaged gradients
             SVECT2D elem_avg_grad_head = integrate_quadrilateral_gradF(elem_nds, 1./area, elem_head);
@@ -1102,7 +1115,8 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             integrate_quadrilateral_gradPhi_dot_vbar(elem_nds, dt * tau, term, rhs_y_eq);            
         }
         for (i=0; i<nnodes; i++) {
-            sw2->elem_rhs_dacont_extra_terms[i][ie] += rhs_c_eq[i];
+            //NEED TO ADD BACK IN
+            //sw2->elem_rhs_dacont_extra_terms[i][ie] += rhs_c_eq[i];
             elem_rhs[i*3] += rhs_c_eq[i];
             elem_rhs[i*3+1] += rhs_x_eq[i];
             elem_rhs[i*3+2] += rhs_y_eq[i];
@@ -1121,6 +1135,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             Is_DoubleArray_Inf_or_NaN(rhs_y_eq, nnodes ,__FILE__ ,__LINE__);
         }
 #endif
+
     }    
     /*!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                    SET DIRICHLET BCS

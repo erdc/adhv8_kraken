@@ -48,32 +48,59 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
     global_to_local_dbl_cg(elem_u, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat);
     //for now let's let f be a constant so we have analytic solution to compare to
     double f[nnodes];
+    double q[nnodes];
     int i;
-    for (i =0;i<nnodes;i++){
-        f[i] = 6;
+    SNODE nodes[nnodes];
+    for (i=0; i<nnodes; i++) {
+        snode_copy(&(nodes[i]), mod->grid->node[elem2d->nodes[i]]);
     }
+
     //perturb solution variable only, let's say we are using U
     if (perturb_var == PERTURB_U){
         elem_u[perturb_node] += perturb_sign * perturbation;
     }
     //this would be mass matrix
     //integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, elem_u, elem_rhs);
-
-
     //compute the Laplacian
     SVECT2D grad_u;
     svect2d_init(&grad_u);
     SVECT2D *grad_shp = elem2d->grad_shp;
-    //compute diffusion
-    for (i=0; i<nnodes; i++) {
-        grad_u.x += elem_u[i] * grad_shp[i].x;
-        grad_u.y += elem_u[i] * grad_shp[i].y;
-    }
+    SVECT2D grad_u_nonlinear[nnodes];
+
+
+
+    //linear case
+    if (mod->LINEAR_PROBLEM == YES){
+        //compute diffusion
+        for (i=0; i<nnodes; i++) {
+            grad_u.x += elem_u[i] * grad_shp[i].x;
+            grad_u.y += elem_u[i] * grad_shp[i].y;
+        }
+        for (i =0;i<nnodes;i++){
+            f[i] = 6;
+        }
     
-    integrate_triangle_gradPhi_dot_vbar(grad_shp, mod->grid->elem2d[ie].djac, 1,  grad_u, elem_rhs);
+        integrate_triangle_gradPhi_dot_vbar(grad_shp, mod->grid->elem2d[ie].djac, 1,  grad_u, elem_rhs);
+        //rhs of linear system (will be 0 when Jacobian is computed)
+        integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, f, elem_rhs);
+    }else if(mod->LINEAR_PROBLEM == NO){
+        svect2d_init_array(grad_u_nonlinear, nnodes);
+        //compute diffusion
+        for (i=0; i<nnodes; i++) {
+            grad_u_nonlinear[0].x += elem_u[i] * grad_shp[i].x;
+            grad_u_nonlinear[0].y += elem_u[i] * grad_shp[i].y;
+            grad_u_nonlinear[1].x += elem_u[i] * grad_shp[i].x;
+            grad_u_nonlinear[1].y += elem_u[i] * grad_shp[i].y;
+            grad_u_nonlinear[2].x += elem_u[i] * grad_shp[i].x;
+            grad_u_nonlinear[2].y += elem_u[i] * grad_shp[i].y;
+            q[i] = 1 + elem_u[i]*elem_u[i];
+            f[i] = 10.0 + 10.0*nodes[i].x + 20.0*nodes[i].y;
+        }
 
-    //rhs of linear system (will be 0 when Jacobian is computed)
-    integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, f, elem_rhs);
 
+        integrate_triangle_gradPhi_dot_f_v(grad_shp, mod->grid->elem2d[ie].djac, 1, q, grad_u_nonlinear, elem_rhs);
+        //rhs of linear system (will be 0 when Jacobian is computed)
+        integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, f, elem_rhs);
+    }
     return 0;
 }

@@ -68,6 +68,8 @@
 #include "smat_physics.h"
 #include "slin_sys.h"
 #include "dofmaps.h"
+#include "sdvar.h"
+#include "ssw.h"
 
 
 //
@@ -108,5 +110,7 @@
 #include "testresidual.h"
 #include "testjacobian.h"
 #include "testnewton.h"
+#include "testnonlinearnewton.h"
 #include "testtimeloop.h"
+#include "testsw2_wd.h"
 //#endif

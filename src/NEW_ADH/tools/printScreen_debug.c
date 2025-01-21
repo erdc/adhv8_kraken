@@ -71,28 +71,6 @@ inline void printScreen_debug_dbl(char *descript, double *f, int n) {
     }
     printf("\n");
 }
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*!
- *  \brief     Writes a double array to screen with global IDs
- *  \author    Corey Trahan, Ph.D.
- *  \bug       none
- *  \warning   none
- *  \copyright AdH
- *
- *  @param[in] descript variable name string
- *  @param[in] f the integer array
- *  @param[in] n the number of array elements
- *  @param[in] global_nd_ids the global IDs of the array nodes
- *  \note
- */
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-inline void printScreen_debug2_dbl(char *descript, double *f, int n, int *global_nd_ids) {
-    int i;
-    for (i=0; i<n; i++) printf("%s[%d] || gnode id: %d || %40.30e\n",descript,i,global_nd_ids[i],f[i]);
-}
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
@@ -111,7 +89,7 @@ inline void printScreen_debug2_dbl(char *descript, double *f, int n, int *global
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-inline void printScreen_rhs_3dof(char *string, int nnodes, int ie, int *nodes, double *elem_rhs) {
+void printScreen_rhs_3dof(char *string, int nnodes, int ie, int *nodes, double *elem_rhs) {
     int i;
     printf("\n***************************************\n%s\n",string);
     for (i=0; i<nnodes; i++) {

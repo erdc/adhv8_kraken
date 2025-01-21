@@ -12,10 +12,8 @@ int time_loop(SMODEL_DESIGN *dm){
 	//the outer time loop
 	do {
 			ts+=1;
-			//printf("DESIGN MODEL ON TIME STEP %d\n",ts);
 			//update t_prev and change dt if timeseries says to
 			LOOP_INCOMPLETE = update_dt(dm);
-
 			//attempt to advance the whole design model by one time step
 			TIME_STEP_WORKED = advance_time(dm, nsuper);
 			//printf("TIME_STEP_WORKED = %d, LOOP_INCOMPLETE = %d\n",TIME_STEP_WORKED,LOOP_INCOMPLETE);

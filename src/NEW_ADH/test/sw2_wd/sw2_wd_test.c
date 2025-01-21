@@ -1,11 +1,11 @@
 /*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 15;//150;
-static int NEWTON_TEST_NY = 15;//150;
+static int NEWTON_TEST_NX = 16;
+static int NEWTON_TEST_NY = 6;
 static double alpha = 3;
 static double beta = 1.2;
-static void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t);
+static double write_testcase_error_wet_dry(SMODEL_SUPER *mod);
 static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -20,22 +20,22 @@ static void permute_array(double *arr,int *p, int n);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int timeloop_test(int argc, char **argv) {
+int sw2_wd_test(int argc, char **argv) {
 	//create a grid
 	SGRID *grid;
 	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
 	//let's just do something simple
 	//3x3 triangular element grid
 	double xmin = 0.0;
-	double xmax = 1.0;
+	double xmax = 1000.0;
 	double ymin = 0.0;
-	double ymax = 1.0;
+	double ymax = 500.0;
 	int npx = NEWTON_TEST_NX;
 	int npy = NEWTON_TEST_NY;
 	double theta = 0.0;
 	double dz = 1.0;
-	double a0 = -5.0;
-	double ax = 0.0;
+	double a0 = 0.0;
+	double ax = 0.0015;
 	double ax2 = 0.0;
 	double ay = 0.0;
 	double ay2 = 0.0;
@@ -50,7 +50,7 @@ int timeloop_test(int argc, char **argv) {
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
     nnodes = grid->nnodes;
-    sgrid_reorder(grid);
+ //   sgrid_reorder(grid);
 	//print coordinates
 //  for(int local_index =0; local_index<grid.nnodes; local_index++){
 //		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
@@ -66,9 +66,9 @@ int timeloop_test(int argc, char **argv) {
 	//sm.grid = &grid;
     SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
-	double dt = 2.0/20.0;
+	double dt = 600.0;
 	double t0 = 0.0;
-	double tf = 2.0;
+	double tf = 864000.0;
 
 	char elemVarCode[4]; 
 	strcpy(&elemVarCode[0],"2");//SW2D
@@ -79,8 +79,65 @@ int timeloop_test(int argc, char **argv) {
 	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
 	printf("NDOFS %d\n",dm.ndofs[0]);
 
-	//OVER WRITE TO HEAT
-	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_resid = HEAT;
+	//OVER WRITE TO SW2
+	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_resid = SW2;
+	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_init = SW2;
+	dm.superModel[0].elem2d_physics_mat[0].model[0].nvar = 3;
+    dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[0] = PERTURB_H;
+    dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[1] = PERTURB_U;
+    dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[2] = PERTURB_V;
+    dm.superModel[0].LINEAR_PROBLEM = NO;
+
+    //hack together the sw2 structure
+    //allocate
+    dm.superModel[0].sw = (SSW*) tl_alloc(sizeof(SSW), 1);
+    //use an alias
+    SSW *sw = dm.superModel[0].sw; //alias for convenience
+    //set it up
+    printf("allocating ssw\n");
+    ssw_alloc_init(sw);
+
+    //set up the dvar map
+    printf("allocating sdvar\n");
+    sdvar_alloc_init(&(sw->dvar), grid->nnodes, 0, 0, 1, grid->nnodes, grid->nelems2d);
+    //hard code set index for wd flag
+    sw->WD_FLAG = 0;
+    printf("sw vals %d\n",sw->WD_FLAG);
+    printf("dvar?? %d\n",sw->dvar.n_dvar_elem_int);
+    //initial conditions and things
+    // intialize dirichlet and old sol (initial guess)
+	for (int local_index=0; local_index<dm.ndofs[0]; local_index++){
+		dm.superModel[0].dirichlet_data[local_index] = 0.0;
+		dm.superModel[0].sol_old[local_index] = 0.0;
+		dm.superModel[0].sol[local_index] = 0.0;
+		dm.superModel[0].lin_sys->dsol[local_index] = 0.0;
+		dm.superModel[0].bc_mask[local_index] = NO;
+	}
+
+	//overwrite intial condition
+	double x_coord, y_coord, z_coord;
+	int id;
+	for (int i=0; i<nnodes; i++){
+		//mark the boundary only
+		x_coord = grid->node[i].x;
+		y_coord = grid->node[i].y;
+		z_coord = grid->node[i].z;
+		//id = grid->node[i].id;
+		id=i;
+		//need to set IC
+		dm.superModel[0].sol[id*3] = 1.0 - z_coord;
+		dm.superModel[0].sol_old[id*3] = 1.0 - z_coord;
+		dm.superModel[0].sol_older[id*3] = 1.0 - z_coord;
+		dm.superModel[0].dirichlet_data[id*3] = 1.0 - z_coord;
+		//no dirichlet condition
+		//if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
+		//	continue;
+		//}else{
+		//	dm.superModel[0].bc_mask[id*3+1]=NO;
+		//}
+		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
+	}
+
 	//printf("Supermodel no read complete\n");
 
 
@@ -127,40 +184,6 @@ int timeloop_test(int argc, char **argv) {
 //	sm.sol_old = (double*) tl_alloc(sizeof(double), sm.ndofs);
 //	sm.sol_older = (double*) tl_alloc(sizeof(double), sm.ndofs);
 
- 	SMODEL_SUPER *sm;
-	sm = &(dm.superModel[0]);
-
-	printf("SETTING UP BCMASK\n");
-
-	// intialize dirichlet and old sol (initial guess)
-	for (int local_index=0; local_index<dm.ndofs[0]; local_index++){
-
-		dm.superModel[0].dirichlet_data[local_index] = 0.0;
-		dm.superModel[0].sol_old[local_index] = 20.0;
-		dm.superModel[0].sol[local_index] = 20.0;
-		dm.superModel[0].lin_sys->dsol[local_index] = 0.0;
-		dm.superModel[0].bc_mask[local_index] = YES;
-	}
-
-	//overwrite intial condition
-	double x_coord, y_coord;
-	int id;
-	for (int i=0; i<nnodes; i++){
-		//mark the boundary only
-		x_coord = grid->node[i].x;
-		y_coord = grid->node[i].y;
-		//id = grid->node[i].id;
-		id=i;
-		//need to set IC
-		dm.superModel[0].sol[id*3+1] = 1 + x_coord*x_coord + alpha * y_coord*y_coord;
-		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
-			continue;
-		}else{
-			dm.superModel[0].bc_mask[id*3+1]=NO;
-		}
-		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
-	}
-	printf("BCMASK COMPLETE\n");
 	//set up bc mask
 
 //	for (int i=0;i<sm.ndofs;i++){
@@ -180,46 +203,14 @@ int timeloop_test(int argc, char **argv) {
 //	status = solve_umfpack(sm.dsol, sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.residual, sm.local_size);
 //	increment_function(&sm);
 	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
-
+	printf("Calling time loop\n");
 	//set forward_step and call timeloop
 	time_loop(&dm); 
 
-	//compare with analytic solution
-	//it is a scalar
-	double *u_exact;
-	u_exact = (double*) tl_alloc(sizeof(double),nnodes);
-	compute_exact_solution_heat(u_exact, nnodes, grid,tf);
-//	for(int i=0;i<nnodes;i++){
-//		printf("Exact solution[%d] = %f\n",i,u_exact[i]);
-//	}
-	
+
 	//extract second variable here
-	double *uh;
-	uh = (double*) tl_alloc(sizeof(double), nnodes);
-	//create temporary integer array for nodes
-	int *nodes;
-	nodes = (int*) tl_alloc(sizeof(int), nnodes);
-	for(int i=0;i<nnodes;i++){
-		nodes[i] = i;
-	}
-
-	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
-	//global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
-	global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat);
-//not needed anymore since nodes are reordered
-//if (grid->inv_per_node!=NULL){
-//	permute_array(uh,grid->inv_per_node,nnodes);
-//}
-//	printf("Final solution:\n");
-//	for(int i=0; i<nnodes;i++){
-//		printf("sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
-//	} 
-
-	//compute L2 and Linf error
-	double l2_err =  l2_error(uh, u_exact, nnodes);
-	double linf_err =  linf_error(uh, u_exact, nnodes);
-
-	printf("Final errors: %6.4e , %6.4e\n", l2_err,linf_err);
+	double total_error = write_testcase_error_wet_dry(&(dm.superModel[0])); 
+	printf("Final error: %6.4e\n", total_error);
 
 	//plot grid in h5?
 //    strcpy(sm.grid->filename, "residtest");
@@ -232,15 +223,12 @@ int timeloop_test(int argc, char **argv) {
 
 	//return -1 if failed, 0 if good
 	
-	if(l2_err < NEWTON_TEST_TOL && linf_err < NEWTON_TEST_TOL){
+	if(total_error < NEWTON_TEST_TOL){
 		err_code=0;
 	}
 	//printf("Final error code %d\n",err_code);
 
-	//free memory
-	u_exact = (double *) tl_free(sizeof(double), nnodes, u_exact);
-	uh = (double *) tl_free(sizeof(double), nnodes, uh);
-	nodes = (int *) tl_free(sizeof(int), nnodes, nodes);
+
 
 
 	smodel_design_free(&dm);
@@ -261,25 +249,47 @@ int timeloop_test(int argc, char **argv) {
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t){
+double write_testcase_error_wet_dry(SMODEL_SUPER *mod) {
+    int inode;
+    double error_vx = 0., error_vy = 0., error_h = 0., max_head = 0., max_u = 0., max_v = 0.;
+    double error_vx_max, error_vy_max, error_h_max, max_head_grid, max_u_grid, max_v_grid;
+    for (inode=0; inode<mod->grid->my_nnodes; inode++) {
+        error_vx += fabs(mod->sol[inode*3+1]); // water initially at rest
+        error_vy += fabs(mod->sol[inode*3+2]); // water initially at rest
+        error_h  += fabs(mod->sol[inode*3] - mod->dirichlet_data[inode*3]);
+        if (fabs(mod->dirichlet_data[inode*3]) > max_head) max_head = fabs(mod->dirichlet_data[inode*3]);
+    }
+    //NEED TO DO
+    //double grid_mass_error = tl_find_grid_mass_error_elem2d(mod->density, mod->sw->d2->head, mod->sw->d2->vel, mod->grid, mod->flag, mod->initial_grid_mass, mod->series_head, mod->str_values, mod->dt, &total_time_mass_flux);
+    
+    return error_vx + error_vy + error_h;
 
-	//test case comes from
-	//https://jsdokken.com/dolfinx-tutorial/chapter2/heat_code.html
-
-	//problem is du/dt - /\u + f = 0 on Omega
-	//f = beta - 2 - 2*alpha
-	// beta = 1.2
-	// alpha = 3.0
-	//u_D = u_exact on dOmega
-	//u_exact = 1 + x^2 + alpha*y^2+beta*t
-
-	//works for cg only at the moment, would need cell by cell loop for dg
-	for(int i =0; i<ndof ; i++){
-		u_exact[i] = 1.0 + grid->node[i].x*grid->node[i].x + alpha*grid->node[i].y*grid->node[i].y + beta*t;
-	}
-
-
-
+//    if (max_head < 1e-6) max_head = 1.;
+//    if (max_u < 1e-6) max_u = 1.;
+//    if (max_v < 1e-6) max_v = 1.;
+//#ifdef _MESSG
+//    error_vx_max=messg_dsum(error_vx,mod->grid->smpi->ADH_COMM);
+//    error_vy_max=messg_dsum(error_vy,mod->grid->smpi->ADH_COMM);
+//    error_h_max=messg_dsum(error_h,mod->grid->smpi->ADH_COMM);
+//    max_head_grid=messg_dmax(max_head,mod->grid->smpi->ADH_COMM);
+//    max_u_grid=messg_dmax(max_u,mod->grid->smpi->ADH_COMM);
+//    max_v_grid=messg_dmax(max_v,mod->grid->smpi->ADH_COMM);
+//    error_vx=error_vx_max;
+//    error_vy=error_vy_max;
+//    error_h=error_h_max;
+//    max_head=max_head_grid;
+//    max_u=max_u_grid;
+//    max_v=max_v_grid;
+//#endif
+//    if(mod->grid->smpi->myid==0){
+//        FILE *fp;
+//        fp = fopen("error.out", "w");
+//        fprintf(fp,"x-velocity abs error: %30.20e :: relative error: %30.20e \n",error_vx/mod->grid->macro_nnodes,error_vx/mod->grid->macro_nnodes/max_u);
+//        fprintf(fp,"y-velocity abs error: %30.20e :: relative error: %30.20e \n",error_vy/mod->grid->macro_nnodes,error_vy/mod->grid->macro_nnodes/max_v);
+//        fprintf(fp,"head abs error: %30.20e :: relative error: %30.20e \n",error_h/mod->grid->macro_nnodes,error_h/mod->grid->macro_nnodes/max_head);
+//        fprintf(fp,"grid_mass_error: %30.20e :: relative error: %30.20e \n",grid_mass_error, grid_mass_error/mod->initial_grid_mass);
+//        fclose(fp);
+//    }
 }
 void permute_array(double *arr,int *p, int n){
 	double *temp;

@@ -19,7 +19,7 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void initialize_system(SMODEL_SUPER *sm) {
-    int i;
+    int i,j,nmods,inc_index;
 
     //seems like the easiest way?
     //maybe think about this
@@ -32,9 +32,42 @@ void initialize_system(SMODEL_SUPER *sm) {
     for(i=0;i< *(sm->ndofs);i++){
         sm->sol[i] = sm->sol_old[i];
     }
-
-
-
+    //then loop through for any initialization routines
+    for(i=0;i<sm->nphysics_mat_1d;i++){
+        nmods = sm->elem1d_physics_mat[i].nSubmodels;
+        for (j=0;j<nmods;j++){
+            inc_index = sm->elem1d_physics_mat[i].model[j].fe_init;
+            //call wrapper for init function
+            //as long as it is not unset
+            if (inc_index!=UNSET_INT){
+                fe_init[inc_index](sm);
+            }
+        }
+    }
+    //then loop through for any initialization routines
+    for(i=0;i<sm->nphysics_mat_2d;i++){
+        nmods = sm->elem2d_physics_mat[i].nSubmodels;
+        for (j=0;j<nmods;j++){
+            inc_index = sm->elem2d_physics_mat[i].model[j].fe_init;
+            //call wrapper for init function
+            //as long as it is not unset
+            if (inc_index!=UNSET_INT){
+                fe_init[inc_index](sm);
+            }
+        }
+    }
+    //then loop through for any initialization routines
+    for(i=0;i<sm->nphysics_mat_3d;i++){
+        nmods = sm->elem3d_physics_mat[i].nSubmodels;
+        for (j=0;j<nmods;j++){
+            inc_index = sm->elem3d_physics_mat[i].model[j].fe_init;
+            //call wrapper for init function
+            //as long as it is not unset
+            if (inc_index!=UNSET_INT){
+                fe_init[inc_index](sm);
+            }
+        }
+    }
     //for (i = 0; i < sm->nhead ; i ++){
 //        sm->head[i] = sm->old_head[i]; 
 //    }//
@@ -96,6 +129,7 @@ void initialize_dirichlet_bc(SMODEL_SUPER *sm) {
     //printf("Initializing Dirichlet B.C. \n");
     int idof;
     int ndofs = *(sm->ndofs);
+    
     for(idof = 0; idof<ndofs; idof++){
         //need to use sseries strings to set dirichlet_data
         if(sm->bc_mask[idof] == YES){

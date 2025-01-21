@@ -4,9 +4,7 @@
  *   All function arguements must be consistent with fe_sw2_wet_dry_wrapper.                */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-#include "global_header.h"
-
+#include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
@@ -31,7 +29,7 @@
 double fe_sw2_wet_dry_factor(SVECT *x, double *h, double djac) {
     
     int i, is_dry, total_vtx, passcode, only_vtx;
-    double elem_djac, factor, diff_h[3];
+    double elem_djac, factor;
     
     passcode = 0; total_vtx = 0;
     
@@ -103,7 +101,7 @@ double fe_sw2_wet_dry_factor(SVECT *x, double *h, double djac) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-double fe_sw2_wet_dry_wrapper(double *elem_rhs, SVECT *x, double *h, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, int redistribute_flag, int DEBUG, double *vars, void (*fe_sw_func) ()) {
+double fe_sw2_wet_dry_wrapper(double *elem_rhs, SVECT *x, double *h, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, int redistribute_flag, int DEBUG, double *vars, void (*fe_sw_func) (SVECT *elem_nds, double *elem_head, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, double *vars, double *elem_rhs)) {
     
 #ifdef _DEBUG
     if (DEBUG) {
@@ -329,7 +327,7 @@ double fe_sw2_wet_dry_wrapper(double *elem_rhs, SVECT *x, double *h, SVECT2D *gr
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-double fe_sw2_wet_dry_wrapper_1d(double *elem_rhs, SVECT *x, double *h, SVECT2D nrml, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, int redistribute_flag, int DEBUG, double *vars, void (*fe_sw_func) ()) {
+double fe_sw2_wet_dry_wrapper_1d(double *elem_rhs, SVECT *x, double *h, SVECT2D *nrml, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, int redistribute_flag, int DEBUG, double *vars, void (*fe_sw_func) (SVECT *elem_nds, double *elem_head, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, double *vars, double *elem_rhs)) {
     
 #ifdef _DEBUG
     if (DEBUG) {
@@ -489,8 +487,8 @@ double fe_sw2_wet_dry_wrapper_1d(double *elem_rhs, SVECT *x, double *h, SVECT2D 
     //    }
     
     // Now integrate using wet/dry values
-    DOF_3 new_elem_rhs[nnodes];
-    sarray_init_dbl(new_elem_rhs, nnodes);
+    double new_elem_rhs[nnodes*3];
+    sarray_init_dbl(new_elem_rhs, nnodes*3);
     fe_sw_func(new_x, new_h, nrml, v, new_v_wet_dry, f, new_f_wet_dry, djac, vars, new_elem_rhs);
     
 #ifdef _DEBUG

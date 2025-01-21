@@ -24,7 +24,14 @@
 #define POISSON 1
 #define HEAT 2
 
+//init routine codes
+#define N_INIT_ROUTINES 1
+#define SW2 0
+
 
 //global array of function pointers to resid routines
 int (*fe_resid[N_RESID_ROUTINES])(SMODEL_SUPER *, double *, int, double, int, int, int, int);
+//global array of function pointers to init routines
+int (*fe_init[N_INIT_ROUTINES])(SMODEL_SUPER *);
+
 

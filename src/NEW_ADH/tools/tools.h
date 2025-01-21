@@ -88,5 +88,12 @@ SVECT2D tl_bendway_correction(
   int ie
 );
 double get_coriolis_angular_speed(double coriolis_factor);
+int is_double_small( double value ) ;
+double fe_get_supg_tau_sw(int nnodes, SVECT *nodes, double g, double elem_avg_depth, double elem_avg_u, double elem_avg_v,
+                                 double elem_avg_w,double *grad_shp_x, double *grad_shp_y, double *grad_shp_z, double djac,
+                                 double alpha, int ndim, int tau_method_flag, int le_method_flag);
+double get_element_length(int nnodes, SVECT *node, double elem_avg_u, double elem_avg_v, double elem_avg_w,
+                          double *grad_shp_x, double *grad_shp_y, double *grad_shp_z, double volume_or_area,
+                          int ndim, int method_flag);
 
 #endif

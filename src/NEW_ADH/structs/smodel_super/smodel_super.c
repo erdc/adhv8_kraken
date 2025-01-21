@@ -65,6 +65,12 @@ void smodel_super_alloc_init(SMODEL_SUPER *sm) {
     sm->o_flag = 0;
     sm->grid = NULL; // just a pointer to the grid in the design model
 
+    //Mark adding some default vals
+    sm->tau_temporal = 0; //can change from super model to super model
+    sm->gravity=9.81; //idk where this should be? probably design, this can just be pointer
+    sm->density=1.0;
+    sm->vorticity_id = UNSET_INT;
+
     // initialize with default values
     sm->isSimple = 0;
     sm->dt = NULL;

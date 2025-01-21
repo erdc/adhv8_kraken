@@ -48,6 +48,8 @@ $(wildcard $(MASTER_SRC_DIR)../structs/sstr_value) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sgrid) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sarray) \
 $(wildcard $(MASTER_SRC_DIR)../structs/smat) \
+$(wildcard $(MASTER_SRC_DIR)../structs/sdvar) \
+$(wildcard $(MASTER_SRC_DIR)../structs/ssw) \
 $(wildcard $(MASTER_SRC_DIR)../structs/slin_sys) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sio) \
 $(wildcard $(MASTER_SRC_DIR)../structs/sseries) \
@@ -67,7 +69,9 @@ $(wildcard $(MASTER_SRC_DIR)../test/la) \
 $(wildcard $(MASTER_SRC_DIR)../test/residual) \
 $(wildcard $(MASTER_SRC_DIR)../test/jacobian) \
 $(wildcard $(MASTER_SRC_DIR)../test/newton) \
+$(wildcard $(MASTER_SRC_DIR)../test/nonlinear_newton) \
 $(wildcard $(MASTER_SRC_DIR)../test/timeloop) \
+$(wildcard $(MASTER_SRC_DIR)../test/sw2_wd) \
 $(wildcard $(MASTER_SRC_DIR)../main)
 
 
@@ -98,6 +102,8 @@ $(MASTER_SRC_DIR)../structs/sstr_value \
 $(MASTER_SRC_DIR)../structs/sgrid \
 $(MASTER_SRC_DIR)../structs/sarray \
 $(MASTER_SRC_DIR)../structs/smat \
+$(MASTER_SRC_DIR)../structs/sdvar \
+$(MASTER_SRC_DIR)../structs/ssw \
 $(MASTER_SRC_DIR)../structs/slin_sys\
 $(MASTER_SRC_DIR)../structs/sio \
 $(MASTER_SRC_DIR)../structs/sseries \
@@ -117,7 +123,9 @@ $(MASTER_SRC_DIR)../test/la \
 $(MASTER_SRC_DIR)../test/residual \
 $(MASTER_SRC_DIR)../test/jacobian \
 $(MASTER_SRC_DIR)../test/newton \
-$(MASTER_SRC_DIR)../test/timeloop
+$(MASTER_SRC_DIR)../test/nonlinear_newton \
+$(MASTER_SRC_DIR)../test/timeloop \
+$(MASTER_SRC_DIR)../test/sw2_wd
 
 
 

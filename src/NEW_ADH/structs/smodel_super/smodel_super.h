@@ -25,6 +25,11 @@ typedef struct {
     double* t_prev;
     double* t_final;
     int* t_adpt_flag;
+    double tau_temporal; //can change from super model to super model
+    double gravity; //idk where this should be? probably design, this can just be pointer
+    double density;
+    int vorticity_id;
+
     //an additional integer if we want to subtimestep off the main dt
     //nsubstep of 1 would be dt = dt of super model
     int nsubsteps;
@@ -212,6 +217,7 @@ typedef struct {
 //    SCON *con;
 //    SNS_2D *sns2d;
 //    SNS_3D *sns3d;
+    SSW *sw; //pointer or actual structure?
 } SMODEL_SUPER;
 
 

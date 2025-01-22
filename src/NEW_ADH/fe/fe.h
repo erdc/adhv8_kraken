@@ -3,6 +3,7 @@
 //1d segments
 void integrate_line_phi_h_h(double djac, double c, double h1, double h2, double *integral);
 void integrate_line_phi_h_h_g(double djac, double c, double h1, double h2, double g1, double g2, double *integral); 
+double integrate_line_h_f(double djac, double c, double *h, double *f);
 //triangles
 double integrate_triangle_f(double djac, double c, double *f);
 double integrate_triangle_f_f(double djac, double c, double *f);
@@ -40,6 +41,8 @@ void integrate_quadrilateral_gradPhi_dot_vbar(SVECT *nd, double c, SVECT2D vbar,
 void integrate_quadrilateral_phi_h_df(SVECT *nd, double c, double *df, double *h, double *integral_x, double *integral_y);
 double get_quadrilateral_linear_djac2d(double xhat, double yhat, SVECT *nd);
 double get_quadrilateral_linear_djac_gradPhi(double xhat, double yhat, SVECT *nd, SVECT *grad_shp);
+//other
+double integrate_quadZ_f(SVECT *nd, double c, double *f);
 //wd integrations
 double fe_sw2_wet_dry_factor(SVECT *x, double *h, double djac);
 double fe_sw2_wet_dry_wrapper(double *elem_rhs, SVECT *x, double *h, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, int REDISTRIBUTE_FLAG, int DEBUG, double *, void (*fe_sw_func) (SVECT *elem_nds, double *elem_head, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, double *vars, double *elem_rhs));

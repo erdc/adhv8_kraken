@@ -1021,5 +1021,36 @@ inline void integrate_quadrilateral_phi_h_df(SVECT *nd, double c, double *df, do
         integral_y[3] += con * ( g4*x1 - g8*x2 - g12*x3 + g16*x4);
     }
 }
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*                             VERTICAL QUADRILATERALS IN 3D SPACE                          */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief  Peforms following *vertical quadrilateral integration:
+ *  \f$ \int_{-1}^{1} \int_{-1}^{1} \big( c \, f(\widehat{s},\widehat{t}) \big) d\widehat{s}\,d\widehat{t}   \f$
+ *  \author  Corey Trahan, Ph.D.
+ *  \note CJT \:: for this integration to be correct, grid must be in column format and numbered correctly.
+ *                (i.e. x3 = x2, y3 = y2, x4 = x1, y4 = y1)
+ *  \note CJT \:: negative on t1 here because of ordering of nodes
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline double integrate_quadZ_f(SVECT *nd, double c, double *f) {
+#if _DEBUG
+    assert(nd[0].x == nd[3].x);
+    assert(nd[1].x == nd[2].x);
+    assert(nd[0].y == nd[3].y);
+    assert(nd[1].y == nd[2].y);
+#endif
+    double t1 = one_2 * sqrt(pow(nd[0].x - nd[1].x,2) + pow(nd[0].y - nd[1].y,2));
+    double t2 = -t1 * one_6 * c; // negative was not here in old code ...
+    return (t2 * ((2*f[0] +   f[1] +   f[2] + 2*f[3])*nd[0].z +
+                  (  f[0] + 2*f[1] + 2*f[2] +   f[3])*nd[1].z -
+                  (  f[0] + 2*f[1] + 2*f[2] +   f[3])*nd[2].z -
+                  (2*f[0] +   f[1] +   f[2] + 2*f[3])*nd[3].z));
+}
 

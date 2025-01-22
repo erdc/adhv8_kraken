@@ -31,3 +31,15 @@ inline void integrate_line_phi_h_h_g(double djac, double c, double h1, double h2
     integral[0] += t1 * ( 3*(4*g1 + g2)*h1*h1 + 2*(3*g1 + 2*g2)*h1*h2 + (2*g1 + 3*g2)*h2*h2 );
     integral[1] += t1 * ( (3*g1 + 2*g2)*h1*h1 + 2*(2*g1 + 3*g2)*h1*h2 + 3*(g1 + 4*g2)*h2*h2 );
 }
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief  Peforms following line segment integration:
+ *  \f$ \int_{0}^{1} c \,  f(\widehat{x})  \,  g(\widehat{x})  d\widehat{x}\f$
+ *  \author  Corey Trahan, Ph.D.
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline double integrate_line_h_f(double djac, double c, double *h, double *f) {
+    double t1 = djac * one_6 * c;
+    return (t1 * ((2*h[0] + h[1])*f[0] + (h[0] + 2*h[1])*f[1]));
+}

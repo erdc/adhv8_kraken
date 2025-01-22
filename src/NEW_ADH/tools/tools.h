@@ -96,4 +96,10 @@ double get_element_length(int nnodes, SVECT *node, double elem_avg_u, double ele
                           double *grad_shp_x, double *grad_shp_y, double *grad_shp_z, double volume_or_area,
                           int ndim, int method_flag);
 
+double tl_find_grid_mass_elem2d(double density, STR_VALUE *str, SSERIES *series_head, double *depth, SGRID *grid, SFLAGS flags);
+double tl_find_grid_mass_error_elem2d(double density, double *depth, SVECT2D *vel, SGRID *grid, SFLAGS flags, double initial_grid_mass, SSERIES *series_head, STR_VALUE *str, double dt, double *total_time_mass_flux_T);
+double tl_find_grid_mass_elem3d(double density, SGRID *grid, double *displacement);
+double tl_find_3d_grid_mass_error(STR_VALUE *str, SSERIES *series_head, double initial_grid_mass, double density, SGRID *grid, SVECT *vel, double *displacement, double *old_displacement, double *older_displacement, double dt, double *new_grid_mass, double *total_time_mass_flux_T);
+double fe_3m2d_dry_wet_factornew(SVECT2D *x, double s, double *h, double djac, int *num_dry);
+
 #endif

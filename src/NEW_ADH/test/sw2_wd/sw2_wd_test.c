@@ -3,7 +3,7 @@
 static double NEWTON_TEST_TOL = 1e-7;
 static int NEWTON_TEST_NX = 16;
 static int NEWTON_TEST_NY = 6;
-static double write_testcase_error_wet_dry(SMODEL_SUPER *mod);
+static double write_testcase_error_wet_dry(SMODEL_SUPER *mod, double initial_grid_mass);
 static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -205,9 +205,22 @@ int sw2_wd_test(int argc, char **argv) {
 	//set forward_step and call timeloop
 	time_loop(&dm); 
 
-
+	//get initial mass
+	double *init_head;
+    init_head = (double *) tl_alloc(sizeof(double), nnodes);
+    SVECT2D *init_vel;
+    init_vel = (SVECT2D *) tl_alloc(sizeof(SVECT2D), nnodes);
+    //fill in temp arrays
+    for (int inode=0; inode<nnodes; inode++){
+    	init_head[inode] = dm.superModel[0].dirichlet_data[inode*3];
+    	init_vel[inode].x = dm.superModel[0].dirichlet_data[inode*3+1];
+    	init_vel[inode].y = dm.superModel[0].dirichlet_data[inode*3+2];
+    }
+    SFLAGS dummy;
+	double initial_grid_mass = tl_find_grid_mass_elem2d(dm.superModel[0].density, NULL, NULL, init_head,dm.superModel[0].grid, dummy);
+	//printf("Initial grid mass = %f\n",initial_grid_mass);
 	//extract second variable here
-	double total_error = write_testcase_error_wet_dry(&(dm.superModel[0])); 
+	double total_error = write_testcase_error_wet_dry(&(dm.superModel[0]),initial_grid_mass); 
 	printf("Final error: %6.4e\n", total_error);
 
 	//plot grid in h5?
@@ -247,10 +260,11 @@ int sw2_wd_test(int argc, char **argv) {
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-double write_testcase_error_wet_dry(SMODEL_SUPER *mod) {
+double write_testcase_error_wet_dry(SMODEL_SUPER *mod, double initial_grid_mass) {
     int inode;
-    double error_vx = 0., error_vy = 0., error_h = 0., max_head = 0., max_u = 0., max_v = 0.;
+    double error_vx = 0., error_vy = 0., error_h = 0., max_head = 0., max_u = 0., max_v = 0., total_time_mass_flux= 0.0;
     double error_vx_max, error_vy_max, error_h_max, max_head_grid, max_u_grid, max_v_grid;
+
     for (inode=0; inode<mod->grid->my_nnodes; inode++) {
         error_vx += fabs(mod->sol[inode*3+1]); // water initially at rest
         error_vy += fabs(mod->sol[inode*3+2]); // water initially at rest
@@ -258,8 +272,25 @@ double write_testcase_error_wet_dry(SMODEL_SUPER *mod) {
         if (fabs(mod->dirichlet_data[inode*3]) > max_head) max_head = fabs(mod->dirichlet_data[inode*3]);
     }
     //NEED TO DO
-    //double grid_mass_error = tl_find_grid_mass_error_elem2d(mod->density, mod->sw->d2->head, mod->sw->d2->vel, mod->grid, mod->flag, mod->initial_grid_mass, mod->series_head, mod->str_values, mod->dt, &total_time_mass_flux);
+    double *head;
+    head = (double *) tl_alloc(sizeof(double), mod->grid->nnodes);
+    SVECT2D *vel;
+    vel = (SVECT2D *) tl_alloc(sizeof(SVECT2D), mod->grid->nnodes);
+    //fill in temp arrays
+    for (inode=0; inode<mod->grid->my_nnodes; inode++){
+    	head[inode] = mod->sol[inode*3];
+    	vel[inode].x = mod->sol[inode*3+1];
+    	vel[inode].y = mod->sol[inode*3+2];
+    }
+    SFLAGS dummy;
+    double grid_mass_error = tl_find_grid_mass_error_elem2d(mod->density, head, vel, mod->grid, dummy, initial_grid_mass, NULL, NULL, *(mod->dt), &total_time_mass_flux);
     
+    printf("Grid mass error %6.4e\n", grid_mass_error);
+
+
+    head = tl_free(sizeof(double),mod->grid->nnodes,head);
+    vel = tl_free(sizeof(SVECT2D),mod->grid->nnodes,vel);
+
     return error_vx + error_vy + error_h;
 
 //    if (max_head < 1e-6) max_head = 1.;

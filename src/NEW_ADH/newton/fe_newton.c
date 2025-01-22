@@ -7,13 +7,13 @@
 #include "adh.h"
 static double *x0;         /* solution = u+u0 - u0 is the shift */
 static int isize = 0;
-static double PETSC_RTOL = 1e-13;
-static double PETSC_ATOL = 1e-15;
+static double PETSC_RTOL = 1e-12;
+static double PETSC_ATOL = 1e-11;
 static double PETSC_DTOL = 1e5;
 static int PETSC_MAXIT = 10000;
 #ifdef _PETSC
-    static const char *PETSC_PRECON = PCLU;// PCILU;//PCLU;
-    static const char *PETSC_KSP = KSPPREONLY;//KSPGMRES;//KSPPREONLY
+    static const char *PETSC_PRECON = PCILU;// PCILU;//PCLU;
+    static const char *PETSC_KSP = KSPGMRES;//KSPPREONLY
 #endif
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -411,7 +411,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //store temporary vector of inital guess for linear system
         sarray_copy_dbl(x0, dsol,  ndofs);
 
-        printf("Using PETSC solver\n");
+        //printf("Using PETSC solver\n");
         // Solver
         //be sure values get updated since we used set with split arrays ...
         KSPSetOperators(lin_sys->ksp,lin_sys->A,lin_sys->A);
@@ -423,9 +423,9 @@ int fe_newton(SMODEL_SUPER* sm)
         PC          pc;      /* preconditioner context */
         KSPGetPC(lin_sys->ksp, &pc);
         PCSetType(pc,PETSC_PRECON);//ILU only works in serial
-        //some other options
-        PetscOptionsSetValue(NULL, "-pc_factor_levels", "0");
-        PetscOptionsSetValue(NULL, "-ksp_gmres_restart", "400");
+        //some other options, seems to break stuff?
+        //PetscOptionsSetValue(NULL, "-pc_factor_levels", "0");
+        //PetscOptionsSetValue(NULL, "-ksp_gmres_restart", "400");
         
         //PetscCall(KSPSetTolerances(sm->ksp, 1.e-11, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT));
         // TODO: can I call this once in fe_main instead?
@@ -441,10 +441,10 @@ int fe_newton(SMODEL_SUPER* sm)
         KSPSetTolerances(lin_sys->ksp, PETSC_RTOL, PETSC_ATOL, PETSC_DTOL, PETSC_MAXIT);
         //KSPSetTolerances(lin_sys->ksp, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
         //KSPSetInitialGuessNonzero(lin_sys->ksp,PETSC_TRUE);
-        KSPSetFromOptions(lin_sys->ksp);
-        PCSetFromOptions(pc);
-        PCSetUp(pc);
-        KSPSetUp(lin_sys->ksp);
+        //KSPSetFromOptions(lin_sys->ksp);
+        //PCSetFromOptions(pc);
+        //PCSetUp(pc);
+        //KSPSetUp(lin_sys->ksp);
         //KSPView(lin_sys->ksp, PETSC_VIEWER_DEFAULT );
         //solve
         KSPSolve(lin_sys->ksp,lin_sys->B,lin_sys->X);
@@ -453,7 +453,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //VecGhostUpdateBegin(sm->X,INSERT_VALUES,SCATTER_FORWARD);
         //VecGhostUpdateEnd(sm->X,INSERT_VALUES,SCATTER_FORWARD);
         KSPGetIterationNumber(lin_sys->ksp, &its);
-        printf("KSP iterations: %i\n",its);
+        //printf("KSP iterations: %i\n",its);
         //unscale, idk if helps or not
         unscale_linear_system(dsol,x0,lin_sys->scale_vect,*(lin_sys->local_size));
         //printf("SOLVER STATUS   %d\n\n",status);
@@ -461,6 +461,7 @@ int fe_newton(SMODEL_SUPER* sm)
 //            printf("dsol[%d] = %.17e \n",j,lin_sys->dsol[j]);
 //        }
         //solv_flag = TRUE; // TODO: Does this need to change - SAM
+        status = 0;
        
 #ifdef _DEBUG
         // Viewer stuff

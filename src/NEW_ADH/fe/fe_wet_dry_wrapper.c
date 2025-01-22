@@ -1,7 +1,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*! \file  fe_sw2_wet_dry_integrations.c This file collects the 2D shallow water wet/dry integrations.
- *   All function arguements must be consistent with fe_sw2_wet_dry_wrapper.                */
+/*! \file  fe_wet_dry_wrapper.c This file collects the 2D shallow water wet/dry wrapper.
+ *   All function arguements assumed to be consistent with function prototype.              */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #include "adh.h"

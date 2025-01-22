@@ -1,6 +1,6 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*! \file  sw2_2d_body_resid.c This file collections functions responsible for
+/*! \file  sw2_body_resid.c This file collections functions responsible for
  *          the 2D shallow water body contributions to the elemental residual.              */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -21,16 +21,15 @@ void fe_sw2_temporal(int ie, SELEM_2D *elem2d, int nnodes, SVECT *elem_nds, doub
  *  \bug       none
  *  \warning   none
  *  \copyright AdH
- *
- * @param[out] elem_rhs      the 2D elemental residual array
- * @param[in]  mod           a pointer to the model struct
- * @param[in]  ie            the elemental id
- * @param[in]  pertubation   the Newton pertubation
- * @param[in]  perturb_node  the node to be perturbed
- * @param[in]  perturb_var   the variable to be perturbed
- * @param[in]  perturb_sign  the direction of Newton perturbation
- * @param[in]  DEBUG         a debug flag
- * @param[in]  PRESSURE_FLAG  a flag turning pressure contributions on/off
+ * @param[in] mod (SMODEL_SUPER *) - the super model, contains pointer to grid, dependent vars, maps, and such
+ * @param[in,out] elem_rhs (double *) - the 2D elemental residual array
+ * @param[in]  ie  (int) - the elemental id
+ * @param[in]  pertubation (double) - the F-D approximation size aka Newton pertubation
+ * @param[in]  perturb_node (int) -  the index of node to be perturbed (local to element)
+ * @param[in]  perturb_var (int)  - the index of the variable to be perturbed
+ * @param[in]  perturb_sign (int)  - the direction of Newton perturbation (either -1 or 1)
+ * @param[in]  DEBUG    (int) - a debug flag
+ * \returns a possible error code
  *
  *  \details Solves the body integals of the following weak, discrete body terms of the 2D shallow water equation: \n
  *  \f{eqnarray*}{

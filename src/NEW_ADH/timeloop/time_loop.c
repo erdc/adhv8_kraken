@@ -1,6 +1,18 @@
+/*! \file  time_loop.c This file has functions responsible for running an array of supermodels in time */
 #include "adh.h"
-//could move to global file?
+//could move to global file? or maybe better to keep here
 static int (*forward_stepper[N_TIME_STEPPERS]) (SMODEL_SUPER*);
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function performs the time loop on a design model (array of super models)
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] dm (SMODEL_DESIGN*) - the design model where the supermodels are
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int time_loop(SMODEL_DESIGN *dm){
 	int TIME_STEP_WORKED = TRUE, LOOP_INCOMPLETE = TRUE;
 	int ierr = YES;
@@ -30,8 +42,20 @@ int time_loop(SMODEL_DESIGN *dm){
 
 	return ierr;
 }
-
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function advances each super model by calling the forward stepper of the
+ *             super model
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] dm (SMODEL_DESIGN*) - the design model where the supermodels are
+ *  @param [in] nsuper (int) - number of super models to call
+ *  \returns - potentially an error code of whether the time step was succesfull or not
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int advance_time(SMODEL_DESIGN *dm, int nsuper){
 	int TS_SUCCESS = TRUE;
 	int nsubsteps;
@@ -69,8 +93,19 @@ int advance_time(SMODEL_DESIGN *dm, int nsuper){
 	return TS_SUCCESS;
 
 }
-
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function updates time and potentially the dt based on time series input
+ *             super model
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] dm (SMODEL_DESIGN*) - the design model where the supermodels are
+ *  \returns - False if final time is passed. true if final time is not passed.
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int update_dt(SMODEL_DESIGN *dm){
 	//advances time
 	dm->t_prev+=dm->dt;

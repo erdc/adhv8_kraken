@@ -8,7 +8,7 @@ static void compute_exact_solution_nonlinear_poisson(double *u_exact, int ndof, 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function tests the Newton solvet using a nonlinear 
+ *  \brief     This function tests the Newton solver using a nonlinear 
  *   Poisson equation with analytic solution.
  *  equation is -\/.(q(u)\/u) + f = 0
  *                q(u) = 1 + u^2

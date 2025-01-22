@@ -107,7 +107,7 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Function to check for near zero entries and force dirichlet conditions
+ *  \brief     Function to check for near zero entries and force dirichlet conditions there
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none

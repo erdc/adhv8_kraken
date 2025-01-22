@@ -66,7 +66,7 @@ void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init
         dm->superModel[i].inc_nonlin = 1e-3;
         dm->superModel[i].max_nonlin_linesearch_cuts = 5;
         dm->superModel[i].it_count_nonlin_failed = 0;
-        dm->superModel[i].max_nonlin_it = 20;
+        dm->superModel[i].max_nonlin_it = 25;
         dm->superModel[i].LINEAR_PROBLEM = YES;
         dm->superModel[i].force_nonlin_it = NO;
         dm->superModel[i].force_nonlin_it = NO;

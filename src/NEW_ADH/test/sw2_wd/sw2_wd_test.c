@@ -1,18 +1,16 @@
-/*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
+/*! \file sw2_wd_test.c This file tests the sw2 engine */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
 static int NEWTON_TEST_NX = 16;
 static int NEWTON_TEST_NY = 6;
-static double alpha = 3;
-static double beta = 1.2;
 static double write_testcase_error_wet_dry(SMODEL_SUPER *mod);
 static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function tests the Newton solvet using a Poisson equation with analytic
- *  solution
+ *  \brief     This function tests a basic sw2 case where we have sloping beach and still
+ *  conditions. Mass conservation is tested
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none

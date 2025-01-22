@@ -1,4 +1,10 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \file  fe_sw2_wdflag_legacy.c This file is the routine that
+ *  updates the w/d flag on each element       */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
  *  \brief     Assigns a wet/dry flag to all element.
  *  \author    Gary Brown, Ph.D.
@@ -11,7 +17,10 @@
  * @param[in]     sw2d (SSW_2D *) a shallow water 2D model
  *
  * \note CJT\:: Label wetting and drying AND neighboring elements as wet/dry elements
- * \note CJT\:: flag = 0 :: fully wet || flag = 1 :: some nodes are dry || flag = 2 :: all nodes dry
+ * \note CJT\:: flag = 0 :: fully wet and no surrounding elements contain dry node
+ *              || flag = 1 :: at least one is dry on the element or neighboring element
+ *              || flag = 2 :: all nodes dry on the element at the last 2 time steps
+ * \note : Still need to write routine to clear wd_tmp at end of time loop
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

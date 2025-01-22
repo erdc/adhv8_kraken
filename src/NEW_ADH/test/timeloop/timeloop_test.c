@@ -1,8 +1,8 @@
-/*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
+/*! \file timeloop_test.c This file tests the timeloop via heat equation */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 15;//150;
-static int NEWTON_TEST_NY = 15;//150;
+static int NEWTON_TEST_NX = 100;//150;
+static int NEWTON_TEST_NY = 100;//150;
 static double alpha = 3;
 static double beta = 1.2;
 static void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t);
@@ -11,7 +11,8 @@ static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function tests the Newton solvet using a Poisson equation with analytic
+ *  \brief     This function tests the time looper and Newton solver
+ *  using a heat equation with analytic
  *  solution
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland

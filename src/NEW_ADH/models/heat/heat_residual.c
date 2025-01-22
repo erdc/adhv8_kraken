@@ -28,7 +28,7 @@ static double beta = 1.2;
  * \returns integer code
  *  \details Solves the body integals of the following weak, discrete body terms of the 2D Poisson equation: \n
  *  \f$
- *  \int_{\Omega} \frac{\partial u_i}{\partial t} \nabla u_i \cdot \nabla v_i dx - \int_{\Omega} f dx = 0 \\
+ *  \int_{\Omega} \frac{\partial u_i}{\partial t} + \nabla u_i \cdot \nabla v_i dx - \int_{\Omega} f dx = 0 \\
  *  f= \beta - 2 -2\alpha \\
  *  u_{exact} = 1 + x^2 + \alpha y^2 + \beta t\\
  *  \f$

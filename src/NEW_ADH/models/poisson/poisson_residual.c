@@ -1,14 +1,15 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*! \file  poisson_residual.c This file collections functions responsible for
- *          the 2D Poisson equation with constant RHS, used for testing             */
+ *          the 2D Poisson equation with constant RHS, used for testing 
+ *          and 2D nonlinear Poisson equation for testing            */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Returns the 2D Poisson residual with constant RHS on an element, used for testing.
+ *  \brief     Returns the 2D Poisson residual (linear or nonlinear), used for testing.
  *  \author    Charlie Berger, Ph.D.
  *  \author    Gaurav Savant, Ph.D.
  *  \author    Gary Brown
@@ -27,10 +28,21 @@
  * @param[in] perturb_sign (int) - the direction of Newton perturbation (-1 or +1)
  * @param[in] DEBUG (int) - a debug flag
  * \returns integer code
- *  \details Solves the body integals of the following weak, discrete body terms of the 2D Poisson equation: \n
+ *  \details If mod->LINEAR then solves the body integals of the following weak, 
+ *  discrete body terms of the 2D Poisson equation: \n
  *  \f$
- *  \int_{\Omega} \nabla u_i \cdot \nabla v_i dx - \int_{\Omega} f dx = 0 \\
- *  f=6 \\
+ *  \int_{\Omega} \nabla u_i \cdot \nabla v_i dx + \int_{\Omega} f dx = 0 \\
+ *  f=6 
+ *  u_{exact} = 1 + x^2 + 2y^2\\
+ *  \f$
+ *  If it is nonlinear then solves:
+ *  \f$
+ *                -\nabla \cdot (q(u) \nabla u) + f = 0\\
+ *                q(u) = 1 + u^2\\
+ *                f = 10 + 10x + 20y\\
+ *                Omega = (0,1) x (0,1)\\
+ *                u = u_{exact} on \partial \Omega\\
+ *                u_{exact} = 1 + x + 2y \\
  *  \f$
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

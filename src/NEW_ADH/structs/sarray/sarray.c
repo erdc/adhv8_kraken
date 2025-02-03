@@ -283,6 +283,17 @@ void sarray_scale_int(int *scaled_array, int *array, int scale, int nsize) {
         scaled_array[i] = scale * array[i];
     }
 }
+//*****************************************************//
+//returns 0 if not in array, 1 if found
+int sarray_is_in_int(int *arr, int size, int val){
+    for(int i=0;i<size;i++){
+        if (arr[i] == val){
+            return 1;
+        }
+    }
+    return 0;
+}
+//*****************************************************//
 //----------------------------------------------------//
 void sarray_scale_dbl(double *scaled_array, double *array, double scale, int nsize) {
     int i=0;
@@ -369,6 +380,79 @@ int sarray_unique_int(int *arr, int size){
         }
     }
     return unique_size;
+}
+
+int sarray_argsort_int(int *my_int_arr, int *my_index_arr, int size){
+
+    bool switched;
+    int temp1;
+    //fill my_index array (assumes it is already allocated)
+    for(int i=0;i<size;i++){my_index_arr[i]=i;}
+do
+{
+    switched = false;
+    for(int i = 1; i < size; i++)
+    {
+        if(my_int_arr[my_index_arr[i-1]] > my_int_arr[my_index_arr[i]])
+        {
+            temp1 = my_index_arr[i];
+            my_index_arr[i] = my_index_arr[i - 1];
+            my_index_arr[i - 1] = temp1;
+            
+            switched = true;
+        }
+    }
+}
+while(switched);
+//Also switch actual array
+int temp[size];
+for(int i=0;i<size;i++){temp[i] = my_int_arr[i];}
+for(int i=0;i<size;i++){my_int_arr[i] =temp[my_index_arr[i]];}
+
+
+    return 0;
+}
+
+int sarray_reverse_argsort_int(int *my_int_arr, int *my_index_arr, int size){
+
+    bool switched;
+    int temp1;
+    //fill my_index array (assumes it is already allocated)
+    for(int i=0;i<size;i++){my_index_arr[i]=i;}
+do
+{
+    switched = false;
+    for(int i = 1; i < size; i++)
+    {
+        if(my_int_arr[my_index_arr[i-1]] < my_int_arr[my_index_arr[i]])
+        {
+            temp1 = my_index_arr[i];
+            my_index_arr[i] = my_index_arr[i - 1];
+            my_index_arr[i - 1] = temp1;
+            
+            switched = true;
+        }
+    }
+}
+while(switched);
+//Also switch actual array
+int temp[size];
+for(int i=0;i<size;i++){temp[i] = my_int_arr[i];}
+for(int i=0;i<size;i++){my_int_arr[i] =temp[my_index_arr[i]];}
+
+
+    return 0;
+}
+
+int sarray_shuffle_int(int *my_int_arr, int *my_index_arr, int size){
+    //takes an array and shuffles the array according to index_arr
+    int temp[size];
+    for (int i = 0;i<size; i++){temp[i]=my_int_arr[i];}
+    for(int i = 0; i<size; i++){
+        my_int_arr[i] = temp[my_index_arr[i]];
+    }
+
+    return 0;
 }
 
 //*****************************************************//
@@ -591,4 +675,23 @@ double sarray_max_dbl(double a[], int num_elements) {
         if (a[i] > max) max = a[i];
     }
     return (max);
+}
+// Function to find the index of the minimum element in an integer array.
+// Returns -1 if the array is NULL or has zero elements.
+int sarray_argmin_int(int *arr, int n) {
+    if (arr == NULL || n <= 0) {
+        return -1; // Indicate an invalid input.
+    }
+
+    int min_index = 0;
+    int min_value = arr[0];
+
+    for (int i = 1; i < n; i++) {
+        if (arr[i] < min_value) {
+            min_value = arr[i];
+            min_index = i;
+        }
+    }
+
+    return min_index;
 }

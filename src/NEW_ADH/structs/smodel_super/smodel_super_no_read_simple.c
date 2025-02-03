@@ -263,6 +263,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     //for CG only nodal is OK
     sm->dof_map_local = (int*) tl_alloc(sizeof(int), sm->grid->nnodes);
     for(i=0;i<sm->grid->nnodes;i++){
+        //temporary debug!! switch back
         sm->dof_map_local[i] = i*3;
     }
 

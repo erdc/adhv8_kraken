@@ -41,7 +41,8 @@ int jacobian_test(int argc, char **argv) {
     *grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
-    sgrid_reorder(grid);
+    sgrid_reorder(grid,3);
+    printf("Grid reorder completed\n");
 //    for(int local_index=0; local_index<grid->nnodes;local_index++){
 //    	printf("Inverse permuatin[%d] = %d, node id = %d\n",local_index,grid->inv_per_node[local_index],grid->node[local_index].id);
 //    }

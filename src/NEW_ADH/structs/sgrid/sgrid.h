@@ -167,7 +167,7 @@ void sgrid_write_elemental_pe(SGRID *g);
 void sgrid_write_xdmf_nodal_pe(SGRID *g);
 void sgrid_write_xdmf_elemental_pe(SGRID *g);
 void sgrid_read_nodal_attribute(SGRID *g);
-int sgrid_reorder(SGRID *grid);
+int sgrid_reorder(SGRID *grid, int option);
 
 /***********************************************************/
 /***********************************************************/

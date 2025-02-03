@@ -65,6 +65,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 
 	grid.elem2d = NULL;
 	grid.inv_per_node = NULL;
+
 	//for now serial only, maybe add scotch in later
 
 
@@ -83,6 +84,8 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 	grid.nQuads=0;
 	grid.nnodes_sur = grid.nnodes;      // number of ghost + residential surface nodes
     grid.nnodes_bed = 0;      // number of ghost + residential bed nodes
+
+    grid.inv_per_node = (int*) tl_alloc(sizeof(int),grid.nnodes);
 
 	// HPC totals, serial only for now
     grid.macro_nnodes = grid.nnodes;          // total # of nodes in the global mesh

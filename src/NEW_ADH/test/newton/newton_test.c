@@ -1,10 +1,11 @@
 /*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 75;//700;
-static int NEWTON_TEST_NY = 74;//700;
+static int NEWTON_TEST_NX = 100;//700;
+static int NEWTON_TEST_NY = 100;//700;
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 static void permute_array(double *arr,int *p, int n);
+static void sketch_csr_sparsity(SLIN_SYS *lin_sys);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -48,7 +49,7 @@ int newton_test(int argc, char **argv) {
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
     nnodes = grid->nnodes;
-    sgrid_reorder(grid);
+    sgrid_reorder(grid,2);
 	//print coordinates
 //  for(int local_index =0; local_index<grid.nnodes; local_index++){
 //		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
@@ -75,8 +76,9 @@ int newton_test(int argc, char **argv) {
 	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
-	printf("NDOFS %d\n",dm.ndofs[0]);
+	//printf("NDOFS %d\n",dm.ndofs[0]);
 	//printf("Supermodel no read complete\n");
+	//sketch_csr_sparsity(dm.lin_sys);
 
 
 	//allocate linear system
@@ -229,12 +231,12 @@ int newton_test(int argc, char **argv) {
 	printf("Final errors: %6.4e , %6.4e\n", l2_err,linf_err);
 
 	//plot grid in h5?
-//    strcpy(sm.grid->filename, "residtest");
-//    init_hdf5_file(sm.grid);
+//    strcpy(sm->grid->filename, "residtest");
+//    init_hdf5_file(sm->grid);
 //    printf("hdf5 initialized\n");
-//    sgrid_write_hdf5(sm.grid);
+//    sgrid_write_hdf5(sm->grid);
 //    printf("hdf5 written\n");
-//    sgrid_write_xdmf(sm.grid);
+//    sgrid_write_xdmf(sm->grid);
 //    printf("xmf written\n");
 
 	//return -1 if failed, 0 if good
@@ -299,4 +301,42 @@ void permute_array(double *arr,int *p, int n){
         arr[i] = temp[i];
     }
 	temp = (double *) tl_free(sizeof(double),n,temp);
+}
+
+void sketch_csr_sparsity(SLIN_SYS *lin_sys){
+	// File name
+    char filename[] = "my_file_reorder.txt";
+
+    // Open the file in write mode ("w")
+    FILE *fp = fopen(filename, "w");
+
+    // Check if the file was opened successfully
+    if (fp == NULL) {
+        printf("Error opening file!\n");
+        return; // Exit with an error code
+    }
+
+    // Write some text to the file
+    int nrows = *(lin_sys->local_size);
+    int start_row;
+    int end_row;
+    int indx;
+    for (int i=0;i<nrows;i++){
+    	start_row = lin_sys->indptr_diag[i];
+    	end_row = lin_sys->indptr_diag[i+1];
+    	indx = start_row;
+    	for (int j=0;j<nrows;j++){
+    		if(j==lin_sys->cols_diag[indx]){
+    			fprintf(fp, "x");
+    			indx+=1;
+    		}else{
+    			fprintf(fp, " ");
+    		}
+    	}
+    	//end of row
+    	fprintf(fp,"\n");
+    }
+
+    // Close the file
+    fclose(fp);
 }

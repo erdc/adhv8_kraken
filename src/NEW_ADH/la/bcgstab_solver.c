@@ -4,7 +4,7 @@
 //TODO: Maybe mve Symbolic, Numeric into slin_sys so we can avoid factoring everytime for Linear problem
 static  void *Symbolic, *Numeric;
 static double Control [UMFPACK_CONTROL], Info [UMFPACK_INFO];
-static double PRE_ORDER_STRAT  = UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_NONE;//UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_BEST;//UMFPACK_ORDERING_NONE;
+static double PRE_ORDER_STRAT  = UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_AMD;//UMFPACK_ORDERING_CHOLMOD;//UMFPACK_ORDERING_BEST;//UMFPACK_ORDERING_NONE;
 static int isize = 0;           /* the size of the arrays */
 static int isize_local = 0;
 static double *r;          /* the linear solver residual */
@@ -362,6 +362,10 @@ int solve_umfpack(double *x, int *indptr_diag, int *cols_diag, double *vals_diag
   int status;   /* default control parameters */
   //try this to account for CSR format, use solution as RHS
   status = umfpack_di_solve (UMFPACK_Aat, indptr_diag, cols_diag, vals_diag, x, b, Numeric, Control, Info);
+#ifdef _DEBUG
+  printf("UMFPACK SOLVER STATUS %d\n",status);
+  assert(status==0);
+#endif
   return status;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

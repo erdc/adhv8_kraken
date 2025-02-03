@@ -82,6 +82,8 @@ void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init
         //define some pointers in each supermodel
         //assign some hard coded values first, then set the pointers
         //in general these would require info taken from each superModel
+
+        //MARK IS SWITCHING FOR DEBUG, PLEASE SWITCH BACK!!!
         dm->ndofs[i] = dm->grid->nnodes*3;
         dm->ndofs_old[i] = 0;
         dm->my_ndofs[i] = dm->grid->nnodes*3;

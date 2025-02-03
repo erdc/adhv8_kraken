@@ -48,7 +48,7 @@ int sw2_wd_test(int argc, char **argv) {
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
     nnodes = grid->nnodes;
- //   sgrid_reorder(grid);
+    sgrid_reorder(grid,2);
 	//print coordinates
 //  for(int local_index =0; local_index<grid.nnodes; local_index++){
 //		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
@@ -100,6 +100,15 @@ int sw2_wd_test(int argc, char **argv) {
     sdvar_alloc_init(&(sw->dvar), grid->nnodes, 0, 0, 1, grid->nnodes, grid->nelems2d);
     //hard code set index for wd flag
     sw->WD_FLAG = 0;
+    //must also set up the dacont extra terms
+    //could be clever hear and pick nnode on each element
+    sw->elem_rhs_dacont_extra_terms = (double **) tl_alloc(sizeof(double *), grid->nelems2d);
+    for (int i=0; i<grid->nelems2d; i++) {
+        sw->elem_rhs_dacont_extra_terms[i] = (double *) tl_alloc(sizeof(double), grid->elem2d[i].nnodes);
+        for (int j=0; j<grid->elem2d[i].nnodes; j++) {
+        	sw->elem_rhs_dacont_extra_terms[i][j] = 0.;
+        }
+    }
     printf("sw vals %d\n",sw->WD_FLAG);
     printf("dvar?? %d\n",sw->dvar.n_dvar_elem_int);
     //initial conditions and things
@@ -222,7 +231,6 @@ int sw2_wd_test(int argc, char **argv) {
 	//extract second variable here
 	double total_error = write_testcase_error_wet_dry(&(dm.superModel[0]),initial_grid_mass); 
 	printf("Final error: %6.4e\n", total_error);
-
 	//plot grid in h5?
 //    strcpy(sm.grid->filename, "residtest");
 //    init_hdf5_file(sm.grid);

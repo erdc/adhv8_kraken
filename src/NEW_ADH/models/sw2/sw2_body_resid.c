@@ -77,13 +77,13 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     SELEM_2D *elem2d = &(grid->elem2d[ie]); // be careful not to shallow copy here
     SVECT2D *grad_shp = elem2d->grad_shp;
     int nnodes = elem2d->nnodes;
-    int ndof = nnodes*3;
-    double alpha = mod->tau_temporal; //where to put this?
-    double dt = (*mod->dt)/(mod->nsubsteps);
+    int ndof = nnodes*3; //this is a 3 dof problem
+    double alpha = mod->tau_temporal; //where to put this? this is specific to choice of time stepping scheme
+    double dt = (*mod->dt)/(mod->nsubsteps); //maybe save this instead of computing every time but it can change
     double djac = elem2d->djac;
     double g = mod->gravity; //where to put this
     double drying_lower_limit = sw2->drying_lower_limit;
-    int imat = elem2d->mat; // what is this used for?, should switch to something like mod->coverage->coverage_2d[SW2_INDEX][ie]
+    int imat = elem2d->mat; // this will need to be mod->coverage->coverage_2d[SW2_INDEX][ie]
     STR_VALUE str_values = mod->str_values[elem2d->string]; //still in use?
     int wd_flag = sw2->dvar.elem_flags[sw2->WD_FLAG][ie]; //WARNING, ie is not always correct, could be sw2->dvar.dvar_elem_map[ie] need to use Coreys map eventually? how to avoid conditional. a function pointer?
     //only make for quadrilateral elements?
@@ -276,7 +276,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #ifdef _DEBUG
     if (DEBUG == ON || DEBUG_LOCAL == ON) {
-        printf("\nSHALLOW WATER 2D ELEM RESID :: ie: %d \t dt: %20.10f \t area: %20.10f \t wd_flag: %d \t djac: %30.20e : %30.20e %30.20e %30.20e",ie,dt,area,mod->grid->wd_flag[ie],djac,mod->grid->node[elem2d->nodes[2]].x,mod->grid->node[elem2d->nodes[2]].y,mod->grid->node[elem2d->nodes[2]].z);
+        printf("\nSHALLOW WATER 2D ELEM RESID :: ie: %d \t dt: %20.10f \t area: %20.10f \t wd_flag: %d \t djac: %30.20e : %30.20e %30.20e %30.20e",ie,dt,area,wd_flag,djac,mod->grid->node[elem2d->nodes[2]].x,mod->grid->node[elem2d->nodes[2]].y,mod->grid->node[elem2d->nodes[2]].z);
         if (perturb_var == PERTURB_H) {
             printf("\t perturbing H  || node: %d || perturbation: %30.20e\n",nodes[perturb_node].id,perturb_sign*perturbation);
         } else if (perturb_var == PERTURB_U) {
@@ -333,10 +333,10 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     double vars[2]; // for passing doubles through wet-dry routine  
     // this is used to store later for transport
     //NEED TO REINCORPORATE
-    //for (i=0; i<nnodes; i++) {
+    for (i=0; i<nnodes; i++) {
         //should be
-    //    sw2->elem_rhs_dacont_extra_terms[i][ie] = 0.;
-    //}    
+        sw2->elem_rhs_dacont_extra_terms[ie][i] = 0.;
+    }    
    /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                 SHOCK CAPTURING CONTRIBUTION
      *-------------------------------------------------------------------------------------------
@@ -374,7 +374,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             }            
             for (i=0; i<nnodes; i++) {
                 //NEED TO FIX!!!
-                //sw2->elem_rhs_dacont_extra_terms[i][ie] += rhs[i*3]; // cjt :: store
+                sw2->elem_rhs_dacont_extra_terms[ie][i] += rhs[i*3]; // cjt :: store
                 elem_rhs[i*3] += rhs[i*3];
                 elem_rhs[i*3+1] += rhs[i*3+1];
                 elem_rhs[i*3+2] += rhs[i*3+2];
@@ -725,7 +725,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             }
         }
 #ifdef _DEBUG
-        if (DEBUG == ON || DEBUG_LOCAL == ON || debug.pressure || debug.rhs) {
+        if (DEBUG == ON || DEBUG_LOCAL == ON ){//|| debug.pressure || debug.rhs) {
             printScreen_rhs_3dof("2D SW || PRESSURE",nnodes, ie, elem2d->nodes, rhs);
         }
 #endif
@@ -754,7 +754,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             }
         }
 #ifdef _DEBUG
-        if (DEBUG == ON || DEBUG_LOCAL == ON || debug.pressure || debug.rhs) {
+        if (DEBUG == ON || DEBUG_LOCAL == ON){// || debug.pressure || debug.rhs) {
             printScreen_rhs_3dof("2D SW || BODY FORCE",nnodes, ie, elem2d->nodes, rhs);
         }
 #endif
@@ -790,7 +790,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             }
         }
 #ifdef _DEBUG
-        if (DEBUG == ON || DEBUG_LOCAL == ON || debug.pressure || debug.rhs) {
+        if (DEBUG == ON || DEBUG_LOCAL == ON ){// debug.pressure || debug.rhs) {
             printScreen_rhs_3dof("2D SW || BOUNDARY PRESSURE",nnodes, ie, elem2d->nodes, rhs);
         }
 #endif
@@ -826,7 +826,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
                 }
             }
 #ifdef _DEBUG
-            if (DEBUG == ON || DEBUG_LOCAL == ON || debug.pressure || debug.rhs) {
+            if (DEBUG == ON || DEBUG_LOCAL == ON){ //|| debug.pressure || debug.rhs) {
                 printScreen_rhs_3dof("2D SW || DENSITY PRESSURE",nnodes, ie, elem2d->nodes, rhs);
             }
 #endif
@@ -855,7 +855,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
                 }
             }
 #ifdef _DEBUG
-            if (DEBUG == ON || DEBUG_LOCAL == ON || debug.pressure || debug.rhs) {
+            if (DEBUG == ON || DEBUG_LOCAL == ON){// || debug.pressure || debug.rhs) {
                 printScreen_rhs_3dof("2D SW || DENSITY BODY FORCE PRESSURE",nnodes, ie, elem2d->nodes, rhs);
             }
 #endif
@@ -891,7 +891,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
                 }
             }
 #ifdef _DEBUG
-            if (DEBUG == ON || DEBUG_LOCAL == ON || debug.pressure || debug.rhs) {
+            if (DEBUG == ON || DEBUG_LOCAL == ON){// || debug.pressure || debug.rhs) {
                 printScreen_rhs_3dof("2D SW || DENSITY BOUNDARY PRESSURE",nnodes, ie, elem2d->nodes, rhs);
             }
 #endif
@@ -1115,7 +1115,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
         }
         for (i=0; i<nnodes; i++) {
             //NEED TO ADD BACK IN
-            //sw2->elem_rhs_dacont_extra_terms[i][ie] += rhs_c_eq[i];
+            sw2->elem_rhs_dacont_extra_terms[ie][i] += rhs_c_eq[i];
             elem_rhs[i*3] += rhs_c_eq[i];
             elem_rhs[i*3+1] += rhs_x_eq[i];
             elem_rhs[i*3+2] += rhs_y_eq[i];
@@ -1127,7 +1127,6 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
                 rhs[i*3+1] = rhs_x_eq[i];
                 rhs[i*3+2] = rhs_y_eq[i];
             }
-            rhs_3dof("2D SW || SUPG",nnodes, ie, elem2d->nodes, rhs);
             printScreen_rhs_3dof("2D SW || SUPG",nnodes, ie, elem2d->nodes, rhs);
             Is_DoubleArray_Inf_or_NaN(rhs_c_eq, nnodes ,__FILE__ ,__LINE__);
             Is_DoubleArray_Inf_or_NaN(rhs_x_eq, nnodes ,__FILE__ ,__LINE__);
@@ -1167,7 +1166,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
         if (DEBUG_PICKETS == ON) tl_check_all_pickets(__FILE__,__LINE__);
     }    
     time_t time2;  time(&time2);
-    TIME_IN_2D_SW_BODY_RESID += difftime(time2,time1);
+    //TIME_IN_2D_SW_BODY_RESID += difftime(time2,time1);
 #endif
 }
 

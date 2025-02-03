@@ -35,14 +35,14 @@ int main(int argc, char **argv) {
     ierr = newton_test(argc,argv);
     assert(ierr==0);
     printf(">>>>>>>>>>>>>>>Newton test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
-    //try a nonlinear newton solve
+    ////try a nonlinear newton solve
     ierr = nonlinear_newton_test(argc,argv);
     assert(ierr==0);
     printf(">>>>>>>>>>>>>>>Nonlinear Newton test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
     //try a time step
     ierr = timeloop_test(argc,argv);
     assert(ierr==0);
-    printf(">>>>>>>>>>>>>>>TIMELOOP test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
+   printf(">>>>>>>>>>>>>>>TIMELOOP test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
     //try a time step
     ierr = sw2_wd_test(argc, argv);
     assert(ierr==0);

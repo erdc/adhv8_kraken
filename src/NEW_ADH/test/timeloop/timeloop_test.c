@@ -51,7 +51,7 @@ int timeloop_test(int argc, char **argv) {
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
     nnodes = grid->nnodes;
-    sgrid_reorder(grid);
+    sgrid_reorder(grid,2);
 	//print coordinates
 //  for(int local_index =0; local_index<grid.nnodes; local_index++){
 //		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);

@@ -12,8 +12,8 @@ static double PETSC_ATOL = 1e-11;
 static double PETSC_DTOL = 1e5;
 static int PETSC_MAXIT = 10000;
 #ifdef _PETSC
-    static const char *PETSC_PRECON = PCILU;// PCILU;//PCLU;
-    static const char *PETSC_KSP = KSPGMRES;//KSPPREONLY
+    static const char *PETSC_PRECON = PCLU;// PCILU;//PCLU;
+    static const char *PETSC_KSP = KSPPREONLY;//KSPGMRES;//KSPPREONLY; KSPBICGSTAB
 #endif
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

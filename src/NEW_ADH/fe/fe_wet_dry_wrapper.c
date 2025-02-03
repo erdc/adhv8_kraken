@@ -496,11 +496,6 @@ double fe_sw2_wet_dry_wrapper_1d(double *elem_rhs, SVECT *x, double *h, SVECT2D 
         if (new_f_wet_dry != NULL) {
             printf("fe_sw2_wet_dry_wrapper :: new_f_wet_dry[0] :: %30.20e %30.20e %30.20e \n",new_f_wet_dry[0],new_f_wet_dry[0],new_f_wet_dry[0]);
         }
-        if (new_grad_phi != NULL) {
-            printf("fe_sw2_wet_dry_wrapper :: new_grad_phi[0] :: %30.20e %30.20e \n",new_grad_phi[0].x,new_grad_phi[0].y);
-            printf("fe_sw2_wet_dry_wrapper :: new_grad_phi[1] :: %30.20e %30.20e \n",new_grad_phi[1].x,new_grad_phi[1].y);
-            printf("fe_sw2_wet_dry_wrapper :: new_grad_phi[2] :: %30.20e %30.20e \n",new_grad_phi[2].x,new_grad_phi[2].y);
-        }
         printf("fe_sw2_wet_dry_wrapper :: new_elem_rhs.c_eq before redistribution :: %30.20e %30.20e %30.20e \n",new_elem_rhs[0],new_elem_rhs[3],new_elem_rhs[6]);
         printf("fe_sw2_wet_dry_wrapper :: new_elem_rhs.x_eq before redistribution :: %30.20e %30.20e %30.20e \n",new_elem_rhs[1],new_elem_rhs[4],new_elem_rhs[7]);
         printf("fe_sw2_wet_dry_wrapper :: new_elem_rhs.y_eq before redistribution :: %30.20e %30.20e %30.20e \n",new_elem_rhs[2],new_elem_rhs[5],new_elem_rhs[8]);

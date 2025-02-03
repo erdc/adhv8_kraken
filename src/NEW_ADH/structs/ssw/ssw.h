@@ -9,7 +9,7 @@ typedef struct {
     int nsw_elems;
     SDVAR dvar;
 
-    // surface water parameters (read from model parameter file)                                   
+    // uniform surface water parameters (read from model parameter file)                                   
     double drying_lower_limit;                                                 
     double drying_upper_limit;
     double wd_lower_tol;
@@ -26,9 +26,9 @@ typedef struct {
     //doesnt fit in dvar, will use dvar stuff tho (map)
     double **elem_rhs_supg_dacont; //for SW3 only
     double **elem_rhs_supg_cont; // for SW3 only
-    double **elem_rhs_dacont_extra_terms; // for SW2 only
+    double **elem_rhs_dacont_extra_terms; // for SW2 only, FLIPPING ORDER FOR EFFICIENCY [nsw_elems][nnode_on_elem]
 
-    //stuff to store variable indices
+    //stuff to store the DVAR column indices
     //nodal variable types
     // vertical grid speeds
     int GS; // 0

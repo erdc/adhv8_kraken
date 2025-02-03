@@ -77,5 +77,10 @@ void sarray_y_plus_ax_dbl(double *y, double alpha, double *x,  int n);
 double sarray_dot_dbl(double *x, double *y,int n);
 double sarray_l_infty_norm(double *v1, int n);
 int sarray_unique_int(int *arr, int size);
+int sarray_is_in_int(int *arr, int size, int val);
+int sarray_argmin_int(int *arr, int n);
+int sarray_argsort_int(int *my_int_arr, int *my_index_arr, int size);
+int sarray_shuffle_int(int *my_int_arr, int *my_index_arr, int size);
+int sarray_reverse_argsort_int(int *my_int_arr, int *my_index_arr, int size);
 
 #endif

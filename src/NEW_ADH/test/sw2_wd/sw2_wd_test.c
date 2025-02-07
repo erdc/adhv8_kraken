@@ -1,8 +1,8 @@
 /*! \file sw2_wd_test.c This file tests the sw2 engine */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 16;
-static int NEWTON_TEST_NY = 6;
+static int NEWTON_TEST_NX = 16;//16;
+static int NEWTON_TEST_NY = 6;//6;
 static double write_testcase_error_wet_dry(SMODEL_SUPER *mod, double initial_grid_mass);
 static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -79,7 +79,7 @@ int sw2_wd_test(int argc, char **argv) {
 
 	//OVER WRITE TO SW2
 	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_resid = SW2;
-	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_init = SW2;
+	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_init = SW2_INIT;
 	dm.superModel[0].elem2d_physics_mat[0].model[0].nvar = 3;
     dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[0] = PERTURB_H;
     dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[1] = PERTURB_U;
@@ -93,13 +93,19 @@ int sw2_wd_test(int argc, char **argv) {
     SSW *sw = dm.superModel[0].sw; //alias for convenience
     //set it up
     printf("allocating ssw\n");
-    ssw_alloc_init(sw);
+    
 
+    //new way
+    //ssw_alloc_init(sw, grid->nnodes, grid->nnodes, grid->nelems2d, 0, 0, 1);
+    //Old way
+    ssw_alloc_init(sw);
     //set up the dvar map
     printf("allocating sdvar\n");
     sdvar_alloc_init(&(sw->dvar), grid->nnodes, 0, 0, 1, grid->nnodes, grid->nelems2d);
     //hard code set index for wd flag
     sw->WD_FLAG = 0;
+
+
     //must also set up the dacont extra terms
     //could be clever hear and pick nnode on each element
     sw->elem_rhs_dacont_extra_terms = (double **) tl_alloc(sizeof(double *), grid->nelems2d);
@@ -109,7 +115,7 @@ int sw2_wd_test(int argc, char **argv) {
         	sw->elem_rhs_dacont_extra_terms[i][j] = 0.;
         }
     }
-    printf("sw vals %d\n",sw->WD_FLAG);
+    //printf("sw vals %d\n",sw->WD_FLAG);
     printf("dvar?? %d\n",sw->dvar.n_dvar_elem_int);
     //initial conditions and things
     // intialize dirichlet and old sol (initial guess)

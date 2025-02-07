@@ -12,9 +12,11 @@
 #include <limits.h>
 #include <ctype.h>
 #include <stdbool.h>
+
 //Mark added
 #include <umfpack.h>
 #include <scotch.h>
+//#include <glib.h>
 
 #ifdef _ADH_HDF5
 #include <hdf5.h>
@@ -80,8 +82,6 @@
 #include "sseries.h"
 #include "smodel_super.h"
 #include "smodel_design.h"
-
-#include "model_codes.h"
 #include "models.h"
 
 //Mark added

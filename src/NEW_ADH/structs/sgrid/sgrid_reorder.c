@@ -1,6 +1,6 @@
 #include "adh.h"
 //can expose to frontend later, but hard coding strategy for now
-static char reorder_strat[] = "g{pass=10}";
+static char reorder_strat[] = "g{pass=2}";
 //static char reorder_strat[] = "c{rat=0.7,cpr=g{pass=10},unc=g{pass=10}}";
 static SCOTCH_Mesh sgrid_to_scotch_mesh(SGRID *grid);
 static SCOTCH_Graph sgrid_to_scotch_graph(SGRID *grid);
@@ -16,6 +16,12 @@ static int reverse_cuthill_mckee(SGRID *grid, int *permtab, int *peritab);
  * 			   for convenient output.
  * 			   Designed for only serial and initial mesh, will not update be valid if grid is
  *             partitioned or adapted.
+ *             Option 1: GPS (Gibbs-Poole-Stockermeyer) via SCOTCH and meshGraph
+ *             Option 2: GPS but builds graph directly
+ *             Option 3: Reverse Cuthill for Mckee
+ *             Option 4: (To do): Try "A cache-efficient reordering method for unstructured meshes
+ *               with applications to wall-resolved large-eddy simulations" 
+ *              
  *  \author    Corey Trahan, Ph.D.
  *  \author    Mark Loveand, Ph.D.
  *  \bug       none

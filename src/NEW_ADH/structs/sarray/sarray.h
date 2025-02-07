@@ -82,5 +82,6 @@ int sarray_argmin_int(int *arr, int n);
 int sarray_argsort_int(int *my_int_arr, int *my_index_arr, int size);
 int sarray_shuffle_int(int *my_int_arr, int *my_index_arr, int size);
 int sarray_reverse_argsort_int(int *my_int_arr, int *my_index_arr, int size);
+void sarray_init_range_int(int *array, int size);
 
 #endif

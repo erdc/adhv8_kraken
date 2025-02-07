@@ -1,6 +1,6 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*! \file  fe_sw2_wdflag_legacy.c This file is the routine that
+/*! \file  sw2_wdflag_legacy.c This file is the routine that
  *  updates the w/d flag on each element       */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -42,7 +42,11 @@ void fe_sw2_wdflag_legacy(SMODEL_SUPER *sm) {
     int nnode_sw2 = sw2d->dvar.nnode_dvar;
     //if nnode!=nnode_sw2, do something more complicated
     int nnode = sm->grid->nnodes;
+    //old way
     int *wd_flag = sw2d->dvar.elem_flags[sw2d->WD_FLAG];
+    //new
+    //int *wdflag_ind = g_hash_table_lookup(sw2d->elemental_flag_hash, "WD_FLAG");
+    //int *wd_flag = sw2d->dvar.elem_flags[*(wdflag_ind)];
     /////////OR JUST CHECK sm->isSimple flag if we use that/////////
     //Works for simple and complex case
     //reallocate if grid changes

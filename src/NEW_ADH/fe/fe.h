@@ -4,6 +4,10 @@
 void integrate_line_phi_h_h(double djac, double c, double h1, double h2, double *integral);
 void integrate_line_phi_h_h_g(double djac, double c, double h1, double h2, double g1, double g2, double *integral); 
 double integrate_line_h_f(double djac, double c, double *h, double *f);
+void integrate_line_phi(double djac, double c, double *integral);
+void integrate_line_phi_f(double djac, double c, double *f, double *integral);
+void integrate_line_phi_h_v_dot_n(double djac, double c, double *h, SVECT2D *v, SVECT2D nrml, double *integral);
+void integrate_line_phi_f_g_h(double djac, double c, double f1, double f2, double g1, double g2, double h1, double h2, double *integral);
 //triangles
 double integrate_triangle_f(double djac, double c, double *f);
 double integrate_triangle_f_f(double djac, double c, double *f);
@@ -58,4 +62,13 @@ void fe_sw2_wd_integrate_triangle_f(SVECT *elem_nds, double *elem_head, SVECT2D 
 void fe_sw2_wd_gls_convection_triangle(SVECT *elem_nds, double *elem_head, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, double *vars, double *rhs);
 void fe_sw2_wd_bodyForce_triangle(SVECT *elem_nds, double *elem_head, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, double *vars, double *rhs);
 void fe_sw2_wd_pressure_triangle(SVECT *elem_nds, double *elem_head, SVECT2D *grad_phi, SVECT2D *v, SVECT2D *v_wet_dry, double *f, double *f_wet_dry, double djac, double *vars, double *rhs);
+//sw2 boundary integrals
+void fe_sw2_1d_explicit_flow(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D nrml, double djac, double dt, double flux, double h_avg, double *u, double *v, int DEBUG, int DEBUG_LOCAL);
+void fe_sw2_1d_implicit_flow(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D nrml, double djac, double dt, SVECT2D *v, double *h, int DEBUG, int DEBUG_LOCAL);
+void fe_sw2_1d_wall_friction(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D nrml, double djac, double dt, double *u, double *v, double *resistance, int DEBUG, int DEBUG_LOCAL);
+void fe_sw2_1d_pressure(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D nrml, double djac, double dt, double *h, double g, int DEBUG, int DEBUG_LOCAL);
+void fe_sw2_1d_density_pressure(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D nrml, double djac, double dt, double *h, double *d, double g, int DEBUG, int DEBUG_LOCAL);
+void fe_sw2_1d_hvel(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D nrml, double djac, double dt, SVECT2D *v, SVECT2D user_velocity, double *h, int DEBUG, int DEBUG_LOCAL);
+
+
 #endif

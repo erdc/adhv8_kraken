@@ -38,6 +38,12 @@ void sarray_init_value_range_int(int *array, int value, int start, int end) {
         array[i] = value;
     }
 }
+//*****************************************************//
+void sarray_init_range_int(int *array, int size) {
+    for (int i=0; i<size; i++) {
+        array[i] = 0;
+    }
+}
 //----------------------------------------------------//
 void sarray_init_value_range_dbl(double *array, double value, int start, int end) {
     int i;

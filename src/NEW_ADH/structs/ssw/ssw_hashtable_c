@@ -1,0 +1,63 @@
+#include "adh.h"
+void ssw_alloc_init(SSW *sw, int nnodes_grid, int nsw_nodes, int nsw_elems, int n_nodal_var, int n_elemental_var, int n_elemental_flag) {
+
+        //sw->series_wind_head = NULL;
+        //sw->series_wave_head = NULL;
+        //sw->series_wind_curr = NULL;
+        //sw->series_wave_curr = NULL;
+        //must allocate the memory
+        
+        printf("allocated ssw pointer\n");
+        sw->nsw_nodes = nsw_nodes;
+        sw->nsw_elems = nsw_elems;
+        // wetting and drying variables
+        
+        sw->drying_lower_limit = 0.;
+        sw->drying_upper_limit = 0.;
+        sw->wd_lower_tol = -0.1;
+        sw->wd_upper_tol = 0.1;
+        sw->wd_rate_lower_tol = -0.1;
+        sw->wd_rate_upper_tol = 0.1;
+
+        // surface water parameters
+        sw->viscosity = 9.8E-7;
+        sw->manning_units_constant = 1.0;
+        sw->density = 1000.;
+        sw->tau_pg = 0.5;
+        sw->elem_rhs_realloc = 0;
+
+        // hydraulic structures
+        //sw->nweir = 0;
+        //sw->nflap = 0;
+        //sw->nsluice = 0;
+        //sw->weir = NULL;
+        //sw->flap = NULL;
+        //sw->sluice = NULL;
+
+        sw->n_nodal_var = n_nodal_var;
+        sw->n_elem_var = n_elemental_var;
+        sw->n_elem_flag = n_elemental_flag;
+
+        if (n_nodal_var != 0){
+                sw->nodal_var_hash = g_hash_table_new(g_str_hash,g_str_equal);
+                sw->nodal_var_ind = (int*) tl_alloc(sizeof(int),n_nodal_var);
+                sarray_init_range_int(sw->nodal_var_ind, n_nodal_var);
+        }
+        if (n_elemental_var != 0){
+                sw->elemental_var_hash = g_hash_table_new(g_str_hash,g_str_equal);
+                sw->elem_var_ind = (int*) tl_alloc(sizeof(int),n_elemental_var);
+                sarray_init_range_int(sw->elem_var_ind, n_elemental_var);
+        }
+        if(n_elemental_flag != 0){
+                sw->elemental_flag_hash = g_hash_table_new(g_str_hash,g_str_equal);
+                sw->elem_flag_ind = (int*) tl_alloc(sizeof(int),n_elemental_flag);
+                sarray_init_range_int(sw->elem_flag_ind, n_elemental_flag);
+                //hard code for testing but where should it go?
+                g_hash_table_insert(sw->elemental_flag_hash, "WD_FLAG", sw->elem_flag_ind);
+        }
+
+        sdvar_alloc_init(&(sw->dvar), nnodes_grid, n_nodal_var, n_elemental_var, n_elemental_flag, nsw_nodes, nsw_elems);
+
+
+
+}

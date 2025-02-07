@@ -85,7 +85,11 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     double drying_lower_limit = sw2->drying_lower_limit;
     int imat = elem2d->mat; // this will need to be mod->coverage->coverage_2d[SW2_INDEX][ie]
     STR_VALUE str_values = mod->str_values[elem2d->string]; //still in use?
+    //old way
     int wd_flag = sw2->dvar.elem_flags[sw2->WD_FLAG][ie]; //WARNING, ie is not always correct, could be sw2->dvar.dvar_elem_map[ie] need to use Coreys map eventually? how to avoid conditional. a function pointer?
+    //new way
+    //int *wdflag_ind = g_hash_table_lookup(sw2->elemental_flag_hash, "WD_FLAG");
+    //int wd_flag = sw2->dvar.elem_flags[*wdflag_ind][ie];
     //only make for quadrilateral elements?
     SQUAD *quad = grid->quad_rect; // for quadrilateral quadrature calculations
     int isTriangle = NO;  if (nnodes == NDONTRI) isTriangle = YES;
@@ -134,14 +138,14 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     global_to_local_SVECT2D_cg(elem_old_vel, mod->sol_old, elem2d->nodes, nnodes, PERTURB_U, PERTURB_V, mod->dof_map_local, mod->node_physics_mat);
     global_to_local_SVECT2D_cg(elem_older_vel, mod->sol_older, elem2d->nodes, nnodes, PERTURB_U, PERTURB_V, mod->dof_map_local, mod->node_physics_mat);  
     double elem_density[nnodes]; sarray_init_value_dbl(elem_density,nnodes,0.);
-    if (FALSE){//(mod->flag.BAROCLINIC == 1) { //where to put this?
-        //global_to_local_dbl(sw2->nd, elem_density, elem2d->nodes, nnodes);
-        //use array mapping
-        global_to_local_dbl_cg_arr_map(elem_density, elem2d->nodes, nnodes, sw2->dvar.dvar_node_map, sw2->dvar.nodal_dvar[sw2->DENSITY]);
-        for (i=0; i<nnodes; i++) {
-            if (elem_head[i] < 0) elem_density[i] = 0;
-           }
-    }  
+//    if (FALSE){//(mod->flag.BAROCLINIC == 1) { //where to put this?
+//        //global_to_local_dbl(sw2->nd, elem_density, elem2d->nodes, nnodes);
+//        //use array mapping
+//        global_to_local_dbl_cg_arr_map(elem_density, elem2d->nodes, nnodes, sw2->dvar.dvar_node_map, sw2->dvar.nodal_dvar[sw2->DENSITY]);
+//        for (i=0; i<nnodes; i++) {
+//            if (elem_head[i] < 0) elem_density[i] = 0;
+//           }
+//    }  
     // local external pressure (atmospheric, lids, etc) :: CJT :: should we use local density here?
     double elem_pressure[nnodes]; sarray_init_value_dbl(elem_pressure,nnodes,0.); // cjt :: used in SUPG only right now
     if (PRESSURE_FLAG == ON) {

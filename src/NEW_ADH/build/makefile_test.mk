@@ -149,10 +149,11 @@ DEPS                = $(foreach dir,    $(INCLUDE_DIR), $(wildcard  $(dir)/*.h))
 
 #------------- Flags
 OPT                 =
-IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
+IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir)) #-I/opt/homebrew/Cellar/glib/2.82.4/include/glib-2.0 -I/opt/homebrew/Cellar/glib/2.82.4/lib/glib-2.0/include -I/opt/homebrew/opt/gettext/include -I/opt/homebrew/Cellar/pcre2/10.44/include
 LFLAGS              += 
-CFLAGS              += -O3 -D_ADH_HDF5 -Wno-incompatible-pointer-types-discards-qualifiers #-D_PETSC #-D_DEBUG #-D_MPI #-D_MESSG #-Wall
-CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/include -lhdf5 -lscotch -lscotcherr -lm  #-L/opt/homebrew/lib
+CFLAGS              += -O3 -D_ADH_HDF5 -Wno-incompatible-pointer-types-discards-qualifiers -D_PETSC #-D_DEBUG  #-D_DEBUG #-D_MPI #-D_MESSG #-Wall
+CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/include -lhdf5 -lscotch #only link if using ptsotch-lscotcherr -lm  #-L/opt/homebrew/lib
+#CFLAGS              += -L/opt/homebrew/Cellar/glib/2.82.4/lib -lglib-2.0 -L/opt/homebrew/opt/gettext/lib -lintl
 FLAGS               = $(OPT) $(IFLAGS) $(LFLAGS) $(CFLAGS) $(LDLIBS) 
 #----------------------------
 

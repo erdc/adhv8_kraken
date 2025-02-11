@@ -1,5 +1,8 @@
 //a small helper function, does binary search for target on sorted array for part of the array given by start and end
 int binary_search_part(int *arr, int start, int end, int target) {
+    // TODO: replace with stdlib.h 
+    //void* bsearch(const void* key, const void* base, size_t len,
+    //size_t elem_size, <compare_function>);
     int low = start;
     int high = end - 1;
 

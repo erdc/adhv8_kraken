@@ -4,7 +4,7 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
 typedef struct {
 
-    // node and element based variables
+    // node and element based variables and their maps
     int nsw_nodes;
     int nsw_elems;
     SDVAR dvar;

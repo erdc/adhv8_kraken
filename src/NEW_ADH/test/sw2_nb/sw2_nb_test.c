@@ -1,7 +1,7 @@
-/*! \file sw2_wd_test.c This file tests the sw2 engine */
+/*! \file sw2_nb_test.c This file tests the sw2 engine */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 16;//16;
+static int NEWTON_TEST_NX = 101;//16;
 static int NEWTON_TEST_NY = 6;//6;
 static double write_testcase_error_wet_dry(SMODEL_SUPER *mod, double initial_grid_mass);
 static void permute_array(double *arr,int *p, int n);
@@ -18,7 +18,7 @@ static void permute_array(double *arr,int *p, int n);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int sw2_wd_test(int argc, char **argv) {
+int sw2_nb_test(int argc, char **argv) {
 	//create a grid
 	SGRID *grid;
 	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
@@ -27,10 +27,10 @@ int sw2_wd_test(int argc, char **argv) {
 	double xmin = 0.0;
 	double xmax = 1000.0;
 	double ymin = 0.0;
-	double ymax = 500.0;
+	double ymax = 50.0;
 	int npx = NEWTON_TEST_NX;
 	int npy = NEWTON_TEST_NY;
-	double theta = 0.0;
+	double theta = 45.0;
 	double dz = 1.0;
 	double a0 = 0.0;
 	double ax = 0.0015;
@@ -46,21 +46,127 @@ int sw2_wd_test(int argc, char **argv) {
     *grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
+
+    //append 1d elements for BC enforcement
+    //create a series and string for boundary data without file read
+	//first add a string, this will come from smat physics file
+	//! Downstream edges
+	//EGS 1 2 2 
+	//EGS 2 3 2 
+	//EGS 3 4 2 
+	//EGS 4 5 2 
+	//EGS 5 6 2 
+	//! Upstream edges
+	//EGS 601 602 3 
+	//EGS 602 603 3 
+	//EGS 603 604 3 
+	//EGS 604 605 3 
+	//EGS 605 606 3
+	grid->nelems1d = 10;
+	grid->max_nelems1d = 10;
+	grid->macro_nelems1d = grid->nelems1d;
+	grid->orig_macro_nelems1d = grid->macro_nelems1d;
+	grid->my_nelems1d = grid->nelems1d;
+	printf("Attempting to add 1d elements: %d\n",grid->nelems1d);
+	selem1d_init_alloc_array( &(grid->elem1d), grid->nelems1d);
+	printf("Addied 1d elements\n");
+
+
+	//hard coded, in reality this is given in geo now
+	int nodes_segment[2];
+	int nnodes_on_elem = 2;
+	SVECT nds[nnodes_on_elem]; svect_init_array(nds, nnodes_on_elem);
+
+	//Downstream Edges
+	int node_ids[2] = {0,1};
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[0]), 0, 0, 2, node_ids, 0, nds, 0);
+	
+	node_ids[0] = 1; node_ids[1] = 2;
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[1]), 0, 0, 2, node_ids, 0, nds, 0);
+	
+	node_ids[0] = 2; node_ids[1] = 3;
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[2]), 0, 0, 2, node_ids, 0, nds, 0);
+
+	node_ids[0] = 3; node_ids[1] = 4;
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[3]), 0, 0, 2, node_ids, 0, nds, 0);
+
+	node_ids[0] = 4; node_ids[1] = 5;
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[4]), 0, 0, 2, node_ids, 0, nds, 0);
+
+	//Downstream Edges
+	node_ids[0] = 600; node_ids[1] = 601;
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[5]), 0, 0, 2, node_ids, 0, nds, 0);
+	
+	node_ids[0] = 601; node_ids[1] = 602;
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[6]), 0, 0, 2, node_ids, 0, nds, 0);
+	
+	node_ids[0] = 602; node_ids[1] = 603;
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[7]), 0, 0, 2, node_ids, 0, nds, 0);
+
+	node_ids[0] = 603; node_ids[1] = 604;
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[8]), 0, 0, 2, node_ids, 0, nds, 0);
+
+	node_ids[0] = 604; node_ids[1] = 605;
+	for (int i=0;i<nnodes_on_elem;i++){
+		nds[i].x = grid->node[node_ids[i]].x;
+    	nds[i].y = grid->node[node_ids[i]].y;
+    	nds[i].z = grid->node[node_ids[i]].z;
+    }
+	selem1d_load(&(grid->elem1d[9]), 0, 0, 2, node_ids, 0, nds, 0);
+
+
+	//reorder grid with Gibbs Poole
     int nnodes;
     nnodes = grid->nnodes;
     sgrid_reorder(grid,2);
-	//print coordinates
-//  for(int local_index =0; local_index<grid.nnodes; local_index++){
-//		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
-//	}
-//	//print connectivity
-//	for(int local_index =0; local_index<grid.nelems2d; local_index++){
-//		printf("Element %d: (nd1,nd2,nd3) = {%d,%d,%d}\n",local_index ,grid.elem2d[local_index].nodes[0], grid.elem2d[local_index].nodes[1], grid.elem2d[local_index].nodes[2]);
-//	}
-
+    printf("Where are we\n");
 
 	//create a supermodel with a grid in it
-	//SMODEL_SUPER sm;
 	//sm.grid = &grid;
     SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
@@ -74,23 +180,33 @@ int sw2_wd_test(int argc, char **argv) {
 	strcpy(&elemVarCode[2],"0"); //Transport
 	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
+	smodel_design_no_read_simple(&dm, dt, t0, tf,1, 1, 0, elemVarCode, grid);
 	printf("NDOFS %d\n",dm.ndofs[0]);
 
-	//OVER WRITE TO SW2
-	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_resid = SW2;
-	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_init = SW2_INIT;
-	dm.superModel[0].elem2d_physics_mat[0].model[0].nvar = 3;
-	//realloc
+	//use pointer for short hand
+	SMODEL_SUPER *sm = &(dm.superModel[0]);
+
+	//OVER WRITE TO SW2 and the BCs
+	sm->elem2d_physics_mat[0].model[0].fe_resid = SW2;
+	sm->elem2d_physics_mat[0].model[0].fe_init = SW2_INIT;
+	sm->elem2d_physics_mat[0].model[0].nvar = 3;
 	(dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars) = (int*) tl_realloc(sizeof(int), 3,1, dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars);
-    dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[0] = PERTURB_H;
-    dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[1] = PERTURB_U;
-    dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[2] = PERTURB_V;
-    dm.superModel[0].LINEAR_PROBLEM = NO;
+    sm->elem2d_physics_mat[0].model[0].physics_vars[0] = PERTURB_H;
+    sm->elem2d_physics_mat[0].model[0].physics_vars[1] = PERTURB_U;
+    sm->elem2d_physics_mat[0].model[0].physics_vars[2] = PERTURB_V;
+    sm->LINEAR_PROBLEM = NO;
+    sm->elem1d_physics_mat[0].model[0].fe_resid = SW2_BC_FLUX;
+//    //need a skip routine (keep it null for now)
+//	sm->elem2d_physics_mat[0].model[0].fe_init = SW2_INIT;
+	sm->elem1d_physics_mat[0].model[0].nvar = 3;
+	(dm.superModel[0].elem1d_physics_mat[0].model[0].physics_vars) = (int*) tl_realloc(sizeof(int), 3,1, dm.superModel[0].elem1d_physics_mat[0].model[0].physics_vars);
+    sm->elem1d_physics_mat[0].model[0].physics_vars[0] = PERTURB_H;
+    sm->elem1d_physics_mat[0].model[0].physics_vars[1] = PERTURB_U;
+    sm->elem1d_physics_mat[0].model[0].physics_vars[2] = PERTURB_V;
 
     //hack together the sw2 structure
     //allocate
-    dm.superModel[0].sw = (SSW*) tl_alloc(sizeof(SSW), 1);
+    sm->sw = (SSW*) tl_alloc(sizeof(SSW), 1);
     //use an alias
     SSW *sw = dm.superModel[0].sw; //alias for convenience
     //set it up
@@ -122,11 +238,11 @@ int sw2_wd_test(int argc, char **argv) {
     //initial conditions and things
     // intialize dirichlet and old sol (initial guess)
 	for (int local_index=0; local_index<dm.ndofs[0]; local_index++){
-		dm.superModel[0].dirichlet_data[local_index] = 0.0;
-		dm.superModel[0].sol_old[local_index] = 0.0;
-		dm.superModel[0].sol[local_index] = 0.0;
-		dm.superModel[0].lin_sys->dsol[local_index] = 0.0;
-		dm.superModel[0].bc_mask[local_index] = NO;
+		sm->dirichlet_data[local_index] = 0.0;
+		sm->sol_old[local_index] = 0.0;
+		sm->sol[local_index] = 0.0;
+		sm->lin_sys->dsol[local_index] = 0.0;
+		sm->bc_mask[local_index] = NO;
 	}
 
 	//overwrite intial condition
@@ -140,10 +256,10 @@ int sw2_wd_test(int argc, char **argv) {
 		//id = grid->node[i].id;
 		id=i;
 		//need to set IC
-		dm.superModel[0].sol[id*3] = 1.0 - z_coord;
-		dm.superModel[0].sol_old[id*3] = 1.0 - z_coord;
-		dm.superModel[0].sol_older[id*3] = 1.0 - z_coord;
-		dm.superModel[0].dirichlet_data[id*3] = 1.0 - z_coord;
+		sm->sol[id*3] = 1.0 - z_coord;
+		sm->sol_old[id*3] = 1.0 - z_coord;
+		sm->sol_older[id*3] = 1.0 - z_coord;
+		sm->dirichlet_data[id*3] = 1.0 - z_coord;
 		//no dirichlet condition
 		//if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
 		//	continue;
@@ -152,6 +268,24 @@ int sw2_wd_test(int argc, char **argv) {
 		//}
 		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
 	}
+
+	//create a series and string for boundary data without file read
+	//first add a string, this will come from smat physics file
+	//! Downstream edges
+	//EGS 1 2 2 
+	//EGS 2 3 2 
+	//EGS 3 4 2 
+	//EGS 4 5 2 
+	//EGS 5 6 2 
+	//! Upstream edges
+	//EGS 601 602 3 
+	//EGS 602 603 3 
+	//EGS 603 604 3 
+	//EGS 604 605 3 
+	//EGS 605 606 3
+	//add this to  
+
+
 
 	//printf("Supermodel no read complete\n");
 

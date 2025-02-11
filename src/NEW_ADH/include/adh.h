@@ -113,4 +113,5 @@
 #include "testnonlinearnewton.h"
 #include "testtimeloop.h"
 #include "testsw2_wd.h"
+#include "testsw2_nb.h"
 //#endif

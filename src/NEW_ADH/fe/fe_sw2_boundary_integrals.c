@@ -83,13 +83,13 @@ void fe_sw2_1d_explicit_flow(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D 
     
 #ifdef _DEBUG
     if (DEBUG == ON || DEBUG_LOCAL == ON) {
-        DOF_3 rhs[NDONSEG];
+        double rhs[NDONSEG*3];
         for (i=0; i<NDONSEG; i++) {
             rhs[i*3] = t1 * rhs_c_eq[i];
             rhs[i*3+1] = t1 * rhs_x_eq[i];
             rhs[i*3+2] = t1 * rhs_y_eq[i];
         }
-        rhs_3dof("1D SW EXPLICIT FLOW: ",NDONSEG, ie, elem1d.nodes, rhs);
+        printScreen_rhs_3dof("1D SW EXPLICIT FLOW: ", NDONSEG, ie, elem1d.nodes, rhs);
     }
 #endif
 }
@@ -163,13 +163,13 @@ void fe_sw2_1d_implicit_flow(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D 
     
 #ifdef _DEBUG
     if (DEBUG == ON || DEBUG_LOCAL == ON) {
-        DOF_3 rhs[NDONSEG];
+        double rhs[NDONSEG*3];
         for (i=0; i<NDONSEG; i++) {
             rhs[i*3] = dt * rhs_c_eq[i];
             rhs[i*3+1] = dt * rhs_x_eq[i];
             rhs[i*3+2] = dt * rhs_y_eq[i];
         }
-        rhs_3dof("1D SW IMPLICIT FLOW: ",NDONSEG, ie, elem1d.nodes, rhs);
+        printScreen_rhs_3dof("1D SW IMPLICIT FLOW: ", NDONSEG, ie, elem1d.nodes, rhs);
     }
 #endif
 }
@@ -226,7 +226,7 @@ void fe_sw2_1d_wall_friction(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D 
             rhs[i*3+1] = dt * resistance[i] * rhs_x_eq[i];
             rhs[i*3+2] = dt * resistance[i] * rhs_y_eq[i];
         }
-        rhs_3dof("1D SW WALL FRICTION: ",NDONSEG, ie, elem1d.nodes, rhs);
+        printScreen_rhs_3dof("1D SW WALL FRICTION ", NDONSEG, ie, elem1d.nodes, rhs);
     }
 #endif
 }
@@ -279,7 +279,7 @@ void fe_sw2_1d_pressure(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D nrml,
             rhs2[i*3+1] = t1 * nrml.x * rhs[i];
             rhs2[i*3+2] = t1 * nrml.y * rhs[i];
         }
-        rhs_3dof("1D SW PRESSURE: ",NDONSEG, ie, elem1d.nodes, rhs2);
+        printScreen_rhs_3dof("1D SW PRESSURE: ", NDONSEG, ie, elem1d.nodes, rhs2);
     }
 #endif
 }
@@ -333,7 +333,7 @@ void fe_sw2_1d_density_pressure(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT
             rhs2[i*3+1] = t1 * nrml.x * rhs[i];
             rhs2[i*3+2] = t1 * nrml.y * rhs[i];
         }
-        rhs_3dof("1D SW DENSITY PRESSURE: ",NDONSEG, ie, elem1d.nodes, rhs2);
+        printScreen_rhs_3dof("1D SW DENITY PRESSURE: ", NDONSEG, ie, elem1d.nodes, rhs2);
     }
 #endif
 }
@@ -384,7 +384,7 @@ void fe_sw2_1d_hvel(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D nrml, dou
             rhs2[i*3+1] = dt * rhs[i] * user_velocity.x;
             rhs2[i*3+2] = dt * rhs[i] * user_velocity.y;
         }
-        rhs_3dof("1D SW HVEL: ",NDONSEG, ie, elem1d.nodes, rhs2);
+        printScreen_rhs_3dof("1D HVEL ", NDONSEG, ie, elem1d.nodes, rhs2);
     }
 #endif
 }

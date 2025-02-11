@@ -48,7 +48,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     //now we fill in the physics mat objects with the provided codes to specify the equations to be solved
     //for now we just assume the elemVarCode is for all the elements, either 1,2, or 3d
     //check inputs are valid, only 1 of these should be nonzero and equal to 1
-    assert( nphysics_mat_1d == 0 || nphysics_mat_2d == 0);
+    //assert( nphysics_mat_1d == 0 || nphysics_mat_2d == 0);
     assert( nphysics_mat_1d == 0 || nphysics_mat_3d == 0);
     assert( nphysics_mat_2d == 0 || nphysics_mat_3d == 0);
     assert( nphysics_mat_1d == 1 || nphysics_mat_2d == 1 || nphysics_mat_3d == 1);
@@ -146,7 +146,7 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     // physics routines
     for(i=0;i<nphysics_mat_1d;i++){
 
-        if (sm->elem1d_physics_mat[i].elemVarCode[0] == '1'){
+        if (sm->elem1d_physics_mat[i].elemVarCode[0] == '2'){
             printf("SW1 Activated for 1d physics mat id %d\n",i);
         }
         if (sm->elem1d_physics_mat[i].elemVarCode[1] == '0'){
@@ -201,6 +201,12 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     sm->elem2d_physics_mat[0].model[0].physics_vars[0] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[1] = PERTURB_U;
     //sm->elem2d_physics[0][0].physics_vars[2] = PERTURB_V;
+    if(sm->grid->nelems1d>0){
+        //just filler for now
+        sm->elem1d_physics_mat[0].model[0].fe_resid = POISSON;//poisson_residual;
+        sm->elem1d_physics_mat[0].model[0].nvar = 1;
+        sm->elem1d_physics_mat[0].model[0].physics_vars[0] = PERTURB_U;
+    }
 
 
 
@@ -247,6 +253,13 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     //same for nodes
     //sm->node_physics_mat[0].nvar = 3;
     assert(sm->node_physics_mat[0]->nvar == 3);
+    if(sm->grid->nelems1d>0){
+        assert(sm->elem1d_physics_mat[0].nvar==3);
+        sm->elem1d_physics_mat[0].vars[0] = PERTURB_H;//poisson_residual;
+        sm->elem1d_physics_mat[0].vars[1] = PERTURB_U;
+        sm->elem1d_physics_mat[0].vars[2] = PERTURB_V;
+        sm->elem1d_physics_mat[0].nSubmodels = 1;
+    }
     //sm->node_physics_mat[0].vars = (int*) tl_alloc(sizeof(int), sm->node_physics_mat->nvar);
     //sm->node_physics_mat[0]->vars[0] = PERTURB_H;
     //sm->node_physics_mat[0]->vars[1] = PERTURB_U;

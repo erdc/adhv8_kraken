@@ -42,11 +42,15 @@ int main(int argc, char **argv) {
     //try a time step
     ierr = timeloop_test(argc,argv);
     assert(ierr==0);
-   printf(">>>>>>>>>>>>>>>TIMELOOP test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
+    printf(">>>>>>>>>>>>>>>TIMELOOP test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
     //try a time step
     ierr = sw2_wd_test(argc, argv);
     assert(ierr==0);
     printf(">>>>>>>>>>>>>>>SW2 WD test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
+    //try a time step
+    ierr = sw2_nb_test(argc, argv);
+    assert(ierr==0);
+    printf(">>>>>>>>>>>>>>>SW2 NB test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
     
 
     free_bcgstab();

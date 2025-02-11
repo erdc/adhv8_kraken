@@ -67,6 +67,7 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
     if (DEBUG_PICKETS == ON) tl_check_all_pickets(__FILE__,__LINE__);
     time_t time1;  time(&time1);
 #endif
+    printf("IN FE SW2 FLUX\n");
     // aliases
     SSW *sw2 = mod->sw;
     SELEM_1D elem1d = mod->grid->elem1d[ie];

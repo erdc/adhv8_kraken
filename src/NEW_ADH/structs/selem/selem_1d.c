@@ -20,6 +20,12 @@ void selem1d_alloc(SELEM_1D *elem1d) {
 void selem1d_alloc_array(SELEM_1D **elem1d, int nelems1d) {
     assert(nelems1d > 0);
     (*elem1d) = (SELEM_1D *) tl_alloc(sizeof(SELEM_1D), nelems1d);
+    for (int ie=0; ie<nelems1d; ie++) {
+        (*elem1d)[ie].nnodes = NDONSEG;
+        (*elem1d)[ie].grad_shp = (double *) tl_alloc(sizeof(double), (*elem1d)[ie].nnodes);
+        (*elem1d)[ie].nodes = (int *) tl_alloc(sizeof(int), (*elem1d)[ie].nnodes);
+        (*elem1d)[ie].levels = (int *) tl_alloc(sizeof(int), (*elem1d)[ie].nnodes);
+    }
 }
 
 /***********************************************************/
@@ -88,7 +94,9 @@ void selem1d_init(SELEM_1D *elem1d) {
     elem1d->id = UNSET_INT;
     elem1d->gid = UNSET_INT;
     elem1d->id_orig = UNSET_INT;
+    elem1d->nnodes = NDONSEG;
     elem1d->elem2d = UNSET_INT;
+    elem1d->bflag = UNSET_INT;
     elem1d->djac = UNSET_FLT;
     elem1d->nrml.x = UNSET_FLT;
     elem1d->nrml.y = UNSET_FLT;
@@ -96,12 +104,15 @@ void selem1d_init(SELEM_1D *elem1d) {
     elem1d->mat = UNSET_INT;
     elem1d->nvars = 0;
     elem1d->vars = NULL;
+    elem1d->string = UNSET_INT;
     for (i = 0; i < elem1d->nnodes; i++) {
         elem1d->grad_shp[i] = UNSET_FLT;
         elem1d->nodes[i] = UNSET_INT;
         elem1d->levels[i] = 0;
     }
     elem1d->flux_elem = NULL;
+    elem1d->flux_elem_tot = UNSET_INT;
+    elem1d->length = UNSET_FLT;
 }
 
 /***********************************************************/

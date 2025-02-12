@@ -33,7 +33,7 @@ int sw2_nb_test(int argc, char **argv) {
 	double theta = 45.0;
 	double dz = 1.0;
 	double a0 = 0.0;
-	double ax = 0.0015;
+	double ax = 0.0;
 	double ax2 = 0.0;
 	double ay = 0.0;
 	double ay2 = 0.0;
@@ -68,6 +68,7 @@ int sw2_nb_test(int argc, char **argv) {
 	grid->orig_macro_nelems1d = grid->macro_nelems1d;
 	grid->my_nelems1d = grid->nelems1d;
 	printf("Attempting to add 1d elements: %d\n",grid->nelems1d);
+	grid->elem1d = NULL;
 	selem1d_init_alloc_array( &(grid->elem1d), grid->nelems1d);
 	printf("Addied 1d elements\n");
 
@@ -170,9 +171,9 @@ int sw2_nb_test(int argc, char **argv) {
 	//sm.grid = &grid;
     SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
-	double dt = 600.0;
+	double dt = 1000.0;
 	double t0 = 0.0;
-	double tf = 864000.0;
+	double tf = 10000.0;
 
 	char elemVarCode[4]; 
 	strcpy(&elemVarCode[0],"2");//SW2D
@@ -195,6 +196,8 @@ int sw2_nb_test(int argc, char **argv) {
     sm->elem2d_physics_mat[0].model[0].physics_vars[1] = PERTURB_U;
     sm->elem2d_physics_mat[0].model[0].physics_vars[2] = PERTURB_V;
     sm->LINEAR_PROBLEM = NO;
+    
+
     sm->elem1d_physics_mat[0].model[0].fe_resid = SW2_BC_FLUX;
 //    //need a skip routine (keep it null for now)
 //	sm->elem2d_physics_mat[0].model[0].fe_init = SW2_INIT;
@@ -259,7 +262,15 @@ int sw2_nb_test(int argc, char **argv) {
 		sm->sol[id*3] = 1.0 - z_coord;
 		sm->sol_old[id*3] = 1.0 - z_coord;
 		sm->sol_older[id*3] = 1.0 - z_coord;
+		//velocity too
+		sm->sol[id*3+1] = 0.070710678;
+		sm->sol[id*3+2] = 0.070710678;
+		sm->sol_old[id*3+1] = 0.070710678;
+		sm->sol_older[id*3+2] = 0.070710678;
+
 		sm->dirichlet_data[id*3] = 1.0 - z_coord;
+		sm->dirichlet_data[id*3+1] = 0.070710678;
+		sm->dirichlet_data[id*3+2] = 0.070710678;
 		//no dirichlet condition
 		//if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
 		//	continue;
@@ -283,7 +294,34 @@ int sw2_nb_test(int argc, char **argv) {
 	//EGS 603 604 3 
 	//EGS 604 605 3 
 	//EGS 605 606 3
-	//add this to  
+	//add this to 
+
+	//create a series
+	SSERIES *series;
+	int nentry = 2; 
+	sseries_alloc(&series, nentry, TIME_SERIES, 0);
+	series->id = 0;
+	series->infact = 1;
+	series->outfact = 1;
+	series->entry[0].time = 0.0;
+  	series->entry[0].time *= series->infact;
+  	series->entry[0].value[0] = -0.1;
+  	series->entry[1].time = 15000;
+    series->entry[1].time *= series->infact;
+    series->entry[1].value[0] = -0.1;
+    // sanity check the series
+  	sseries_check(*series);
+  	printf("attempting to add series to linked list\n");
+  	sm->series_head = NULL;
+  	sm->series_curr = NULL;
+  	// add to linked list (which will allocate another, so we can delete this one)
+    sseries_add(series, &(sm->series_head), &(sm->series_curr), TRUE); 
+    sseries_free(series);
+
+    //create string that points to it!
+    //this will be inside elem mat physics now!
+    sm->elem1d_physics_mat[0].bc_index = (int*) tl_alloc(sizeof(int), 1);
+	sm->elem1d_physics_mat[0].bc_index[0] = 0;    
 
 
 

@@ -145,7 +145,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
 
         }
     }
-    //printf("Initial loop through 2d starting\n");
+    printf("Initial loop through 2d starting\n");
     //do 2d elements and then 1d
     //loop thorugh each element and find sparsity
     for (j=0;j<grid->nelems2d;j++){
@@ -193,7 +193,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
 
         }
     }
-    //printf("Initial loop through 2d\n");
+    printf("Initial loop through 1d\n");
     //now 1d
     //loop thorugh each element and find sparsity
     for (j=0;j<grid->nelems1d;j++){

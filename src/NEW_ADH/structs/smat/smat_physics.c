@@ -105,6 +105,7 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, int ntrns, int nvar, int nSubMod
     }else{
         mat->model = NULL;
     }
+    mat->bc_index=NULL;
 
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

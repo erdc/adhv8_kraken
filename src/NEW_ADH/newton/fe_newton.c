@@ -7,8 +7,8 @@
 #include "adh.h"
 static double *x0;         /* solution = u+u0 - u0 is the shift */
 static int isize = 0;
-static double PETSC_RTOL = 1e-12;
-static double PETSC_ATOL = 1e-11;
+static double PETSC_RTOL = 1e-15;
+static double PETSC_ATOL = 1e-14;
 static double PETSC_DTOL = 1e5;
 static int PETSC_MAXIT = 10000;
 #ifdef _PETSC
@@ -443,11 +443,11 @@ int fe_newton(SMODEL_SUPER* sm)
         //KSPSetInitialGuessNonzero(lin_sys->ksp,PETSC_TRUE);
         //KSPSetFromOptions(lin_sys->ksp);
         //PCSetFromOptions(pc);
-        //PCSetUp(pc);
-        //KSPSetUp(lin_sys->ksp);
+        PCSetUp(pc);
+        KSPSetUp(lin_sys->ksp);
         //KSPView(lin_sys->ksp, PETSC_VIEWER_DEFAULT );
         //solve
-        KSPSolve(lin_sys->ksp,lin_sys->B,lin_sys->X);
+        status = KSPSolve(lin_sys->ksp,lin_sys->B,lin_sys->X);
         //scatter forward appears to update array as we need
         //forward sends owned dofs -> ghosts
         //VecGhostUpdateBegin(sm->X,INSERT_VALUES,SCATTER_FORWARD);
@@ -456,10 +456,9 @@ int fe_newton(SMODEL_SUPER* sm)
         //printf("KSP iterations: %i\n",its);
         //unscale, idk if helps or not
         unscale_linear_system(dsol,x0,lin_sys->scale_vect,*(lin_sys->local_size));
-        //printf("SOLVER STATUS   %d\n\n",status);
-//    for(int j =0;j<ndofs;j++){
-//            printf("dsol[%d] = %.17e \n",j,lin_sys->dsol[j]);
-//        }
+#ifdef _DEBUG
+        assert(status == 0);
+#endif
         //solv_flag = TRUE; // TODO: Does this need to change - SAM
         status = 0;
        
@@ -535,7 +534,6 @@ int fe_newton(SMODEL_SUPER* sm)
 //          printf("Dsol increment[%d] = %f\n",i,dsol[i]);
 //        }
 #endif        
-        
         /* adds the increment to the solution */
         //(*inc_fnctn) (sm,isuperModel);
         increment_function(sm);
@@ -568,28 +566,6 @@ int fe_newton(SMODEL_SUPER* sm)
         //(*update_fnctn) (sm,isuperModel);
         //(*residual_fnctn) (sm,isuperModel);
         
-#ifdef _DEBUG
-#ifndef _PETSC
-        if (DEBUG_FULL) {
-#ifdef _MESSG
-            for(proc_count=0;proc_count<supersmpi->npes;proc_count++){
-                if(proc_count==supersmpi->myid){
-                    printf("***********myid %d ",supersmpi->myid);
-#endif
-                    printf("AFTER SOLVE!\n");
-                    printScreen_dble_array("sol after solving", sm->sol, ndofs, __LINE__, __FILE__);
-                    printScreen_dble_array("residual before solving", residual, ndofs, __LINE__, __FILE__);
-                    //printScreen_int_array("bc_mask after solving",sm->bc_mask, nnodes * nsys, __LINE__, __FILE__);
-                    //printScreen_dble_array("scale_vect after solving",sm->scale_vect, nnodes * nsys, __LINE__, __FILE__);
-                    //if (DEBUG_MATRIX) printScreen_matrix("matrix after solving", sm->diagonal, sm->matrix, nnodes, sm->max_nsys_sq,__LINE__, __FILE__);
-#ifdef _MESSG
-                }
-            }
-#endif
-        }
-#endif
-#endif
-        
         /* calculates the norms of the residual */
         //ignore for now
 //        if (is_2d_hydro && include_node_norm != NULL) {
@@ -621,6 +597,7 @@ int fe_newton(SMODEL_SUPER* sm)
 
         if (solv_isnan(resid_l2_norm) || solv_isinf(resid_l2_norm)) {
             solv_flag = NO;
+            printf("SOLV FLG SET TO NO\n");
             //what is solve_atf
 //            for (i=0; i<sm->nsubmodels; i++) {
 //                if(sm->submodel[i].proc_flag==1){
@@ -673,7 +650,6 @@ int fe_newton(SMODEL_SUPER* sm)
         /* (2) No Simple Decrease in l2 norm of Residual */
         /* (3) Not Enough Line Search Cuts Yet */
         linesearch_cuts = 0;
-
         while ((resid_max_norm > sm->tol_nonlin) && (resid_l2_norm > old_resid_norm) && (linesearch_cuts < sm->max_nonlin_linesearch_cuts)) {
             //printf("IN LINE SEARCH\n");
 #ifdef _DEBUG
@@ -683,12 +659,10 @@ int fe_newton(SMODEL_SUPER* sm)
                 }
             }
 #endif
-            
             /* reduces the increment */
             for (i = 0, iend = ndofs; i < iend; i++){
                 dsol[i] *= 0.5;
             }
-
             /* calculates the residual */
             increment_function(sm);
             update_function(sm);
@@ -718,7 +692,6 @@ int fe_newton(SMODEL_SUPER* sm)
             &imax_dof, &iinc_dof, include_dof,
             my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
             );
-            
 #ifdef _MESSG
             resid_max_norm = messg_dmax(resid_max_norm, supersmpi->ADH_COMM);
             inc_max_norm = messg_dmax(inc_max_norm, supersmpi->ADH_COMM);

@@ -25,7 +25,7 @@ typedef struct sts {
   double infact;            /* conversion factor to seconds */
   double outfact;           /* conversion factor from seconds */
   double tol;               /* the tolerance of the series */
-  double *ivalue;           /* current interpolation values */
+  double *ivalue;           /* current interpolation values, array of size [nvalues] */
   SMETEOR_STATION *station; /* meteorologic station tied to the series if there is one */
   SSERIES_ENTRY *entry;     /* an array of series entries */
   struct sts *next;         /* next item in linked list */

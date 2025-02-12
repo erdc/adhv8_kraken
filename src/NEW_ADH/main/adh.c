@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
      printf("Called PETSC Initialize\n");
 #endif
 
-    int ierr = 0;
+  int ierr = 0;
     residual_test(argc,argv);
     printf(">>>>>>>>>>>>>>>Residual test complete<<<<<<<<<<<<<<<<<<<<<\n");
     //try an assembly

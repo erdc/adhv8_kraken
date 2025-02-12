@@ -67,7 +67,6 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
     if (DEBUG_PICKETS == ON) tl_check_all_pickets(__FILE__,__LINE__);
     time_t time1;  time(&time1);
 #endif
-    printf("IN FE SW2 FLUX\n");
     // aliases
     SSW *sw2 = mod->sw;
     SELEM_1D elem1d = mod->grid->elem1d[ie];
@@ -81,7 +80,8 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
     double dt = (*mod->dt)/(mod->nsubsteps);//need to pull this outside of loop
     double djac = elem1d.djac;
     double g = mod->gravity;
-    STR_VALUE *str_values = mod->str_values;//what is this?
+    //no string for boubdary anymire
+    //STR_VALUE *str_values = mod->str_values;//what is this?
     //SWEIR_C *weir = mod->weir; //how should we handle these?
     //SFLAP_C *flap = mod->flap;
     //SSLUICE_C *sluice = mod->sluice; 
@@ -140,8 +140,11 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
      * Calculates the convection boundary flux addition to the SW 2D elemental residual. \n
      * \note
      *********************************************************************************************/
-    int isers = str_values[string].ol_flow.isigma; //how to replace
-    double flux = -1.0 * sseries_get_value(isers, mod->series_head, 0);
+    //int isers = str_values[string].ol_flow.isigma; //how to replace
+    int isers = mod->elem1d_physics_mat[string].bc_index[0];//hard coded for now but should be an ivar pos
+    //negative now outside of individual routines
+    //double flux = -1.0 * sseries_get_value(isers, mod->series_head, 0);
+    double flux = 1.0 * sseries_get_value(isers, mod->series_head, 0);
     fe_sw2_1d_explicit_flow(elem_rhs, elem1d, ie, nrml, djac, dt, flux, h_avg, u, v, DEBUG, DEBUG_LOCAL);
 #ifdef _DEBUG
         if (DEBUG == ON || DEBUG_LOCAL == ON) printf("DEBUG BC FLUX :: flux: %20.10e \n",flux);

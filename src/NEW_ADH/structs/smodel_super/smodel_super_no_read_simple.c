@@ -28,8 +28,8 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     sm->old_dt = dt_in;
     sm->dt_err = dt_in;
     sm->dt_prev = dt_in;
-    sm->inc_nonlin = 1e-3;
-    sm->tol_nonlin = 1e-5;
+    sm->inc_nonlin = 1e-6;
+    sm->tol_nonlin = 1e-8;
     sm->t_init = t_init;
     sm->t_prev = t_prev;
     sm->t_final = t_final;
@@ -43,6 +43,8 @@ void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init
     //start building up materials
     sm->grid = grid;
     sm->lin_sys = sys;
+    sm->series_head = NULL;
+    sm->series_curr = NULL;
 
 
     //now we fill in the physics mat objects with the provided codes to specify the equations to be solved

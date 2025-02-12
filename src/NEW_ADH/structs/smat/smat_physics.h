@@ -34,6 +34,9 @@ typedef struct {
 //    bool WAVE;
 //    bool WIND;
 
+    //place holder for now, should be IVAR_POS eventually
+    int *bc_index;
+
 } SMAT_PHYSICS;
 
 // methods

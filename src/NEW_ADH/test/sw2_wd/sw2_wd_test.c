@@ -255,12 +255,7 @@ int sw2_wd_test(int argc, char **argv) {
 	}
 	//printf("Final error code %d\n",err_code);
 
-
-
-
 	smodel_design_free(&dm);
-
-
 	return err_code;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

@@ -25,7 +25,7 @@ int time_loop(SMODEL_DESIGN *dm){
 	do {
 			ts+=1;
 			//update t_prev and change dt if timeseries says to
-			LOOP_INCOMPLETE = update_dt(dm);
+			LOOP_INCOMPLETE = update_dt(dm); 
 			//attempt to advance the whole design model by one time step
 			TIME_STEP_WORKED = advance_time(dm, nsuper);
 			//printf("TIME_STEP_WORKED = %d, LOOP_INCOMPLETE = %d\n",TIME_STEP_WORKED,LOOP_INCOMPLETE);
@@ -75,8 +75,11 @@ int advance_time(SMODEL_DESIGN *dm, int nsuper){
 			//update sol_old and sol_older
 			// prep solutions
  			smodel_super_prep_sol(sm);
+ 			// update time-series values
+            sseries_setall_ts_valuesAVG(sm->series_head, *(sm->t_prev) -  *(sm->dt), *(sm->t_prev));
 			//update dirichlet data
 			smodel_super_update_dirichlet_data(sm);
+
 
 			//forward step in time
 			TS_SUCCESS = smodel_super_forward_step(sm, forward_stepper[sm->forward_step]);
